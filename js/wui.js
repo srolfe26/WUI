@@ -88,11 +88,14 @@ var Wui = Wui || {};
 							action 	= (obj.appendTo !== undefined) ? 'append' : (obj.prependTo !== undefined) ? 'prepend' : (act !== undefined && target[act]) ? act : 'append';
 						
 						// Try appending with WUI modifiers, else just append in good ol' jQuery fashion
-						try{target[action](Wui.o.prototype.cssByParam(obj))}
+						try{target[action](obj.el)}
 						catch(e){
 							try{target[action](obj)}
 							catch(e){}
 						}
+						
+						// Add styles
+						Wui.o.prototype.cssByParam(obj);
 						
 						return true;
 					},
@@ -116,7 +119,6 @@ var Wui = Wui || {};
 							if(m.height && m.height.indexOf && m.height.indexOf('%') != -1){
 								m.el.height(Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height()));
 							}
-						
                         	return m.el.addClass(m.cls);
                         }else{
                         	return m;
@@ -127,6 +129,7 @@ var Wui = Wui || {};
                         var me = this;
 						
 						//adds the objects items if any
+						if(me.items === undefined) me.items = [];
 						for(var i in me.items){
 							me.items[i].parent = me;
 							if(me.items[i].place)	me.items[i].place();
@@ -144,7 +147,8 @@ var Wui = Wui || {};
 						if(me.items === undefined) me.items = [];
 						for(var i in arguments){
 							arguments[i].parent = me;
-							me.addToDOM(arguments[i]);
+							if(arguments[i].place)	arguments[i].place();
+							else					me.addToDOM(arguments[i]);
 						}		
 						
 						return Array.prototype.push.apply(me.items,arguments);

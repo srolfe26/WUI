@@ -738,7 +738,7 @@
                         	me.urlField = new Wui.text({cls:'wui-link-third wui-link-focus', blankText:'URL', linkData:'uri'}),
                         	me.titleField = new Wui.text({cls:'wui-link-third', blankText:'Display Text', linkData:'title'}),
                         	me.targetField = new Wui.combo({
-	                            cls:'wui-link-third no-margin', valueItem: 'target', titleItem:'name', template: '<li>{name}</li>', blankText:'Target',
+	                            cls:'wui-link-third no-margin', valueItem: 'target', titleItem:'name', template: '<li>{name}</li>', blankText:'Target', keepInline:true,
 	                            data:[{target:'_self', name:'Opens In Same Window'}, {target:'_blank', name:'Opens In New Window/Tab'}], linkData:'target'
 	                        })
                         ];

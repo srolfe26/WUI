@@ -23,6 +23,46 @@
 	
 	
 	// Method which creates a Wui Tab Pane
+	Wui.tabs = function(args){ $.extend(this,args); this.init(); }
+	Wui.tabs.prototype = $.extend(new Wui.pane(),{
+		init:			function(){
+							Wui.pane.prototype.init.call(this);
+						},
+		tabsBottom:		false,
+		cls:			'wui-tabs',
+		place:      	function(){
+							var me = this;
+							
+							//adds the objects items if any
+							if(me.items === undefined) me.items = [];
+							$.each(me.items,function(idx,itm){
+								itm.tabCls = 'wui-tab ' + ((itm.tabCls) ? ' ' + itm.tabCls : '');
+									
+								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.button({
+									text:	itm.title || 'Tab ' + (parseInt(idx) + 1),
+									click:	function(){ 
+												me.giveFocus(itm);
+												if(itm.layout && typeof itm.layout == 'function')	itm.layout();		
+											},
+									cls:	itm.tabCls
+								}));
+								itm.cls = (itm.cls || '') + ' wui-tab-panel';
+							});
+
+							return Wui.o.prototype.place.call(me);
+						},
+		giveFocus:		function(tab){
+							$.each(this.items,function(idx,itm){
+								var isActive = itm === tab;
+								itm.tab.el.toggleClass('selected', isActive);
+								itm.el.toggleClass('active', isActive);
+							});
+						},
+		onRender:		function(){
+							this.giveFocus(this.items[0]);
+						}
+	});
+	/* NEWER METHOD
 	Wui.tabs = function(args){
 		$.extend(this,{
 			tabsBottom:false
@@ -64,7 +104,7 @@
 		onRender:		function(){
 							this.giveFocus(this.items[0]);
 						}
-	});
+	});*/
 	
 	
 	// Method which creates a Wui Grid
