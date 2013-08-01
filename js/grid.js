@@ -1,6 +1,13 @@
 (function($) {
 	// Method which creates a Wui layout - Wui layouts are meant to be heavily CSS dependent
-	Wui.layout = function(args){ $.extend(this, {targets:[]}, args); this.init(); }
+	Wui.layout = function(args){ 
+		$.extend(this, {
+			bbar:   [],
+			targets:[],
+			tbar:   []
+		}, args); 
+		this.init(); 
+	}
 	Wui.layout.prototype = $.extend(new Wui.pane(),{
 		init:			function(){
 							var me = this;
@@ -23,7 +30,14 @@
 	
 	
 	// Method which creates a Wui Tab Pane
-	Wui.tabs = function(args){ $.extend(this,args); this.init(); }
+	Wui.tabs = function(args){ 
+		$.extend(this,{
+			bbar:   [],
+			items:	[],
+			tbar:	[]
+		},args); 
+		this.init();
+	}
 	Wui.tabs.prototype = $.extend(new Wui.pane(),{
 		init:			function(){
 							Wui.pane.prototype.init.call(this);
@@ -46,16 +60,15 @@
 											},
 									cls:	itm.tabCls
 								}));
-								itm.cls = (itm.cls || '') + ' wui-tab-panel';
 							});
-
-							return Wui.o.prototype.place.call(me);
+							
+							return Wui.o.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.wrap($('<div>').addClass('wui-tab-panel')); }); });
 						},
 		giveFocus:		function(tab){
 							$.each(this.items,function(idx,itm){
 								var isActive = itm === tab;
 								itm.tab.el.toggleClass('selected', isActive);
-								itm.el.toggleClass('active', isActive);
+								itm.el.parent().toggleClass('active', isActive);
 							});
 						},
 		onRender:		function(){
@@ -110,6 +123,7 @@
 	// Method which creates a Wui Grid
 	Wui.grid = function(args){
 		$.extend(this,{
+			bbar:   		[],
 			columns: 		[],
 			data:			null,
 			defaultDataType:'string',
@@ -125,7 +139,8 @@
 							}*/
 			remoteParams:	{},
 			remoteUrl:  	null,
-			selected:		[]
+			selected:		[],
+			tbar:   		[]
 		},args); 
 		this.init();
 	};
@@ -445,8 +460,8 @@
 							me.posDataWin();
 
 							// Add data to grid
-							if(me.data !== null)	me.beforeMake();
-							else					me.getData();
+							if(me.data !== null)	{ me.total = me.data.length; me.beforeMake(); }
+							else					{ me.getData(); }
 						},
 		posDataWin:		function(){
 							var me = this,

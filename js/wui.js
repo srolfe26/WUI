@@ -95,12 +95,16 @@ var Wui = Wui || {};
 						}
 						
 						// Add styles
-						Wui.o.prototype.cssByParam(obj);
+						this.cssByParam(obj);
 						
 						return true;
 					},
 		callRender:	function(){
 			        	var me = this;
+			        	
+			        	// Add styles if they didn't get added
+						me.cssByParam(me);
+			        	
 						if(me.onRender)  me.onRender();
 			        	for(var i in me.items) if(me.items[i].callRender) me.items[i].callRender();
 						if(me.afterRender)  me.afterRender();
@@ -125,7 +129,7 @@ var Wui = Wui || {};
                         }
                     },
 		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
-		place:      function(){
+		place:      function(after){
                         var me = this;
 						
 						//adds the objects items if any
@@ -138,7 +142,13 @@ var Wui = Wui || {};
 						
                         //adds the object to the DOM and starts the recursive callRender to render properties on the children
                         me.addToDOM(me);
+                        
+                        // perform operations on the object after its placed on the DOM but before onRender
+                        if(after && typeof after == 'function')	after(me);
+                        
+                        // run through a parent object and all of its children to run onRender
 						if(me.parent === undefined) me.callRender();
+						
                         return me;
                     },
 		push:       function(){

@@ -492,7 +492,6 @@
 		                        click:		function(){
 					                            if(!me.dd.is(':visible')){
 					                                me.field.focus();
-					                            	me.field.isBlurring = false;
 					                                me.selectCurr();
 					                                me.showDD();
 					                            }else{
@@ -662,7 +661,7 @@
 								zIndex:	Wui.maxZ()
 							});
 						}else{
-							this.dd.show();
+							this.dd.css({ zIndex:Wui.maxZ() }).show();
 						}
 					},
         val:        function(setVal){        

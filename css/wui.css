@@ -116,7 +116,7 @@
         background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
         max-height:150px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
     }
-	.wui-inline-dd {z-index:10050; right:0; top:98%;}
+	.wui-inline-dd {right:0; top:98%; width:100%;}
     .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
         .wui-combo-dd li.selected { background:#19f; color:#fff; }
     .dd-wrapper, .file-wrapper {position:relative;}
