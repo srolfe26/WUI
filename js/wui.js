@@ -116,12 +116,12 @@ var Wui = Wui || {};
                         	if(m.attr)	m.el.attr(m.attr);
                         	
                         	// calculate dimensions
-                        	if(Wui.isNumeric(m.height))	m.el.height(m.height);
-                        	if(Wui.isNumeric(m.width))	m.el.width(m.width);
+                        	if(Wui.isNumeric(m.height))	m.el.css({height: m.height});
+                        	if(Wui.isNumeric(m.width))	m.el.css({width: m.width});
                         	if(m.width && m.width.indexOf && m.width.indexOf('%') != -1)
-								m.el.width(Math.floor((parseFloat(m.width) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).width()));
+								m.el.css({width: Math.floor((parseFloat(m.width) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).width())});
 							if(m.height && m.height.indexOf && m.height.indexOf('%') != -1){
-								m.el.height(Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height()));
+								m.el.css({height: Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height())});
 							}
                         	return m.el.addClass(m.cls);
                         }else{

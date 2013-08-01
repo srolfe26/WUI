@@ -75,49 +75,6 @@
 							this.giveFocus(this.items[0]);
 						}
 	});
-	/* NEWER METHOD
-	Wui.tabs = function(args){
-		$.extend(this,{
-			tabsBottom:false
-		},args);
-		this.init();
-	};
-	Wui.tabs.prototype = $.extend(new Wui.pane(),{
-		giveFocus:		function(tab){
-							$.each(this.items,function(idx,itm){
-								var isActive = itm === tab;
-								itm.tab.el.toggleClass('selected', isActive);
-								itm.el.parent().toggleClass('active', isActive);
-							});
-						},
-		init:			function(){
-							var me = this;
-							Wui.pane.prototype.init.call(me);
-							me.el.addClass('wui-tabs');
-							
-							for(var i in me.items){
-								var itm = me.items[i];
-								$.extend(itm,{
-									tabCls:		'wui-tab ' + ((itm.tabCls) ? itm.tabCls : ''),
-									parent:		me,
-								});
-								
-								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.button({
-									text:	itm.title || 'Tab ' + (i + 1),
-									click:	function(){ 
-												me.giveFocus(itm);
-												if(itm.layout && typeof itm.layout == 'function')	itm.layout();		
-											},
-									cls:	itm.tabCls
-								}));
-								
-								itm.el.wrap($('<div>').addClass('wui-tab-panel'));
-							}
-						},
-		onRender:		function(){
-							this.giveFocus(this.items[0]);
-						}
-	});*/
 	
 	
 	// Method which creates a Wui Grid
@@ -130,7 +87,7 @@
 			multiSelect:	false,
 			onDataLoad:		function(){},
 			onDoubleClick:	function(rec){},
-			onRecordSelect:	function(){},
+			onRecordSelect:	function(rec){},
 			paging:			null,
 							/*{
 								limit:	page size,
@@ -139,6 +96,7 @@
 							}*/
 			remoteParams:	{},
 			remoteUrl:  	null,
+			hideHeader:		false,
 			selected:		[],
 			tbar:   		[]
 		},args); 
@@ -159,7 +117,12 @@
 								$.each(me.renderers,function(idx, r){
 									var cell = a.el.children(':eq(' +r.index+ ')').children('div'),
 										val = a.rec[r.dataItem];
-									cell.html(r.renderer.call(this, cell, val, a.rec, a.el));
+											
+									if(typeof r.renderer == 'function'){
+										cell.html(r.renderer.call(this, cell, val, a.rec, a.el));
+									}else{
+										cell.html(val);
+									}
 								});
 								
 								// Add rows with events
@@ -178,7 +141,7 @@
 										 
 										  $('html').click(); // gets rid of the outline from the HTML elements
 									 }
-									 me.onRecordSelect();
+									 me.onRecordSelect(a.rec);
 									 
 									 return false // stops propagation & prevents default
 								 })
@@ -247,27 +210,29 @@
 								$.ajax(me.remoteUrl, {
 									data:       me.remoteParams,
 									dataType:	'json',
-									success:	function(response){
-													var retData = me.processData(response);
-													me.waiting = false;
-													me.data = retData.payload;
-													me.total = retData.total;
-													
-													if(me.isPaging && me.tbl.children().length > 0){
-														if(me.total > me.data.length){
-															me.addRows(retData.payload);
-															me.rowHeight = me.tbl.find('tr:first').outerHeight();
-															me.tbl.css({top:(start * me.rowHeight) + 'px'});
-															me.matchCols();
-														}
-													}else{
-														me.beforeMake();
-													}
-													
-													me.onDataLoad();
-												}
+									success:	function(response){ var retData = me.processData(response); }
 								});
 							}
+						},
+		processData:	function(response){ this.postDataProcess(response); },
+		postDataProcess:function(retData){
+							var me = this;
+							me.waiting = false;
+							me.data = retData.payload;
+							me.total = retData.total;
+							
+							if(me.isPaging && me.tbl.children().length > 0){
+								if(me.total > me.data.length){
+									me.addRows(retData.payload);
+									me.rowHeight = me.tbl.find('tr:first').outerHeight();
+									me.tbl.css({top:(start * me.rowHeight) + 'px'});
+									me.matchCols();
+								}
+							}else{
+								me.beforeMake();
+							}
+							
+							me.onDataLoad();
 						},
 		getSelected:	function(){ return (this.selected.length > 0) ? this.selected : Wui.errRpt('No row selected.','Select Something');},
 		init:			function(){
@@ -332,6 +297,7 @@
 							});
 							
 							me.elAlias.append(me.tblContainer,me.headingContainer);
+							if(me.hideHeader)	me.headingContainer.height(0);
 						},
 		layout:			function(){
 							this.posDataWin();
@@ -339,8 +305,9 @@
 						},
 		makeGrid:		function(){
 							var me = this, t = '<tr>';
-							
-							if(typeof me.columns[0].heading === 'string'){
+
+							if(me.columns[0] && typeof me.columns[0].heading === 'string'){
+								me.heading.html('');
 								$.each(me.columns,function(i,col){
 									// Build template from specified columns
 									if(col.dataItem && col.heading)	t += '<td><div>{' + col.dataItem + '}</div></td>';
@@ -385,26 +352,26 @@
 								// finish up template
 								t += '</tr>';
 								me.tplt = new Wui.tplt({tplt:t});
-								
-								me.addRows(me.data);
-								me.rowHeight = me.tbl.find('tr:first').outerHeight();
-							
-								// If paging add spacing to account for pages you're not on
-								if(me.isPaging === true){
-									if(me.total > me.data.length){
-										me.totalHeight = me.total * me.rowHeight;
-										me.totalPages = Math.floor(me.total/me.paging.limit);
-										me.tbl.wrap(me.pagingPadBefore = $('<div>').height(me.totalHeight).addClass('wui-paging-pad'));
-										
-										$.each(me.paging.sort,function(idx,itm){
-											$.each(me.columns,function(i,col){
-												if(col.dataItem === itm.dataItem) me.mngSorters(col,itm.order);
-											});
-										});
-									}
-								}
 							}
 							
+							me.addRows(me.data);
+							me.rowHeight = me.tbl.find('tr:first').outerHeight();
+						
+							// If paging add spacing to account for pages you're not on
+							if(me.isPaging === true){
+								if(me.total > me.data.length){
+									me.totalHeight = me.total * me.rowHeight;
+									me.totalPages = Math.floor(me.total/me.paging.limit);
+									me.tbl.wrap(me.pagingPadBefore = $('<div>').height(me.totalHeight).addClass('wui-paging-pad'));
+									
+									$.each(me.paging.sort,function(idx,itm){
+										$.each(me.columns,function(i,col){
+											if(col.dataItem === itm.dataItem) me.mngSorters(col,itm.order);
+										});
+									});
+								}
+							}
+
 							me.sizeCols();
 						},
 		mngSorters:		function(col,dir){
@@ -469,10 +436,9 @@
 							me.heading.css({paddingRight:((me.total * me.rowHeight > me.container.height() - hh) ? Wui.scrollbarWidth() : 0) + 'px'});
 							me.tblContainer.css({height:me.container.height() - hh, top:hh});
 						},
-		processData:	function(response){ return response; },
 		refresh:		function(newData){
 							if(this.remoteUrl !== null)	{ this.getData(); }
-							else						{ this.data = newData; this.makeGrid(); }
+							else						{ this.data = newData; this.total = this.data.length; this.makeGrid(); }
 						},
 		resetSelect:	function(){
 							var me = this,
@@ -501,6 +467,25 @@
 									ofstP = firstSelect.offsetParent();
 								ofstP.animate({scrollTop:0},0);
 								ofstP.animate({scrollTop: firstSelect.offset().top - ofstP.offset().top },500);
+							}
+						},
+		selectItem:		function(kvp){
+							var me = this,
+								key = null,
+								val = null;
+							
+							// get the key and value
+							for(var i in kvp)	{ key = i; val = kvp[i]; }
+							
+							// select the item if it exists
+							for(var a in me.tbl.items){
+								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
+									me.tbl.find('.wui-selected').removeClass('wui-selected');
+									me.tbl.items[a].el.addClass('wui-selected');
+									me.selected = [me.tbl.items[a]];
+									me.onRecordSelect(me.tbl.items[a].rec);
+									break;
+								}
 							}
 						},
 		sizeCols:		function(){
