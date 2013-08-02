@@ -1258,6 +1258,50 @@
                         	.attr('disabled',true);
                     }
 	});
+	
+	
+	Wui.input = function(msg, msgTitle, callback, inputs, content){
+		// make sure the inputs will be acceptable on the form
+		if(inputs){
+			if(!inputs.length){
+				if(inputs instanceof Wui.frmField || inputs.ftype)
+					inputs = [inputs];
+				else
+					inputs = [{ftype:'Wui.text'}];
+			}
+		}else{
+			inputs = [{ftype:'Wui.text'}];
+		}
+		if(inputs.length == 1)	$.extend(inputs[0],{label:msg, required:true, name:'inputField'});
+		if(content !== undefined) inputs.splice(0,0,{ftype:'Wui.note', label: content});
+		
+		// create the form and the window
+		var inputFrm = new Wui.form({ labelPos:'left', items:inputs }),
+			Msg = new Wui.window({
+				title:      msgTitle || 'Input',
+				bbar:		[ new Wui.button({text:'Submit', click:function(){ Msg.getVal(); }}) ],
+				isModal:    true,
+				items:      [inputFrm],
+				cls:		'wui-input-window',
+				width:      600, 
+				height:     250,
+				getVal:		function(){
+								var formData = inputFrm.getData();
+								if(formData){
+									if(callback && typeof callback == 'function'){
+										var len = 0;
+										for(var n in formData) len++;
+										if(len == 1 && formData.inputField)	callback(formData.inputField);
+										else 								callback(formData);
+									}
+									Msg.answerRun = true;
+									Msg.close();
+								}
+							},
+				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+			});
+	    return true;
+	}
 }(jQuery));
 
 

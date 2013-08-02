@@ -45,8 +45,8 @@
 .wui-btn:active, .wui-btn:hover, .wui-btn.selected  {background-color:#fff; border:1px solid #ccc;}
 .wui-btn:active {box-shadow: inset 0 0 10px #333; border:none;}
 
-.wui-pane-header > .wui-btn, .wui-pane-footer > .wui-btn, .wui-pane-header > .wui-btn:hover, .wui-pane-footer > .wui-btn:hover,
-.wui-pane-header > .wui-btn:active, .wui-pane-footer > .wui-btn:active {border-left:1px solid #888; border-top-color:transparent; border-right-color:transparent; border-bottom-color:transparent; text-shadow:none;}
+.wui-pane-header .wui-btn, .wui-pane-footer .wui-btn, .wui-pane-header .wui-btn:hover, .wui-pane-footer .wui-btn:hover,
+.wui-pane-header .wui-btn:active, .wui-pane-footer .wui-btn:active {border-left:1px solid #888; border-top-color:transparent; border-right-color:transparent; border-bottom-color:transparent; text-shadow:none;}
 
 .wui-btn.disabled {background-color:transparent;}
 .wui-btn.disabled:active, .wui-btn.disabled:hover {box-shadow: none; background-color:transparent;}
@@ -333,7 +333,9 @@
     .wui-pane .wui-pane .wui-pane-header h1 {color:#555;}
 .wui-pane .wui-pane .wui-pane-footer {border:none;}
 .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
-.wui-pane .wui-pane .wui-pane-header > .wui-btn, .wui-pane .wui-pane .wui-pane-footer > .wui-btn {border: 1px solid; height:26px; line-height:26px; margin-right: 0.5em;}
+.wui-pane .wui-pane .wui-pane-header .wui-btn, .wui-pane .wui-pane .wui-pane-footer .wui-btn {border: 1px solid; height:26px; line-height:26px; margin-right: 0.5em;}
+.wui-pane .wui-pane .wui-pane-header .wui-btn.disabled, .wui-pane .wui-pane .wui-pane-footer .wui-btn.disabled {opacity:0.5;}
+.wui-pane .wui-pane .wui-pane-header .wui-fe .wui-btn, .wui-pane .wui-pane .wui-pane-footer .wui-fe .wui-btn {border:0; margin:0;}
 .wui-pane .wui-pane .wui-pane-header .wui-btn.wui-tab, .wui-pane .wui-pane .wui-pane-footer .wui-btn.wui-tab {border:none; height: 40px; line-height: 40px; margin-right:0; background-color:#fff;}
 .wui-pane .wui-pane .wui-pane-header .wui-btn.wui-tab.selected, .wui-pane .wui-pane .wui-pane-footer .wui-btn.wui-tab.selected {background-color:#ccc;}
 .wui-pane .wui-pane .wui-form {overflow:auto; margin:0.5em;}

@@ -115,14 +115,10 @@
 								
 								// Perform renderers
 								$.each(me.renderers,function(idx, r){
-									var cell = a.el.children(':eq(' +r.index+ ')').children('div'),
+									var cell = a.el.children(':eq(' +r.index+ ')'),
 										val = a.rec[r.dataItem];
 											
-									if(typeof r.renderer == 'function'){
-										cell.html(r.renderer.call(this, cell, val, a.rec, a.el));
-									}else{
-										cell.html(val);
-									}
+									cell.children('div').html(r.renderer.call(this, cell, val, a.rec, a.el));
 								});
 								
 								// Add rows with events
@@ -308,12 +304,21 @@
 
 							if(me.columns[0] && typeof me.columns[0].heading === 'string'){
 								me.heading.html('');
+								me.renderers = [];
 								$.each(me.columns,function(i,col){
 									// Build template from specified columns
 									if(col.dataItem && col.heading)	t += '<td><div>{' + col.dataItem + '}</div></td>';
 									else						   	t += '<td><div></div></td>';
 									
-									if(col.renderer)	me.renderers.push({dataItem:col.dataItem, renderer:col.renderer, index:i});
+									// Handles renderer if it exists
+									if(col.renderer){
+										if(typeof col.renderer == 'function'){
+											me.renderers.push({dataItem:col.dataItem, renderer:col.renderer, index:i});
+										}else if(eval('typeof ' + col.renderer) == 'function'){
+											var funcFromString = new Function(col.renderer + '.apply(this,arguments)');
+											me.renderers.push({dataItem:col.dataItem, renderer:funcFromString, index:i});
+										}
+									}									
 									
 									// Build heading and append to DOM
 									$.extend(col,{

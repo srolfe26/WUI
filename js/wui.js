@@ -548,27 +548,50 @@ var Wui = Wui || {};
 	
 	Wui.Msg = function(msg, msgTitle, callback, content){
 	    var cntnt   = (content !== undefined) ? [new Wui.o({el: $('<p>').html(msg) }), content] : [new Wui.o({el: $('<p>').html(msg) })],
-	        Msv  = new Wui.window({
-	        title:      msgTitle || 'Message', 
-	        isModal:    true,
-	        items:      cntnt, 
-	        width:      350, 
-	        height:     200,
-	        onWinClose: callback || function(){}
-	    });
+	        msg  = new Wui.window({
+				title:      msgTitle || 'Message', 
+				isModal:    true,
+				items:      cntnt, 
+				width:      350, 
+				height:     200,
+				onWinClose: callback || function(){}
+			});
+			return true;
+	}
+	
+	
+	Wui.confirm = function(msg, msgTitle, callback, content){
+	    var itms   = (content !== undefined) ? [new Wui.o({el: $('<p>').html(msg) }), content] : [new Wui.o({el: $('<p>').html(msg) })],
+	        Msg  = new Wui.window({
+				title:      msgTitle || 'Confirm',
+				bbar:		[
+								new Wui.button({text:'No', click:function(){ Msg.doAnswer(false); }}),
+								new Wui.button({text:'Yes', click:function(){ Msg.doAnswer(true); }})
+							],
+				isModal:    true,
+				items:      itms, 
+				width:      350, 
+				height:     200,
+				doAnswer:	function(ans){
+								if(callback && typeof callback == 'function')	callback(ans);
+								Msg.answerRun = true;
+								Msg.close();
+							},
+				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+			});
 	    return true;
 	}
 	
 	
 	Wui.HelpWindow = function(msgTitle, src, width, height, callback){
 	    var cntnt = [new Wui.o({el: $('<iframe>').attr({src:src}).css({height:'100%',width:'100%', border:'none'})})],
-	    newErr  = new Wui.window({
-	        title:      msgTitle || 'Message', 
-	        items:      cntnt, 
-	        width:      width || 600, 
-	        height:     height || 400,
-	        onWinClose: callback || function(){}
-	    });
+			newErr  = new Wui.window({
+				title:      msgTitle || 'Message', 
+				items:      cntnt, 
+				width:      width || 600, 
+				height:     height || 400,
+				onWinClose: callback || function(){}
+			});
 	    return true;
 	}
 }(jQuery));
