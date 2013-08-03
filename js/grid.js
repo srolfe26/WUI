@@ -238,9 +238,11 @@
 							me.el.addClass('wui-grid');
 							
 							// Define object internal variables
-							me.tblContainer = $('<div><table></table></div>').addClass('grid-body');
+							me.tblContainer = $('<div><div>&nbsp;</div><table></table></div>').addClass('grid-body');
 							me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh');
 							me.tbl = me.tblContainer.children('table');
+							me.tblHSize = me.tblContainer.children('div');
+							me.tblHSize.addClass('wui-ghs');
 							me.heading = me.headingContainer.children('ul');
 							me.sorters = [];
 							me.renderers = [];
@@ -326,7 +328,9 @@
 										fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
 										index:		i,
 										width:		col.width === undefined ? 0 : col.width,
-										heading:	$('<li>').text(col.heading).addClass('wui-gc')
+										heading:	$('<li>').text(col.heading)
+													.attr({unselectable:'on'})
+													.addClass('wui-gc')
 													.resizable({
 														handles:	'e',
 														resize:		function(event,ui){
@@ -423,7 +427,7 @@
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 4); // 4 accounts for some crazy crap happening on the table
+								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2); // 2 accounts for borders
 							});
 						},
 		onRender:		function (){
@@ -496,37 +500,42 @@
 		sizeCols:		function(){
 							var me		= this,
 								tcw		= me.calcColWidth(),
-								hc		= me.headingContainer.width() - ((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0),
+								scrollbarWidth = (me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0,
+								hc		= me.headingContainer.width() - scrollbarWidth,
 								hw		= me.heading.width(),
 								fitCt	= 0,
 								fixdWid = 0,
 								fitMux	= 0;
-							
+
 							$.each(me.columns,function(i,col){
 								fitCt += col.fit;
 								fixdWid += col.width;
 							});
-							
-							if(tcw < hw){
+						
+							var sizeNow = (tcw < hw && fixdWid < hw);
+							if(sizeNow){
 								if(fitCt == 0){
-									fitCt	= 0;
 									fixdWid = 0;
 									for(var i in me.columns) {
 										var col = me.columns[i]; 
-										col.fit = hc / col.heading.outerWidth(); 
+										col.fit = hc / (col.width != 0 ? col.width : col.heading.width()); 
 										col.width = 0;
 										fitCt += col.fit;
 										fixdWid += col.width;
 									}
 								}
-								
-								fitMux = (hc - fixdWid) / fitCt;
-								for(var i in me.columns) {
-									var col = me.columns[i];
-									col.heading.css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
-								}
 							}
-							me.tbl.width(me.calcColWidth());
+							
+							fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
+							for(var i in me.columns) {
+								var col = me.columns[i];
+								col.heading.css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
+							}
+							
+							var newColWid = me.calcColWidth();
+							me.heading.width(newColWid + scrollbarWidth);
+							me.tbl.width(newColWid);
+							me.tblHSize.width(newColWid);
 							me.matchCols();
 						},
 		sortList:		function(col) {
