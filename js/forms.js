@@ -54,6 +54,7 @@
 					},
 		place:      function(){
 						var me = this;
+						if(me.items === undefined) me.items = [];
 						$.each(me.items, function(i,itm){ me.items[i] = me.normFrmItem(itm); });
 						Wui.o.prototype.place.call(this);
 		                this.afterCreate();
