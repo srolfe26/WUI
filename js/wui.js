@@ -323,8 +323,8 @@ var Wui = Wui || {};
 		init:		function(){},
 		make:		function(){
 						var me = this,
-							holdingData = me.data;
-						
+							holdingData = me.data || [];
+
 						$.each(holdingData,function(idx,rec){
 							me.data = rec;
 							var a = {el:Wui.tplt.prototype.make.call(me), rec:rec};
