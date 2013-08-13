@@ -831,26 +831,34 @@
                             if(overrideText != undefined){ me.displayDiv.html(overrideText); return; }
                             if(me.value == "" || me.value === null) { return; }
                             
-                            var hours = me.value.getHours(),
-                                minutes = me.value.getMinutes(),
-                                time = ((hours < 13) ? (hours > 9) ? hours : '0' + hours : (hours - 12)) + ':' + 
-                                ((minutes > 9) ? minutes : '0' + minutes) + ' ' + 
-                                ((hours < 12) ? 'AM' : 'PM'),
-                                formatted = (me.days[me.value.getDay()].substr(0,3)) + ' ' + 
-                                            (me.value.getMonth() + 1) + '-' + me.value.getDate() + '-' + 
-                                            me.value.getFullYear() + ' ' + time;
-                            
                             //validation for min-date
+                            var formattedDate = me.formatDateTime(me.value);
                             if(!(me.minDate != null && me.value < me.minDate)){
-                                me.displayDiv.html(formatted);
+                                me.displayDiv.html(formattedDate.date + ' ' + formattedDate.time);
                             }else{
                                 me.displayDiv.html('Less than minimum required date of ' + 
                                                     (me.minDate.getMonth() + 1) + '-' + me.minDate.getDate() + '-' + me.minDate.getFullYear());
                             }
                             
-                            return  (me.value.getMonth() + 1) + '/' + me.value.getDate() + '/' + me.value.getFullYear() + ' ' + time;
+                            return  (me.value.getMonth() + 1) + '/' + me.value.getDate() + '/' + me.value.getFullYear() + ' ' + formattedDate.time;
                         },
-		 getM:            function(num){
+         formatDateTime:function(dateObj){
+					        if(dateObj instanceof Date){
+						        var hours = dateObj.getHours(),
+	                                minutes = dateObj.getMinutes(),
+	                                formattedTime = ((hours < 13) ? (hours > 9) ? hours : '0' + hours : (hours - 12)) + ':' + 
+	                                ((minutes > 9) ? minutes : '0' + minutes) + ' ' + 
+	                                ((hours < 12) ? 'AM' : 'PM'),
+	                                formattedDt = (this.days[dateObj.getDay()].substr(0,3)) + ' ' + 
+	                                            (dateObj.getMonth() + 1) + '-' + dateObj.getDate() + '-' + 
+	                                            dateObj.getFullYear();
+								return {date:formattedDt, time:formattedTime};
+					        }else{
+						        return {date:'Invalid', time:'Invalid'};
+					        }
+					        
+				        },
+		 getM:          function(num){
                             var magnitude = 0;
                             while((num = num / 10) >= 1)    magnitude++
                             return magnitude;

@@ -5,12 +5,12 @@
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
-    <!--<link rel="stylesheet" href="css/condor-small.css" type="text/css" media="only screen and (max-width: 960px)">-->
-<style>
-	.left-full {border-right: 6px solid #888; height: 100%; width: 50%;}
-	.bottom-right {border-top: 6px solid #888; clear: right; float: right; height: 70%; width: 50%;}
-	.top-right {clear: right; float: right; height: 30%; width: 50%;}
-</style>
+
+	<style>
+		.left-full {border-right: 6px solid #888; height: 100%; width: 50%;}
+		.bottom-right {border-top: 6px solid #888; clear: right; float: right; height: 55%; width: 50%;}
+		.top-right {clear: right; float: right; height: 45%; width: 50%;}
+	</style>
 
 	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
 	<script type="text/javascript" src="js/wui.js"></script>
@@ -18,6 +18,34 @@
 	<script type="text/javascript" src="js/grid.js"></script>
 	<script type="text/javascript">
 		var win = null, dave = null, janice = null, bill = null, jerome = null, neil = null, james = null, bart = null, sam = null;
+		var jamesCols = [{heading:'Number', dataItem:'num', dataType:'numeric'},{heading:'Date', dataItem:'dt', dataType:'date', renderer:'jamesDtRender'}, {heading:'String', dataItem:'str', dataType:'string'}];
+		
+		function genRandData(cols,length){
+			var retArray = [],
+				l = 0,
+				randWords = 'These are some random words that we can use to populate the data Stephen Nielsen and Kayli are the best of friends'.split(' ');
+			
+			for(;l < length; l++){
+				var tup = {};
+				
+				for(var i in cols){
+					if(cols[i].dataType == 'date')			{ var yr = Wui.randNum(1850,2100),
+															  	  mon = Wui.randNum(1,12),
+															  	  day = Wui.randNum(0,28);
+															  tup[cols[i].dataItem] = new Date(mon + '/' + day + '/' + yr);
+															}
+					else if (cols[i].dataType == 'numeric')	{ tup[cols[i].dataItem] = Wui.randNum(0,1000000) }
+					else									{ tup[cols[i].dataItem] = randWords[Wui.randNum(0,21)] }
+				}
+				retArray.push(tup);
+			}
+						
+			return retArray;
+		}
+		
+		function jamesDtRender(cell,val,rec,row){
+			return Wui.datetime.prototype.formatDateTime(val).date;
+		}
 		
 		$(document).ready(function(){
 			/* Datalist example
@@ -37,7 +65,7 @@
 				title: 		'Layout',
 				appendTo: 	$('body'),
 				height: 	500,
-				width:		700,
+				width:		1200,
 				targets: 	[
 			                    {name:'topRight', el:$('<div>'), cls:'top-right'},
 			                    {name:'bottomRight', el:$('<div>'), cls:'bottom-right'},
@@ -48,8 +76,9 @@
 									target:	'topRight',
 									labelPos:'left',
 									items:	[
-												{ftype:'Wui.text', name:'foo', label:'Num 1'},
-												{ftype:'Wui.text', name:'bar', label:'Num 2'}
+												{ftype:'Wui.text', name:'num', label:'Number'},
+												{ftype:'Wui.datetime', name:'dt', label:'Date'},
+												{ftype:'Wui.text', name:'str', label:'String'},
 											]
 								}),
 			    				james = new Wui.grid({
@@ -57,31 +86,8 @@
 									defaultDataType: 'numeric',
 									height: 	'100%',
 									target:		'leftFull',
-									columns:    [{heading:'Num 1', dataItem:'foo'},{heading:'Num 2', dataItem:'bar'}],
-									data:       [
-									                {foo:1, bar:2},
-									                {foo:1, bar:2},
-									                {foo:1, bar:2},
-									                {foo:1, bar:2},
-									                {foo:1, bar:2},
-									                {foo:1, bar:4},
-									                {foo:1, bar:12},
-									                {foo:1, bar:7},
-									                {foo:1, bar:2},
-									                {foo:2, bar:2},
-									                {foo:2, bar:45},
-									                {foo:2, bar:2},
-									                {foo:2, bar:2},
-									                {foo:2, bar:2},
-									                {foo:1, bar:2},
-									                {foo:1, bar:12},
-									                {foo:1, bar:2},
-									                {foo:3, bar:2},
-									                {foo:4, bar:2345},
-									                {foo:3, bar:2},
-									                {foo:3, bar:56},
-									                {foo:3, bar:2}
-									            ],
+									columns:    jamesCols,
+									data:       genRandData(jamesCols,500),
 						            bbar: 		[
 													new Wui.button({
 															text:	'Load Selected', 
@@ -108,8 +114,7 @@
 																	blankText:'Add a title, and upload a file...',
 																	upTitleName: 'title',
 																	upParams: {xaction:'upload_attachment', att_id:0}},
-																{ftype:'Wui.link', label:'Its A Link', name:'linky',required:true},
-																{ftype:'Wui.datetime', label:'Date Time', name:'blu', blankText:'Enter a date.'}
+																{ftype:'Wui.link', label:'Its A Link', name:'linky',required:true}
 															]
 												}),
 												new Wui.o({el:$('<div>').text('Another Tab')})
@@ -118,7 +123,7 @@
 			    			]
 			});
 			bart.place();
-			
+			/*
 			win = new Wui.window({
 				title:	'Win Doe',
 				width:	800,
@@ -160,7 +165,7 @@
 														return r;
 													}
 									}), 
-									*/
+									
 									dave = new Wui.grid({
 										title:       'Local Gridz',
 										defaultDataType: 'numeric',
@@ -254,7 +259,7 @@
 									})								]
 							})
 						]
-			});/**/
+			});*/
 		}); // end document.ready
 		
 	</script>

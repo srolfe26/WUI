@@ -107,7 +107,7 @@
 							var me = this;
 							me.tbl.items = [];
 							me.tbl.children().remove();
-							
+							var a = new Date();
 							$.each(source,function(idx,dataItem){
 								me.tplt.data = dataItem;
 								var a = {el:me.tplt.make(), rec:dataItem, originalSrt:idx};
@@ -125,9 +125,7 @@
 								a.el.addClass((idx % 2 == 0) ? 'even' : 'odd')
 								.click(function(e){
 									 if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
-										 me.tbl.find('.wui-selected').removeClass('wui-selected');
-										 $(this).addClass('wui-selected');
-										 me.selected = [a];
+										 me.selectSingle($(this),a);
 									 }else if(e.metaKey || e.ctrlKey){
 										 var alreadySelected = $(this).hasClass('wui-selected');
 										 $(this).toggleClass('wui-selected',!alreadySelected);
@@ -142,15 +140,14 @@
 									 return false // stops propagation & prevents default
 								 })
 								 .dblclick(function(e){
-									 me.tbl.find('.wui-selected').removeClass('wui-selected');
-									 $(this).addClass('wui-selected');
-									 me.selected = [a];
-									 
+									 me.selectSingle($(this),a);
 									 me.onDoubleClick(a.rec);
 									 return false // stops propagation & prevents default
 								 });
 								me.tbl.append(a.el);
 							});
+							var b = new Date();
+							console.log(b.getTime() - a.getTime());
 							return source;
 						},
 		beforeMake:		function(){ this.makeGrid(); },
@@ -317,7 +314,7 @@
 										if(typeof col.renderer == 'function'){
 											me.renderers.push({dataItem:col.dataItem, renderer:col.renderer, index:i});
 										}else if(eval('typeof ' + col.renderer) == 'function'){
-											var funcFromString = new Function(col.renderer + '.apply(this,arguments)');
+											var funcFromString = new Function('return ' + col.renderer + '.apply(this,arguments)');
 											me.renderers.push({dataItem:col.dataItem, renderer:funcFromString, index:i});
 										}
 									}									
@@ -434,9 +431,9 @@
 							var me = this;
 							
 							me.posDataWin();
-
+							
 							// Add data to grid
-							if(me.data !== null)	{ me.total = me.data.length; me.beforeMake(); }
+							if(me.data !== null)	{ if(me.total === undefined) { me.total = me.data.length; me.beforeMake(); } }
 							else					{ me.getData(); }
 						},
 		posDataWin:		function(){
@@ -462,9 +459,7 @@
 											itm.el.addClass('wui-selected');
 											me.selected.push(itm);
 										}else{
-											me.tbl.find('.wui-selected').removeClass('wui-selected');
-											itm.el.addClass('wui-selected');
-											me.selected = [itm];
+											me.selectSingle(itm.el,itm);
 										}
 									}
 								});
@@ -489,13 +484,16 @@
 							// select the item if it exists
 							for(var a in me.tbl.items){
 								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
-									me.tbl.find('.wui-selected').removeClass('wui-selected');
-									me.tbl.items[a].el.addClass('wui-selected');
-									me.selected = [me.tbl.items[a]];
+									me.selectSingle(me.tbl.items[a].el,me.tbl.items[a]);
 									me.onRecordSelect(me.tbl.items[a].rec);
 									break;
 								}
 							}
+						},
+		selectSingle:	function(row,data){
+							this.tbl.find('.wui-selected').removeClass('wui-selected');
+							row.addClass('wui-selected');
+							this.selected = [data];
 						},
 		sizeCols:		function(){
 							var me		= this,
