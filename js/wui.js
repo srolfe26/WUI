@@ -112,7 +112,7 @@ var Wui = Wui || {};
 		cssByParam: function(m) { 
                         var m = m || this;
                         
-                        if(m.el !== null && m.el.addClass){
+                        if(m.el && m.el.addClass){
                         	if(m.attr)	m.el.attr(m.attr);
                         	
                         	// calculate dimensions

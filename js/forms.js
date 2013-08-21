@@ -1218,6 +1218,7 @@
                             onComplete: function upComplete(r){
                                             try{
                                             	var d = $.parseJSON(r);
+												console.log(d);
                                                 me.field.removeClass('uploading empty'); //remove the css uploading state
                                                 
 												if(d.success == true && d.payload){
@@ -1242,7 +1243,7 @@
                     },
 		upFailure:  function(e,e2){
                         console.log(e,e2);
-						Wui.text.prototype.val.call(me,'Upload Failure');
+						Wui.text.prototype.val.call(this,'Upload Failure');
                     },
         val:        function(setVal, callback){
                         if(setVal !== undefined)    { 
