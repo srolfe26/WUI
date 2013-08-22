@@ -85,7 +85,7 @@
     }
     
     /* Form Elements - per label type */
-    .wui-fe, .wui-input {display:block; position:relative;}
+    .wui-fe, .wui-input {display:block; position:relative; line-height:1em !important;}
     .wui-form.labels-left .wui-fe > input, .wui-form.labels-left .wui-fe > div,  .wui-form.labels-left .wui-fe > textarea,
     .wui-form.labels-left .wui-radio ul, .wui-form.labels-left .wui-checkbox ul { display:inline-block; width:70%; }
     
