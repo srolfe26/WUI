@@ -1310,7 +1310,7 @@
 							},
 				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
 			});
-	    return true;
+	    return inputFrm;
 	}
 }(jQuery));
 
