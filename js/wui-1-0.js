@@ -657,8 +657,8 @@ var Wui = Wui || {};
 						var me = this;
 						if(itm.ftype && !(itm instanceof Wui.frmField)){
 							var ft = itm.ftype.split('.');
-							if(window[ft[0]][ft[1]] !== undefined)	return new window[ft[0]][ft[1]]( $.extend(itm,{disabled:me.disabled}) );
-							else									throw('Object type ' +itm.ftype+ ' is not defined.');
+							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,{disabled:me.disabled}) );
+							else										throw('Object type ' +itm.ftype+ ' is not defined.');
 						}else if(itm instanceof Wui.frmField){
 							return $.extend(itm,{disabled:me.disabled});
 						}else{
@@ -1766,7 +1766,7 @@ var Wui = Wui || {};
 	Wui.file = function(args){ 
 		$.extend(this,{
 			beforSelect:function(){},
-			fileTypeFiler: null,
+			fileTypeFilter: null,
 			upFieldName:'fileupload',
 			upParams:   {},
 			upSuccess:  function(){},
@@ -1793,7 +1793,7 @@ var Wui = Wui || {};
                         titleParam[this.upTitleName] = Wui.text.prototype.val.call(this);
 						
 						// for file filtering
-						if(this.fileTypeFiler !== null) $.extend(titleParam,{file_type_filter:this.fileTypeFiler});
+						if(this.fileTypeFilter !== null) $.extend(titleParam,{file_type_filter:this.fileTypeFilter});
 						
                         fileControl.params($.extend(this.upParams, titleParam));
                         //upload file

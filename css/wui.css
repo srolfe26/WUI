@@ -81,7 +81,7 @@
     .wui-fe label { display:block; text-transform: lowercase; color:#555; font-weight:bold; margin:0.5em 0 0.25em 0; font-size:0.9em;}
     .wui-form.labels-proper .wui-fe label {font-weight:normal; margin-top:1.5em; text-transform: none;}
     .wui-form.labels-left .wui-fe > label {
-        width:28%; margin:0 2% 0 0; text-align:right; display:inline-table; vertical-align:top; padding-top:0.33em; text-transform: none; line-height: 26px;
+        width:28%; margin:0 2% 0 0; text-align:right; display:inline-table; vertical-align:top; padding-top:0.33em; text-transform: none;
     }
     
     /* Form Elements - per label type */
