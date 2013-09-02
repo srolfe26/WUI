@@ -1,0 +1,268 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <title>WUI 1.0 Test Page</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+
+	<style>
+		.left-full {border-right: 6px solid #888; height: 100%; width: 50%;}
+		.bottom-right {border-top: 6px solid #888; clear: right; float: right; height: 55%; width: 50%;}
+		.top-right {clear: right; float: right; height: 45%; width: 50%;}
+	</style>
+
+	<script type="text/javascript" src="js/wui-1-0.js"></script>
+	<script type="text/javascript">
+		var win = null, dave = null, janice = null, bill = null, jerome = null, neil = null, james = null, bart = null, sam = null;
+		var jamesCols = [{heading:'Number', dataItem:'num', dataType:'numeric'},{heading:'Date', dataItem:'dt', dataType:'date', renderer:'jamesDtRender'}, {heading:'String', dataItem:'str', dataType:'string'}];
+		
+		function genRandData(cols,length){
+			var retArray = [],
+				l = 0,
+				randWords = 'These are some random words that we can use to populate the data Stephen Nielsen and Kayli are the best of friends'.split(' ');
+			
+			for(;l < length; l++){
+				var tup = {};
+				
+				for(var i in cols){
+					if(cols[i].dataType == 'date')			{ var yr = Wui.randNum(1850,2100),
+															  	  mon = Wui.randNum(1,12),
+															  	  day = Wui.randNum(0,28);
+															  tup[cols[i].dataItem] = new Date(mon + '/' + day + '/' + yr);
+															}
+					else if (cols[i].dataType == 'numeric')	{ tup[cols[i].dataItem] = Wui.randNum(0,1000000) }
+					else									{ tup[cols[i].dataItem] = randWords[Wui.randNum(0,21)] }
+				}
+				retArray.push(tup);
+			}
+						
+			return retArray;
+		}
+		
+		function jamesDtRender(cell,val,rec,row){
+			return Wui.datetime.prototype.formatDateTime(val).date;
+		}
+		
+		$(document).ready(function(){
+			/* Datalist example
+			sam = new Wui.dataList({
+				appendTo:	$('body'),
+				cls:		'datalist',
+				data:		[{name:'thing one'},{name:'thing two'}],
+				tplt:		'<p>{name}</p>'
+			});
+			sam.place(); 
+			
+			$('.datalist').select(function(){console.log('selected!',arguments);});
+			$('.datalist').on('deselect',function(){console.log('deeeeeez!',arguments);});
+			$('.datalist').on('refresh',function(){console.log('make!',arguments);});*/
+			
+			bart = new Wui.layout({
+				title: 		'Layout',
+				appendTo: 	$('body'),
+				height: 	500,
+				width:		1200,
+				targets: 	[
+			                    {name:'topRight', el:$('<div>'), cls:'top-right'},
+			                    {name:'bottomRight', el:$('<div>'), cls:'bottom-right'},
+			                    {name:'leftFull', el:$('<div>'), cls:'left-full'}
+			                ],
+			    items:		[
+			    				sam = new Wui.form({
+									target:	'topRight',
+									labelPos:'left',
+									items:	[
+												{ftype:'Wui.hidden', name:'hide'},
+												{ftype:'Wui.text', name:'num', label:'Number'},
+												{ftype:'Wui.datetime', name:'dt', label:'Date'},
+												{ftype:'Wui.text', name:'str', label:'String'},
+											]
+								}),
+			    				james = new Wui.grid({
+									title:       'Dummy Data',
+									defaultDataType: 'numeric',
+									height: 	'100%',
+									target:		'leftFull',
+									columns:    jamesCols,
+									data:       genRandData(jamesCols,500),
+						            bbar: 		[
+													new Wui.button({
+															text:	'Load Selected', 
+															click:	function(){
+																		var selectedRecord = null;
+																		if(selectedRecord = james.getSelected()[0].rec){
+																			sam.setData(selectedRecord);
+																		}
+																	}
+														})
+											  ]
+								}),
+								neil = new Wui.tabs({
+									title:	'Tabs!',
+									height: '100%',
+									target:	'bottomRight',
+									items:	[
+												new Wui.form({
+													title:	'Unrelated Form',
+													items:	[
+																{ftype:'Wui.file', label:'File Upload', name:'pic', 
+																	upTarget:'/usurf-cmu/data/cmu-list-forms', 
+																	upFieldName:'doc_file', 
+																	blankText:'Add a title, and upload a file...',
+																	upTitleName: 'title',
+																	upParams: {xaction:'upload_attachment', att_id:0}},
+																{ftype:'Wui.link', label:'Its A Link', name:'linky',required:true}
+															]
+												}),
+												new Wui.o({el:$('<div>').text('Another Tab')})
+											]
+								})
+			    			]
+			});
+			bart.place();
+			/*
+			win = new Wui.window({
+				title:	'Win Doe',
+				width:	800,
+				height:	600,
+				items:	[
+							 bill = new Wui.tabs({
+								title:	'Tabs To Ya Motha',
+								height: '100%',
+								items:	[
+									/*
+									 jerome = new Wui.grid({
+										title:		'Remote Grizzy',
+										height: 	'100%',
+										remoteUrl: 	'../../../../geek/geekphrase/assets/data/words.cfc',
+										paging:		{start:0, limit:12, sort:[{dataItem:'word',order:'asc'},{dataItem:'word_id',order:'desc'}]},
+										multiSelect: true,
+										remoteParams:{method:'getAllWords'},
+										bbar: 		[
+														new Wui.button({text:'Log Selected', click:function(){console.log(jerome.getSelected());} })
+													],
+										columns: 	[
+														{heading:'Category Id', dataItem:'category_id', dataType:'numeric', fit:1},
+														{heading:'Category', dataItem:'category', fit:2},
+														{heading:'Word Id', dataItem:'word_id', dataType:'numeric', width:100},
+														{heading:'Word', dataItem:'word', fit:3}
+													],
+										processData:function(response){
+														// translate the coldfusion response into usable JSON
+														var r = {};
+														r.total = 791;
+														r.payload = [];
+														$.each(response.DATA,function(idx, row){
+														var a = {};
+														$.each(response.COLUMNS,function(i, col){
+														a[col.toLowerCase()] = row[i];
+														});
+														r.payload.push(a);
+														});
+														return r;
+													}
+									}), 
+									
+									dave = new Wui.grid({
+										title:       'Local Gridz',
+										defaultDataType: 'numeric',
+										height: '100%',
+										tbar:		[new Wui.button({text:'Level 2 Baby!!'})],
+										columns:    [{heading:'Num 1', dataItem:'foo', width:350},{heading:'Num 2', dataItem:'bar'}],
+										data:       [
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:4},
+										                {foo:1, bar:12},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:5},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:7},
+										                {foo:1, bar:2},
+										                {foo:2, bar:2},
+										                {foo:2, bar:45},
+										                {foo:2, bar:2},
+										                {foo:2, bar:2},
+										                {foo:2, bar:2},
+										                {foo:1, bar:2},
+										                {foo:1, bar:12},
+										                {foo:1, bar:2},
+										                {foo:3, bar:2},
+										                {foo:4, bar:2345},
+										                {foo:3, bar:2},
+										                {foo:3, bar:56},
+										                {foo:3, bar:2}
+										            ]
+									}),
+									janice = new Wui.form({
+										title: 'Form',
+										labelPos: 'left',
+										items:  [
+													{ftype:'Wui.hidden', name:'blork', disabled:true},
+													{ftype:'Wui.text', label:'Text', blankText:'Some blank text', name:'foo', required:true, disabled:true},
+													{ftype:'Wui.note', label:'This is a note. I can put HTML in here to do <em>whatever</em> I think is <strong>important</strong>.'+
+														' Notes will appear in a paragraph tag and will span the full width of the form regardless of the label type chosen.'},
+													{
+														ftype:'Wui.combo', label:'Combo', blankText:'Select your favorite developer...', name:'webdev',
+														valueItem: 'id',
+														titleItem: 'title', disabled:true,
+														keepInline:true,
+														data: [
+																   {id:1, title:"Steve"},
+																   {id:2, title:"Dan"},
+																   {id:16, title:"Tony"},
+																   {id:3, title:"Keith"},
+																   {id:4, title:"Julie"},
+																   {id:5, title:"Marty"},
+																   {id:6, title:"Catherine"},
+																   {id:7, title:"Josh"},
+																   {id:8, title:"Scannel"},
+																   {id:9, title:"Saunders"},
+																   {id:10, title:"BDansie2"},
+																   {id:11, title:"Stuart"},
+																   {id:12, title:"Jankowski"},
+																   {id:13, title:"Mike"},
+																   {id:14, title:"Theo"},
+																   {id:15, title:"Max"}
+															  ]
+													},
+													{
+														ftype:'Wui.radio', label:'Should I stay or should I go?', name:'82s', //buttonStyle:true,
+														options:[
+																	 {val:0, title:'Stay = trouble.'},
+																	 {val:1, title:'Go = double trouble.'}
+																], disabled:true
+													},
+													{ftype:'Wui.checkbox', label:'Checkbox!!', name:'booyas', buttonStyle:true, disabled:true},
+													{ftype:'Wui.wysiwyg', label:'WYSIWYG', name:'adv', disabled:true},
+													{ftype:'Wui.file', label:'File Upload', name:'pic', 
+														upTarget:'/usurf-cmu/data/cmu-list-forms', 
+														upFieldName:'doc_file', 
+														blankText:'Add a title, and upload a file...',
+														upTitleName: 'title',
+														upParams: {xaction:'upload_attachment', att_id:0}, disabled:true},
+													{ftype:'Wui.link', label:'Its A Link', name:'linky',required:true, disabled:true},
+													{ftype:'Wui.datetime', label:'Date Time', name:'blu', blankText:'Enter a date.', disabled:true},
+													{ftype:'Wui.textarea', label:'Text Area', name:'tune', disabled:true}
+												]
+									})								]
+							})
+						]
+			});*/
+		}); // end document.ready
+		
+	</script>
+</head>
+<body>
+
+</body>
+</html>
