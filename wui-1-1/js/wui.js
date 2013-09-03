@@ -283,9 +283,31 @@ var Wui = Wui || {};
 		// data:	null, * required
 		make:	function(){
 					var me = this;
-					if(me.data !== null && me.data !== undefined && me.tplt !== null){
+					if(me.data && me.tplt){
 					    var tplCopy = me.tplt;
-	                    return $(tplCopy.replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";}));
+	                    return $(
+							tplCopy
+							// replaces straight values
+							.replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
+							// accounts for complex expressions
+							.replace(/\{\((.*)\)\}/,function(m,fn){
+								var keys = [],
+									vals = [];
+								
+								// fill arrays of keys and their values and make sure they are in the same order
+								for(var i in me.data)	keys.push(i);
+								for(var i in keys)		vals.push(me.data[keys[i]]);
+								
+								// add the passed in conditional as the body of the function created below
+								keys.push("return " + fn);
+								
+								// create function that will perform the conditional statement
+								var newFn = Function.apply(null,keys);
+								
+								// call the function with the keys as variables in scope
+								return newFn.apply(null,vals);
+							})
+						);
 					}
 					throw new Error('Template engine missing data and/or template.');
 				}
@@ -300,13 +322,13 @@ var Wui = Wui || {};
 			stringVal =	(typeof test == 'function') ? test.toString() : '',
 			passed =	expected === returned,
 			endTime = 	new Date(),
-			testData = 	{passed_class:(passed)?'pass':'fail', string_val:(stringVal.length)?' - ' + stringVal: '', expected:expected, returned:returned, passed:passed, name:name, time:endTime - startTime},
+			testData = 	{string_val:(stringVal.length) ? '<pre>' + stringVal.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>' : '', expected:expected, returned:returned, passed:passed, name:name, time:endTime - startTime},
 			tplt = 		new Wui.tplt({
 							tplt:	'<tr>' +
 										'<td>{name}{string_val}</td>' +
 										'<td>{expected}</td>' +
 										'<td>{returned}</td>' +
-										'<td class="{passed_class}">{passed}</td>' +
+										'<td class="{((passed)?"pass":"fail")}">{passed}</td>' +
 										'<td>{time}ms</td>' +
 									'</tr>',
 							data:	testData

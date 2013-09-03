@@ -1,0 +1,82 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
+    <title>WUI Object - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+
+	<style type="text/css">
+		.stage {background:#556577; margin:1em; padding:1em; width:800px; height:300px; overflow:hidden; -moz-box-sizing: border-box !important; -webkit-box-sizing: border-box !important; box-sizing: border-box !important;}
+		.stage div {min-width:1em; min-height:1em; margin:0.5em; background:#ff0; display:inline-block;}
+			.stage div div {background:#fc0;}
+		.stage div.spliced {background:#0f0;}
+		.stage div#red {background:#f00;}
+	</style>
+	
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			a = new Wui.o({
+				el:			$('<div>'),
+				cls:		'stage',
+				prependTo:	$('body')
+			})
+			a.place();
+			
+			Wui.ts.test(Wui.assert('Push a new WUI object on to the \'stage\'',1,a.push(new Wui.o({el: $('<div>')})) ));
+			Wui.ts.test(Wui.assert('Push another WUI object on to the \'stage\'',2,a.push(new Wui.o({el: $('<div>')})) ));
+			Wui.ts.test(Wui.assert('Splice an item onto \'stage\'',true,function(){
+				a.splice(1,0,new Wui.o({el: $('<div>'), cls:'spliced'}));
+				return a.items[1].el.hasClass('spliced');
+			}));
+			Wui.ts.test(Wui.assert('Splice an object onto the end',true,function(){
+				var len = a.items.length;
+				a.splice(a.items.length - 1,0,new Wui.o({el: $('<div>'), cls:'spliced'}));
+				return a.items.length > len;
+			}));
+			Wui.ts.test(Wui.assert('Remove an item by splicing it out',true,function(){
+				var len = a.items.length;
+				a.splice(0,1);
+				return a.items.length < len;
+			}));
+			Wui.ts.test(Wui.assert('Test the height attribute of the item being added',true,function(){
+				a.push(new Wui.o({el: $('<div>'), height:'50%'}));
+				return a.items[a.items.length -1].el.height() == a.el.height() * 0.5;
+			}));
+			Wui.ts.test(Wui.assert('Test that attributes are being added',1,function(){
+				a.push(new Wui.o({el: $('<div>'), attr:{id:'red'}}));
+				return $('#red').length;
+			}));
+			Wui.ts.test(Wui.assert('Remove an item calling its own remove function',true,function(){
+				var len = a.items.length;
+				a.items[2].remove();
+				return a.items.length < len;
+			}));
+			Wui.ts.test(Wui.assert('Nesting WUI Objects',true,function(){
+				var len = a.items.length;
+				var nest = new Wui.o({el: $('<div>')});
+				a.push(nest);
+				nest.push(new Wui.o({el: $('<div>')}));
+				return (a.items.length == len + 1 && nest.items.length == 1);
+			}));
+			Wui.ts.test(Wui.assert('Did the object fade in and out?',true,function(){
+				var houdini = new Wui.o({el: $('<div>')});
+				a.push(houdini);
+				Wui.ts.pause();
+				houdini.hide(500,function(){ console.log(this); this.show(); });
+				return true;
+			}));
+		}); // end document.ready		
+	</script>
+</head>
+<body>
+<h1 class="wui-docs">WUI Object</h1>
+<pre class="wui-docs">
+</body>
+</html>

@@ -1,0 +1,66 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
+    <title>Template Engine - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// Some random data
+			var data =	[
+							{id:1, fname:'Steve'},
+							{id:2, fname:'Dave'},
+							{id:3, fname:'Dan'},
+							{id:4, fname:'Sam'}
+						];
+			
+			// Create the template engine
+			a = new Wui.tplt({
+				tplt:	'<li>Name: {fname}, conditional expression: {((id == 3)?"This has an ID of 3!!":fname)}</li>'
+			});
+			
+			// Display something on the body
+			var target = $('<ul>').prependTo('body');
+			
+			for(var i in data){
+				a.data = data[i];
+				target.append(a.make());
+			}
+			
+		}); // end document.ready		
+	</script>
+</head>
+<body>
+<h1 class="wui-docs">Template Engine</h1>
+<pre class="wui-docs">
+// Some random data
+var data =	[
+				{id:1, fname:'Steve'},
+				{id:2, fname:'Dave'},
+				{id:3, fname:'Dan'},
+				{id:4, fname:'Sam'}
+			];
+
+// Create the template engine
+a = new Wui.tplt({
+	tplt:	'&lt;li&gt;Name: {fname}, conditional expression: {((id == 3)?"This has an ID of 3!!":fname)}&lt;/li&gt;'
+});
+
+// Display something on the body
+var target = $('&lt;ul&gt;').prependTo('body');
+
+for(var i in data){
+	a.data = data[i];
+	target.append(a.make());
+}
+</pre>
+</body>
+</html>

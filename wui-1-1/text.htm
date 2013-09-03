@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     
-    <title>Text Box WUI 1.1</title>
+    <title>Text Box - WUI 1.1</title>
     
 	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 
@@ -31,14 +31,28 @@
 			Wui.ts.test(Wui.assert("Change Blank Text",'New Blank',function(){return a.setBlankText('New Blank')}));
 			Wui.ts.test(Wui.assert("Blank out field",true,a.val('')));
 			Wui.ts.test(Wui.assert("Check Blank Text",'New Blank',a.field.val()));
+			Wui.ts.test(Wui.assert("Despite blank text, field value is null",null,a.val()));
 			
 			Wui.ts.test(Wui.assert("Set Disabled",true,function(){ a.setDisabled(true); return a.el.hasClass('wui-disabled'); }));
-			Wui.ts.test(Wui.assert("Set Text",true,function(){ return a.val('Test Complete') }));
+			Wui.ts.test(Wui.assert("Change Blank Text",'Test Complete',function(){return a.setBlankText('Test Complete')}));
+			Wui.ts.test(Wui.assert("Check Blank Text",'Test Complete',a.field.val()));
 			Wui.ts.test(Wui.assert("Set Enabled",true,function(){ a.setDisabled(false); return !a.el.hasClass('wui-diabled'); }));
+			Wui.ts.test(Wui.assert("Despite blank text, field value is null",null,a.val()));
 			
 		}); // end document.ready		
 	</script>
 </head>
 <body>
+<h1 class="wui-docs">Text Box</h1>
+<pre class="wui-docs">
+// Add a text formItem onto the body
+a = new Wui.text({ label:'Text Field', blankText:'Type Something', name:'textfield', attr:{name:'textfield'}, prependTo:$('body') });
+a.place();
+
+// Listener for a change to the text object
+$('.wui-fe[name=textfield]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+	Wui.assert('Listener on valchange fired',true, (itm == a));
+});		
+</pre>
 </body>
 </html>
