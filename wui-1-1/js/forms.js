@@ -226,8 +226,10 @@
                         this.el.append(Wui.text.prototype.setListeners.call(this,this));
                     },
         setBlankText:function(bt){
-                        this.el.val(this.blankText = bt).addClass(this.blankCls);
-                        return bt;
+                        var me = this;
+						if(me.field.val() == me.blankText)
+							me.field.val(bt).addClass(this.blankCls);
+						return me.blankText = bt;
                     },
         clearBlankText:	function(){
 					        var me = this;
@@ -273,5 +275,20 @@
 					}
     });
 
+	
+	/* WUI Text Area */
+	Wui.textarea = function(args){
+	    $.extend(this, args, {
+			field:$('<textarea>')
+		});
+	    this.init();
+	};
+	Wui.textarea.prototype = $.extend(new Wui.text(),{
+		init:   	function(){
+	                    Wui.text.prototype.init.call(this);
+	                    this.el.append(this.field).css({height:'auto'});
+	                    this.field.height(this.height);
+	                }
+	});
 	
 }(jQuery));

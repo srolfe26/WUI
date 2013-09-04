@@ -290,7 +290,7 @@ var Wui = Wui || {};
 							// replaces straight values
 							.replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
 							// accounts for complex expressions
-							.replace(/\{\((.*)\)\}/,function(m,fn){
+							.replace(/\{\((.*)\)\}/g,function(m,fn){
 								var keys = [],
 									vals = [];
 								
@@ -314,36 +314,72 @@ var Wui = Wui || {};
 	};
 	
 	
-	/****************** WUI Test Suite *****************/
-	Wui.ts = {};
-	Wui.assert = function(name,expected,test){
-		var startTime = new Date(),
-			returned = 	(typeof test == 'function') ? test() : test,
-			stringVal =	(typeof test == 'function') ? test.toString() : '',
-			passed =	expected === returned,
-			endTime = 	new Date(),
-			testData = 	{string_val:(stringVal.length) ? '<pre>' + stringVal.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>' : '', expected:expected, returned:returned, passed:passed, name:name, time:endTime - startTime},
-			tplt = 		new Wui.tplt({
+	/****************** WUI Docs & Test Suite *****************/
+	Wui.docCode = function(){
+		var wuiCode = $('.wui-doc-code');
+			if(wuiCode.length > 0){
+				var e = document.createElement('i'),
+					docCode = '';
+				
+				// encode html tags that would mess up the code area
+				wuiCode.each(function(){
+					var code = ($(this).prop('tagName').toLowerCase() == 'style') 
+							? '\n<style type="text/css">\n' +$(this).text()+ '\n</style>\n'
+							: '\n<script type="text/javascript">\n' +$(this).text()+ '\n</script>\n';
+							
+					docCode += code.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+				});
+				
+				// replace tabs with 4 spaces where the browser doesn't support tab size
+				if(e.style.tabSize !== '' && e.style.MozTabSize !== '' && e.style.oTabSize !== '')	docCode.replace(/\t/g,'    ');
+				
+				// create the <pre> object with associated button to show and hide it
+				var	preObj = $('<pre>' +docCode+ '</pre>'),
+					docBtn = new Wui.button({
+						preVisible:	false,
+						text:		'Show Source',
+						appendTo:	$('body'),
+						click:		function(){
+										if(this.preVisible){ preObj.fadeOut(1000); this.setText('Show Source'); }
+										else{ preObj.fadeIn(1000); this.setText('Hide Source'); }
+										this.preVisible = !this.preVisible;
+									}
+					});
+				
+				// append everything on the body
+				docBtn.place();
+				$('body').append(preObj.hide());
+			}
+	};
+	
+	
+	Wui.assert = function(descrip,test,count){
+		var startTime	= new Date(),
+			passed		= (typeof test == 'function') ? test() : test,
+			fnString	= (typeof test == 'function') ? test.toString() : '',
+			stringVal	= (fnString.length) ? '<pre>' + fnString.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\t/g,'    ')+ '</pre>' : '',
+			endTime		= new Date(),
+			testNum		= (count) ? count : '-',
+			testData	= {string_val:stringVal, passed:passed, name:descrip, test_num:testNum, time:endTime - startTime},
+			tplt		= new Wui.tplt({
 							tplt:	'<tr>' +
+										'<td>{test_num}</td>' +
 										'<td>{name}{string_val}</td>' +
-										'<td>{expected}</td>' +
-										'<td>{returned}</td>' +
 										'<td class="{((passed)?"pass":"fail")}">{passed}</td>' +
 										'<td>{time}ms</td>' +
 									'</tr>',
 							data:	testData
 						});
-		
-		if($('.wui-test-results tbody').length == 0){
+						
+			if($('.wui-test-results tbody').length == 0){
 			$('body').append($(
 				'<table class="wui-test-results">' +
 					'<thead>' +
 						'<tr>' +
-							'<th>Test Description</th>' +
-							'<th>Expected</th>' +
-							'<th>Returned</th>' +
-							'<th class="pass-fail">Pass/Fail</th>' +
-							'<th class="timing">Time</th>' +
+							'<th class="wui-test-smaller">Test</th>' +
+							'<th>Description</th>' +
+							'<th class="wui-test-smaller">Success</th>' +
+							'<th class="wui-test-smaller">Time</th>' +
 						'</tr>' +
 					'</thead>' +
 					'<tbody></tbody>' +
@@ -351,38 +387,34 @@ var Wui = Wui || {};
 			));	
 		};
 		
-		$('.wui-test-results tbody').append(tplt.make());
+		$('.wui-test-results tbody').prepend(tplt.make());
 		return testData;
 	};
 	
 	
-	// John Resig's Javascript Ninja asynchronous test function
-	(function(w) {
-		
-		var queue = [], paused = false;                
-		
-		w.test = function(fn) {                   
-			queue.push(fn);
-			runTest();
-		};
-		
-		w.pause = function() {
-			paused = true;
-		};
-		
-		w.resume = function() {
-			paused = false;
-			setTimeout(runTest, 1);
-		};
-		
-		function runTest() {
-			if (!paused && queue.length) {
-				queue.shift();
-				if (!paused) w.resume();
-			}
-		}
-	})(Wui.ts);
-		
+	Wui.ts = function(){
+		var me = this;
+		$.extend(me,{
+			count:	0,
+			paused: false,
+			queue:	[],
+			test:	function(desc,fn){
+						me.queue.push(function(){ me.count++; Wui.assert(desc, fn, me.count); });
+						me.runTest();
+					},
+			pause:	function(){ me.paused = true; },
+			resume:	function(){
+						me.paused = false;
+						setTimeout(me.runTest,1);
+					},
+			runTest:function(){
+						if (!me.paused && me.queue.length) {
+							me.queue.shift()();
+							if (!me.paused) me.resume();
+						}
+					}
+		});
+	};
 	
 	
 	Wui.dataList = function(args){

@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Text Box - WUI 1.1</title>
+    <title>Text Area - WUI 1.1</title>
     
 	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 	
@@ -14,11 +14,11 @@
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.text({ label:'Text Field', blankText:'Type Something', name:'textfield', attr:{name:'textfield'}});
+			a = new Wui.textarea({ label:'Text Area', blankText:'Type Something', name:'textarea', attr:{name:'textarea'}, height:150});
 			a.addToDOM(a,$('h1'),'after');
 			
 			// Listener for a change to the text object
-			$('.wui-fe[name=textfield]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+			$('.wui-fe[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
 				ts.test('Listener on valchange fired',(itm == a));
 			});
 
@@ -40,10 +40,11 @@
 			ts.test("Check Blank Text",function(){ return a.field.val() == 'Test Complete'; });
 			ts.test("Set Enabled",function(){ return a.setDisabled(false); return !a.el.hasClass('wui-diabled'); });
 			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
+			ts.test("Setting the height of the text field to match its container doesn't work if the label is on the top instead of left",false);
 		}); // end document.ready		
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Textbox</h1>
+<h1>Text Area</h1>
 </body>
 </html>
