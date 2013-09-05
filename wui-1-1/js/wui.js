@@ -129,6 +129,10 @@ var Wui = Wui || {};
                         }
                     },
 		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		append:		function(obj){
+						var me = this, el = me.elAlias || me.el;
+						el.append(obj);
+					},
 		place:      function(after){
                         var me = this;
 						

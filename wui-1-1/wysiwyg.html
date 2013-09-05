@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Text Area - WUI 1.1</title>
+    <title>WYSIWYG - WUI 1.1</title>
     
 	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 	
@@ -14,11 +14,11 @@
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.textarea({ label:'Text Area', blankText:'Type Something', name:'textarea', attr:{name:'textarea'}, height:200});
+			a = new Wui.wysiwyg({ label:'WYSIWYG', name:'wysiwyg', attr:{name:'wysiwyg'}, height:200});
 			a.addToDOM(a,$('h1'),'after');
 			
 			// Listener for a change to the text object
-			$('.wui-fe[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+			$('.wui-fe[name=wysiwyg]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
 				ts.test('Listener on valchange fired',(itm == a));
 			});
 
@@ -44,6 +44,6 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Text Area</h1>
+<h1>WYSIWYG</h1>
 </body>
 </html>

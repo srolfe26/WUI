@@ -99,27 +99,53 @@
 	});
 	
 	
+	/* WUI Label */
+	Wui.label = function(args){ 
+		$.extend(this,{
+			html:			'',
+			labelPosition:	'top'
+		},args);
+		
+		this.init(); 
+	};
+	Wui.label.prototype = $.extend(new Wui.o(),{
+		init:       function(){
+						var me = this;
+						me.el = $('<div>')
+								.addClass('wui-lbl' + ' lbl-' + me.labelPosition)
+								.append( me.label = $('<label>').html(me.html).addClass(me.cls).attr(me.attr ? me.attr : {}) );
+					},
+		setLabel:	function(newLabel){
+						this.label.html(this.html = newLabel);
+					}
+    });
+	
+	
 	/* WUI FormField */
 	Wui.frmField = function(args){
 		$.extend(this,{
-			disabled:	false,
-			invalidMsg: null,
-			label:      null,
-			labelCls:	null,
-			required:   false,
-			validRegEx:	null,
-			validTest:  null
+			disabled:		false,
+			invalidMsg: 	null,
+			label:      	null,
+			labelPosition:	'top',
+			labelCls:		null,
+			required:   	false,
+			validRegEx:		null,
+			validTest:  	null
 		},args);
 	};
 	Wui.frmField.prototype = $.extend(new Wui.o(),{
 		init:  		function(){
-                        this.value = null;
-                        this.el = $('<div>').addClass('wui-fe');
-        				if(this.label !== null && this.label.length > 0){
-                        	this.lbl = new Wui.label({text:this.label,cls:this.labelCls});
-                        	this.el.prepend(this.lbl.el);
-                        }
-						return this.el;
+                        var me = this;
+						me.value = null;
+                        me.el = $('<div>').addClass('wui-fe');
+						
+						if(me.label && me.label.length > 0){
+                        	me.lbl = new Wui.label({html:me.label, cls:me.labelCls, labelPosition:me.labelPosition});
+							me.elAlias = me.el;
+							me.el = me.lbl.el.append(me.elAlias);
+						}
+						return me.el;
                     },
 		onRender:	function(){ if(this.disabled) this.setDisabled(this.disabled); },
         setDisabled:function(val){
@@ -192,16 +218,6 @@
 	});
 	
 	
-	/* WUI Label */
-	Wui.label = function(args){ 
-		$.extend(this,{ text:'' },args); 
-		this.init(); 
-	};
-	Wui.label.prototype = $.extend(new Wui.o(),{
-		init:       function(){ this.el = $('<label>').html(this.text); }
-    });
-    
-    
     /* WUI Hidden */
 	Wui.hidden = function(args){
 		$.extend(this,{el:null},args); 
@@ -223,7 +239,7 @@
 	Wui.text.prototype = $.extend(new Wui.frmField(),{
 		init:		function(){
             			Wui.frmField.prototype.init.call(this);
-                        this.el.append(Wui.text.prototype.setListeners.call(this,this));
+                        this.append(Wui.text.prototype.setListeners.call(this,this));
                     },
         setBlankText:function(bt){
                         var me = this;
@@ -278,17 +294,53 @@
 	
 	/* WUI Text Area */
 	Wui.textarea = function(args){
-	    $.extend(this, args, {
+	    $.extend(this, args, { field:$('<textarea>') });
+	    this.init();
+	};
+	Wui.textarea.prototype = new Wui.text();
+	
+	
+	/* WUI WYSIWYG */
+	Wui.wysiwyg = function(args){
+	    $.extend(this,{
+			showHTML:	false
+		},args,{
+			blankText:null,
 			field:$('<textarea>')
 		});
 	    this.init();
 	};
-	Wui.textarea.prototype = $.extend(new Wui.text(),{
-		init:   	function(){
-	                    Wui.text.prototype.init.call(this);
-	                    this.el.append(this.field).css({height:'auto'});
-	                    this.field.height(this.height);
-	                }
+	Wui.wysiwyg.prototype = $.extend(new Wui.textarea(),{
+		onRender:	function(){
+                    	var tb = [['bold','italic','underline','strikethrough'], 
+                    	          ['link','unlink','unorderedlist','orderedlist'],
+                                  ['justifyleft','justifycenter','justifyright']];
+                    	if(this.showHTML) tb.push(['html']);
+			
+						this.field.htmlarea({
+                            css: 		'body { color:#333; font:90%  Arial, Verdana, Helvetica, sans-serif !important; overflow:hidden; }' +
+                                 		'a {color:#09c; text-decoration:none;} a:hover {color:#0c9; text-decoration:underline;}',
+                            toolbar:	tb,
+                            loaded:		function(){}
+                        });
+						
+                        var iframe = this.field.parent('.wui-html').height(this.height).find('iframe');
+                        this.field.attr({tabindex:'-1'});
+                        this.field.parent('.wui-html').resizable({
+                            animateEasing: 'linear',
+                            minWidth:   this.field.outerWidth(),
+                            maxWidth:	this.field.outerWidth(),
+                            minHeight:  this.field.parent('.wui-html').find('.tools').outerHeight() * 3,
+                            start:      function(evnt, ui){ this.iFrameOrigHeight = iframe.height(); },
+                            resize:     function(evnt, ui){ iframe.height(ui.size.height - (ui.originalSize.height - this.iFrameOrigHeight)); },
+                            handles:	'se'
+                        });
+						Wui.frmField.prototype.onRender.call(this);
+                    },
+        val:    	function(setVal){
+                        if(setVal === undefined)    {return this.field.val();}
+                        else                        {this.field.val(((setVal !== null) ? setVal : '')); this.field.keyup();}
+                    }
 	});
 	
 }(jQuery));
