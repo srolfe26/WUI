@@ -18,7 +18,7 @@
 			a.addToDOM(a,$('h1'),'after');
 			
 			// Listener for a change to the text object
-			$('.wui-fe[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+			$('[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
 				ts.test('Listener on valchange fired',(itm == a));
 			});
 

@@ -14,11 +14,11 @@
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.wysiwyg({ label:'WYSIWYG', name:'wysiwyg', attr:{name:'wysiwyg'}, height:200});
-			a.addToDOM(a,$('h1'),'after');
+			a = new Wui.wysiwyg({ label:'WYSIWYG', labelPosition:'left', name:'wysiwyg', attr:{name:'wysiwyg'}, height:150, appendTo:$('body')});
+			a.place();
 			
 			// Listener for a change to the text object
-			$('.wui-fe[name=wysiwyg]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+			$('[name=wysiwyg]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
 				ts.test('Listener on valchange fired',(itm == a));
 			});
 
@@ -30,20 +30,17 @@
 			ts.test("Get value on blank text field",function(){ return a.val() == null; });
 			ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text') == true; });
 			ts.test("Make sure the value set to 'Set Text'",function(){ return a.val() == 'Set Text'; });
-			ts.test("Change Blank Text",function(){return a.setBlankText('New Blank') == 'New Blank'; });
 			ts.test("Blank out field",function(){ return a.val('') == true; });
-			ts.test("Check Blank Text",function(){ return a.field.val() == 'New Blank'; });
 			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
 			
 			ts.test("Set Disabled",function(){ a.setDisabled(true); return a.el.hasClass('wui-disabled') == true; });
-			ts.test("Change Blank Text",function(){return a.setBlankText('Test Complete') == 'Test Complete'});
-			ts.test("Check Blank Text",function(){ return a.field.val() == 'Test Complete'; });
 			ts.test("Set Enabled",function(){ return a.setDisabled(false); return !a.el.hasClass('wui-diabled'); });
-			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
+			ts.test("Set Value",function(){ a.val('Test Complete'); return a.val() == 'Test Complete'; });
 		}); // end document.ready		
 	</script>
 </head>
 <body class="wui-docs">
 <h1>WYSIWYG</h1>
+<textarea name="juliette"></textarea>
 </body>
 </html>

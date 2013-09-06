@@ -17,11 +17,8 @@
 			a = new Wui.text({ label:'Text Field', blankText:'Type Something', name:'textfield', attr:{name:'textfield'}});
 			a.addToDOM(a,$('h1'),'after');
 			
-			b = new Wui.text({ label:'Text Field', blankText:'Type Something', name:'textfield', labelPosition:'left', attr:{name:'textfield'}});
-			b.addToDOM(b,$('h1'),'after');
-			
 			// Listener for a change to the text object
-			$('.wui-fe[name=textfield]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+			$('[name=textfield]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
 				ts.test('Listener on valchange fired',(itm == a));
 			});
 

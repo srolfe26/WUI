@@ -337,10 +337,338 @@
                         });
 						Wui.frmField.prototype.onRender.call(this);
                     },
-        val:    	function(setVal){
-                        if(setVal === undefined)    {return this.field.val();}
-                        else                        {this.field.val(((setVal !== null) ? setVal : '')); this.field.keyup();}
-                    }
+		setBlankText:function(){},
+		setListeners:function(t){
+						$(t.field).change(function(){ t.val(); });
+					},
+		valChange:	function(){ this.field.keyup(); }
 	});
 	
 }(jQuery));
+
+/**
+* jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
+* Copyright (c) 2012 Chris Pietschmann
+* http://jhtmlarea.codeplex.com
+* Licensed under the Microsoft Reciprocal License (Ms-RL)
+* http://jhtmlarea.codeplex.com/license
+* 
+* Modified 2013 Stephen Nielsen
+*/
+(function ($) {
+    $.fn.htmlarea = function (opts) {
+        if (opts && typeof (opts) === "string") {
+            var args = [];
+            for (var i = 1; i < arguments.length; i++) { args.push(arguments[i]); }
+            var htmlarea = jHtmlArea(this[0]);
+            var f = htmlarea[opts];
+            if (f) { return f.apply(htmlarea, args); }
+        }
+        return this.each(function () { jHtmlArea(this, opts); });
+    };
+    var jHtmlArea = window.jHtmlArea = function (elem, options) {
+        if (elem.jquery) {
+            return jHtmlArea(elem[0]);
+        }
+        if (elem.jhtmlareaObject) {
+            return elem.jhtmlareaObject;
+        } else {
+            return new jHtmlArea.fn.init(elem, options);
+        }
+    };
+    jHtmlArea.fn = jHtmlArea.prototype = {
+
+        // The current version of jHtmlArea being used
+        jhtmlarea: "0.7.5",
+
+        init: function (elem, options) {
+            if (elem.nodeName.toLowerCase() === "textarea") {
+                var opts = $.extend({}, jHtmlArea.defaultOptions, options);
+                elem.jhtmlareaObject = this;
+
+                var textarea = this.textarea = $(elem);
+                var container = this.container = $("<div/>").addClass("wui-html").insertAfter(textarea);
+
+                var toolbar = this.toolbar = $("<div/>").addClass("tools").appendTo(container);
+                priv.initToolBar.call(this, opts);
+
+                var iframe = this.iframe = $("<iframe/>");
+                var htmlarea = this.htmlarea = $("<div/>").append(iframe);
+
+                container.append(htmlarea).append(textarea.hide());
+
+                priv.initEditor.call(this, opts);
+                priv.attachEditorEvents.call(this);
+
+                // Fix total height to match TextArea
+                iframe.height(iframe.height() - toolbar.height());
+                
+                toolbar.width(textarea.width() - 2);
+
+                if (opts.loaded) { opts.loaded.call(this); }
+            }
+        },
+        dispose: function () {
+            this.textarea.show().insertAfter(this.container);
+            this.container.remove();
+            this.textarea[0].jhtmlareaObject = null;
+        },
+        execCommand: function (a, b, c) {
+            this.iframe[0].contentWindow.focus();
+            this.editor.execCommand(a, b || false, c || null);
+            this.updateTextArea();
+        },
+        ec: function (a, b, c) {
+            this.execCommand(a, b, c);
+        },
+        queryCommandValue: function (a) {
+            this.iframe[0].contentWindow.focus();
+            return this.editor.queryCommandValue(a);
+        },
+        qc: function (a) {
+            return this.queryCommandValue(a);
+        },
+        getSelectedHTML: function () {
+            var r = this.getRange();
+            if(r.htmlText)	return r.htmlText;
+            else			return $('<p>').append($(r.cloneContents())).html();
+        },
+        getSelection: function () {
+            if (this.editor.selection)	return this.editor.selection;
+        	else						return this.iframe[0].contentDocument.defaultView.getSelection();
+        },
+        getRange: function () {
+            var s = this.getSelection();
+            if (!s) { return null; }
+            return (s.getRangeAt) ? s.getRangeAt(0) : s.createRange();
+        },
+        html: function (v) {
+            if (v) {
+                this.textarea.val(v);
+                this.updateHtmlArea();
+            } else {
+                return this.toHtmlString();
+            }
+        },
+        pasteHTML: function (html) {
+            this.iframe[0].contentWindow.focus();
+            var r = this.getRange();
+            if (r.pasteHTML) {
+                r.pasteHTML(html);
+            }else{
+                r.deleteContents();
+                r.insertNode($((html.indexOf("<") != 0) ? $("<span/>").append(html) : html)[0]);
+            }
+            /* TODO: TEST THAT THIS PROC WORKS IN WEBKIT WITHOUT THIS CODE!!
+            else { // Safari
+                r.deleteContents();
+                r.insertNode($(this.iframe[0].contentWindow.document.createElement("span")).append($((html.indexOf("<") != 0) ? "<span>" + html + "</span>" : html))[0]);
+            }*/
+            r.collapse(false);
+            r.select();
+        },
+        bold: function () { this.ec("bold"); },
+        italic: function () { this.ec("italic"); },
+        underline: function () { this.ec("underline"); },
+        strikeThrough: function () { this.ec("strikethrough"); },
+        removeFormat: function () {
+            this.ec("removeFormat", false, []);
+            this.unlink();
+        },
+        link: function () {
+            if (this.getRange().htmlText)	this.ec("createLink", true);
+            else							this.ec("createLink", false, prompt("Link URL:", "http://"));
+        },
+        unlink: function () { this.ec("unlink", false, []); },
+        unorderedList: function () { this.ec("insertunorderedlist"); },
+        orderedList: function () { this.ec("insertorderedlist"); },
+        justifyLeft: function () { this.ec("justifyLeft"); },
+        justifyCenter: function () { this.ec("justifyCenter"); },
+        justifyRight: function () { this.ec("justifyRight"); },
+        formatBlock: function (v) { this.ec("formatblock", false, v || null); },
+        showHTMLView: function () {
+            this.updateTextArea();
+            this.textarea.show();
+            this.htmlarea.hide();
+            $("ul li:not(li:has(a.html))", this.toolbar).hide();
+            $("ul:not(:has(:visible))", this.toolbar).hide();
+            $("ul li a.html", this.toolbar).addClass("highlighted");
+            this.container.css({height:'auto'});
+            this.textarea.css({paddingBottom:'28px'});
+        },
+        hideHTMLView: function () {
+            this.updateHtmlArea();
+            this.textarea.hide();
+            this.htmlarea.show();
+            $("ul", this.toolbar).show();
+            $("ul li", this.toolbar).show().find("a.html").removeClass("highlighted");
+        },
+        toggleHTMLView: function () {
+            (this.textarea.is(":hidden")) ? this.showHTMLView() : this.hideHTMLView();
+        },
+
+        toHtmlString: function () {
+            return $.trim(this.editor.body.innerHTML
+                    .replace(/MsoNormal/gi, "")
+                    .replace(/<\/?link[^>]*>/gi, "")
+                    .replace(/<\/?meta[^>]*>/gi, "")
+                    .replace(/<\/?xml[^>]*>/gi,"")
+                    .replace(/<\?xml[^>]*\/>/gi, "")
+                    .replace(/<!--(.*)-->/gi, "")
+                    .replace(/<!--(.*)>/gi, "")
+                    .replace(/<!(.*)-->/gi, "")
+                    .replace(/<w:[^>]*>(.*)<\/w:[^>]*>/gi, "")
+                    .replace(/<w:[^>]*\/>/gi, "")
+                    .replace(/<\/?w:[^>]*>/gi, "")
+                    .replace(/<m:[^>]*\/>/gi, "")
+                    .replace(/<m:[^>]>(.*)<\/m:[^>]*>/gi, "")
+                    .replace(/<o:[^>]*>([.|\s]*)<\/o:[^>]*>/gi, "")
+                    .replace(/<o:[^>]*>/gi, "")
+                    .replace(/<o:[^>]*\/>/gi, "")
+                    .replace(/<\/o:[^>]*>/gi, "")
+                    .replace(/<\/?m:[^>]*>/gi, "")
+                    .replace(/style=\"([^>]*)\"/gi, "")
+                    .replace(/style=\'([^>]*)\'/gi, "")
+                    .replace(/class=\"(.*)\"/gi, "")
+                    .replace(/class=\'(.*)\'/gi,"")
+                    .replace(/<p[^>]*>/gi, "<p>")
+                    .replace(/<\/p[^>]*>/gi, "</p>")
+                    .replace(/<span[^>]*>/gi, "")
+                    .replace(/<\/span[^>]*>/gi, "")
+                    .replace(/<st1:[^>]*>/gi, "")
+                    .replace(/<\/st1:[^>]*>/gi, "")
+                    .replace(/<font[^>]*>/gi, "")
+                    .replace(/<\/font[^>]*>/gi, "")
+                    .replace(/[\r\n]/g, " ")
+                    .replace(/<wordPasteong><\/wordPasteong>/gi, "")
+                    .replace(/<p><\/p>/gi, "").replace(/\/\*(.*)\*\//gi, "")
+                    .replace(/<!--/gi, "")
+                    .replace(/-->/gi, "")
+                    .replace(/<style[^>]*>[^<]*<\/style[^>]*>/gi, "")
+                    .replace(/<hr>/gi, ""))
+        },
+        toString: function () {
+            return this.editor.body.innerText;
+        },
+
+        updateTextArea: function () {
+            this.textarea.val(this.toHtmlString());
+			this.textarea.change();
+        },
+        updateHtmlArea: function () {
+            this.editor.body.innerHTML = this.textarea.val();
+        }
+    };
+    jHtmlArea.fn.init.prototype = jHtmlArea.fn;
+
+    jHtmlArea.defaultOptions = {
+        toolbar: [
+        ["bold", "italic", "underline", "link", "unlink", "strikethrough", "orderedlist", "unorderedlist"],
+        ["justifyleft", "justifycenter", "justifyright"]
+    ],
+        css: null,
+        toolbarText: {
+            bold : "Bold",
+            italic : "Italic",
+            underline : "Underline",
+            strikethrough : "Strike-Through",
+            justifyleft : "Left Justify",
+            justifycenter : "Center Justify",
+            justifyright : "Right Justify",
+            link : "Insert Link",
+            unlink : "Remove Link",
+            unorderedlist : "Insert Unordered List",
+            orderedlist : "Insert Ordered List",
+            html : "Show/Hide HTML Source View"
+        }
+    };
+    var priv = {
+        toolbarButtons: {
+            strikethrough : "strikeThrough",
+            unorderedlist : "unorderedList",
+            orderedlist : "orderedList",
+            justifyleft : "justifyLeft",
+            justifycenter : "justifyCenter",
+            justifyright : "justifyRight",
+            html : function(btn) {
+                this.toggleHTMLView()
+            }
+        },
+        initEditor: function (options) {
+            var edit = this.editor = this.iframe[0].contentWindow.document;
+            edit.designMode = 'on';
+            edit.open();
+            edit.write(this.textarea.val());
+            edit.close();
+            if (options.css)  $('head',edit).append($('<style>').attr({type:'text/css'}).text(options.css));
+        },
+        initToolBar: function (options) {
+            var that = this;
+
+            var menuItem = function (className, altText, action) {
+                return $("<li/>").append($('<a href="javascript:void(0);" tabindex="-1"/>').addClass(className).attr("title", altText).click(function () { action.call(that, $(this)); }));
+            };
+
+            function addButtons(arr) {
+                var ul = $("<ul/>").appendTo(that.toolbar);
+                for (var i = 0; i < arr.length; i++) {
+                    var e = arr[i];
+                    if ((typeof (e)).toLowerCase() === "string") {
+                        if (e === "|") {
+                            ul.append($('<li class="separator"/>'));
+                        } else {
+                            var f = (function (e) {
+                                // If button name exists in priv.toolbarButtons then call the "method" defined there, otherwise call the method with the same name
+                                var m = priv.toolbarButtons[e] || e;
+                                if ((typeof (m)).toLowerCase() === "function") {
+                                    return function (btn) { m.call(this, btn); };
+                                } else {
+                                    return function () { this[m](); this.editor.body.focus(); };
+                                }
+                            })(e.toLowerCase());
+                            var t = options.toolbarText[e.toLowerCase()];
+                            ul.append(menuItem(e.toLowerCase(), t || e, f));
+                        }
+                    } else {
+                        ul.append(menuItem(e.css, e.text, e.action));
+                    }
+                }
+            };
+            if (options.toolbar.length !== 0 && priv.isArray(options.toolbar[0])) {
+                for (var i = 0; i < options.toolbar.length; i++) {
+                    addButtons(options.toolbar[i]);
+                }
+            } else {
+                addButtons(options.toolbar);
+            }
+        },
+        attachEditorEvents: function () {
+            var t = this;
+            function showToolbar(e){ t.toolbar.css('opacity',100 * (e.type != 'blur' ? 1 : 0)); }
+            function fnHA(e) {
+                t.updateHtmlArea();
+                showToolbar(e);
+            }
+            function fnTA(e) {
+                t.updateTextArea();
+                showToolbar(e);
+            }
+            
+            this.textarea.click(fnHA).
+                keyup(fnHA).
+                keydown(fnHA).
+                mousedown(fnHA).
+                blur(fnHA);
+
+            $(this.editor).focus(fnTA).
+                click(fnTA).
+                keyup(fnTA).
+                keydown(fnTA).
+                mousedown(fnTA).
+                blur(fnTA);
+        },
+        isArray: function (v) {
+            return v && typeof v === 'object' && typeof v.length === 'number' && typeof v.splice === 'function' && !(v.propertyIsEnumerable('length'));
+        }
+    };
+})(jQuery);
