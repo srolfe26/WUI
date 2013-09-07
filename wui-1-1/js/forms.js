@@ -24,7 +24,7 @@
 	                },
 		forItems:	function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)
-							if(this.items[i].val && typeof this.items[i].val == 'function')
+							if(!(itm instanceof Wui.note))
 								f(this.items[i],i);
 						return true;
 			    	},
@@ -54,7 +54,7 @@
 						var me = this;
 						if(itm.ftype && !(itm instanceof Wui.frmField)){
 							var ft = itm.ftype.split('.');
-							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,{disabled:me.disabled}) );
+							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,((itm.disabled && itm.disabled === true) ? {disabled:me.disabled} : {})) );
 							else										throw('Object type ' +itm.ftype+ ' is not defined.');
 						}else if(itm instanceof Wui.frmField){
 							return $.extend(itm,{disabled:me.disabled});
@@ -81,9 +81,8 @@
 		setData:    function(d){
 	                    this.forItems(function(itm){ itm.val((d) ? d[itm.name] : null); });
 	                },
-		setDisabled:function(val){
-						return this.forItems(function(itm){ itm.setDisabled(val); });
-					},
+		disable:	function(val){ return this.forItems(function(itm){ itm.disable(); }); },
+		enable:		function(val){ return this.forItems(function(itm){ itm.enable(); }); },
 		setField:   function(fieldname, d){
 		                this.forItems(function(itm){ if(itm.name == fieldname) itm.val(d); });
 	            	},
@@ -98,6 +97,13 @@
 	            	}
 	});
 	
+	
+	/* WUI Note */
+	Wui.note = function(args){ $.extend(this,{html:''},args); this.init(); };
+	Wui.note.prototype = $.extend(new Wui.o(),{
+		init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note'); }
+    });
+    
 	
 	/* WUI Label */
 	Wui.label = function(args){ 
@@ -148,16 +154,16 @@
 						return me.el;
                     },
 		onRender:	function(){ if(this.disabled) this.setDisabled(this.disabled); },
-        setDisabled:function(val){
-						this.disabled = val;
-						if(this.el && this.el.addClass){
-							if(val)		this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
-							else		this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
-							return true;
-						}else{
-							return false;
-						}
-					},
+        disable:	function(){
+				        this.disabled = true;
+				        if(this.el && this.el.addClass)
+				        	this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+			        },
+        enable:		function(){
+				        this.disabled = false;
+				        if(this.el && this.el.addClass)
+				        	this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
+			        },
         validate:   function(){
                         var me = this,
                         	errMsg = (me.invalidMsg !== null) ? me.invalidMsg : 

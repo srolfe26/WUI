@@ -71,7 +71,6 @@
 			});
 			ts.test('Test the width by percentage',function(){
 				a.push(new Wui.o({el: $('<div>'), width:'20%'}));
-				console.log(a.items[a.items.length -1].el.outerWidth(),a.el.width() * 0.2);
 				return Math.floor(a.items[a.items.length -1].el.outerWidth()) == Math.floor(a.el.width() * 0.2);
 			});
 			ts.test('Test the height by value',function(){

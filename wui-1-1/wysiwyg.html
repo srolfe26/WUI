@@ -16,11 +16,6 @@
 			// Add a text formItem onto the body
 			a = new Wui.wysiwyg({ label:'WYSIWYG', labelPosition:'left', name:'wysiwyg', attr:{name:'wysiwyg'}, height:150, appendTo:$('body')});
 			a.place();
-			
-			// Listener for a change to the text object
-			$('[name=wysiwyg]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
-				ts.test('Listener on valchange fired',(itm == a));
-			});
 
 			// SHOW ITEM CREATION CODE
 			Wui.docCode();
@@ -32,15 +27,26 @@
 			ts.test("Make sure the value set to 'Set Text'",function(){ return a.val() == 'Set Text'; });
 			ts.test("Blank out field",function(){ return a.val('') == true; });
 			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
-			
-			ts.test("Set Disabled",function(){ a.setDisabled(true); return a.el.hasClass('wui-disabled') == true; });
-			ts.test("Set Enabled",function(){ return a.setDisabled(false); return !a.el.hasClass('wui-diabled'); });
+			ts.test("Test 'valchange' listener",function(){
+				ts.pause();
+				// Listener for a change to the text object
+				$('[name=wysiwyg]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+					ts.resume();
+					ts.test('Listener on \'valchange\' fired and passed correct values',function(){
+						return ( newVal === passedVal && itm === a)
+					});
+				});
+				a.val('Test Listener');
+				$('[name=wysiwyg]').off('valchange');
+				return a.val() == 'Test Listener';
+			});
+			ts.test("Set Disabled",function(){ a.disable(); return a.el.hasClass('wui-disabled') == true; });
+			ts.test("Set Enabled",function(){ a.enable(); return !a.el.hasClass('wui-diabled'); });
 			ts.test("Set Value",function(){ a.val('Test Complete'); return a.val() == 'Test Complete'; });
 		}); // end document.ready		
 	</script>
 </head>
 <body class="wui-docs">
 <h1>WYSIWYG</h1>
-<textarea name="juliette"></textarea>
 </body>
 </html>

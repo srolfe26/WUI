@@ -17,11 +17,6 @@
 			a = new Wui.textarea({ label:'Text Area', blankText:'Type Something', name:'textarea', attr:{name:'textarea'}, height:200});
 			a.addToDOM(a,$('h1'),'after');
 			
-			// Listener for a change to the text object
-			$('[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
-				ts.test('Listener on valchange fired',(itm == a));
-			});
-
 			// SHOW ITEM CREATION CODE
 			Wui.docCode();
 			
@@ -31,14 +26,26 @@
 			ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text') == true; });
 			ts.test("Make sure the value set to 'Set Text'",function(){ return a.val() == 'Set Text'; });
 			ts.test("Change Blank Text",function(){return a.setBlankText('New Blank') == 'New Blank'; });
+			ts.test("Test 'valchange' listener",function(){
+				ts.pause();
+				// Listener for a change to the text object
+				$('[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+					ts.resume();
+					ts.test('Listener on \'valchange\' fired and passed correct values',function(){
+						return ( newVal === passedVal && oldVal === 'Set Text' && itm === a)
+					});
+				});
+				a.val('Test Listener');
+				$('[name=textarea]').off('valchange');
+				return a.val() == 'Test Listener';
+			});
 			ts.test("Blank out field",function(){ return a.val('') == true; });
 			ts.test("Check Blank Text",function(){ return a.field.val() == 'New Blank'; });
 			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
-			
-			ts.test("Set Disabled",function(){ a.setDisabled(true); return a.el.hasClass('wui-disabled') == true; });
+			ts.test("Set Disabled",function(){ a.disable(); return a.el.hasClass('wui-disabled'); });
 			ts.test("Change Blank Text",function(){return a.setBlankText('Test Complete') == 'Test Complete'});
 			ts.test("Check Blank Text",function(){ return a.field.val() == 'Test Complete'; });
-			ts.test("Set Enabled",function(){ return a.setDisabled(false); return !a.el.hasClass('wui-diabled'); });
+			ts.test("Set Enabled",function(){ a.enable(); return !a.el.hasClass('wui-diabled'); });
 			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
 		}); // end document.ready		
 	</script>

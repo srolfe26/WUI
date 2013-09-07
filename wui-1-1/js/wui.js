@@ -99,6 +99,10 @@ var Wui = Wui || {};
 						
 						return true;
 					},
+		append:		function(obj){
+						var me = this, el = me.elAlias || me.el;
+						el.append(obj);
+					},
 		callRender:	function(){
 			        	var me = this;
 			        	
@@ -128,11 +132,11 @@ var Wui = Wui || {};
                         	return m;
                         }
                     },
+        forItems:	function(f){
+						for(var i = this.items.length - 1; i >= 0; i--)	f(this.items[i],i);
+						return true;
+			    	},
 		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
-		append:		function(obj){
-						var me = this, el = me.elAlias || me.el;
-						el.append(obj);
-					},
 		place:      function(after){
                         var me = this;
 						
@@ -168,6 +172,13 @@ var Wui = Wui || {};
 						return Array.prototype.push.apply(me.items,arguments);
                     },
 		remove:     function(){
+                        var me = this, spliceVal = null;
+                        console.log(me.parent);
+                        if(me.parent){
+	                        me.parent.forItems(function(itm,idx){ if(itm === me) spliceVal = idx;});
+	                        if(spliceVal !== null)
+	                        	me.parent.splice(spliceVal,1);
+                        }
                         this.el.remove();
                         delete this;
                     },
