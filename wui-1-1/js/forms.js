@@ -201,7 +201,7 @@
 								this.parent.formChanged = true;
 							
 							// Calls functionally defined valChange() - one will override another
-							this.valChange(this.value);
+							this.valChange(this);
 							
 							// Calls listeners for valchange - in the case of hidden fields calls 'hiddenchange'
 							if(this.el){
@@ -350,7 +350,135 @@
 		valChange:	function(){ this.field.keyup(); }
 	});
 	
+	
+	/* WUI Radio */
+	Wui.radio = function(args){ 
+		$.extend(this,{
+			buttonStyle:false,
+			name:       'wui-radio',
+			options:    [],
+			onChange:   function(){},
+			tplt:		'<li><input type="radio" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
+		},args,{
+			el:$('<div>')
+		});
+		this.init();
+	};
+	Wui.radio.prototype = $.extend(new Wui.frmField(),{
+		init:       function(){
+        				Wui.frmField.prototype.init.call(this);
+        				this.el.addClass('wui-radio');
+						
+        				var me = this,
+							tplEngine = new Wui.tplt({ tplt:this.tplt }),
+							ul = $('<ul>');
+							
+						//make radio group look like buttons
+						if(me.buttonStyle) ul.addClass('button');
+						
+						me.el.append(ul);
+						$.each(me.options,function(i,itm){
+							itm.name = me.name;
+					        itm.id = me.name + '-' + i;
+					        ul.append(
+					        	tplEngine.make(tplEngine.data = itm)
+					        	.children('label').attr({unselectable:'on'}).end()
+					        	.children('input')
+					        	.change(function(){ me.itmChange($(this)); })
+					        	.focus(function(){ul.addClass('has-focus');})
+					        	.blur(function(){ul.removeClass('has-focus');})
+					        	.end()
+					        );
+						});
+                    },
+		itmChange:	function(elem){
+			        	this.value = elem.val();
+					    this.valChange(this);
+			        },
+		onRender:	function(){
+				        var me = this;
+        				me.el.find('input').each(function(){
+					        $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
+				        });
+						Wui.frmField.prototype.onRender.call(this);
+			        },
+		getVal:		function(){ return this.value; },
+		setVal:		function(sv){
+						this.value = sv;
+                        this.el.find("input[value='" + sv + "']").attr('checked',true);
+					}
+	});
+	
+	
+	/* WUI Checkbox */
+	Wui.checkbox = function(args){ 
+		$.extend(this,{
+			name:   'wui-checkbox',
+			tplt:	'<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
+		},args);
+	this.init(); };
+	Wui.checkbox.prototype = $.extend(new Wui.radio(),{
+        calcVal:	function(){
+						var me = this;
+        				me.value = [];
+        				me.el.find('input:checked').each(function(){
+			        		me.value.push($(this).attr('value'));
+			        	});
+						return ((me.value.length > 0) ? (me.value.length > 1) ? me.value : me.value[0] : 0);
+					},
+		init:       function(){
+                        if(this.options.length == 0) this.options.push({val:1,title:''});
+        				
+                        Wui.radio.prototype.init.call(this);
+        				this.el.removeClass('wui-radio').addClass('wui-checkbox');
+						
+        				//steal label if button style
+        				if(this.options.length == 1){
+        					this.el.find('li label').text(this.el.children('label').text());
+        					this.el.children('label').text('');
+        				}
+                    },
+        itmChange:	function(elem){ this.valChange(this); },
+		getVal:		function(){ return this.calcVal(); },
+		setVal:		function(sv){
+						if(me.options.length == 1 && (typeof sv == 'number' || typeof sv == 'string')){
+							me.el.find('input').attr('checked',!!sv).siblings('li').toggleClass('checked',!!sv);
+						}else{
+							// clear out all checkboxes
+							me.el.find('input').attr('checked',false);
+							me.el.find('label').removeClass('checked');
+							
+							// set the ones passed in
+							$.each(sv, function(i,v){
+								me.el.find('input[value=' +v+ ']').attr('checked',true).siblings('li').addClass('checked');
+							});
+						}
+					},
+		validTest:	function(){ if(this.required && this.val() == 0) return false;	return true; }
+	});
+	
 }(jQuery));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
 * jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
