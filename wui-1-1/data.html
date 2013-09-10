@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Object - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+
+	<style type="text/css" class="wui-doc-code">
+		.stage {
+			background:#556577; margin:1em; padding:1em; 
+			width:800px; height:100px; overflow:hidden;
+			position:relative;
+			-moz-box-sizing: border-box !important; -webkit-box-sizing: border-box !important; box-sizing: border-box !important;
+		}
+		.stage:after {position:absolute; right:1em; bottom:1em; color:#fff; content:"Stage";}
+			.stage div {min-width:1em; min-height:1em; margin:0.5em; background:#ff0; display:inline-block;}
+				.stage div div {background:#0cf;}
+			.stage div.spliced {background:#0f0;}
+			.stage div#red {background:#f00;}
+		
+	</style>
+	
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		$(document).ready(function(){
+			a = new Wui.o({
+				el:			$('<div>'),
+				cls:		'stage',
+				prependTo:	$('body')
+			})
+			a.place();
+
+			// SHOW ITEM CREATION CODE
+			Wui.docCode();
+			
+			// TESTING
+			ts = new Wui.ts();
+			
+			ts.test('Push a new WUI object on to the \'stage\'', function(){
+				a.push(new Wui.o({el: $('<div>')}));
+				return a.items.length == 1;
+			});
+			
+			ts.test('Push another WUI object on to the \'stage\'', function(){
+				a.push(new Wui.o({el: $('<div>')}));
+				return a.items.length == 2;
+			});
+			
+			ts.test('Splice an item onto \'stage\'',function(){
+				a.splice(1,0,new Wui.o({el: $('<div>'), cls:'spliced'}));
+				return a.items[1].el.hasClass('spliced');
+			});
+			ts.test('Splice an object onto the end',function(){
+				var len = a.items.length;
+				a.splice(a.items.length - 1,0,new Wui.o({el: $('<div>'), cls:'spliced'}));
+				return a.items.length > len;
+			});
+			ts.test('Remove an item by splicing it out',function(){
+				var len = a.items.length;
+				a.splice(0,1);
+				return a.items.length < len;
+			});
+			ts.test('Test the height by percentage',function(){
+				a.push(new Wui.o({el: $('<div>'), height:'75%'}));
+				return Math.floor(a.items[a.items.length -1].el.height()) == Math.floor(a.el.height() * 0.75);
+			});
+			ts.test('Test the width by percentage',function(){
+				a.push(new Wui.o({el: $('<div>'), width:'20%'}));
+				return Math.floor(a.items[a.items.length -1].el.outerWidth()) == Math.floor(a.el.width() * 0.2);
+			});
+			ts.test('Test the height by value',function(){
+				a.push(new Wui.o({el: $('<div>'), height:30}));
+				return Math.round(a.items[a.items.length -1].el.height()) == 30;
+			});
+			ts.test('Test the width by value',function(){
+				a.push(new Wui.o({el: $('<div>'), width:27}));
+				return Math.round(a.items[a.items.length -1].el.width()) == 27;
+			});
+			ts.test('Test that attributes are being added',function(){
+				a.push(new Wui.o({el: $('<div>'), attr:{id:'red'}}));
+				return $('#red').length == 1;
+			});
+			ts.test('Remove an item calling its own remove function',function(){
+				var len = a.items.length;
+				a.items[2].remove();
+				return a.items.length < len;
+			});
+			ts.test('Nesting WUI Objects',function(){
+				var len = a.items.length;
+				var nest = new Wui.o({el: $('<div>')});
+				a.push(nest);
+				nest.push(new Wui.o({el: $('<div>')}));
+				return (a.items.length == len + 1 && nest.items.length == 1);
+			});
+			ts.test('Object Faded Out',function(){
+				ts.pause();
+				var houdini = new Wui.o({el: $('<div>')});
+				a.push(houdini);
+				houdini.hide(2000,function(){ 
+					ts.resume();
+					ts.test('Did the object fade in?',function(){
+						ts.pause();
+						
+						var start = new Date();
+						ts.test('Did the testing suite wait for the animation?',function(){ var end = new Date(); return end - start >= 1000; });
+						
+						houdini.show(1000,function(){ ts.resume(); });
+						return true;
+					});
+				});
+				return true;
+			});
+			ts.test('Pushed item gets parent assigned',function(){
+				var p = null;
+				a.push(p = new Wui.o({el: $('<div>')}));
+				return p.parent == a;
+			});
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+<h1>WUI Object</h1>
+</body>
+</html>

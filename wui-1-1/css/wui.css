@@ -32,7 +32,7 @@
 /* radio/checkbox */
 .wui-fe input[type=radio], .wui-fe input[type=checkbox] {width:auto;}
 .wui-radio ul, .wui-checkbox ul {list-style:none; display:block; margin:0; padding:0;}
-.wui-radio input, .wui-checkbox input, .wui-radio ul label, .wui-checkbox ul label {width:auto; display:inline-block; font-weight:normal; text-transform:none; margin:0; padding:0;}
+.wui-radio input, .wui-checkbox input, .wui-radio ul label, .wui-checkbox ul label {width:auto; display:inline-block; font-weight:normal; text-transform:none; margin:0; padding:0.2em 0.5em;}
 
 .wui-radio ul.button, .wui-checkbox ul.button {margin-top:0.5em; -moz-user-select:none; -webkit-user-select:none;}
 .button li {overflow:hidden; display:inline-block;}

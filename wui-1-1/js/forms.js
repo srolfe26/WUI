@@ -22,7 +22,7 @@
 	                    for(var e in this.errs) msg += this.errs[e] + '<br/>';
 	                    Wui.errRpt(msg,'Form Errors')
 	                },
-		forItems:	function(f){
+		each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)
 							if(!(itm instanceof Wui.note))
 								f(this.items[i],i);
@@ -34,17 +34,17 @@
 	                },
 	    getField:   function(fieldname){
 	                    var retval = null;
-	                    this.forItems(function(itm){ if(itm.name == fieldname) retval = itm.val(); });
+	                    this.each(function(itm){ if(itm.name == fieldname) retval = itm.val(); });
 	                    return retval;
 	                },
 	    getFrmItm:	function(fieldname){
 	                    var retItm = undefined;
-						this.forItems(function(itm,idx){ if(itm.name == fieldname) retItm = itm; });
+						this.each(function(itm,idx){ if(itm.name == fieldname) retItm = itm; });
 	                    return retItm;
 					},
 		getRawData: function(){
 	                    var ret = {};
-	                    this.forItems(function(itm){ ret[itm.name] = itm.val(); });
+	                    this.each(function(itm){ ret[itm.name] = itm.val(); });
 	                    return ret;
 	                },
 	    init:		function(){
@@ -75,22 +75,22 @@
 					},
 		remFrmItm:	function(fieldname){
 	                    var me = this;
-						this.forItems(function(itm,idx){ if(itm.name == fieldname) Wui.o.prototype.splice.call(me,idx,1); });
+						this.each(function(itm,idx){ if(itm.name == fieldname) Wui.o.prototype.splice.call(me,idx,1); });
 	                    return true;
 					},
 		setData:    function(d){
-	                    this.forItems(function(itm){ itm.val((d) ? d[itm.name] : null); });
+	                    this.each(function(itm){ itm.val((d) ? d[itm.name] : null); });
 	                },
-		disable:	function(val){ return this.forItems(function(itm){ itm.disable(); }); },
-		enable:		function(val){ return this.forItems(function(itm){ itm.enable(); }); },
+		disable:	function(val){ return this.each(function(itm){ itm.disable(); }); },
+		enable:		function(val){ return this.each(function(itm){ itm.enable(); }); },
 		setField:   function(fieldname, d){
-		                this.forItems(function(itm){ if(itm.name == fieldname) itm.val(d); });
+		                this.each(function(itm){ if(itm.name == fieldname) itm.val(d); });
 	            	},
 		throwErr:   function(m){this.errs.push(m); return false;},
 		validate:   function(){
 		                var me = this;
 						me.errs = [];
-		                me.forItems(function(itm){ 
+		                me.each(function(itm){ 
 		                	if(itm.el && itm.el.toggleClass) { itm.el.toggleClass(me.errCls,!itm.validate()); }
 		                });
 		                return (me.errs.length == 0);

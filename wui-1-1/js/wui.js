@@ -132,7 +132,7 @@ var Wui = Wui || {};
                         	return m;
                         }
                     },
-        forItems:	function(f){
+        each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)	f(this.items[i],i);
 						return true;
 			    	},
@@ -175,7 +175,7 @@ var Wui = Wui || {};
                         var me = this, spliceVal = null;
                         console.log(me.parent);
                         if(me.parent){
-	                        me.parent.forItems(function(itm,idx){ if(itm === me) spliceVal = idx;});
+	                        me.parent.each(function(itm,idx){ if(itm === me) spliceVal = idx;});
 	                        if(spliceVal !== null)
 	                        	me.parent.splice(spliceVal,1);
                         }
@@ -216,6 +216,8 @@ var Wui = Wui || {};
                     }
 	};
 	
+	
+	/****************** WUI Viewport *****************/
 	Wui.viewport = function(args){
 		var me = this,
 			params = $.extend({
@@ -291,7 +293,69 @@ var Wui = Wui || {};
 	}
 	Wui.viewport.prototype = new Wui.o();
 
+	
+	/****************** WUI Data Object *****************/
+	Wui.data = function(args){
+		$.extend(this,{
+			data:			[],
+			params:			{},
+			url:	  		null,
+			waiting: 		false,
+			ajaxConfig:		{},
+			total:			0
+		},args);
+	}
+	Wui.data.prototype = {
+		dataContainer:	null,
+		totalContainer:	null,
+		each:			function(f){
+							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
+							return true;
+				    	},
+		loadData:		function(){
+							var me = this,
+								config = $.extend({
+									data:       me.params,
+									dataType:	'json',
+									success:	me.onSuccess,
+									error:		me.onFailure
+								},me.ajaxConfig);
+							
+							if(!me.waiting){
+								me.waiting = true;
+								me.beforeLoD();
+								$.ajax(me.url,config);
+							}
+						},
+		setData:		function(d){
+							this.beforeSet();
+							this.data = this.processData(d);
+							this.afterSet();
+						},
+		beforeLoad:		function(){},
+		afterSet:		function(){},
+		beforeSet:		function(){},
+		success:		function(r){
+							var me = this, 
+								response	= (me.dataContainer && r[me.dataContainer]) ? r[me.dataContainer] : r,
+								total 		= (me.totalContainer && r[me.totalContainer]) ? r[me.totalContainer] : response.length;
+							
+							me.waiting = false;
+							me.total = total;
+							me.onSuccess(r);
+							me.setData(response);
+						},
+		onSuccess:		function(){},
+		onFailure:		function(){},
+		failure:		function(e){
+							this.waiting = false;
+							this.onFailure(e);
+						},
+		processData:	function(response){ return response; }
+	};
 
+
+	/****************** WUI Template Engine *****************/
 	Wui.tplt = function(args){ $.extend(this,args); }
 	Wui.tplt.prototype = {
 		// tplt:	null, * required
@@ -432,6 +496,7 @@ var Wui = Wui || {};
 	};
 	
 	
+	/****************** WUI Data List Control *****************/
 	Wui.dataList = function(args){
 		$.extend(this,{
 			el:$('<div>'),
@@ -498,6 +563,7 @@ var Wui = Wui || {};
 	});
 	
 	
+	/****************** WUI Button *****************/
 	Wui.button = function(args){
 	    $.extend(this, {
 	    	el:			$('<div>').attr({unselectable:'on'}),
@@ -533,6 +599,7 @@ var Wui = Wui || {};
 	});
 	
 	
+	/****************** WUI Pane/Panel *****************/
 	Wui.pane = function(args){ 
 		$.extend(this,{
 			bbar:       [],
@@ -584,6 +651,8 @@ var Wui = Wui || {};
 		setTitle:   function(t){ this.header.el.children('h1:first').text(t); }
 	});
 	
+	
+	/****************** WUI Window *****************/
 	Wui.window = function(args){ 
 		$.extend(this,{
 			bbar:       [],
@@ -718,19 +787,6 @@ var Wui = Wui || {};
 								Msg.close();
 							},
 				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
-			});
-	    return true;
-	}
-	
-	
-	Wui.HelpWindow = function(msgTitle, src, width, height, callback){
-	    var cntnt = [new Wui.o({el: $('<iframe>').attr({src:src}).css({height:'100%',width:'100%', border:'none'})})],
-			newErr  = new Wui.window({
-				title:      msgTitle || 'Message', 
-				items:      cntnt, 
-				width:      width || 600, 
-				height:     height || 400,
-				onWinClose: callback || function(){}
 			});
 	    return true;
 	}
