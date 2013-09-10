@@ -5,8 +5,7 @@
 			disabled:	false,
 			errCls:		'wui-form-err',
 			labelPos:	'top'
-		}, args);
-		$.extend(this, {
+		}, args, {
 	    	dataValid:  null,
 	    	formChanged:false,
 			el:			$('<div>'),

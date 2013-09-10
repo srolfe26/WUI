@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>State Machine - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+	
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	<script type="text/javascript" src="js/state.js"></script>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		$(document).ready(function(){
+			ts = new Wui.ts();
+			
+			sm = new Wui.stateMachine();
+			// clear out any existing hashes
+			sm.clearState();
+			
+			ts.test("test setup",function(){
+				var newState = {AdminView:{mode:'edit',wid:'11557'}};
+				ts.pause();
+				
+				sm.turnOn(function(state){
+					ts.resume();
+					ts.test("Set state with Object",function(){
+						// newState = {AdminView:{mode:'edit',wid:'11557'}};
+						sm.turnOff();
+						return sm.stringify(state) === sm.stringify(newState);
+					});
+				});
+				sm.setState(newState);
+				return true;
+			});
+			
+			ts.test("test setup",function(){
+				var newState = 'AdminView?mode=edit&wid=11557';
+				ts.pause();
+				
+				sm.turnOn(function(state){
+					ts.resume();
+					ts.test("Set state with String",function(){
+						// newState = 'AdminView?mode=edit&wid=11557';
+						sm.turnOff();
+						return sm.stringify(state) === newState;
+					});
+				});
+				sm.setState(newState);
+				return true;
+			});
+			
+			ts.test("test setup",function(){
+				ts.pause();
+				
+				sm.turnOn(function(state){
+					ts.resume();
+					ts.test("Clear State",function(){
+						sm.turnOff();
+						return sm.stringify(state) === '';
+					});
+				});
+				sm.clearState();
+				return true;
+			});
+			
+			/*sm.setState('adminView?lid=200335/anotherView?param1=1&param2=2');
+			sm.setState('adminView?lid=200335/anotherView?param1=1');
+			sm.setState('adminView?lid=200335/');
+			sm.setState('adminView?lid=200335/anotherView?param1=305');*/
+			
+			
+			/* pushState and getState
+			(function(){ 
+				var urlParams = {steve:1,jay:2};
+				ts.pause();
+				
+				 $(window).on('hashchange', function(){
+					ts.resume();
+					ts.test("Data on address bar matches what was set",function(){
+						var paramsOkay = true;
+						
+						paramsOkay = (paramsOkay && urlParams.steve === $.bbq.getState('steve',true));
+						paramsOkay = (paramsOkay && urlParams.jay === $.bbq.getState('jay',true));
+						
+						$(window).off('hashchange');
+						$.bbq.removeState();
+						
+						return paramsOkay;
+					});
+				 });
+				
+				$.bbq.pushState(urlParams);
+			})();*/
+			
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+<h1>State Machine</h1>
+</body>
+</html>
