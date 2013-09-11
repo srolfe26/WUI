@@ -63,9 +63,15 @@
 							
 							return state;
 						},
+		getVal:			function(view,key){
+							var state = this.getState(),
+								val = (state[view] && state[view][key]) ? state[view][key] : undefined;
+							return val;
+						},
 		clearState:		function(){ this.setState(); },
-		turnOn:			function(fn){ 
+		setChangeAction:function(fn){ 
 							var me = this;
+							me.turnOff();
 							$(window).on('hashchange', function(){
 								fn.call(me,me.getState());
 							});

@@ -12,89 +12,111 @@
 	<script type="text/javascript" src="js/grid.js"></script>
 	<script type="text/javascript" src="js/state.js"></script>
 	
+	<style type="text/css" class="wui-doc-code">
+		.state-man {width:224px; height:257px; background:url(img/state-man.gif) no-repeat 0 0; margin:0 auto;}
+		.state-man.one {background-position:0 0;}
+		.state-man.two {background-position:0 -257px;}
+		.state-man.three {background-position:0 -514px;}
+		.state-man.four {background-position:0 -771px;}
+	</style>
+	
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
+			//create state machine
+			sm = new Wui.stateMachine();
+		});
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+			// SHOW ITEM CREATION CODE
+			Wui.docCode();
+			
+			// TESTING SUITE
 			ts = new Wui.ts();
 			
-			sm = new Wui.stateMachine();
-			// clear out any existing hashes
+			// clear out hashes
 			sm.clearState();
 			
 			ts.test("test setup",function(){
 				var newState = {AdminView:{mode:'edit',wid:'11557'}};
 				ts.pause();
 				
-				sm.turnOn(function(state){
+				sm.setChangeAction(function(state){
 					ts.resume();
 					ts.test("Set state with Object",function(){
 						// newState = {AdminView:{mode:'edit',wid:'11557'}};
-						sm.turnOff();
 						return sm.stringify(state) === sm.stringify(newState);
 					});
 				});
 				sm.setState(newState);
 				return true;
-			});
+			}, true);
 			
 			ts.test("test setup",function(){
 				var newState = 'AdminView?mode=edit&wid=11557';
 				ts.pause();
 				
-				sm.turnOn(function(state){
+				sm.setChangeAction(function(state){
 					ts.resume();
 					ts.test("Set state with String",function(){
 						// newState = 'AdminView?mode=edit&wid=11557';
-						sm.turnOff();
 						return sm.stringify(state) === newState;
 					});
 				});
 				sm.setState(newState);
 				return true;
-			});
+			}, true);
 			
 			ts.test("test setup",function(){
 				ts.pause();
 				
-				sm.turnOn(function(state){
+				sm.setChangeAction(function(state){
 					ts.resume();
-					ts.test("Clear State",function(){
-						sm.turnOff();
-						return sm.stringify(state) === '';
-					});
+					ts.finalTests();
 				});
 				sm.clearState();
 				return true;
-			});
+			}, true);
 			
-			/*sm.setState('adminView?lid=200335/anotherView?param1=1&param2=2');
-			sm.setState('adminView?lid=200335/anotherView?param1=1');
-			sm.setState('adminView?lid=200335/');
-			sm.setState('adminView?lid=200335/anotherView?param1=305');*/
-			
-			
-			/* pushState and getState
-			(function(){ 
-				var urlParams = {steve:1,jay:2};
-				ts.pause();
+			ts.finalTests = function(){
+				ts.test("Clear State",function(){
+					return sm.stringify(sm.getState()) === '';
+				});
 				
-				 $(window).on('hashchange', function(){
-					ts.resume();
-					ts.test("Data on address bar matches what was set",function(){
-						var paramsOkay = true;
-						
-						paramsOkay = (paramsOkay && urlParams.steve === $.bbq.getState('steve',true));
-						paramsOkay = (paramsOkay && urlParams.jay === $.bbq.getState('jay',true));
-						
-						$(window).off('hashchange');
-						$.bbq.removeState();
-						
-						return paramsOkay;
+				ts.test("History length = 2",function(){
+					// even though state was set three times, there are only 2 unique 
+					// states, so the browser history two records back should be blank
+					sm.turnOff();
+					history.go(-2);
+					return sm.stringify(sm.getState()) === '';
+				});
+				
+				ts.test("Show Animation",function(){
+					$('h1').after($('<div>').addClass('state-man'));
+					
+					sm.setChangeAction(function(state){
+						ts.resume();
+						$('.state-man').removeClass().addClass('state-man ' + sm.getVal('main','pic'));
 					});
-				 });
-				
-				$.bbq.pushState(urlParams);
-			})();*/
-			
+					
+					ts.pause();
+					sm.setState('main?pic=one');
+					
+					ts.pause();
+					sm.setState('main?pic=two');
+					
+					ts.pause();
+					sm.setState('main?pic=three');
+					
+					ts.pause();
+					sm.setState('main?pic=four');
+					
+					return true;
+				});
+			};
 		}); // end document.ready		
 	</script>
 </head>

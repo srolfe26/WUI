@@ -432,11 +432,11 @@ var Wui = Wui || {};
 	};
 	
 	
-	Wui.assert = function(descrip,test,count){
+	Wui.assert = function(descrip,test,count,hideFn){
 		var startTime	= new Date(),
 			passed		= (typeof test == 'function') ? test() : test,
 			fnString	= (typeof test == 'function') ? test.toString() : '',
-			stringVal	= (fnString.length) ? '<pre>' + fnString.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\t/g,'    ')+ '</pre>' : '',
+			stringVal	= (fnString.length && hideFn !== true) ? '<pre>' + fnString.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\t/g,'    ')+ '</pre>' : '',
 			endTime		= new Date(),
 			testNum		= (count) ? count : '-',
 			testData	= {string_val:stringVal, passed:passed, name:descrip, test_num:testNum, time:endTime - startTime},
@@ -477,8 +477,8 @@ var Wui = Wui || {};
 			count:	0,
 			paused: false,
 			queue:	[],
-			test:	function(desc,fn){
-						me.queue.push(function(){ me.count++; Wui.assert(desc, fn, me.count); });
+			test:	function(desc,fn,supressFunction){
+						me.queue.push(function(){ me.count++; Wui.assert(desc, fn, me.count, supressFunction); });
 						me.runTest();
 					},
 			pause:	function(){ me.paused = true; },
