@@ -17,56 +17,61 @@
 									window.location = preHash;
 								}
 						},
-		stringify:		function(stateObj){
-							var stateStr	= '',
-								locCount	= 0;
+		stringify:		function(stateArray){
+							var stateStr	= '';
 							
-							for(var loc in stateObj){
+							for(var i in stateArray){
 								// Keep keys in alphabetical order so that comparing states works
 								var keys = [];
-								for(var key in stateObj[loc])
-									keys.push(key);
+								for(var key in stateArray[i].params)	keys.push(key);
 								keys.sort();
+								// State the location
+								stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
 								
-								stateStr += (locCount > 0) ? '/' + loc : loc;
-								locCount++;
-								
-								for(var i = 0; i < keys.length; i++)
-									stateStr += ((i > 0) ? '&' : '?') + keys[i] + '=' + stateObj[loc][keys[i]];
-							};
+								for(var j = 0; j < keys.length; j++)
+									stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
+							}
 							
 							return stateStr;
 						},
 		getState:		function(){
-							var state = {},
-								windowHash = window.location.hash.replace('#','').split('/');
-								
-							for(var itm in windowHash){
-								var navArea = windowHash[itm].split('?'),
-									navName = navArea[0];
-									
-								if(navArea[1]){
-									var navKeys = navArea[1].split('&');
-									
-									if(navName.length > 0){
-										state[navName] = {};
-										
-										for(var key in navKeys){
-											var keyVal = navKeys[key].split('=');
-											state[navName][keyVal[0]] = keyVal[1];
-										}
-									}
-								}else{
-									state[navName] = {};
-								}
-							}
+							var state = [];
+							
+							window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
+								var itm = {};
+								viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
+									itm[key] = val;
+									return '';
+								});
+								state.push({view:viewarea, params:itm});
+							});
 							
 							return state;
 						},
-		getVal:			function(view,key){
-							var state = this.getState(),
-								val = (state[view] && state[view][key]) ? state[view][key] : undefined;
+		getParam:		function(target,key){
+							var state	= this.getState(),
+								val		= undefined;
+								
+							for(var i in state)
+								if(state[i].view === target && state[i].params[key])	return state[i].params[key];
+
 							return val;
+						},
+		changeView:		function(oldView,newView){
+							/** Changes a view in place leaving the parameters */
+							var state = this.getState();
+							for(var i in state)
+								if(state[i].view === oldView)
+									state[i].view = newView;
+							this.setState(state);
+						},
+		getViews:		function(){
+							/** Lists all of the views */
+							var state = this.getState(),
+								retArr = [];
+								
+							for(var i in state)	retArr.push(state[i].view);
+							return retArr;
 						},
 		clearState:		function(){ this.setState(); },
 		setChangeAction:function(fn){ 

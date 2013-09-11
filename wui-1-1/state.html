@@ -41,7 +41,7 @@
 			sm.clearState();
 			
 			ts.test("test setup",function(){
-				var newState = {AdminView:{mode:'edit',wid:'11557'}};
+				var newState = [{view:'AdminView', params:{mode:'edit',wid:'11557'}}];
 				ts.pause();
 				
 				sm.setChangeAction(function(state){
@@ -99,7 +99,7 @@
 					
 					sm.setChangeAction(function(state){
 						ts.resume();
-						$('.state-man').removeClass().addClass('state-man ' + sm.getVal('main','pic'));
+						$('.state-man').removeClass().addClass('state-man ' + sm.getParam('main','pic'));
 					});
 					
 					ts.pause();
