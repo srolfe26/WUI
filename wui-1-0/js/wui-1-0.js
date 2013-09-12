@@ -462,12 +462,14 @@ var Wui = Wui || {};
 		$.extend(this,{
 			bbar:       [],
 			border:		false,
+			disabled:	false,
 			height:		400,
 			isModal:	false,
 			onWinClose:	function(){},
 			onWinOpen:	function(){},
 			tbar:       [], 
 			title:		'Window',
+			maskHTML:	'Loading...',
 			width:		600
 		},args);  
 		this.init(); 
@@ -480,6 +482,31 @@ var Wui = Wui || {};
 							me.remove();
 						}
 					},
+		disable:	function(){
+						this.disabled = true;
+						// cover window contents
+						this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+						// disable footer objects
+						for(var i in this.footer.items)
+							if(this.footer.items[i].setDisabled) this.footer.items[i].setDisabled(true);
+						// disable header objects except the close button	
+						for(var i in this.header.items)
+							if(this.header.items[i].setDisabled && this.header.items[i] !== this.winClose)
+								this.header.items[i].setDisabled(true);
+					},
+		enable:		function(){
+						var me = this, mask = me.mask;
+						me.disabled = false;
+						me.mask.fadeOut(500,function(){ 
+							// remove mask and enable header and footer buttons (all of them)
+							me.mask.remove();
+							me.mask = undefined;
+							for(var i in me.footer.items)
+								if(me.footer.items[i].setDisabled) me.footer.items[i].setDisabled(false);
+							for(var i in me.header.items)
+								if(me.header.items[i].setDisabled) me.header.items[i].setDisabled(false);
+						});
+					},
 		init:       function(){
             	        var me = this;
 	    				me.appendTo = $('body');
@@ -491,7 +518,7 @@ var Wui = Wui || {};
             	        }
             	        
             	        // Add close buttons where appropriate
-            	        me.tbar.push(new Wui.button({click:function(){me.close()}, text:'X'}));
+            	        me.tbar.push(me.winClose = new Wui.button({click:function(){me.close()}, text:'X'}));
             	        if(me.bbar.length == 0) me.bbar = [new Wui.button({click:function(){me.close()}, text:'Close'})];
             	        
             	        // Calls the parent init function
@@ -517,6 +544,9 @@ var Wui = Wui || {};
                         // Make the overlay the el so that when the window is closed it gets taken with it
                         if(me.isModal)	me.el = me.modalEl;
                         
+						// Disable if necessary
+						if(me.disabled === true)	me.disable();
+						
                         this.onWinOpen(me);
 						me.windowEl.trigger($.Event('open'),[me]);
                         

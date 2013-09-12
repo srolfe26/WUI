@@ -32,6 +32,7 @@
     
 /******************   MODAL WINDOW STYLES   ********************/
 .wui-overlay {position: fixed; top:0; left:0; width:100% !important; height:100% !important; background:rgba(100,100,100,0.7);}
+.wui-mask {position:absolute; top:0; left:0; background:rgba(100,100,100,0.25); width:100%; text-align:center; padding-top: 20%; color:#AAA; font-weight:bold; font-size:1.25em;}
 .wui-window {margin:0 auto; box-shadow: 0 0 15px black; position:absolute;}
 .wui-pane.wui-window {width:auto;}
     .wui-window > .wui-pane-header {cursor:move;}

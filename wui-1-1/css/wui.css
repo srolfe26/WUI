@@ -5,6 +5,8 @@
     box-sizing:         border-box !important;
 }
 
+/**********************************************   WINDOW STYLES   **********************************************/
+.wui-mask {position:absolute; top:0; left:0; background:rgba(100,100,100,0.25); width:100%; text-align:center; padding-top: 20%; color:#AAA; font-weight:bold; font-size:1.25em;}
 
 /***********************************************   FORM STYLES   ***********************************************/
 /* labels */
