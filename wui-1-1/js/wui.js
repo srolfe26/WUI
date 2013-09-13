@@ -25,7 +25,7 @@
 /** Make sure the WUI is defined */
 var Wui = Wui || {};
 
-(function($) {
+(function($,window) {
 	/** AJAX error reporting and caching */
 	$.ajaxSetup({ 
 		cache:	false,
@@ -298,6 +298,7 @@ var Wui = Wui || {};
 	Wui.data = function(args){
 		$.extend(this,{
 			data:			[],
+			name:			null,
 			params:			{},
 			url:	  		null,
 			waiting: 		false,
@@ -317,20 +318,23 @@ var Wui = Wui || {};
 								config = $.extend({
 									data:       me.params,
 									dataType:	'json',
-									success:	me.onSuccess,
-									error:		me.onFailure
+									success:	function(r){ me.success.call(me,r); },
+									error:		function(e){ me.success.call(me,e); },
 								},me.ajaxConfig);
 							
 							if(!me.waiting){
 								me.waiting = true;
-								me.beforeLoD();
+								me.beforeLoad();
 								$.ajax(me.url,config);
 							}
 						},
-		setData:		function(d){
-							this.beforeSet();
-							this.data = this.processData(d);
-							this.afterSet();
+		setData:		function(d,t){
+							var me = this;
+							me.beforeSet();
+							me.data = me.processData(d);
+							me.total = (t !== undefined) ? t : me.data.length;
+							$(window).trigger($.Event('dataset'),[(me.name || 'wui-data'), me]);
+							me.afterSet();
 						},
 		beforeLoad:		function(){},
 		afterSet:		function(){},
@@ -339,11 +343,9 @@ var Wui = Wui || {};
 							var me = this, 
 								response	= (me.dataContainer && r[me.dataContainer]) ? r[me.dataContainer] : r,
 								total 		= (me.totalContainer && r[me.totalContainer]) ? r[me.totalContainer] : response.length;
-							
 							me.waiting = false;
-							me.total = total;
 							me.onSuccess(r);
-							me.setData(response);
+							me.setData(response,total);
 						},
 		onSuccess:		function(){},
 		onFailure:		function(){},
@@ -418,6 +420,7 @@ var Wui = Wui || {};
 						preVisible:	false,
 						text:		'Show Source',
 						appendTo:	$('body'),
+						cls:		'wui-docs',
 						click:		function(){
 										if(this.preVisible){ preObj.fadeOut(1000); this.setText('Show Source'); }
 										else{ preObj.fadeIn(1000); this.setText('Hide Source'); }
@@ -579,7 +582,7 @@ var Wui = Wui || {};
 		click:      function(){},
 		init:       function(){ 
 	                    var me = this;
-						if(me.disabled)	me.el.addClass('disabled').attr('disabled',true);
+						if(me.disabled)	me.disable();
 	                    
 	                    me.el.click(function(e){
 	                    	if(!me.disabled) me.click(arguments);
@@ -588,13 +591,14 @@ var Wui = Wui || {};
 	                    .html(me.text)
 	                    .attr({title:me.toolTip});
 	                },
-		setDisabled:function(bool){
-				        this.disabled = bool;
-				        this.el.toggleClass('disabled',this.disabled);
-				        
-				        if(this.disabled == true)	this.el.attr('disabled',true);
-				        else						this.el.removeAttr('disabled');
-			        },
+		disable:	function(){
+						this.disabled = true;
+						this.el.toggleClass('disabled',this.disabled).attr('disabled',true);
+					},
+		enable:		function(){
+						this.disabled = false;
+						this.el.toggleClass('disabled',this.disabled).removeAttr('disabled');
+					},
 		setText:    function(txt){ return this.el.html(txt); },
 	});
 	
@@ -606,12 +610,33 @@ var Wui = Wui || {};
 			border:		true,
 			borderStyle:{borderWidth:6},
 			tbar:       [],
+			disabled:	false,
+			maskHTML:	'Loading...',
 			title:		null
 		},args); 
 		this.init();
 	}
 	Wui.pane.prototype = $.extend(new Wui.o(),{
-        init:		function(wuiPane){
+        disable:	function(){
+						this.disabled = true;
+						// cover pane contents
+						this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+						// disable header & footer objects
+						this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
+						this.header.each(function(itm){ if(itm.disable) itm.disable(); });
+					},
+		enable:		function(){
+						var me = this, mask = me.mask;
+						me.disabled = false;
+						me.mask.fadeOut(500,function(){ 
+							// remove mask and enable header and footer buttons (all of them)
+							me.mask.remove();
+							me.mask = undefined;
+							me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
+							me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+						});
+					},
+		init:		function(wuiPane){
 						var me = wuiPane || this;
 						me.el		 = $('<div>').addClass('wui-pane').append(
 										   $('<div>').addClass('wui-pane-wrap').append(
@@ -656,14 +681,12 @@ var Wui = Wui || {};
 		$.extend(this,{
 			bbar:       [],
 			border:		false,
-			disabled:	false,
 			height:		400,
 			isModal:	false,
 			onWinClose:	function(){},
 			onWinOpen:	function(){},
 			tbar:       [], 
 			title:		'Window',
-			maskHTML:	'Loading...',
 			width:		600
 		},args);  
 		this.init(); 
@@ -677,29 +700,8 @@ var Wui = Wui || {};
 						}
 					},
 		disable:	function(){
-						this.disabled = true;
-						// cover window contents
-						this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
-						// disable footer objects
-						for(var i in this.footer.items)
-							if(this.footer.items[i].setDisabled) this.footer.items[i].setDisabled(true);
-						// disable header objects except the close button	
-						for(var i in this.header.items)
-							if(this.header.items[i].setDisabled && this.header.items[i] !== this.winClose)
-								this.header.items[i].setDisabled(true);
-					},
-		enable:		function(){
-						var me = this, mask = me.mask;
-						me.disabled = false;
-						me.mask.fadeOut(500,function(){ 
-							// remove mask and enable header and footer buttons (all of them)
-							me.mask.remove();
-							me.mask = undefined;
-							for(var i in me.footer.items)
-								if(me.footer.items[i].setDisabled) me.footer.items[i].setDisabled(false);
-							for(var i in me.header.items)
-								if(me.header.items[i].setDisabled) me.header.items[i].setDisabled(false);
-						});
+						Wui.pane.prototype.disable.call(this);
+						this.winClose.enable(); // Enable the close button for the window - esp. important if its modal
 					},
 		init:       function(){
             	        var me = this;
@@ -816,4 +818,4 @@ var Wui = Wui || {};
 			});
 	    return true;
 	}
-}(jQuery));
+}(jQuery,this));
