@@ -102,9 +102,9 @@ var Wui = Wui || {};
 							action 	= (obj.appendTo !== undefined) ? 'append' : (obj.prependTo !== undefined) ? 'prepend' : (act !== undefined && target[act]) ? act : 'append';
 						
 						// Try appending with WUI modifiers, else just append in good ol' jQuery fashion
-						try{target[action](obj.el)}
+						try{$(target)[action](obj.el)}
 						catch(e){
-							try{target[action](obj)}
+							try{$(target)[action](obj)}
 							catch(e){}
 						}
 						
@@ -1047,9 +1047,9 @@ var Wui = Wui || {};
 								me.el.find('label').removeClass('checked');
 								
 								// set the ones passed in
-								$.each(setVal, function(i,v){
-									me.el.find('input[value=' +v+ ']').attr('checked',true).siblings('li').addClass('checked');
-								});
+								for(var i in setVal){
+									me.el.find('input[value=' +setVal[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
+								}
 							}
                         	me.onChange(me.calcVal());
                         }

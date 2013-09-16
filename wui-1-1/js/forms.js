@@ -448,9 +448,7 @@
 							me.el.find('label').removeClass('checked');
 							
 							// set the ones passed in
-							$.each(sv, function(i,v){
-								me.el.find('input[value=' +v+ ']').attr('checked',true).siblings('li').addClass('checked');
-							});
+							for(var i in setVal) me.el.find('input[value=' +setVal[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
 						}
 					},
 		validTest:	function(){ if(this.required && this.val() == 0) return false;	return true; }
