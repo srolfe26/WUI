@@ -14,7 +14,7 @@
 	    
 	    this.init();
 	};
-	Wui.form.prototype = $.extend(new Wui.o(),{
+	Wui.form.prototype = $.extend(new Wui.O(),{
 		clearData:  function(){ this.setData(); },
 		dispErrs:   function(){
 	                    var msg = '';
@@ -65,16 +65,16 @@
 						var me = this;
 						if(me.items === undefined) me.items = [];
 						$.each(me.items, function(i,itm){ me.items[i] = me.normFrmItem(itm); });
-						Wui.o.prototype.place.call(this);
+						Wui.O.prototype.place.call(this);
 		                this.afterCreate();
                     },
 		push:		function(){
 						for(var i in arguments) arguments[i] = this.normFrmItem(arguments[i]);
-						Wui.o.prototype.push.apply(this,arguments);
+						Wui.O.prototype.push.apply(this,arguments);
 					},
 		remFrmItm:	function(fieldname){
 	                    var me = this;
-						this.each(function(itm,idx){ if(itm.name == fieldname) Wui.o.prototype.splice.call(me,idx,1); });
+						this.each(function(itm,idx){ if(itm.name == fieldname) Wui.O.prototype.splice.call(me,idx,1); });
 	                    return true;
 					},
 		setData:    function(d){
@@ -99,7 +99,7 @@
 	
 	/* WUI Note */
 	Wui.note = function(args){ $.extend(this,{html:''},args); this.init(); };
-	Wui.note.prototype = $.extend(new Wui.o(),{
+	Wui.note.prototype = $.extend(new Wui.O(),{
 		init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note'); }
     });
     
@@ -113,7 +113,7 @@
 		
 		this.init(); 
 	};
-	Wui.label.prototype = $.extend(new Wui.o(),{
+	Wui.label.prototype = $.extend(new Wui.O(),{
 		init:       function(){
 						var me = this;
 						me.el = $('<div>')
@@ -139,7 +139,7 @@
 			validTest:  	null
 		},args);
 	};
-	Wui.frmField.prototype = $.extend(new Wui.o(),{
+	Wui.frmField.prototype = $.extend(new Wui.O(),{
 		init:  		function(){
                         var me = this;
 						me.value = null;

@@ -75,8 +75,8 @@ var Wui = Wui || {};
 	
 	
 	/** The basic WUI object */
-	Wui.o = function(args){ $.extend(this,args); };
-	Wui.o.prototype = {
+	Wui.O = function(args){ $.extend(this,args); };
+	Wui.O.prototype = {
 		addToDOM:	function(obj, tgt, act){
 						// Take the target and action from the passed object first if defined, then default to passed arguments, 
 						// then to a default of $('body') and 'append'
@@ -222,7 +222,7 @@ var Wui = Wui || {};
 	
 	
 	/****************** WUI Viewport *****************/
-	Wui.viewport = function(args){
+	Wui.Viewport = function(args){
 		var me = this,
 			params = $.extend({
 				el:	$('body'),
@@ -295,11 +295,11 @@ var Wui = Wui || {};
 			$.extend(me,params);
 			me.init();
 	}
-	Wui.viewport.prototype = new Wui.o();
+	Wui.Viewport.prototype = new Wui.O();
 
 	
 	/****************** WUI Data Object *****************/
-	Wui.data = function(args){
+	Wui.Data = function(args){
 		$.extend(this,{
 			data:			[],
 			name:			null,
@@ -310,7 +310,7 @@ var Wui = Wui || {};
 			total:			0
 		},args);
 	}
-	Wui.data.prototype = {
+	Wui.Data.prototype = {
 		dataContainer:	null,
 		totalContainer:	null,
 		dataChanged:	function(newdata){},
@@ -412,7 +412,7 @@ var Wui = Wui || {};
 		$.extend(this, {el:$('<div>')}, args);
 		this.init();
 	};
-	Wui.DataList.prototype = $.extend(new Wui.o(), new Wui.Template(), new Wui.data(), {
+	Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(), {
 		beforeSet:	function(){ this.clear(); },
 		dataChanged:function(){ this.make(); },
 		init:		function(){},
@@ -472,7 +472,7 @@ var Wui = Wui || {};
 				
 				// create the <pre> object with associated button to show and hide it
 				var	preObj = $('<pre>' +docCode+ '</pre>'),
-					docBtn = new Wui.button({
+					docBtn = new Wui.Button({
 						preVisible:	false,
 						text:		'Show Source',
 						appendTo:	$('body'),
@@ -556,7 +556,7 @@ var Wui = Wui || {};
 	
 	
 	/****************** WUI Button *****************/
-	Wui.button = function(args){
+	Wui.Button = function(args){
 	    $.extend(this, {
 	    	el:			$('<div>').attr({unselectable:'on'}),
 			disabled:	false,
@@ -567,7 +567,7 @@ var Wui = Wui || {};
 		});
 		this.init();
 	};
-	Wui.button.prototype = $.extend(new Wui.o(),{
+	Wui.Button.prototype = $.extend(new Wui.O(),{
 		click:      function(){},
 		init:       function(){ 
 	                    var me = this;
@@ -593,7 +593,7 @@ var Wui = Wui || {};
 	
 	
 	/****************** WUI Pane/Panel *****************/
-	Wui.pane = function(args){ 
+	Wui.Pane = function(args){ 
 		$.extend(this,{
 			bbar:       [],
 			border:		true,
@@ -605,7 +605,7 @@ var Wui = Wui || {};
 		},args); 
 		this.init();
 	}
-	Wui.pane.prototype = $.extend(new Wui.o(),{
+	Wui.Pane.prototype = $.extend(new Wui.O(),{
         disable:	function(){
 						this.disabled = true;
 						// cover pane contents
@@ -633,8 +633,8 @@ var Wui = Wui || {};
 										   )
 									   );
 						me.sureEl	 = me.el;
-						me.header    = new Wui.o({el:$('<div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
-	                    me.footer    = new Wui.o({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
+						me.header    = new Wui.O({el:$('<div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
+	                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
 	                    me.elAlias	 = me.container;
 	                    
 	                    // Set  border if applicable
@@ -666,7 +666,7 @@ var Wui = Wui || {};
 	});
 	
 	
-	Wui.window = function(args){ 
+	Wui.Window = function(args){ 
 		$.extend(this,{
 			bbar:       [],
 			border:		false,
@@ -680,7 +680,7 @@ var Wui = Wui || {};
 		},args);  
 		this.init(); 
 	}
-	Wui.window.prototype = $.extend(new Wui.pane(),{
+	Wui.Window.prototype = $.extend(new Wui.Pane(),{
 		close:		function(){ 
 						var me = this;
 						if(me.onWinClose(me) !== false){
@@ -689,7 +689,7 @@ var Wui = Wui || {};
 						}
 					},
 		disable:	function(){
-						Wui.pane.prototype.disable.call(this);
+						Wui.Pane.prototype.disable.call(this);
 						this.winClose.enable(); // Enable the close button for the window - esp. important if its modal
 					},
 		init:       function(){
@@ -703,11 +703,11 @@ var Wui = Wui || {};
             	        }
             	        
             	        // Add close buttons where appropriate
-            	        me.tbar.push(new Wui.button({click:function(){me.close()}, text:'X'}));
-            	        if(me.bbar.length == 0) me.bbar = [new Wui.button({click:function(){me.close()}, text:'Close'})];
+            	        me.tbar.push(new Wui.Button({click:function(){me.close()}, text:'X'}));
+            	        if(me.bbar.length == 0) me.bbar = [new Wui.Button({click:function(){me.close()}, text:'Close'})];
             	        
             	        // Calls the parent init function
-            	        Wui.pane.prototype.init(me);
+            	        Wui.Pane.prototype.init(me);
             	        
             	        // Add window specific properties
             	        me.windowEl = me.el
@@ -759,10 +759,10 @@ var Wui = Wui || {};
 	
 	
 	Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
-		var newErr = new Wui.window({
+		var newErr = new Wui.Window({
 			isModal:    true,
 		    title:		msgTitle || 'Error', 
-			items:    	[new Wui.o({el:$('<p>').addClass('err').html(errMsg) })], 
+			items:    	[new Wui.O({el:$('<p>').addClass('err').html(errMsg) })], 
 			width:		350, 
 			height:		200,
 			bbar:		buttons || [],
@@ -772,9 +772,9 @@ var Wui = Wui || {};
 	}
 	
 	
-	Wui.Msg = function(msg, msgTitle, callback, content){
-	    var cntnt   = (content !== undefined) ? [new Wui.o({el: $('<p>').html(msg) }), content] : [new Wui.o({el: $('<p>').html(msg) })],
-	        msg  = new Wui.window({
+	Wui.msg = function(msg, msgTitle, callback, content){
+	    var cntnt   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
+	        msg  = new Wui.Window({
 				title:      msgTitle || 'Message', 
 				isModal:    true,
 				items:      cntnt, 
@@ -787,12 +787,12 @@ var Wui = Wui || {};
 	
 	
 	Wui.confirm = function(msg, msgTitle, callback, content){
-	    var itms   = (content !== undefined) ? [new Wui.o({el: $('<p>').html(msg) }), content] : [new Wui.o({el: $('<p>').html(msg) })],
-	        Msg  = new Wui.window({
+	    var itms   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
+	        Msg  = new Wui.Window({
 				title:      msgTitle || 'Confirm',
 				bbar:		[
-								new Wui.button({text:'No', click:function(){ Msg.doAnswer(false); }}),
-								new Wui.button({text:'Yes', click:function(){ Msg.doAnswer(true); }})
+								new Wui.Button({text:'No', click:function(){ Msg.doAnswer(false); }}),
+								new Wui.Button({text:'Yes', click:function(){ Msg.doAnswer(true); }})
 							],
 				isModal:    true,
 				items:      itms, 
