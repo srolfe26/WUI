@@ -454,6 +454,225 @@
 		validTest:	function(){ if(this.required && this.val() == 0) return false;	return true; }
 	});
 	
+	/* WUI Combo */
+	Wui.combo = function(args){ 
+		$.extend(this, {
+			autoLoad:   false,
+			ddCls:		'',
+			doSearch:   function(){},
+			emptyText:  '(empty)',
+			field:		$('<input>').attr({type:'text'}),
+			keepInline:	false,
+			minKeys:    2,
+			onBlur:     function(){},
+			titleItem:  null,
+			valueItem:  null,
+			unsearched: null
+		},args,{
+			cls:(args.cls) ? args.cls + ' wui-combo' : 'wui-combo',
+		}); 
+		
+		// Create template when one hasn't been defined
+		if(	this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && !this.hasOwnProperty('template') && this.valueItem.length &&
+			 this.valueItem.length > 0 && this.titleItem.length && this.titleItem.length > 0) this.template = '<li>{' +this.titleItem+ '}</li>';
+
+		this.init(); 
+	};
+	Wui.combo.prototype = $.extend(new Wui.text(), new Wui.data(), {
+		enterKey:   	function(){
+	                        if(this.selectItm !== null)   this.selectItm.click();
+	                    },
+		keyDown:    	function(){
+	                        if(!this.dd.is(':visible')){
+	                            this.selectCurr();
+	                            this.showDD();
+	                        }else{
+	                            var si = (this.selectItm === null) ? 0 : this.selectItm.index();
+	                            var idx = (si == this.data.length - 1) ? 0 : si + 1;
+	                            this.rsltHover(this.dd.children(':eq(' + idx + ')'));
+	                        }
+	                    },
+        keyUp:      	function(){
+	                        if(this.selectItm !== null){
+	                            var idx = this.selectItm.index() - 1;
+	                            
+	                            if(idx < 0){
+	                                this.field.focus();
+	                                this.dd.children().removeClass('selected');
+	                                this.selectItm = null;
+	                            }else{
+	                                this.rsltHover(this.dd.children(':eq(' + idx + ')'));
+	                            } 
+	                        }
+	                    },
+		hideDD:     	function(){this.dd.hide();},
+		init:       	function(){
+	                        var me = this,
+								ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
+	                        
+							//setup combobox variables
+	                        me.tplEngine = new Wui.tplt({tplt:me.template});
+	                        me.selectItm = null;
+	                        
+	                        //put field inside a wrapper and add drop down switch
+	                        Wui.text.prototype.init.call(me);
+	                        
+	                        me.wrapper = $('<div>').addClass('dd-wrapper');
+	                    	me.ddSwitch = new Wui.button({
+		                        click:		function(){
+					                            if(!me.dd.is(':visible')){
+					                                me.field.focus();
+					                                me.selectCurr();
+					                                me.showDD();
+					                            }else{
+					                                me.hideDD();
+					                            }
+					                        },
+		                        text:		'',
+		                        attr:		{tabindex:-1},
+		                        appendTo:	me.wrapper,
+		                        cls: 		'field-btn dd-switch'
+		                    });
+	                            
+							me.append(me.wrapper.append(
+	                        	me.dd = $('<ul>').addClass('wui-combo-dd ' + ddAddCls + ' ' + me.ddCls),
+	                        	me.field.addClass('has-dd')
+	                        ));
+	                        me.ddSwitch.place();
+							
+	                        if(me.autoLoad)   me.loadData();
+	                        else              me.renderData();
+	                    },
+		renderData: 	function(){
+	                        var me = this,
+	                        	holder = $('<ul>');
+	                        me.dd.html('');
+	                        if(this.data.length > 0){ 
+	                            for(var i = 0; i < this.data.length; i++){
+		                            me.tplEngine.data = this.data[i];
+	                                holder.append(me.tplEngine.make()
+			                            .mouseenter(function(evnt){ me.rsltHover(evnt); })
+			                            .mousedown(function(e){me.field.isBlurring = false;})
+			                            .click(function(){ me.rsltClick(); }));
+	                            }
+	                            me.dd.append(holder.children().unwrap());
+	                        }else{ 
+	                            me.dd.html(this.emptyText);
+	                        }
+	                        
+	                        return true;
+	                    },
+        rsltClick:  	function(){
+	                        this.hideDD();
+	                        this.val(this.data[this.selectItm.index()]);
+	                    },
+		rsltHover:  	function(itmTarget){
+	                        if(itmTarget.addClass === undefined) {var itmTarget = $(itmTarget.currentTarget);}
+	                        this.dd.children().removeClass('selected');
+	                        this.selectItm = itmTarget;
+	                        this.selectItm.addClass('selected');
+	                    },
+        searchData: 	function(srchVal){
+	                        var me = this;
+	                        if(me.remoteUrl !== null && srchVal.length > me.minKeys){
+	                            if(me.remoteWait == false){
+	                                me.remoteWait = true;
+	                                $.extend(me.remoteParams,{srch: srchVal});
+	                                me.loadData(
+	                                    function(d){ 
+	                                        if(d.payload)   me.setData(d.payload);  //assumes that incoming json data will be in a 'payload' array
+	                                        me.remoteWait = false;
+	                                        if(me.unsearched !== null){
+	                                            var a = me.unsearched;
+	                                            me.unsearched = null;
+	                                            me.searchData(a);
+	                                        }
+	                                    }
+	                                );
+	                            }else{
+	                                me.unsearched = srchVal;
+	                            }
+	                        }else{
+	                            me.showDD();
+	                            me.rsltHover(me.dd.children(':contains(' +srchVal+ '):first'));
+	                        }
+	                    },
+        selectCurr: 	function(i){
+	                        if(i === undefined && this.value !== null){
+	                            for(var d in this.data){
+	                                if(this.data[d][this.valueItem] === (this.value[this.valueItem] || this.value))   { i = d; break; }
+	                            }
+	                        }
+	                        this.rsltHover(this.dd.children(':eq(' +i+ ')'));
+	                    },
+		afterSet:   	function(newData){ this.renderData(); },
+		setListeners:	function(t){
+	                        t.field.focus(function(e){
+	                            t.field.isBlurring = undefined;
+	                        })
+	                        .blur(function(e){
+	                            if(t.field.isBlurring !== false){
+	                                t.hideDD();
+	                                t.onBlur();
+	                            }
+	                         })
+	                        .click(function(){
+	                            t.showDD();
+	                        })
+	                        .keyup(function(evnt){
+	                            var currVal = t.field.val();
+	                            switch(evnt.keyCode){
+	                                case 40:    /*Do Nothing*/  break;
+	                                case 38:    /*Do Nothing*/  break;
+	                                case 13:    /*Do Nothing*/  break;
+	                                case 9:     /*Do Nothing*/  break;
+	                                default:    t.searchData(currVal);
+	                            }
+	                        })
+	                        .keydown(function(evnt){
+	                            var currVal = t.field.val();
+	                            
+	                            //clear the value if the user blanks out the field
+	                            if(currVal.length == 0) t.value = null;
+	                            
+	                            if(t.data.length > 0){
+	                                switch(evnt.keyCode){
+	                                    case 40:    t.keyDown();   break;
+	                                    case 38:    t.keyUp();     break;
+	                                    case 13:
+	                                    case 9:     t.enterKey();  break;
+	                                }
+	                                
+	                                //scroll the list to the currently selected item
+	                                if(t.selectItm !== null){
+	                                    var beforeHeight = 0;
+	                                    t.selectItm.siblings(':lt(' +t.selectItm.index()+ ')').each(function(){ beforeHeight+= $(this).outerHeight(); });
+	                                    t.selectItm.parent().animate({scrollTop:beforeHeight}, 100);
+	                                }
+	                            }
+	                        });
+	                        return t.field;
+	                    },
+		showDD:     	function(){
+							if(!this.keepInline){
+								var fld		= this.field,
+									ofst	= fld.offset(),
+									ddWid	= parseInt(this.dd.css('width')),
+									width	= (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
+								
+								this.dd.appendTo('body').css({
+									left:	ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
+									top:	ofst.top + fld.outerHeight(),
+									width:	width,
+									display:'block',
+									zIndex:	Wui.maxZ()
+								});
+							}else{
+								this.dd.css({ zIndex:Wui.maxZ() }).show();
+							}
+						},
+	});
+	
 }(jQuery));
 
 

@@ -72,6 +72,7 @@
 				a.beforeLoad = function(){ test_num += 3; };
 				a.onSuccess = function(){ test_num += 9; };
 				a.beforeSet = function(){ test_num = test_num * 5; };
+				a.dataChanged = function(newdata){ test_num = test_num },
 				a.processData = function(r){ test_num -= 6; return r; };
 				a.afterSet = function(){ test_num = test_num / 9; };
 				
@@ -82,6 +83,7 @@
 						// a.beforeLoad = function(){ test_num = 3; };
 						// a.onSuccess = function(){ test_num += 9; };
 						// a.beforeSet = function(){ test_num = test_num * 5; };
+						// a.dataChanged = function(newdata){ test_num = test_num },
 						// a.processData = function(r){ test_num -= 6; return r; };
 						// a.afterSet = function(){ test_num = test_num / 9; };
 						return test_num == 6;

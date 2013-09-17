@@ -309,6 +309,7 @@ var Wui = Wui || {};
 	Wui.data.prototype = {
 		dataContainer:	null,
 		totalContainer:	null,
+		dataChanged:	function(newdata){},
 		each:			function(f){
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
 							return true;
@@ -332,6 +333,7 @@ var Wui = Wui || {};
 							var me = this;
 							me.beforeSet();
 							me.data = me.processData(d);
+							me.dataChanged(me.data);
 							me.total = (t !== undefined) ? t : me.data.length;
 							$(window).trigger($.Event('dataset'),[(me.name || 'wui-data'), me]);
 							me.afterSet();
