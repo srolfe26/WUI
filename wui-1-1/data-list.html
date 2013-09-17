@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Data List - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+	
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	
+	<style type="text/css" class="wui-doc-code">
+		
+	</style>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		$(document).ready(function(){
+			a = new Wui.DataList({
+				url:		'data.json',
+				el:			$('<table>'+
+								'<thead>'+
+									'<tr><th>Date</th><th>Amount</th><th>Check Number</th><th style="width:60%;">Description</th><tr>'+
+								'</thead>' +
+								'<tbody></tbody>' +
+							'</table>').addClass('wui-test-results'),
+							
+				template:	'<tr>' +
+								'<td>{date}</td><td>{amount}</td><td>{check_number}</td><td>{description}</td>' +
+							'</tr>',
+							
+				appendTo:	$('body'),
+				init:		function(){
+								this.elAlias = this.el.children('tbody');
+							}
+			});
+			a.place();
+		});
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// SHOW ITEM CREATION CODE
+			Wui.docCode();
+			
+			// TESTING
+			ts = new Wui.ts();
+
+			//ts.test('Set Button Text', function(){ a.setText('Test 1 Was Successful'); return a.el.text() == 'Test 1 Was Successful'; });
+			
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+<h1>Data List</h1>
+</body>
+</html>

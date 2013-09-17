@@ -357,7 +357,7 @@
 			name:       'wui-radio',
 			options:    [],
 			onChange:   function(){},
-			tplt:		'<li><input type="radio" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
+			template:		'<li><input type="radio" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
 		},args,{
 			el:$('<div>')
 		});
@@ -369,7 +369,7 @@
         				this.el.addClass('wui-radio');
 						
         				var me = this,
-							tplEngine = new Wui.tplt({ tplt:this.tplt }),
+							tplEngine = new Wui.Template({ template:this.template }),
 							ul = $('<ul>');
 							
 						//make radio group look like buttons
@@ -412,8 +412,8 @@
 	/* WUI Checkbox */
 	Wui.checkbox = function(args){ 
 		$.extend(this,{
-			name:   'wui-checkbox',
-			tplt:	'<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
+			name:   	'wui-checkbox',
+			template:	'<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
 		},args);
 	this.init(); };
 	Wui.checkbox.prototype = $.extend(new Wui.radio(),{

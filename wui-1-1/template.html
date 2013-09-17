@@ -22,8 +22,8 @@
 						];
 			
 			// Create the template engine
-			a = new Wui.tplt({
-				tplt:	'<li>Name: {fname}, conditional expression: {((id == 3)?"This has an ID of 3!!":fname)}</li>'
+			a = new Wui.Template({
+				template:	'<li>Name: {fname}, conditional expression: {((id == 3)?"This has an ID of 3!!":fname)}</li>'
 			});
 			
 			// Display something on the body

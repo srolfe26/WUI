@@ -34,9 +34,9 @@
 			
 			ts.test("Test &amp; Window Listener Setup",function(){
 				ts.pause();
-				$(window).on('dataset',function(event,name,dataObj){
+				$(window).on('datachanged',function(event,name,dataObj){
 					ts.resume();
-					$(window).off('dataset');
+					$(window).off('datachanged');
 					ts.test('Load Data and listen with window event', function(){ return name == 'unit-test-data'; });
 				});
 				a.loadData();
@@ -52,9 +52,9 @@
 				a.dataContainer = 'payload';
 				a.totalContainer = 'total';
 				
-				$(window).on('dataset',function(event,name,dataObj){
+				$(window).on('datachanged',function(event,name,dataObj){
 					ts.resume();
-					$(window).off('dataset');
+					$(window).off('datachanged');
 					ts.test('Load wrapped data from data-wrapped.json', function(){ return name == 'asdf'; });
 				});
 				a.loadData();
@@ -76,9 +76,9 @@
 				a.processData = function(r){ test_num -= 6; return r; };
 				a.afterSet = function(){ test_num = test_num / 9; };
 				
-				$(window).on('dataset',function(event,name,dataObj){
+				$(window).on('datachanged',function(event,name,dataObj){
 					ts.resume();
-					$(window).off('dataset');
+					$(window).off('datachanged');
 					ts.test('Test execution order:', function(){ 
 						// a.beforeLoad = function(){ test_num = 3; };
 						// a.onSuccess = function(){ test_num += 9; };

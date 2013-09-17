@@ -103,6 +103,10 @@ var Wui = Wui || {};
 						var me = this, el = me.elAlias || me.el;
 						el.append(obj);
 					},
+		clear:		function(obj){
+						var me = this, el = me.elAlias || me.el;
+						el.children().remove();
+					},
 		callRender:	function(){
 			        	var me = this;
 			        	
@@ -331,11 +335,17 @@ var Wui = Wui || {};
 						},
 		setData:		function(d,t){
 							var me = this;
+							
+							// Event hook for before the data is set
 							me.beforeSet();
+							
+							// Set the data
 							me.data = me.processData(d);
-							me.dataChanged(me.data);
 							me.total = (t !== undefined) ? t : me.data.length;
-							$(window).trigger($.Event('dataset'),[(me.name || 'wui-data'), me]);
+							
+							// Event hooks for after the data is set
+							me.dataChanged(me.data);
+							$(window).trigger($.Event('datachanged'),[(me.name || 'wui-data'), me]);
 							me.afterSet();
 						},
 		beforeLoad:		function(){},
@@ -360,14 +370,14 @@ var Wui = Wui || {};
 
 
 	/****************** WUI Template Engine *****************/
-	Wui.tplt = function(args){ $.extend(this,args); }
-	Wui.tplt.prototype = {
-		// tplt:	null, * required
-		// data:	null, * required
+	Wui.Template = function(args){ $.extend(this,args); }
+	Wui.Template.prototype = {
+		// template:	null, * required
+		// data:		null, * required
 		make:	function(){
 					var me = this;
-					if(me.data && me.tplt){
-					    var tplCopy = me.tplt;
+					if(me.data && me.template){
+					    var tplCopy = me.template;
 	                    return $(
 							tplCopy
 							// replaces straight values
@@ -395,6 +405,50 @@ var Wui = Wui || {};
 					throw new Error('Template engine missing data and/or template.');
 				}
 	};
+	
+	
+	/****************** WUI Data List Control *****************/
+	Wui.DataList = function(args){
+		$.extend(this, {el:$('<div>')}, args);
+		this.init();
+	};
+	Wui.DataList.prototype = $.extend(new Wui.o(), new Wui.Template(), new Wui.data(), {
+		beforeSet:	function(){ this.clear(); },
+		dataChanged:function(){ this.make(); },
+		init:		function(){},
+		make:		function(){
+						var me = this,
+							holdingData = me.data || [];
+
+						for(var i = 0; i < holdingData.length; i++){
+							var rec = me.data = holdingData[i],
+								a = {el:Wui.Template.prototype.make.call(me), rec:rec};
+							
+							me.append(
+								a.el.click(function(){
+									if(me.selected && me.selected === a){
+										a.el.removeClass('wui-selected');
+										me.selected = null;
+										me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
+									}else{
+										me.el.find('.wui-selected').removeClass('wui-selected');
+										a.el.addClass('wui-selected');
+										me.selected = a;
+										me.el.trigger($.Event('select'), [me, a.el, a.rec]);
+									}
+								})
+							);
+						}
+						
+						me.data = holdingData;
+						me.el.trigger($.Event('refresh'),[me,me.data]);
+					},
+		onRender:	function(){
+						if(this.url === null)	this.make();
+						else					this.loadData();
+					},
+		refresh:	function(){ this.onRender(); }
+	});
 	
 	
 	/****************** WUI Docs & Test Suite *****************/
@@ -499,73 +553,6 @@ var Wui = Wui || {};
 					}
 		});
 	};
-	
-	
-	/****************** WUI Data List Control *****************/
-	Wui.dataList = function(args){
-		$.extend(this,{
-			el:$('<div>'),
-			remoteUrl:	null,
-			remoteParams:null,
-			selected:	null
-		},args);
-		this.init();
-	};
-	Wui.dataList.prototype = $.extend(new Wui.o(), new Wui.tplt(), {
-		getData:	function(page){
-						var me = this;
-						
-						if(!me.waiting){
-							me.waiting = true;
-							
-							$.ajax(me.remoteUrl, {
-								data:       me.remoteParams,
-								dataType:	'json',
-								success:	function(response){
-												me.waiting = false;
-												me.data = me.processData(response).payload;
-												me.el.trigger($.Event('loadData'), [me, response]);
-												me.make();
-											}
-							});
-						}
-					},
-		init:		function(){},
-		make:		function(){
-						var me = this,
-							holdingData = me.data || [];
-
-						$.each(holdingData,function(idx,rec){
-							me.data = rec;
-							var a = {el:Wui.tplt.prototype.make.call(me), rec:rec};
-							me.el.append(
-								a.el.click(function(){
-									if(me.selected === a){
-										a.el.removeClass('wui-selected');
-										me.selected = null;
-										me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
-									}else{
-										me.el.find('.wui-selected').removeClass('wui-selected');
-										a.el.addClass('wui-selected');
-										me.selected = a;
-										me.el.trigger($.Event('select'), [me, a.el, a.rec]);
-									}
-								})
-							);
-						});
-						me.data = holdingData;
-						me.el.trigger($.Event('refresh'),[me,me.data]);
-					},
-		onRender:	function(){
-						if(this.remoteUrl === null)	this.make();
-						else						this.getData();
-					},
-		processData:function(r){ return r; },
-		refresh:	function(){
-						this.el.children().remove();
-						this.onRender();
-					}
-	});
 	
 	
 	/****************** WUI Button *****************/
