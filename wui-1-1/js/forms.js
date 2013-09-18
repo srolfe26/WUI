@@ -1,5 +1,5 @@
 (function($) {
-	Wui.form = function(args){
+	Wui.Form = function(args){
 	    $.extend(this,{
 			afterCreate:function(){},
 			disabled:	false,
@@ -14,7 +14,7 @@
 	    
 	    this.init();
 	};
-	Wui.form.prototype = $.extend(new Wui.O(),{
+	Wui.Form.prototype = $.extend(new Wui.O(),{
 		clearData:  function(){ this.setData(); },
 		dispErrs:   function(){
 	                    var msg = '';
@@ -23,7 +23,7 @@
 	                },
 		each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)
-							if(!(itm instanceof Wui.note))
+							if(!(itm instanceof Wui.Note))
 								f(this.items[i],i);
 						return true;
 			    	},
@@ -51,11 +51,11 @@
 				    },
 		normFrmItem:function(itm){
 						var me = this;
-						if(itm.ftype && !(itm instanceof Wui.frmField)){
+						if(itm.ftype && !(itm instanceof Wui.FrmField)){
 							var ft = itm.ftype.split('.');
 							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,((itm.disabled && itm.disabled === true) ? {disabled:me.disabled} : {})) );
 							else										throw('Object type ' +itm.ftype+ ' is not defined.');
-						}else if(itm instanceof Wui.frmField){
+						}else if(itm instanceof Wui.FrmField){
 							return $.extend(itm,{disabled:me.disabled});
 						}else{
 							return itm;
@@ -98,14 +98,14 @@
 	
 	
 	/* WUI Note */
-	Wui.note = function(args){ $.extend(this,{html:''},args); this.init(); };
-	Wui.note.prototype = $.extend(new Wui.O(),{
+	Wui.Note = function(args){ $.extend(this,{html:''},args); this.init(); };
+	Wui.Note.prototype = $.extend(new Wui.O(),{
 		init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note'); }
     });
     
 	
 	/* WUI Label */
-	Wui.label = function(args){ 
+	Wui.Label = function(args){ 
 		$.extend(this,{
 			html:			'',
 			labelPosition:	'top'
@@ -113,7 +113,7 @@
 		
 		this.init(); 
 	};
-	Wui.label.prototype = $.extend(new Wui.O(),{
+	Wui.Label.prototype = $.extend(new Wui.O(),{
 		init:       function(){
 						var me = this;
 						me.el = $('<div>')
@@ -127,7 +127,7 @@
 	
 	
 	/* WUI FormField */
-	Wui.frmField = function(args){
+	Wui.FrmField = function(args){
 		$.extend(this,{
 			disabled:		false,
 			invalidMsg: 	null,
@@ -139,14 +139,14 @@
 			validTest:  	null
 		},args);
 	};
-	Wui.frmField.prototype = $.extend(new Wui.O(),{
+	Wui.FrmField.prototype = $.extend(new Wui.O(),{
 		init:  		function(){
                         var me = this;
 						me.value = null;
                         me.el = $('<div>').addClass('wui-fe');
 						
 						if(me.label && me.label.length > 0){
-                        	me.lbl = new Wui.label({html:me.label, cls:me.labelCls, labelPosition:me.labelPosition});
+                        	me.lbl = new Wui.Label({html:me.label, cls:me.labelCls, labelPosition:me.labelPosition});
 							me.elAlias = me.el;
 							me.el = me.lbl.el.append(me.elAlias);
 						}
@@ -196,7 +196,7 @@
 							this.setVal(setVal);
 							
 							// Marks the parent form as 'changed'
-							if(this.parent && this.parent instanceof Wui.form)
+							if(this.parent && this.parent instanceof Wui.Form)
 								this.parent.formChanged = true;
 							
 							// Calls functionally defined valChange() - one will override another
@@ -206,11 +206,11 @@
 							if(this.el){
 								this.el.trigger($.Event('valchange'), [this, oldVal, this.value, setVal]); 
 							}else{
-								if(this.parent && this.parent instanceof Wui.form)
+								if(this.parent && this.parent instanceof Wui.Form)
 									this.parent.el.trigger($.Event('hiddenchange'), [this, oldVal, this.value, setVal]);
 							}
 								
-							return true;
+							return setVal;
 						}
 					},
 		getVal:		function(){
@@ -224,15 +224,15 @@
 	
 	
     /* WUI Hidden */
-	Wui.hidden = function(args){
+	Wui.Hidden = function(args){
 		$.extend(this,{el:null},args); 
 		this.init();
 	};
-	Wui.hidden.prototype = $.extend(new Wui.frmField(),{ init: function(){} });
+	Wui.Hidden.prototype = $.extend(new Wui.FrmField(),{ init: function(){} });
 	
 	
 	/* WUI Text */
-	Wui.text = function(args){
+	Wui.Text = function(args){
 		$.extend(this,{
 			blankCls:   'empty',
 			blankText:  ''
@@ -241,10 +241,10 @@
 		}); 
 		this.init();
 	};
-	Wui.text.prototype = $.extend(new Wui.frmField(),{
+	Wui.Text.prototype = $.extend(new Wui.FrmField(),{
 		init:		function(){
-            			Wui.frmField.prototype.init.call(this);
-                        this.append(Wui.text.prototype.setListeners.call(this,this));
+            			Wui.FrmField.prototype.init.call(this);
+                        this.append(Wui.Text.prototype.setListeners.call(this,this));
                     },
         setBlankText:function(bt){
                         var me = this;
@@ -282,7 +282,7 @@
 			                         t.field.addClass(me.blankCls).val(me.blankText);
 	                        });
 							
-							if(this.setListeners !== Wui.text.prototype.setListeners) this.setListeners(this);
+							if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
 	                        return t.field;
 	                    },
 		setVal:		function(sv){
@@ -298,15 +298,15 @@
 
 	
 	/* WUI Text Area */
-	Wui.textarea = function(args){
+	Wui.Textarea = function(args){
 	    $.extend(this, args, { field:$('<textarea>') });
 	    this.init();
 	};
-	Wui.textarea.prototype = new Wui.text();
+	Wui.Textarea.prototype = new Wui.Text();
 	
 	
 	/* WUI WYSIWYG */
-	Wui.wysiwyg = function(args){
+	Wui.Wysiwyg = function(args){
 	    $.extend(this,{
 			showHTML:	false
 		},args,{
@@ -315,7 +315,7 @@
 		});
 	    this.init();
 	};
-	Wui.wysiwyg.prototype = $.extend(new Wui.textarea(),{
+	Wui.Wysiwyg.prototype = $.extend(new Wui.Textarea(),{
 		onRender:	function(){
                     	var tb = [['bold','italic','underline','strikethrough'], 
                     	          ['link','unlink','unorderedlist','orderedlist'],
@@ -340,7 +340,7 @@
                             resize:     function(evnt, ui){ iframe.height(ui.size.height - (ui.originalSize.height - this.iFrameOrigHeight)); },
                             handles:	'se'
                         });
-						Wui.frmField.prototype.onRender.call(this);
+						Wui.FrmField.prototype.onRender.call(this);
                     },
 		setBlankText:function(){},
 		setListeners:function(t){
@@ -351,7 +351,7 @@
 	
 	
 	/* WUI Radio */
-	Wui.radio = function(args){ 
+	Wui.Radio = function(args){ 
 		$.extend(this,{
 			buttonStyle:false,
 			name:       'wui-radio',
@@ -363,9 +363,9 @@
 		});
 		this.init();
 	};
-	Wui.radio.prototype = $.extend(new Wui.frmField(),{
+	Wui.Radio.prototype = $.extend(new Wui.FrmField(),{
 		init:       function(){
-        				Wui.frmField.prototype.init.call(this);
+        				Wui.FrmField.prototype.init.call(this);
         				this.el.addClass('wui-radio');
 						
         				var me = this,
@@ -399,7 +399,7 @@
         				me.el.find('input').each(function(){
 					        $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
 				        });
-						Wui.frmField.prototype.onRender.call(this);
+						Wui.FrmField.prototype.onRender.call(this);
 			        },
 		getVal:		function(){ return this.value; },
 		setVal:		function(sv){
@@ -410,13 +410,13 @@
 	
 	
 	/* WUI Checkbox */
-	Wui.checkbox = function(args){ 
+	Wui.Checkbox = function(args){ 
 		$.extend(this,{
 			name:   	'wui-checkbox',
 			template:	'<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
 		},args);
 	this.init(); };
-	Wui.checkbox.prototype = $.extend(new Wui.radio(),{
+	Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
         calcVal:	function(){
 						var me = this;
         				me.value = [];
@@ -428,7 +428,7 @@
 		init:       function(){
                         if(this.options.length == 0) this.options.push({val:1,title:''});
         				
-                        Wui.radio.prototype.init.call(this);
+                        Wui.Radio.prototype.init.call(this);
         				this.el.removeClass('wui-radio').addClass('wui-checkbox');
 						
         				//steal label if button style
@@ -454,8 +454,16 @@
 		validTest:	function(){ if(this.required && this.val() == 0) return false;	return true; }
 	});
 	
-	/* WUI Combo */
-	Wui.combo = function(args){ 
+	/***********************************   WUI Combo   ***********************************/
+	
+	// Make jQuery contains case insensitive
+	$.expr[":"].contains = $.expr.createPseudo(function(arg) {
+		return function( elem ) {
+			return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+		};
+	});
+	
+	Wui.Combo = function(args){ 
 		$.extend(this, {
 			autoLoad:   false,
 			ddCls:		'',
@@ -465,6 +473,7 @@
 			keepInline:	false,
 			minKeys:    2,
 			onBlur:     function(){},
+			searchLocal:true,
 			titleItem:  null,
 			valueItem:  null,
 			unsearched: null
@@ -478,7 +487,7 @@
 
 		this.init(); 
 	};
-	Wui.combo.prototype = $.extend(new Wui.text(), new Wui.data(), {
+	Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
 		enterKey:   	function(){
 	                        if(this.selectItm !== null)   this.selectItm.click();
 	                    },
@@ -487,9 +496,9 @@
 	                            this.selectCurr();
 	                            this.showDD();
 	                        }else{
-	                            var si = (this.selectItm === null) ? 0 : this.selectItm.index();
-	                            var idx = (si == this.data.length - 1) ? 0 : si + 1;
-	                            this.rsltHover(this.dd.children(':eq(' + idx + ')'));
+	                            var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
+									idx = (si > 0) ? si : 0;
+								this.rsltHover(this.dd.children(':eq(' + idx + ')'));
 	                        }
 	                    },
         keyUp:      	function(){
@@ -511,14 +520,14 @@
 								ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
 	                        
 							//setup combobox variables
-	                        me.tplEngine = new Wui.tplt({tplt:me.template});
+	                        me.tplEngine = new Wui.Template({template:me.template});
 	                        me.selectItm = null;
 	                        
 	                        //put field inside a wrapper and add drop down switch
-	                        Wui.text.prototype.init.call(me);
+	                        Wui.Text.prototype.init.call(me);
 	                        
 	                        me.wrapper = $('<div>').addClass('dd-wrapper');
-	                    	me.ddSwitch = new Wui.button({
+	                    	me.ddSwitch = new Wui.Button({
 		                        click:		function(){
 					                            if(!me.dd.is(':visible')){
 					                                me.field.focus();
@@ -572,30 +581,18 @@
 	                        this.selectItm = itmTarget;
 	                        this.selectItm.addClass('selected');
 	                    },
+		beforeLoad:		function(srchVal){
+							$.extend(this.params,{srch: srchVal});
+						},
         searchData: 	function(srchVal){
-	                        var me = this;
-	                        if(me.remoteUrl !== null && srchVal.length > me.minKeys){
-	                            if(me.remoteWait == false){
-	                                me.remoteWait = true;
-	                                $.extend(me.remoteParams,{srch: srchVal});
-	                                me.loadData(
-	                                    function(d){ 
-	                                        if(d.payload)   me.setData(d.payload);  //assumes that incoming json data will be in a 'payload' array
-	                                        me.remoteWait = false;
-	                                        if(me.unsearched !== null){
-	                                            var a = me.unsearched;
-	                                            me.unsearched = null;
-	                                            me.searchData(a);
-	                                        }
-	                                    }
-	                                );
-	                            }else{
-	                                me.unsearched = srchVal;
-	                            }
-	                        }else{
-	                            me.showDD();
-	                            me.rsltHover(me.dd.children(':contains(' +srchVal+ '):first'));
-	                        }
+	                        if(this.searchLocal){
+								this.showDD();
+								this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
+								this.dd.children(':contains(' +srchVal+ ')').show();
+	                            this.rsltHover(this.dd.children(':contains(' +srchVal+ '):first'));
+							}else{
+								this.loadData(srchVal);
+							}
 	                    },
         selectCurr: 	function(i){
 	                        if(i === undefined && this.value !== null){
@@ -646,7 +643,7 @@
 	                                //scroll the list to the currently selected item
 	                                if(t.selectItm !== null){
 	                                    var beforeHeight = 0;
-	                                    t.selectItm.siblings(':lt(' +t.selectItm.index()+ ')').each(function(){ beforeHeight+= $(this).outerHeight(); });
+	                                    t.selectItm.siblings(':lt(' +t.selectItm.index()+ '):visible').each(function(){ beforeHeight+= $(this).outerHeight(); });
 	                                    t.selectItm.parent().animate({scrollTop:beforeHeight}, 100);
 	                                }
 	                            }
@@ -671,6 +668,43 @@
 								this.dd.css({ zIndex:Wui.maxZ() }).show();
 							}
 						},
+		getVal:			function(){
+							var me = this;
+							return (me.value === null || typeof me.value != 'object') ? me.value : me.value[me.valueItem];
+						},
+		setVal:			function(sv){
+							var me = this;
+							
+							if(sv === null){
+                                me.value = {};
+                                me.data = [];
+                                me.renderData();
+								Wui.text.prototype.val.call(me,'');
+                            }else if(typeof sv == 'object'){
+                                me.value = sv;
+                                
+                                //add the piece of data to the dd data if it does not exist there
+                                var addData = true;
+                                for(var d in me.data) if(me.data[d] == sv) addData = false;
+                                if(addData){
+                                    me.data.push(me.value);
+                                    me.renderData();
+                                }
+                                var selectVal = me.value[me.valueItem];
+                            }else{
+                                me.value = sv;
+                                var selectVal = me.value;
+                            }
+                            
+                            //select the item out of the data set
+                            for(var d in me.data){
+                                if(me.data[d][me.valueItem] === selectVal){
+                                    me.selectCurr(d);
+									Wui.Text.prototype.val.call(me,me.data[d][me.titleItem]);
+                                    break;
+                                }
+                            }
+						}
 	});
 	
 }(jQuery));

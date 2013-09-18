@@ -8,14 +8,14 @@
 		}, args); 
 		this.init(); 
 	}
-	Wui.layout.prototype = $.extend(new Wui.pane(),{
+	Wui.layout.prototype = $.extend(new Wui.Pane(),{
 		init:			function(){
 							var me = this;
 							me.itemsHolder = me.items;
 							
-							$.each(me.targets, function(i,t){ me[t.name] = t = new Wui.o(t); t.el.css('overflow','auto') });
+							$.each(me.targets, function(i,t){ me[t.name] = t = new Wui.O(t); t.el.css('overflow','auto') });
 							me.items = me.targets;
-							Wui.pane.prototype.init.call(me);
+							Wui.Pane.prototype.init.call(me);
 
 						},
 		onRender:		function(){
@@ -38,9 +38,9 @@
 		},args); 
 		this.init();
 	}
-	Wui.tabs.prototype = $.extend(new Wui.pane(),{
+	Wui.tabs.prototype = $.extend(new Wui.Pane(),{
 		init:			function(){
-							Wui.pane.prototype.init.call(this);
+							Wui.Pane.prototype.init.call(this);
 						},
 		tabsBottom:		false,
 		cls:			'wui-tabs',
@@ -52,7 +52,7 @@
 							$.each(me.items,function(idx,itm){
 								itm.tabCls = 'wui-tab ' + ((itm.tabCls) ? ' ' + itm.tabCls : '');
 									
-								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.button({
+								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
 									text:	itm.title || 'Tab ' + (parseInt(idx) + 1),
 									click:	function(){ 
 												me.giveFocus(itm);
@@ -62,7 +62,7 @@
 								}));
 							});
 							
-							return Wui.o.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.wrap($('<div>').addClass('wui-tab-panel')); }); });
+							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.wrap($('<div>').addClass('wui-tab-panel')); }); });
 						},
 		giveFocus:		function(tab){
 							$.each(this.items,function(idx,itm){
@@ -102,7 +102,7 @@
 		},args); 
 		this.init();
 	};
-	Wui.grid.prototype = $.extend(new Wui.pane(),{
+	Wui.grid.prototype = $.extend(new Wui.Pane(),{
 		addRows:		function(source){
 							var me = this;
 							me.tbl.items = [];
@@ -231,7 +231,7 @@
 		init:			function(){
 							var me = this;
 								
-							Wui.pane.prototype.init.call(me);
+							Wui.Pane.prototype.init.call(me);
 							me.el.addClass('wui-grid');
 							
 							// Define object internal variables
@@ -357,7 +357,7 @@
 								
 								// finish up template
 								t += '</tr>';
-								me.tplt = new Wui.tplt({tplt:t});
+								me.tplt = new Wui.Template({template:t});
 							}
 							
 							me.addRows(me.data);

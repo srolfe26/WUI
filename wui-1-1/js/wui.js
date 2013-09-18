@@ -313,6 +313,7 @@ var Wui = Wui || {};
 	Wui.Data.prototype = {
 		dataContainer:	null,
 		totalContainer:	null,
+		ajaxWait:		10,
 		dataChanged:	function(newdata){},
 		each:			function(f){
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
@@ -329,8 +330,12 @@ var Wui = Wui || {};
 							
 							if(!me.waiting){
 								me.waiting = true;
-								me.beforeLoad();
+								me.beforeLoad.apply(me,arguments);
 								$.ajax(me.url,config);
+							}else{
+								setTimeout(function(){
+									me.loadData.apply(me,arguments);
+								}, me.ajaxWait);
 							}
 						},
 		setData:		function(d,t){
@@ -499,8 +504,8 @@ var Wui = Wui || {};
 			endTime		= new Date(),
 			testNum		= (count) ? count : '-',
 			testData	= {string_val:stringVal, passed:passed, name:descrip, test_num:testNum, time:endTime - startTime},
-			tplt		= new Wui.tplt({
-							tplt:	'<tr>' +
+			tplt		= new Wui.Template({
+							template:'<tr>' +
 										'<td>{test_num}</td>' +
 										'<td>{name}{string_val}</td>' +
 										'<td class="{((passed)?"pass":"fail")}">{passed}</td>' +
