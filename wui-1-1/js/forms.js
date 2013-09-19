@@ -242,16 +242,16 @@
 		this.init();
 	};
 	Wui.Text.prototype = $.extend(new Wui.FrmField(),{
-		init:		function(){
-            			Wui.FrmField.prototype.init.call(this);
-                        this.append(Wui.Text.prototype.setListeners.call(this,this));
-                    },
-        setBlankText:function(bt){
-                        var me = this;
-						if(me.field.val() == me.blankText)
-							me.field.val(bt).addClass(this.blankCls);
-						return me.blankText = bt;
-                    },
+		init:			function(){
+	            			Wui.FrmField.prototype.init.call(this);
+	                        this.append(Wui.Text.prototype.setListeners.call(this,this));
+	                    },
+        setBlankText:	function(bt){
+	                        var me = this;
+							if(me.field.val() == me.blankText)
+								me.field.val(bt).addClass(this.blankCls);
+							return me.blankText = bt;
+	                    },
         clearBlankText:	function(){
 					        var me = this;
 					        me.value = me.field.val();
@@ -275,7 +275,7 @@
 	                        	var v = me.value = t.field.val();
 		                        
 		                        // Call val function so that valchange will be fired if needed
-		                        if(fieldState != me.value)	me.val(me.value);
+		                        // if(fieldState != me.value)	me.val(me.value);
 		                        
 		                        // Add the blank text if the field went blank
 		                        if(v === me.blankText || !v.length || v === null)
@@ -285,15 +285,15 @@
 							if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
 	                        return t.field;
 	                    },
-		setVal:		function(sv){
-						if(sv == ''){
-                            this.field.addClass(this.blankCls).val(this.blankText);
-                            this.value = null;
-                        }else{
-                            this.field.removeClass(this.blankCls).val(sv);
-                            this.value = sv;
-                        }
-					}
+	    setField:		function(sv){
+						    var isBlank = !(sv && sv.length !== 0);
+						    this.field[isBlank ? 'addClass' : 'removeClass'](this.blankCls);
+						    this.field.val(isBlank ? this.blankText : sv);
+					    },
+		setVal:			function(sv){
+							this.setField(sv);
+							this.value = (sv.length == 0) ? null : sv;
+						}
     });
 
 	
@@ -454,6 +454,7 @@
 		validTest:	function(){ if(this.required && this.val() == 0) return false;	return true; }
 	});
 	
+	
 	/***********************************   WUI Combo   ***********************************/
 	
 	// Make jQuery contains case insensitive
@@ -495,6 +496,7 @@
 	                        if(!this.dd.is(':visible')){
 	                            this.selectCurr();
 	                            this.showDD();
+	                            this.field.select();
 	                        }else{
 	                            var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
 									idx = (si > 0) ? si : 0;
@@ -503,10 +505,10 @@
 	                    },
         keyUp:      	function(){
 	                        if(this.selectItm !== null){
-	                            var idx = this.selectItm.index() - 1;
+	                            var idx = this.selectItm.prevAll(':visible:first').index();
 	                            
 	                            if(idx < 0){
-	                                this.field.focus();
+	                                this.field.focus().select();
 	                                this.dd.children().removeClass('selected');
 	                                this.selectItm = null;
 	                            }else{
@@ -576,22 +578,25 @@
 	                        this.val(this.data[this.selectItm.index()]);
 	                    },
 		rsltHover:  	function(itmTarget){
-	                        if(itmTarget.addClass === undefined) {var itmTarget = $(itmTarget.currentTarget);}
+	                        if(!itmTarget.addClass)
+	                        	itmTarget = $(itmTarget.currentTarget);
 	                        this.dd.children().removeClass('selected');
-	                        this.selectItm = itmTarget;
-	                        this.selectItm.addClass('selected');
+	                        this.selectItm = itmTarget.addClass('selected');
 	                    },
 		beforeLoad:		function(srchVal){
-							$.extend(this.params,{srch: srchVal});
+							if(this.searchFilter)
+								$.extend(this.params,{srch: this.searchFilter});
 						},
         searchData: 	function(srchVal){
+	                        this.searchFilter = srchVal;
+	                        
 	                        if(this.searchLocal){
 								this.showDD();
 								this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
 								this.dd.children(':contains(' +srchVal+ ')').show();
-	                            this.rsltHover(this.dd.children(':contains(' +srchVal+ '):first'));
+	                            this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
 							}else{
-								this.loadData(srchVal);
+								this.loadData();
 							}
 	                    },
         selectCurr: 	function(i){
@@ -604,7 +609,8 @@
 	                    },
 		afterSet:   	function(newData){ this.renderData(); },
 		setListeners:	function(t){
-	                        t.field.focus(function(e){
+	                        t.field
+	                        .focus(function(e){
 	                            t.field.isBlurring = undefined;
 	                        })
 	                        .blur(function(e){
@@ -615,6 +621,7 @@
 	                         })
 	                        .click(function(){
 	                            t.showDD();
+	                            t.field.select();
 	                        })
 	                        .keyup(function(evnt){
 	                            var currVal = t.field.val();
@@ -670,16 +677,15 @@
 						},
 		getVal:			function(){
 							var me = this;
-							return (me.value === null || typeof me.value != 'object') ? me.value : me.value[me.valueItem];
+							return (me.value === null || typeof me.value !== 'object') ? me.value : me.value[me.valueItem];
 						},
 		setVal:			function(sv){
 							var me = this;
 							
 							if(sv === null){
                                 me.value = {};
-                                me.data = [];
                                 me.renderData();
-								Wui.text.prototype.val.call(me,'');
+								Wui.Text.prototype.setField.call(me,'');
                             }else if(typeof sv == 'object'){
                                 me.value = sv;
                                 
@@ -700,7 +706,7 @@
                             for(var d in me.data){
                                 if(me.data[d][me.valueItem] === selectVal){
                                     me.selectCurr(d);
-									Wui.Text.prototype.val.call(me,me.data[d][me.titleItem]);
+									Wui.Text.prototype.setField.call(me,me.data[d][me.titleItem]);
                                     break;
                                 }
                             }
