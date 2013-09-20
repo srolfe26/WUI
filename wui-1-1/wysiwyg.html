@@ -23,10 +23,9 @@
 			// TESTING
 			ts = new Wui.ts();
 			ts.test("Get value on blank text field",function(){ return a.val() == null; });
-			ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text') == true; });
+			ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text')[0] == 'Set Text'; });
 			ts.test("Make sure the value set to 'Set Text'",function(){ return a.val() == 'Set Text'; });
-			ts.test("Blank out field",function(){ return a.val('') == true; });
-			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
+			ts.test("Despite blank text, field value is null",function(){ a.val(''); return a.val() == null; });
 			ts.test("Test 'valchange' listener",function(){
 				ts.pause();
 				// Listener for a change to the text object

@@ -315,7 +315,7 @@ var Wui = Wui || {};
 		totalContainer:	null,
 		ajaxWait:		10,
 		dataChanged:	function(newdata){},
-		each:			function(f){
+		dataEach:		function(f){
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
 							return true;
 				    	},
@@ -497,9 +497,16 @@ var Wui = Wui || {};
 	
 	
 	Wui.assert = function(descrip,test,count,hideFn){
+		try{
+			var passed	= (typeof test == 'function') ? test() : test,
+				fnString= (typeof test == 'function') ? test.toString() : '';
+		}catch(e){
+			// If the test expression itself has problems, return passed = false and the javascript error
+			var passed	= false,
+				fnString= (typeof test == 'function') ? e + '\n\n' + test.toString() : '';
+		};
+
 		var startTime	= new Date(),
-			passed		= (typeof test == 'function') ? test() : test,
-			fnString	= (typeof test == 'function') ? test.toString() : '',
 			stringVal	= (fnString.length && hideFn !== true) ? '<pre>' + fnString.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\t/g,'    ')+ '</pre>' : '',
 			endTime		= new Date(),
 			testNum		= (count) ? count : '-',

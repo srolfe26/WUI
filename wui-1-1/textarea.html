@@ -22,32 +22,40 @@
 			
 			// TESTING
 			ts = new Wui.ts();
+			
+			var html5Placebolder = ('placeholder' in document.createElement('input'));
+			
 			ts.test("Get value on blank text field",function(){ return a.val() == null; });
-			ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text') == true; });
-			ts.test("Make sure the value set to 'Set Text'",function(){ return a.val() == 'Set Text'; });
+			ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text')[0] == a.val(); });
 			ts.test("Change Blank Text",function(){return a.setBlankText('New Blank') == 'New Blank'; });
 			ts.test("Test 'valchange' listener",function(){
 				ts.pause();
 				// Listener for a change to the text object
-				$('[name=textarea]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+				$('[name=textarea]').on('valchange',function(event,itm,newVal){
 					ts.resume();
 					ts.test('Listener on \'valchange\' fired and passed correct values',function(){
-						return ( newVal === passedVal && oldVal === 'Set Text' && itm === a)
+						return ( newVal === 'Test Listener')
 					});
 				});
 				a.val('Test Listener');
 				$('[name=textarea]').off('valchange');
-				return a.val() == 'Test Listener';
+				return true;
+			},true);
+			ts.test("Blank out field",function(){ a.val(''); return a.val() === null; });
+			ts.test("The emptyCls property is only being added if the HTML 5 attribute placeholder is not supported",function(){ 
+				if(html5Placebolder){
+					return !a.field.hasClass(a.emptyCls);
+				}else{
+					return a.field.hasClass(a.emptyCls);
+				}
 			});
-			ts.test("Blank out field",function(){ return a.val('') == true; });
-			ts.test("Check Blank Text",function(){ return a.field.val() == 'New Blank'; });
-			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
+			
 			ts.test("Set Disabled",function(){ a.disable(); return a.el.hasClass('wui-disabled'); });
 			ts.test("Change Blank Text",function(){return a.setBlankText('Test Complete') == 'Test Complete'});
-			ts.test("Check Blank Text",function(){ return a.field.val() == 'Test Complete'; });
 			ts.test("Set Enabled",function(){ a.enable(); return !a.el.hasClass('wui-diabled'); });
-			ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
-		}); // end document.ready		
+			
+			if(!html5Placebolder)
+				ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });		}); // end document.ready		
 	</script>
 </head>
 <body class="wui-docs">

@@ -1,4 +1,17 @@
 (function($) {
+	$.fn.overrideNodeMethod = function(methodName, action) {
+	    var originalVal = $.fn[methodName];
+	    var thisNode = this;
+	    $.fn[methodName] = function() {
+	        if (this[0]==thisNode[0]) {
+	            return action.apply(this, arguments);
+	        } else {
+	            return originalVal.apply(this, arguments);
+	        }
+	    };
+	};
+	
+	
 	Wui.Form = function(args){
 	    $.extend(this,{
 			afterCreate:function(){},
@@ -51,11 +64,11 @@
 				    },
 		normFrmItem:function(itm){
 						var me = this;
-						if(itm.ftype && !(itm instanceof Wui.FrmField)){
+						if(itm.ftype && !(itm instanceof Wui.FormField)){
 							var ft = itm.ftype.split('.');
 							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,((itm.disabled && itm.disabled === true) ? {disabled:me.disabled} : {})) );
 							else										throw('Object type ' +itm.ftype+ ' is not defined.');
-						}else if(itm instanceof Wui.FrmField){
+						}else if(itm instanceof Wui.FormField){
 							return $.extend(itm,{disabled:me.disabled});
 						}else{
 							return itm;
@@ -127,7 +140,7 @@
 	
 	
 	/* WUI FormField */
-	Wui.FrmField = function(args){
+	Wui.FormField = function(args){
 		$.extend(this,{
 			disabled:		false,
 			invalidMsg: 	null,
@@ -139,7 +152,7 @@
 			validTest:  	null
 		},args);
 	};
-	Wui.FrmField.prototype = $.extend(new Wui.O(),{
+	Wui.FormField.prototype = $.extend(new Wui.O(),{
 		init:  		function(){
                         var me = this;
 						me.value = null;
@@ -186,31 +199,32 @@
                         // Default return value is true
                         return true;
                     },
-		val:		function(setVal){
-						if(setVal === undefined){
+		val:		function(){
+						if(!arguments.length){
 							return this.getVal();
 						}else{
-							var oldVal = this.value;
-							
 							// Set the actual value of the item
-							this.setVal(setVal);
-							
-							// Marks the parent form as 'changed'
+							this.setVal.apply(this,arguments);
+							// Call change listeners
+							this.setChanged();
+							// Return the passed value(s)
+							return arguments;
+						}
+					},
+		setChanged:	function(){
+						// Marks the parent form as 'changed'
+						if(this.parent && this.parent instanceof Wui.Form)
+							this.parent.formChanged = true;
+						
+						// Calls functionally defined valChange() - one will override another
+						this.valChange(this);
+						
+						// Calls listeners for valchange - in the case of hidden fields calls 'hiddenchange'
+						if(this.el){
+							this.el.trigger($.Event('valchange'), [this, this.value]); 
+						}else{
 							if(this.parent && this.parent instanceof Wui.Form)
-								this.parent.formChanged = true;
-							
-							// Calls functionally defined valChange() - one will override another
-							this.valChange(this);
-							
-							// Calls listeners for valchange - in the case of hidden fields calls 'hiddenchange'
-							if(this.el){
-								this.el.trigger($.Event('valchange'), [this, oldVal, this.value, setVal]); 
-							}else{
-								if(this.parent && this.parent instanceof Wui.Form)
-									this.parent.el.trigger($.Event('hiddenchange'), [this, oldVal, this.value, setVal]);
-							}
-								
-							return setVal;
+								this.parent.el.trigger($.Event('hiddenchange'), [this, this.value]);
 						}
 					},
 		getVal:		function(){
@@ -228,7 +242,7 @@
 		$.extend(this,{el:null},args); 
 		this.init();
 	};
-	Wui.Hidden.prototype = $.extend(new Wui.FrmField(),{ init: function(){} });
+	Wui.Hidden.prototype = $.extend(new Wui.FormField(),{ init: function(){} });
 	
 	
 	/* WUI Text */
@@ -241,58 +255,69 @@
 		}); 
 		this.init();
 	};
-	Wui.Text.prototype = $.extend(new Wui.FrmField(),{
+	Wui.Text.prototype = $.extend(new Wui.FormField(),{
 		init:			function(){
-	            			Wui.FrmField.prototype.init.call(this);
-	                        this.append(Wui.Text.prototype.setListeners.call(this,this));
+	            			var me = this;
+	            			Wui.FormField.prototype.init.call(me);
+	            			
+	            			if(me.blankText && me.blankText.length)	me.setBlankText(me.blankText);
+	            			
+	                        me.append(Wui.Text.prototype.setListeners.call(me,me));
 	                    },
         setBlankText:	function(bt){
-	                        var me = this;
-							if(me.field.val() == me.blankText)
-								me.field.val(bt).addClass(this.blankCls);
-							return me.blankText = bt;
+	                        var me = this, f = me.field;
+	                        
+	                        me.blankText = bt;
+	                        
+	                        // if the HTML 5 placeholder isn't supported, mimic it by
+	            			// replacing the native jQuery val function
+	            			if('placeholder' in document.createElement('input')){
+		            			me.field.attr('placeholder', bt);
+	            			}else{
+		            			var valFn = $.fn.val;
+		            			
+		            			f.overrideNodeMethod('val',function(){
+			            			var v = valFn.apply(f,arguments);
+			            			if(!arguments.length)	if(v == me.blankText) return '';
+			            			else					return v;
+		            			});
+		            			
+		            			f.focusin(function () {
+									if(valFn.call(f) == me.blankText) f.val('');
+									f.removeClass(me.blankCls);
+								}).blur(function () {
+									var v = f.val();
+									if(v === me.blankText || !v.length)
+			                        	f.addClass(me.blankCls).val(me.blankText);
+								});
+								
+								// set the blank text on the field
+								console.log(f.val().length);
+								if(!f.val().length)
+									f.addClass(this.blankCls).val(bt);	
+	            			}
+							
+							return bt;
 	                    },
-        clearBlankText:	function(){
-					        var me = this;
-					        me.value = me.field.val();
-					        if(me.field.val() == me.blankText)
-                        		me.field.val('');
-                        	me.field.removeClass(me.blankCls);
-				        },
 		setListeners:	function(t){
 	                        var me = this,
 	                        	fieldState = null;
 	                        
 	        				t.field
-	        				.val(me.blankText)
-	        				.addClass(me.blankCls)
-	                        .focusin(function(){
-	                        	me.clearBlankText.call(me); 
-	                        	fieldState = me.value;	// Set fieldState (closure variable) to allow for comparison on blur
-	                        })
-	                        .keydown(function(){me.clearBlankText.call(me)})
-	                        .blur(function(){ 
-	                        	var v = me.value = t.field.val();
-		                        
-		                        // Call val function so that valchange will be fired if needed
-		                        // if(fieldState != me.value)	me.val(me.value);
-		                        
-		                        // Add the blank text if the field went blank
-		                        if(v === me.blankText || !v.length || v === null)
-			                         t.field.addClass(me.blankCls).val(me.blankText);
-	                        });
+	        				.focusin(function(){ fieldState = me.field.val(); }) // Set fieldState (closure variable) to allow for comparison on blur
+	                        .blur(function(){ if(fieldState != me.field.val()) me.setChanged(); }) // Call val function so that valchange will be fired if needed
 							
 							if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
 	                        return t.field;
 	                    },
-	    setField:		function(sv){
-						    var isBlank = !(sv && sv.length !== 0);
-						    this.field[isBlank ? 'addClass' : 'removeClass'](this.blankCls);
-						    this.field.val(isBlank ? this.blankText : sv);
+	    fieldText:		function(sv){
+						    this.field.val(sv);
+						    if(this.blankText && this.blankText.length)	this.setBlankText(this.blankText);
 					    },
-		setVal:			function(sv){
-							this.setField(sv);
-							this.value = (sv.length == 0) ? null : sv;
+		getVal:			function(){ return this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null; },
+		setVal:			function(sv){ 
+							this.fieldText(this.value = (sv.length) ? sv : null);
+							
 						}
     });
 
@@ -340,7 +365,7 @@
                             resize:     function(evnt, ui){ iframe.height(ui.size.height - (ui.originalSize.height - this.iFrameOrigHeight)); },
                             handles:	'se'
                         });
-						Wui.FrmField.prototype.onRender.call(this);
+						Wui.FormField.prototype.onRender.call(this);
                     },
 		setBlankText:function(){},
 		setListeners:function(t){
@@ -363,9 +388,9 @@
 		});
 		this.init();
 	};
-	Wui.Radio.prototype = $.extend(new Wui.FrmField(),{
+	Wui.Radio.prototype = $.extend(new Wui.FormField(),{
 		init:       function(){
-        				Wui.FrmField.prototype.init.call(this);
+        				Wui.FormField.prototype.init.call(this);
         				this.el.addClass('wui-radio');
 						
         				var me = this,
@@ -399,7 +424,7 @@
         				me.el.find('input').each(function(){
 					        $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
 				        });
-						Wui.FrmField.prototype.onRender.call(this);
+						Wui.FormField.prototype.onRender.call(this);
 			        },
 		getVal:		function(){ return this.value; },
 		setVal:		function(sv){
@@ -616,6 +641,19 @@
 	                        .blur(function(e){
 	                            if(t.field.isBlurring !== false){
 	                                t.hideDD();
+	                                
+	                                // If the combo has a non-value item in the search field
+	                                // select the seleted item or clear the value
+	                                var titlePresent = false;
+	                                for(var d in t.data){
+		                                if(t.field.val() == t.data[d][t.titleItem]){
+			                                titlePresent = true;
+			                                break;
+		                                }
+		                            }
+		                            if(!titlePresent)	t.val(null);
+	                                
+	                                // Event hook function
 	                                t.onBlur();
 	                            }
 	                         })
@@ -677,15 +715,15 @@
 						},
 		getVal:			function(){
 							var me = this;
-							return (me.value === null || typeof me.value !== 'object') ? me.value : me.value[me.valueItem];
+							return (me.value && me.value[me.valueItem]) ? me.value[me.valueItem] : me.value;
 						},
 		setVal:			function(sv){
 							var me = this;
 							
 							if(sv === null){
-                                me.value = {};
+                                me.value = null;
                                 me.renderData();
-								Wui.Text.prototype.setField.call(me,'');
+								me.fieldText('');
                             }else if(typeof sv == 'object'){
                                 me.value = sv;
                                 
@@ -706,7 +744,7 @@
                             for(var d in me.data){
                                 if(me.data[d][me.valueItem] === selectVal){
                                     me.selectCurr(d);
-									Wui.Text.prototype.setField.call(me,me.data[d][me.titleItem]);
+									me.fieldText(me.data[d][me.titleItem]);
                                     break;
                                 }
                             }
