@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Combo - WUI 1.1</title>
+    <title>Link Input - WUI 1.1</title>
     
 	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 	
@@ -14,28 +14,7 @@
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.Combo({ 
-				label:		'Combo Box', 
-				blankText:	'Type Something', 
-				name:		'demo-combo', 
-				attr:		{name:'combo'}, 
-				valueItem:	'tx_id',
-				titleItem:	'description',
-				autoLoad:	true,
-				searchLocal:false,
-				
-				// used to simulate a server filtering the data on search
-				processData:function(r){
-								if(this.searchFilter){
-									for(var i = r.length - 1; i >= 0; i--){
-										if(r[i][this.titleItem].toUpperCase().indexOf(this.searchFilter.toUpperCase()) < 0) r.splice(i,1);
-									}
-								}
-								return r;							
-							},
-				url: 		'data.json',
-				appendTo:	$('body')
-			});
+			a = new Wui.Link({ label:'Link Input Field', name:'link', attr:{name:'link'} });
 			a.place();
 		});
 	</script>
@@ -53,7 +32,7 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Combo</h1>
+<h1>Link Input</h1>
 
 </body>
 </html>

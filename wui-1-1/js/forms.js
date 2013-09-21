@@ -481,7 +481,6 @@
 	
 	
 	/***********************************   WUI Combo   ***********************************/
-	
 	// Make jQuery contains case insensitive
 	$.expr[":"].contains = $.expr.createPseudo(function(arg) {
 		return function( elem ) {
@@ -621,7 +620,8 @@
 								this.dd.children(':contains(' +srchVal+ ')').show();
 	                            this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
 							}else{
-								this.loadData();
+								if(srchVal.length >= this.minKeys)
+									this.loadData();
 							}
 	                    },
         selectCurr: 	function(i){
@@ -751,39 +751,693 @@
 						}
 	});
 	
-}(jQuery));
+	
+	/***********************************   WUI Link   ***********************************/
+	Wui.Link = function(args){ 
+		$.extend(this,{
+			invalidMsg: 'The value for \'' + ((this.label) ? this.label : (this.args && this.args.name) ? this.args.name : 'a link field') + '\' is not a properly formatted link.'
+		},args);
+		this.init();
+	};
+	Wui.Link.prototype = $.extend(new Wui.FormField(),{
+		buildOutput:function(){
+                         if(this.outputFld === undefined)	this.elAlias.append(this.outputFld = $('<div>').attr({tabindex:-1}).addClass('feedback'));
+        	
+        				if(this.testLink()){
+                            var tp = new Wui.Template({data:this.value, template:'<span>Preview:</span> <a href="{uri}" target="{target}" class="{((target == "_blank") ? "uri-new-win" : "")}">{title}</a>'})
+                            this.outputFld.html(tp.make());
+                        }else{
+                            this.outputFld.html('Your link is improperly formatted.');
+                        }
+                            
+                    },
+		init:       function(){
+                        var me = this;
+                        
+                        me.items = [
+                        	me.urlField = new Wui.Text({cls:'wui-link-third wui-link-focus', blankText:'URL', linkData:'uri'}),
+                        	me.titleField = new Wui.Text({cls:'wui-link-third', blankText:'Display Text', linkData:'title'}),
+                        	me.targetField = new Wui.Combo({
+	                            cls:'wui-link-third no-margin', valueItem: 'target', titleItem:'name', blankText:'Target', keepInline:true,
+	                            data:[{target:'_self', name:'Opens In Same Window'}, {target:'_blank', name:'Opens In New Window/Tab'}], linkData:'target'
+	                        })
+                        ];
+                        
+                        Wui.FormField.prototype.init.call(me);
+                        me.value = { target:'_self', title:null, uri:null };
+                        
+                        me.el.append(me.elAlias = $('<div>').addClass('wui-hyperlink'));
+                        
+                        //additional listeners and initial value for target
+                        me.setLisners(me.urlField,me.titleField,me.targetField);
+                        me.targetField.val(me.value.target);
+                       
+                        me.urlField.field.keyup(function(e){
+                            //sets the title the same as the url - for laziness' sake
+                        	if(me.titleField.field.val() == me.titleField.blankText)
+                        		me.value.title = null;
+                            if(me.value.title === null)
+                            	me.titleField.val($(this).val());
+                        })
+                        .blur(function(){me.value.title = me.titleField.val()});
+                    },
+		setLisners: function(){
+                        var me = this,
+                        	flds = arguments;
+                        	
+                        $.each(flds,function(idx,itm){
+	                        (itm.field.field || itm.field).on('blur click keyup keydown mousedown', null, itm, function(e){
+                                var wuiObjVal = e.data.val();
+                            	if(wuiObjVal !== null && wuiObjVal != {}) me.value[e.data.linkData] = wuiObjVal;
+                                me.buildOutput();
+                            })
+                            .on('focus',null, itm, function(e){
+                                for(var i in flds)
+                                    flds[i].el.removeClass('wui-link-focus');
+                                e.data.el.addClass('wui-link-focus');
+                            });
+                        });
+                    },       
+            
+        testLink:   function isUrl() {
+                        var fullPath = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                        var relativePath = /(\/|\/([\w#!:.?+=&%@!\-\/]))/
+                        return (fullPath.test(this.value.uri) || relativePath.test(this.value.uri));
+                    },
+        getVal:		function(){
+				        return this.value;
+			        },
+		setVal:		function(sv){
+				        $.extend(this.value,setVal);
+                        this.urlField.val(this.value.uri);
+                        this.titleField.val(this.value.title);
+                        this.targetField.val(this.value.target);
+                        this.buildOutput();
+			        },
+		validTest:	function(){ if(this.required && !this.testLink()) return false; return true; }
+	});
+	
+	
+	/***********************************   WUI DateTime   ***********************************/
+	Wui.Datetime = function(args){ 
+		$.extend(this,{
+			valChange:	function(val){}
+		},args,{
+			field:		$('<input>').attr({type:'text'})
+		});
+		this.init();
+	};
+	
+	/**
+	 * Borrowed from Date.js and tweaked a little - See license below, and check out the full library if you're doing tons with dates
+	 * Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+	 * License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
+	 * Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
+	*/
+	$.extend(Date,{
+		CultureInfo:			{
+									name: "en-US",
+									englishName: "English (United States)",
+									nativeName: "English (United States)",
+									dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+									abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+									shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+									firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
+									monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+									abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+									amDesignator: "AM",
+									pmDesignator: "PM"
+								},
+		
+		isLeapYear:				function(year) {
+									return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
+								},
+		getDaysInMonth:			function(year, month) {
+									return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+								},
+		getTimezoneOffset:		function(s, dst) {
+									return (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST[s.toUpperCase()] : Date.CultureInfo.abbreviatedTimeZoneStandard[s.toUpperCase()];
+								},
+		getTimezoneAbbreviation:function(offset, dst) {
+									var n = (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST : Date.CultureInfo.abbreviatedTimeZoneStandard,
+										p;
+									for (p in n) {
+										if (n[p] === offset) {
+											return p;
+										}
+									}
+									return null;
+								}
+	});
+	$.extend(Date.prototype,{
+		getDaysInMonth:	function() {
+							return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+						},
+		addMilliseconds:function(value) {
+							this.setMilliseconds(this.getMilliseconds() + value);
+							return this;
+						},
+		addSeconds:		function(value) {
+							return this.addMilliseconds(value * 1000);
+						},
+		addMinutes:		function(value) {
+							return this.addMilliseconds(value * 60000);
+						},
+		addHours:		function(value) {
+							return this.addMilliseconds(value * 3600000);
+						},
+		addDays:		Date.prototype.addDays = function(value) {
+							return this.addMilliseconds(value * 86400000);
+						},
+		addWeeks:		function(value) {
+							return this.addMilliseconds(value * 604800000);
+						},
+		addMonths:		function(value) {
+							var n = this.getDate();
+							this.setDate(1);
+							this.setMonth(this.getMonth() + value);
+							this.setDate(Math.min(n, this.getDaysInMonth()));
+							return this;
+						},
+		addYears:		function(value) {
+							return this.addMonths(value * 12);
+						},
+		add:			function(config) {
+							if (typeof config == "number") {
+								this._orient = config;
+								return this;
+							}
+							var x = config;
+							if (x.millisecond || x.milliseconds) {
+								this.addMilliseconds(x.millisecond || x.milliseconds);
+							}
+							if (x.second || x.seconds) {
+								this.addSeconds(x.second || x.seconds);
+							}
+							if (x.minute || x.minutes) {
+								this.addMinutes(x.minute || x.minutes);
+							}
+							if (x.hour || x.hours) {
+								this.addHours(x.hour || x.hours);
+							}
+							if (x.month || x.months) {
+								this.addMonths(x.month || x.months);
+							}
+							if (x.year || x.years) {
+								this.addYears(x.year || x.years);
+							}
+							if (x.day || x.days) {
+								this.addDays(x.day || x.days);
+							}
+							return this;
+						},
+		getDayName:		function(abbrev) {
+							return abbrev ? Date.CultureInfo.abbreviatedDayNames[this.getDay()] : Date.CultureInfo.dayNames[this.getDay()];
+						},
+		getMonthName:	function(abbrev) {
+							return abbrev ? Date.CultureInfo.abbreviatedMonthNames[this.getMonth()] : Date.CultureInfo.monthNames[this.getMonth()];
+						},
+		_toString:		Date.prototype.toString,
+		toString:		function(format) {
+							var self = this;
+							var p = function p(s) {
+									return (s.toString().length == 1) ? "0" + s : s;
+								};
+							return format ? format.replace(/dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|zz?z?/g, function(format) {
+								switch (format) {
+								case "hh":
+									return p(self.getHours() < 13 ? self.getHours() : (self.getHours() - 12));
+								case "h":
+									return self.getHours() < 13 ? self.getHours() : (self.getHours() - 12);
+								case "HH":
+									return p(self.getHours());
+								case "H":
+									return self.getHours();
+								case "mm":
+									return p(self.getMinutes());
+								case "m":
+									return self.getMinutes();
+								case "ss":
+									return p(self.getSeconds());
+								case "s":
+									return self.getSeconds();
+								case "yyyy":
+									return self.getFullYear();
+								case "yy":
+									return self.getFullYear().toString().substring(2, 4);
+								case "dddd":
+									return self.getDayName();
+								case "ddd":
+									return self.getDayName(true);
+								case "dd":
+									return p(self.getDate());
+								case "d":
+									return self.getDate().toString();
+								case "MMMM":
+									return self.getMonthName();
+								case "MMM":
+									return self.getMonthName(true);
+								case "MM":
+									return p((self.getMonth() + 1));
+								case "M":
+									return self.getMonth() + 1;
+								case "t":
+									return self.getHours() < 12 ? Date.CultureInfo.amDesignator.substring(0, 1) : Date.CultureInfo.pmDesignator.substring(0, 1);
+								case "tt":
+									return self.getHours() < 12 ? Date.CultureInfo.amDesignator : Date.CultureInfo.pmDesignator;
+								case "zzz":
+								case "zz":
+								case "z":
+									return "";
+								}
+							}) : this._toString();
+						}
+	});
+	/** End borrowing from date.js */
+	
+	Wui.Datetime.prototype = $.extend(new Wui.Text(),{
+		second:         1e3,
+        minute:         6e4,
+        hour:           36e5,
+        day:            864e5,
+        days:           ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"],
+        shortDays:      ["sun","mon","tue","wed","thu","fri","sat"],
+        months:         ["january","february","march","april","may","june","july","august","september","october","november","december"],
+        shortMonths:    ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"],
+        sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
+        minDate:        null,
+		prevText:       null,
+        value:          null,
+		
+        displayDate:    function(overrideText){
+                            var me = this;
+        					
+                            // process current date value
+                            if(overrideText != undefined){ me.displayDiv.html(overrideText); return; }
+                            if(me.value == "" || me.value === null) { return; }
+                            
+                            //validation for min-date
+                            if(!(me.minDate != null && me.value < me.minDate))	me.displayDiv.html(me.value.toString('ddd MM-dd-yyyy h:mm tt'));
+                            else												me.displayDiv.html(me.value.toString('Less than minimum required date of MM-dd-yyyy'));
+                            
+                            return  me.value.toString('MM/dd/yyyy h:mm tt');
+                        },
+		 getM:          function(num){
+                            var magnitude = 0;
+                            while((num = num / 10) >= 1) magnitude++
+                            return magnitude;
+                        },
+		init:           function(){
+                            var me = this;
+        					Wui.Text.prototype.init.call(me);
+                            me.append(
+                                $('<div>').addClass('wui-date').append(
+                                    me.setListenrs(me),
+                                    me.displayDiv = $("<div>").addClass('feedback').attr({tabindex:-1})
+                                )
+                            );
+                                
+                            //add jQuery datepicker (calendar) to the field
+                            me.field.datepicker({
+                                autoSize:       true,
+                                buttonText:     '',
+                                showOn:         'button',
+                                minDate:        me.minDate,
+                                constrainInput: false,
+                                beforeShow:     function(txtElem, pickerObj){
+                                                    if(me.validDate(me.value))  me.field.datepicker('setDate',me.value);
+                                                    else                        me.val('');
+                                                },
+                                onSelect:       function(dateString, pickerObj){
+                                                    if(me.value !== null){
+                                                        me.value.setDate(pickerObj.selectedDay);
+                                                        me.value.setMonth(pickerObj.selectedMonth);
+                                                        me.value.setYear(pickerObj.selectedYear);
+                                                    }else{
+                                                        me.value = me.field.datepicker('getDate');
+                                                    }
+                                                    me.val(me.displayDate());
+                                                }
+                            });
+                            me.el.find('.ui-datepicker-trigger').attr({tabindex:-1});
+                        },
+		num2Dec:        function (words){
+                            var numberRepl = {  a:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,
+                                thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,
+                                thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1e3,
+                                million:1e6,billion:1e9,trillion:1e12,quadrillion:1e15,quintillion:1e18
+                            };
+                
+                            //replace the written words with numbers
+                            words = words.toString().replace(/ and /g,' ').replace(/-/g,' ');
+                            for(var itm in numberRepl)
+                                words = words.replace(new RegExp('(^|[ ]|-)' + itm + '(-|[ ]|$)','g'),' ' + numberRepl[itm] + ' ');
+                            
+                            var wArray = $.trim(words).split(/[ ]+/); 
+                                partsArry = [],
+                                finalNum = 0,
+                                pos = 0;
+   
+                            //separate by numbers larger than 100
+                            while(wArray[pos]){
+                                if(this.getM(wArray[pos]) > 2){
+                                    partsArry.push(wArray.splice(0,pos + 1));
+                                    pos = 0;
+                                }
+                                pos++;
+                            }
+                            partsArry.push(wArray);
+                           
+                            for(nums in partsArry){
+                                var tmp = this.txt2Num(partsArry[nums]);
+                                if(parseInt(tmp))
+                                    finalNum += parseInt(tmp);
+                            }
+                           
+                            return finalNum;
+                        },
+		processDate:    function(dtString){
+                            var me = this,
+                            	dateString = dtString || me.field.val();
+                            
+                            if (dateString.length > 0) {
+                                var genDate = me.translateDate(dateString);
+                                
+                                //Returns a message to the user that the program doesn't understand them
+                                if(genDate.toString() == 'Invalid Date'){
+                                    me.displayDate(me.sarcasmArray[Wui.randNum(0,(me.sarcasmArray.length -1))]);
+                                    return;
+                                }
+                                
+                                me.value = genDate;
+                                me.displayDate();
+                                return genDate;
+                            }else{
+                                me.value = null;
+                                me.displayDate('');
+                            }
+                        },
+		setListenrs:    function(t){
+                            return t.field.keyup(function(evnt){ t.processDate(); });
+                        },
+		setMinDate:     function(minDt){ 
+                            this.minDate = this.translateDate(minDt.toString());
+                            this.field.datepicker( "option", "minDate", new Date(me.minDate.valueOf() + me.minute));
+                        },
+		translateDate:  function(ds){
+                            var me			= this,
+                            	now         = new Date(), 
+                                orig        = ds,
+                                dateReg     = /\d{1,2}\/\d{1,2}\/\d{2,4}/,
+                                ifDateReg   = /([a|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|and,\d,\s,-]+)\s((millisecond|second|minute|hour|day|week|month|year)+[s]*)\s(from|after|before|previous to)+\s(.+)$/,
+                                intvF       = ifDateReg.exec(ds.toLowerCase());
+                            
+                            //for interval specifications
+                            if(intvF !== null){
+                                var n       = me.num2Dec(intvF[1]),
+                                    directn = {from:1, after:1, before:-1, 'previous to':-1},
+                                    dir     = directn[intvF[4]],
+                                    dt      = me.translateDate(intvF[5]);  
+                                return dt['add' + intvF[3].charAt(0).toUpperCase() + intvF[3].slice(1) + 's'](n * dir);
+                            }
+                           
+                            //returns a match for "now"
+                            if(ds.toLowerCase().match(/now/) !== null){ return now; }
+                            
+                            
+                            if(ds.toLowerCase().match(/[stephen|steve] nielsen/) !== null){var e=now.getFullYear(),t="5/26/"+e,n=new Date(t);t=n>now?t:"5/26/"+(new Date(now.valueOf()+me.day*365)).getFullYear()+" ";me.value=new Date(t);var r=me.value.getMonth()+1+"/"+me.value.getDate()+"/"+me.value.getFullYear()+" "+" - "+parseInt((me.value.valueOf()-now.valueOf())/me.day)+" days left to buy a present.";me.displayDate(r); return}
+                            ds = ds.toLowerCase()
+                            .replace('noon','12')
+                            .replace('midnight','00:00')
+                            .replace(/o.clock/,'')
+                            .replace(/(\d+)[st|nd|rd|th]+/,function(m,dt){ return dt; })                        // Strip 'nd', 'th', 'rd', 'st'
+                            .replace(/(\d{4})-(\d{1,2})-(\d{1,2})/g,function(m,yr,mm,dd){                       // Change UTC dates to ISO
+                                return mm + '/' + dd + '/' + yr;
+                            })
+                            .replace(/(\d{1,2})-(\d{1,2})-(\d{2,4})/g,function(m,mm,dd,yr){                     // Change other UTC dates to ISO
+                                return mm + '/' + dd + '/' + yr;
+                            })
+                            .replace(/^(\d{1,2})-(\d{1,2})[\s]*/,function(m,mm,dd){ return mm + '/' + dd + ' '; }) // Change other UTC dates to ISO
+                            .replace('at','@')                                                                  // Replace at with the @ symbol
+                            .replace(/(today|tomorrow|yesterday)/,function(m,f){                                // Translate today, tomorrow & yesterday into dates
+                                     var replaceDays = {'today':0, 'tomorrow':1, 'yesterday':-1}
+                                         newDt = new Date(now.valueOf() + (me.day * replaceDays[f]));
+                                     return  (newDt.getMonth() + 1) + '/' + newDt.getDate() + '/' 
+                                     + newDt.getFullYear();
+                                 })
+                            .replace(/(next|last) ([a-z]{3,10})[ ]*([0-9]+)*/,function(n, dir, word, day){      // Translate days of week & months into dates
+                                 var dayVal = me.day * ((dir == 'next') ? 1 : -1),
+                                     dy = ($.inArray(word,me.days) > -1) ? $.inArray(word,me.days) 
+                                     : $.inArray(word,me.shortDays),
+                                     month = ($.inArray(word,me.months) > -1) ? $.inArray(word,me.months) 
+                                     : $.inArray(word,me.shortMonths),
+                                     useNum = (dy > -1) ? dy : (month > -1) ? month : -1,
+                                     useFunc = (dy > -1) ? 'getDay' : (month > -1) ? 'getMonth' : '';
+                                     
+                                 if(useNum > -1){
+                                     var nxt = now.valueOf(), inc = new Date(nxt += dayVal);
+                                     while(inc[useFunc]() != useNum){
+                                         nxt += dayVal;
+                                         inc = new Date(nxt);
+                                     }
+                                     if(month != undefined && month != -1 && day.length != 0){
+                                         inc.setDate(parseInt(day));
+                                     }
+                                     return (inc.getMonth() + 1) + '/' + inc.getDate() + '/' 
+                                       + inc.getFullYear() + ' ';
+                                 }else{
+                                     return '';
+                                 }
+                             })
+                             .replace(/(\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|-)+\b)/g,function(m,f){
+                                 return me.num2Dec(f);                                                            // Converts number text to decimals
+                             })
+                             .replace(/([a-z]{3,10}) (\d{1,2})[,]*/, function(m,f,s){                             // Translate 'Month DD' to 'MM/DD'
+                                 return ((($.inArray(f,me.months) > -1) ? $.inArray(f,me.months) : 
+                                     $.inArray(f,me.shortMonths)) + 1) + '/' + s;
+                             })
+                            .replace(/^(\d{1,2}\/\d{1,2}(?![\d]))([\s|\/]*)(\d{0,4})/, function(m,dt,s,yr){      // Add century to dates with ambiguous years
+                                if(yr.length == 2){
+                                    var thisYear = parseInt(now.getFullYear().toString().substr(2,4)),
+                                        thisCentury = parseInt(now.getFullYear().toString().substr(0,2)) * 100,
+                                        inputYear = parseInt(yr),
+                                        yearDiff = 100 - inputYear,
+                                        centuryDiff = (thisYear < 50)    ? -100 * ((yearDiff >= 50) ? 0 : 1) 
+                                         : 100 * ((yearDiff < 50) ? 0 : 1),
+                                        retYear = thisCentury + inputYear + centuryDiff;
+                                    return dt + '/' + retYear;    
+                                }else if(yr.length == 4){
+                                    return dt + '/' + yr;
+                                }else{
+                                    retDt = dt + '/' + now.getFullYear().toString();
+                                    withDt = new Date(retDt);
+                                    return (withDt.valueOf() > now.valueOf()) ? retDt : dt + '/' + new Date(now.valueOf() 
+                                      + (me.day * 365)).getFullYear() + ' ';
+                                }
+                            })
+                            .replace(/(\d{1,2}\/\d{1,2})\s(\d{4})/,function(m,dt,yr){return dt + '/' + yr; })   // Remove space in instances of '3/21 2012'
+                            
+                            //Adds today's date to strings that have no date information specified
+                            ds = (dateReg.test(ds) == true) ? ds : (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear() +' '+ ds;
+                          
+                            /* Adds an @ symbol for time strings that aren't UTC spec so that they can be modified later */
+                            ds = ds.replace(/(\d{1,2}\/\d{1,2}\/\d{4})\s(.+)/,function(m,dt,ts){
+                             if(ts.indexOf('@') == -1)   ts = '@ ' + ts;
+                             return dt + ' ' + ts;
+                            })
+                            
+                            /* Translate colloquial times */
+                            .replace(/\d[ ]*[a|p]$/,function(m){ return m + 'm'; })
+                            .replace(/[a|p][.][m]*[.]*/,function(m){ return m.replace(/[.]/g,'') })
+                            .replace(/\d.m/,function(m){ return m.substring(0, m.length - 2) + ' ' + m.substring(m.length - 2, 3) })
+                            .replace(/@ (\d+[ ]\d+)/,function(m,f){ return f.replace(' ',':'); })
+                            .replace(/@ (\d+)/,function(m,f,p,o){ 
+                                if(o.indexOf(':') != -1) return m;
+                                else                     return m.trim() + ':00 ';
+                            })
+                            .replace(/@/g,''); // Firefox & IE don't like the @ symbol being used
+
+                            return new Date(ds);
+                        },
+		txt2Num:        function(wArray){
+                            //split into an array and combine them according to magnitude
+                            var pos = 0, theNum = 0;
+                           
+                            if(wArray.length == 1){
+                                return wArray[0];
+                            }else{
+                                while(wArray[pos + 1] !== undefined){
+                                    var currNum = parseInt(wArray[pos]),
+                                        nextNum = parseInt(wArray[pos + 1]),
+                                        lastNum = parseInt(wArray[wArray.length - 1]),
+                                        smallerThanNext = this.getM(currNum) <= this.getM(nextNum);
+                                       
+                                    if(pos == 0){
+                                        theNum = (smallerThanNext) ? currNum * nextNum : currNum + nextNum;
+                                    }else{
+                                        if(smallerThanNext) theNum *= nextNum;
+                                        else                theNum += nextNum;
+                                    }
+                                    pos++;
+                                }
+                            }
+                           
+                            if(lastNum != nextNum)  return (this.getM(lastNum) > 2) ? theNum *= lastNum : theNum += lastNum;
+                            else                    return theNum;
+                        },
+        getVal:			function(){
+					        return this.value;
+				        },
+		setVal:			function(sv){
+					        if(sv !== null){
+                                if(typeof sv == 'string'){
+                                    this.fieldText(sv);
+                                    this.processDate();
+                                }else{
+                                    this.value = sv;
+                                    this.fieldText(this.displayDate());
+                                }
+                            }
+                            else{
+								this.fieldText('');
+								this.displayDiv.html('');
+								this.value = null;
+							}
+				        },
+		validDate:       function(dt){
+                            if(dt != null && dt.toString() == 'Invalid Date')   return false;
+                            else if (dt == null)                                return false;
+                            else                                                return true;
+                        }
+	});
+	
+	
+	/***********************************   WUI File   ***********************************/
+	Wui.File = function(args){ 
+		$.extend(this,{
+			beforSelect:function(){},
+			fileTypeFilter: null,
+			upFieldName:'fileupload',
+			upParams:   {},
+			upSuccess:  function(){},
+			upTarget:   '',
+			upTitleName:'title'
+		},args,{
+			field:	$('<input>').attr({type:'text'})
+		}); 
+		this.init();
+	};
+	Wui.File.prototype = $.extend(new Wui.Text(),{
+		changeClick:function(){
+                         //swap buttons
+                         this.changeBtn.el.fadeOut('fast');
+                         this.upBtn.el.parents('div:first').fadeIn('slow'); 
+                         this.field.removeClass().focus();
+                     },
+		onSelect:   function(fileControl){
+                        this.beforSelect(fileControl, this);
+                        
+                        //add title to parameters and parameters to the file upload
+                        var titleParam = {};
+						this.beforeSelectTitle = titleParam[this.upTitleName] = this.field.val();
+						
+						// for file filtering
+						if(this.fileTypeFilter !== null) $.extend(titleParam,{file_type_filter:this.fileTypeFilter});
+						
+                        fileControl.params($.extend(this.upParams, titleParam));
+                        //upload file
+                        fileControl.submit();
+                    },
+		init:       function(){
+                        var me = this;
+        				Wui.Text.prototype.init.call(me);
+						me.wrapper = $('<div>').addClass('wui-file').append(me.field);
+						me.append(me.wrapper);
+        				me.push(
+							me.changeBtn = new Wui.Button({
+								click:  function(){ 
+											Wui.Text.prototype.val.call(me,'');
+											me.field.removeAttr('disabled'); 
+											me.changeClick(); 
+										},
+								text:   'X',
+								attr:	{tabindex:-1},
+								cls:    'file-change field-btn',
+								parent:	me
+							})
+						);
+                        
+						me.upBtn = new Wui.Button({text:'Browse', cls:'field-btn', attr:{tabindex:-1}});
+						me.cssByParam(me.upBtn).appendTo(me.wrapper).upload({
+                            name:       this.upFieldName,
+                            action:     this.upTarget,
+                            autoSubmit: false,
+                            onSubmit:   function() { 
+                                            me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
+                                        },
+                            onFocus:    function(){ me.upBtn.el.addClass('selected'); },
+                            onBlur:     function(){ me.upBtn.el.removeClass('selected'); },
+                            onComplete: function upComplete(r){
+                                            try{
+                                            	var d = $.parseJSON(r);
+												console.log(d);
+                                                me.field.removeClass('uploading empty'); //remove the css uploading state
+                                                
+												if(d.success == true && d.payload){
+													me.val(d.payload,'upSuccess');
+												}else{
+													if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
+														Wui.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
+														me.field.removeClass('has-file uploading').removeAttr('disabled');
+														if(me.beforeSelectTitle)
+															me.fieldText(me.beforeSelectTitle);
+													}else{
+														me.upFailure(r);
+													}
+												}
+                                            }catch(err){
+                                                console.log(err,r);
+                                                me.upFailure(err,r);
+                                            }
+                                        },
+                            onSelect:   function() { me.onSelect(this); }
+                        });
+                    },
+		upFailure:  function(e,e2){
+                        console.log(e,e2);
+						Wui.Text.prototype.val.call(this,'Upload Failure');
+                    },
+        getVal:		function(){ return this.value || {}; },
+        setVal:		function(sv){
+	        			this.value = this.value || {};
+                        $.extend(this.value,sv);
+			        },
+	    val:		function(sv,callback){
+					    Wui.FormField.prototype.apply(this,arguments);
+					    if(this[callback] && typeof this[callback] == 'function') this[callback]();
+				    },
+        valChange:  function(){
+                        var me = this;
+        				me.field.addClass('has-file').removeAttr('disabled');
+                        me.upBtn.el.parents('div:first').hide();
+                        me.changeBtn.el.show();
+                        
+                        //changed to a 'file-selected' view and display a nicely formatted file
+                        me.field.addClass('has-file ' + ((me.value.extension !== undefined) ? 'icon-' + me.value.extension.replace('.','') : '')).attr('disabled',true);
+                        me.fieldText(me.value[me.upTitleName]);
+                    }
+	});
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
-* jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
-* Copyright (c) 2012 Chris Pietschmann
-* http://jhtmlarea.codeplex.com
-* Licensed under the Microsoft Reciprocal License (Ms-RL)
-* http://jhtmlarea.codeplex.com/license
-* 
-* Modified 2013 Stephen Nielsen
-*/
-(function ($) {
+	/**
+	* jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
+	* Copyright (c) 2012 Chris Pietschmann
+	* http://jhtmlarea.codeplex.com
+	* Licensed under the Microsoft Reciprocal License (Ms-RL)
+	* http://jhtmlarea.codeplex.com/license
+	* 
+	* Modified 2013 Stephen Nielsen
+	*/
     $.fn.htmlarea = function (opts) {
         if (opts && typeof (opts) === "string") {
             var args = [];
@@ -1099,4 +1753,167 @@
             return v && typeof v === 'object' && typeof v.length === 'number' && typeof v.splice === 'function' && !(v.propertyIsEnumerable('length'));
         }
     };
+    
+    /*
+	 * One Click Upload - jQuery Plugin
+	 * Copyright (c) 2008 Michael Mitchell - http://www.michaelmitchell.co.nz
+	 *
+	 * Modified 2012 Stephen Nielsen
+	 */
+	 $.fn.upload = function(options) {
+        /** Merge the users options with our defaults */
+        options = $.extend({
+            name: 'file',
+            enctype: 'multipart/form-data',
+            action: '',
+            autoSubmit: true,
+            onSubmit: function() {},
+            onComplete: function() {},
+            onSelect: function() {},
+            onFocus: function() {},
+            onBlur: function() {},
+            params: {}
+        }, options);
+
+        return new $.ocupload(this, options);
+    },
+    
+    $.ocupload = function(element, options) {
+        /** Fix scope problems */
+        var self = this;
+    
+        /** A unique id so we can find our elements later */
+        var id = new Date().getTime().toString().substr(8);
+        
+        /** Upload Iframe */
+        var iframe = $('<iframe '+ 'id="iframe'+id+'" '+ 'name="iframe'+id+'"'+ '></iframe>').css({ display: 'none' });
+        
+        /** Form */
+        var form = $('<form '+ 'method="post" '+ 'enctype="'+options.enctype+'" '+ 'action="'+options.action+'" '+ 'target="iframe'+id+'"'+ '></form>').css({margin: 0, padding: 0});
+        
+        /** File Input */
+        var input = $('<input '+ 'name="'+options.name+'" '+ 'type="file" '+ '/>').css({
+            position: 'relative',
+            display: 'block',
+            opacity: 0
+        });
+        
+        /** Put everything together */
+        element.wrap('<div></div>'); //container
+            form.append(input);
+            element.after(form);
+            element.after(iframe);
+    
+        /** Find the container and make it nice and snug */
+        var container = element.parent().addClass("wui-browse-btn");
+        
+        /** Watch for file selection */
+        input.change(function() {
+            /** Do something when a file is selected. */
+            self.onSelect(); 
+            
+            /** Submit the form automaticly after selecting the file */
+            if(self.autoSubmit) {
+                self.submit();
+            }
+        })
+        .focus(function(){self.onFocus();})
+        .blur(function(){self.onBlur();});
+        
+        /** Methods */
+        $.extend(this, {
+            autoSubmit: options.autoSubmit,
+            onSubmit: options.onSubmit,
+            onComplete: options.onComplete,
+            onSelect: options.onSelect,
+            onBlur: options.onBlur,
+            onFocus: options.onFocus,
+        
+            /** get filename */     
+            filename: function() {
+                return input.attr('value');
+            },
+            
+            /** get/set params */
+            params: function(params) {
+                if(params || false)  options.params = $.extend(options.params, params);
+                else                 return options.params;
+            },
+            
+            /** get/set name */
+            name: function(nam) {
+                if(nam || false)  input.attr("name", value);
+                else              return input.attr("name");
+            },
+            
+            /** get/set action */
+            action: function(action) {
+                if(action || false)  form.attr("action", action);
+                else                 return form.attr("action");
+            },
+            
+            /** get/set enctype */
+            enctype: function(enctype) {
+                if(enctype || false)  form.attr("enctype", enctype);
+                else            return form.attr("enctype");
+            },
+            
+            /** set options */
+            set: function(obj, value) {
+                var value = value ? value : false;
+                                
+                function option(action, value) {
+                    switch (action) {
+                        default:
+                            throw new Error("[jQuery.ocupload.set] '" + e + "' is an invalid option.");
+                            break;
+                        case "name":        self.name(value);          break;
+                        case "action":      self.action(value);        break;
+                        case "enctype":     self.enctype(value);       break;
+                        case "params":      self.params(value);        break;
+                        case "autoSubmit":  self.autoSubmit = value;   break;
+                        case "onSubmit":    self.onSubmit = value;     break;
+                        case "onComplete":  self.onComplete = value;   break;
+                        case "onFocus":     self.onFocus = value;      break;
+                        case "onBlur":      self.onBlur = value;       break;
+                        case "onSelect":    self.onSelect = value;     break
+                    }
+                }               
+                var value = value ? value : false;
+                if(value) {
+                    option(obj, value);
+                }
+                else {              
+                    $.each(obj, function(key, value) {
+                        option(key, value);
+                    });
+                }
+            },
+            
+            /** Submit the form */
+            submit: function() {
+                /** Do something before we upload */
+                this.onSubmit();
+                
+                /** add additional paramters before sending */
+                $.each(options.params, function(key, value) {
+                    form.children("input[name=" +key+ "]").remove();
+                    form.append($('<input type="hidden" name="' +key+ '" value="' +value+ '" />'));
+                });
+                
+                /** Submit the actual form */
+                form.submit(); 
+                
+                /** Do something after we are finished uploading */
+                iframe.unbind().load(function() {
+                    /** Get a response from the server in plain text */
+                    var myFrame = document.getElementById(iframe.attr('name'));
+                    /** Do something on complete */
+                    self.onComplete($(myFrame.contentWindow.document.body).text()); //done :D
+                });
+            }
+        });
+    }
 })(jQuery);
+
+

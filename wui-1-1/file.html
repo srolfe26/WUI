@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>File Upload - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+	
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		$(document).ready(function(){
+			// Add a text formItem onto the body
+			a = new Wui.File({ label:'File Upload', blankText:'A file title is optional', name:'file', attr:{name:'file'} });
+			a.place();
+		});
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function(){	
+			// SHOW ITEM CREATION CODE
+			Wui.docCode();
+			
+			// TESTING
+			ts = new Wui.ts();
+			
+			//ts.test("Today",function(){ var today = new Date(); a.val('today'); return a.val().toString('yyyy-MM-dd') == today.toString('yyyy-MM-dd'); });
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+<h1>File Upload</h1>
+
+</body>
+</html>

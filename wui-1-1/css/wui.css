@@ -17,6 +17,12 @@
 .wui-btn:active, .wui-btn:hover, .wui-btn.selected  {background-color:#fff; border:1px solid #ccc;}
 .wui-btn:active {box-shadow: inset 0 0 10px #333; border:none;}
 
+/*********************   FIELD/BUTTON STYLES ***********************/
+.wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form, .wui-fe input[type=text] {height:26px;}
+.wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form {line-height:26px;}
+.wui-btn.field-btn, .wui-browse-btn {
+    position: absolute; right:0; border-radius:0 4px 4px 0; top:0; background-color:#ccc; border:1px solid #aaa; border-left:transparent;
+}
 
 /***********************************************   FORM   ***********************************************/
 /* labels */
@@ -66,15 +72,81 @@
 .wui-inline-dd {right:0; top:98%; width:100%;}
 .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
     .wui-combo-dd li.selected { background:#19f; color:#fff; }
-.dd-wrapper, .file-wrapper {position:relative;}
+.dd-wrapper, .wui-file {position:relative;}
 .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-image:url(../img/wui-icons.png); background-position: -12px -10px; }
 
-/*********************   FIELD/BUTTON STYLES ***********************/
-.wui-btn.field-btn, .wui-file-upload .wui-btn, .wui-browse-btn, .wui-browse-btn > form, .wui-fe input[type=text] {height:26px;}
-.wui-btn.field-btn, .wui-file-upload .wui-btn, .wui-browse-btn, .wui-browse-btn > form {line-height:26px;}
-.wui-btn.field-btn, .wui-file-upload .wui-btn, .wui-browse-btn {
-    position: absolute; right:0; border-radius:0 4px 4px 0; top:0; background-color:#bbb; border:1px solid #aaa; border-left:transparent;
+/* hyperlink */
+.wui-link-third {
+    display:inline-block; width:19%; margin-right:1%; 
+    -webkit-transition: all 0.33s linear; -moz-transition: all 0.33s linear; -o-transition: all 0.33s linear; transition: all 0.33s linear;
 }
+.wui-link-third.wui-fe input, .wui-link-third > div {min-width:100%;}
+.wui-link-third.no-margin {margin-right:0;}
+.wui-link-third.wui-link-focus {display:inline-block; width:60%;}
+    .wui-link-third label {display:none !important;}
+    
+/* date picker / date range */
+.wui-date {position:relative;}
+.feedback { font-size: 0.7em; text-transform:uppercase; overflow:hidden;}
+.feedback a {text-transform:none; color: #1AF; }
+.feedback a, .feedback span {font-size:1em;}
+
+.ui-datepicker { background-color:#fff; padding:0.25em; display:table; font-size:0.8em; box-shadow: 0 0 3px; display:none; }
+    .ui-datepicker-header{padding: 0.2em 0; position: relative; background-color:rgba(0,0,0,0.5); color: #fff;}
+        .ui-datepicker-prev, .ui-datepicker-next {height: 1.75em; position: absolute; top: 2px; width: 1.7em;}
+            .ui-datepicker-prev {left:2px;}
+            .ui-datepicker-next {right:2px;}
+            .ui-datepicker-prev span, .ui-datepicker-next span {
+                display: block; left: 50%; margin:-6px 0 0 -6px; position: absolute; width:12px; height:12px;
+                top: 50%; overflow:hidden; text-indent:-999px; background-image:url(../img/wui-icons.png);
+            }
+            .ui-datepicker-prev span {background-position:-162px 0;}
+                .ui-datepicker-prev:hover span {background-position:-162px -17px;}
+                .ui-datepicker-prev:active span {background-position:-162px -34px;}
+            .ui-datepicker-next span {background-position:-146px 0;}
+                .ui-datepicker-next:hover span {background-position:-146px -17px;}
+                .ui-datepicker-next:active span {background-position:-146px -34px;}
+        
+    .ui-datepicker-title { line-height: 1.7em; margin: 0 3.5em; text-align: center; font-weight: bold; }
+    .ui-datepicker-calendar{ border-collapse: collapse; font-size: 0.9em; margin: 0 0 0.4em; width: 100%; }
+        .ui-datepicker-calendar th {color:#333; padding:0.2em 0;}
+
+.wui-fe input[type="text"].hasDatepicker {padding-right:2em;}
+.ui-datepicker-trigger {
+    background: url(../img/wui-icons.png) no-repeat -95px -32px; width:13px; height:12px; position:absolute; right:0.5em; top:7px; border:0;
+}
+
+.ui-datepicker td span, .ui-datepicker td a {
+    display: block; text-align: right; text-decoration: none; font-size:1.5em; width:1.75em; padding:0.1em 0.25em 0.1em 0.1em; color: #333; font-weight: normal;
+}
+.ui-state-default { background: #ddd; }
+.ui-state-highlight { background:#fc0; /*#FCEFA1;*/ }
+.ui-datepicker td a.ui-state-active { background:#0cf; color:#fff; font-weight:bold; }
+.ui-state-disabled { opacity: 0.5; }
+
+/* files */
+.wui-file input[type=text] {padding-right:85px;}
+.wui-file input[type=text].has-file { 
+   padding-left:29px !important; padding-right: 48px !important; background-repeat:no-repeat; background-position: 7px 4px;
+}
+.wui-file input[type=text].has-file.uploading {background-image:url(../img/16x16-cc.gif);}
+.wui-browse-btn { overflow:hidden; cursor:pointer; margin:0; padding:0; width:60px; position:absolute;}
+.wui-browse-btn > .wui-btn {border:none; height:28px; top:-1px; right:-2px; text-indent:-2px; width:60px; padding:0; }
+.wui-browse-btn.selected {position:relative;}
+.wui-browse-btn > form {position:absolute; width:60px; top:0; right:0; overflow:hidden;}
+.wui-browse-btn > form > input {width:60px;}
+.wui-btn.file-change.field-btn {width:26px; padding:0; display:none;}
+
+.wui-fe input.has-file[type="text"][disabled] { color:#555; } 
+.has-file { background-image:url(../img/page_white.png); color:#555; } 
+.icon-pdf { background-image:url(../img/page_white_acrobat.png); }
+.icon-png, .icon-jpeg, .icon-jpg, .icon-gif, .icon-bmp, .icon-ai, .icon-psd { background-image:url(../img/image.png); }
+.icon-mov, .icon-wmv, .icon-m4v, .icon-mpeg, .icon-mpeg4, .icon-fla { background-image:url(../img/film.png); }
+.icon-doc, .icon-docx, .icon-dot, .icon-dotx { background-image:url(../img/page_white_word.png); }
+.icon-xls, .icon-xlsx, .icon-csv { background-image:url(../img/page_white_excel.png); }
+.icon-ppt, .icon-pptx, .icon-pot, .icon-potx { background-image:url(../img/page_white_powerpoint.png); }
+.icon-zip, .icon-dmg { background-image:url(../img/page_white_zip.png); }
+
 
 /****************************************   JHTMLArea WYSIWYG Styles   *****************************************/
 .wui-html, .wui-html * {
