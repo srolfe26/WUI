@@ -7,32 +7,69 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 
+	<style type="text/css">
+		body {margin:0; padding:0;}
+		.wui-kitchen-sink > .wui-pane-wrap > .wui-pane-content > .wui-pane, .iframe-pane {float:left;}
+	</style>
+
 	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
 	<script type="text/javascript" src="js/wui.js"></script>
 	<script type="text/javascript" src="js/forms.js"></script>
 	<script type="text/javascript" src="js/grid.js"></script>
 	
 	<script type="text/javascript">
-		$(document).ready(function(){
+		var kSink = null;
 		
+		$(document).ready(function(){
+			kSink = new Wui.Pane({
+				height:		'100%',
+				title:		'Wui 1.1 Kitchen Sink',
+				appendTo: 	$('body'),
+				fitDimension:'width',
+				cls:		'wui-kitchen-sink',
+			    items:		[
+			    				selector = new Wui.Grid({
+				    				data:			[
+						    							{link:'docs/o.html', title:'WUI Object'},
+						    							{link:'docs/text.html', title:'Text Box'},
+						    							{link:'docs/textarea.html', title:'Text Area'},
+						    							{link:'docs/template.html', title:'Template Engine'},
+						    							{link:'docs/wysiwyg.html', title:'WYSIWYG'},
+						    							{link:'docs/radio.html', title:'Radio'},
+						    							{link:'docs/checkbox.html', title:'Checkbox'},
+						    							{link:'docs/state.html', title:'State Machine', target:'_blank'},
+						    							{link:'docs/data.html', title:'Data'},
+						    							{link:'docs/data-list.html', title:'Data List'},
+						    							{link:'docs/button.html', title:'Button'},
+						    							{link:'docs/combo.html', title:'Combo'},
+						    							{link:'docs/link.html', title:'Link Input'},
+						    							{link:'docs/datetime.html', title:'Date/Time Input'},
+						    							{link:'docs/file.html', title:'File'},
+						    							{link:'docs/fit.html', title:'WUI.fit'},
+						    						],
+				    				columns:		[{heading:'Feature', dataItem:'title'}],
+				    				borderStyle:	{borderWidth: '0 6px 0 0'},
+				    				fit: 			1,
+				    				height:			'100%',
+				    				onRecordSelect: function(rec){
+									    				var now = new Date();
+									    				if(!rec.target)	frame.el.attr({src:rec.link + '?_dc=' + now.toString()});
+									    				else			window.location = rec.link;
+								    				}
+			    				}),
+			    				frame = new Wui.O({
+				    				cls:			'iframe-pane',
+				    				el: 			$('<iframe>').attr({src:'docs/about.html'}).css({border:'none', backgroundColor:'#fff'}),
+				    				fit: 			5,
+				    				height:			'100%'
+			    				})
+			    			]
+
+			});
+			kSink.place();
 		}); // end document.ready
 	</script>
 </head>
 <body>
-	<p><a href="o.html">WUI Object</a></p>
-	<p><a href="text.html">Text Box</a></p>
-	<p><a href="textarea.html">Text Area</a></p>
-	<p><a href="template.html">Template Engine</a></p>
-	<p><a href="wysiwyg.html">WYSIWYG</a></p>
-	<p><a href="radio.html">Radio</a></p>
-	<p><a href="checkbox.html">Checkbox</a></p>
-	<p><a href="state.html">State Machine</a></p>
-	<p><a href="data.html">Data</a></p>
-	<p><a href="data-list.html">Data List</a></p>
-	<p><a href="button.html">Button</a></p>
-	<p><a href="combo.html">Combo</a></p>
-	<p><a href="link.html">Link Input</a></p>
-	<p><a href="datetime.html">Date/Time Input</a></p>
-	<p><a href="file.html">File</a></p>
 </body>
 </html>

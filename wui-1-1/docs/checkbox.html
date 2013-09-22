@@ -2,19 +2,19 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Radio - WUI 1.1</title>
+    <title>Checkbox - WUI 1.1</title>
     
-	<link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
 	
-	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
-	<script type="text/javascript" src="js/wui.js"></script>
-	<script type="text/javascript" src="js/forms.js"></script>
-	<script type="text/javascript" src="js/grid.js"></script>
+	<script type="text/javascript" src="../js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="../js/wui.js"></script>
+	<script type="text/javascript" src="../js/forms.js"></script>
+	<script type="text/javascript" src="../js/grid.js"></script>
 	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.Radio({
+			a = new Wui.Checkbox({
 				label:			'Should I stay or should I go?',
 				name:			'82s',
 				//buttonStyle:	true,
@@ -26,6 +26,9 @@
 								]
 			});
 			a.place();
+			
+			b = new Wui.Checkbox({label:'Single Checkbox Button', name:'booyas', buttonStyle:true, appendTo:$('body') });
+			b.place();
 			
 			// SHOW ITEM CREATION CODE
 			Wui.docCode();
@@ -39,6 +42,6 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Radio</h1>
+<h1>Checkbox</h1>
 </body>
 </html>

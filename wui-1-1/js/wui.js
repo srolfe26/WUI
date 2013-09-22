@@ -74,6 +74,53 @@ var Wui = Wui || {};
 	};
 	
 	
+	Wui.fit = function(collection){
+		var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
+		
+		// Ensure the collection is an array of Wui Objects
+		if(collection instanceof Array && collection.length > 0 && collection[0] instanceof Wui.O){
+			var parent		= (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
+				parentEl	= (parent.el) ? (parent.elAlias || parent.el) : parent,
+				parentSize	= (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim](),
+				fitCt		= 0,
+				fixedSize 	= 0,
+				fitMux		= 0;
+			
+			// Tally all sizes we're dealing with
+			$.each(collection,function(i,itm){
+				if(itm[dim]){
+					// Tally fixed size values & percentage based size values
+					// Doing this gives percentages precendence over fit
+					if(Wui.isNumeric(itm[dim]))	{ fixedSize += itm[dim]; }
+					else						{
+												  var itmDimension = Math.floor((parseFloat(itm[dim]) / 100) * parentSize);
+												  fixedSize += (itm[dim] = itmDimension);
+												}
+					delete itm.fit;			// Ensure the item doesn't have a dimension and a fit specified
+				}else if(itm.fit){
+					fitCt += itm.fit; 		// Tally fit values
+				}else{
+					fitCt += (itm.fit = 1); // Add a fit value to an item that doesn't have dimensions specified
+				}
+			});
+			
+			// Get the fit multiplier
+			fitMux = (fitCt !== 0) ? (parentSize - fixedSize) / fitCt : 0;
+			
+			// Size 'fit' items
+			$.each(collection,function(i,itm){
+				var css = {};
+				if(itm.fit){
+					css[dim] = fitMux * itm.fit;
+					$(itm.el).css(css);
+				}
+			});
+		}else{
+			throw('Improper collection specified');
+		}
+	};
+	
+	
 	/** The basic WUI object */
 	Wui.O = function(args){ $.extend(this,args); };
 	Wui.O.prototype = {
@@ -113,7 +160,20 @@ var Wui = Wui || {};
 			        	// Add styles if they didn't get added
 						me.cssByParam(me);
 			        	
+			        	// Perform render for this
 						if(me.onRender)  me.onRender();
+			        	
+			        	// Perform Wui.fit on items that need it
+			        	var needFit = false;
+			        	
+			        	for(var i in me.items)
+			        		if(me.items[i].fit)
+				        		needFit = true;
+						
+						if(me.fitDimension || needFit)
+			        		Wui.fit(me.items, (me.fitDimension || undefined));
+			        		
+			        	// Perform rendering for child elements
 			        	for(var i in me.items) if(me.items[i].callRender) me.items[i].callRender();
 						if(me.afterRender)  me.afterRender();
 			        },

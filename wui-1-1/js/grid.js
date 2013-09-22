@@ -1,6 +1,6 @@
 (function($) {
 	// Method which creates a Wui layout - Wui layouts are meant to be heavily CSS dependent
-	Wui.layout = function(args){ 
+	Wui.Layout = function(args){ 
 		$.extend(this, {
 			bbar:   [],
 			targets:[],
@@ -8,7 +8,7 @@
 		}, args); 
 		this.init(); 
 	}
-	Wui.layout.prototype = $.extend(new Wui.Pane(),{
+	Wui.Layout.prototype = $.extend(new Wui.Pane(),{
 		init:			function(){
 							var me = this;
 							me.itemsHolder = me.items;
@@ -30,7 +30,7 @@
 	
 	
 	// Method which creates a Wui Tab Pane
-	Wui.tabs = function(args){ 
+	Wui.Tabs = function(args){ 
 		$.extend(this,{
 			bbar:   [],
 			items:	[],
@@ -38,7 +38,7 @@
 		},args); 
 		this.init();
 	}
-	Wui.tabs.prototype = $.extend(new Wui.Pane(),{
+	Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
 		init:			function(){
 							Wui.Pane.prototype.init.call(this);
 						},
@@ -78,7 +78,7 @@
 	
 	
 	// Method which creates a Wui Grid
-	Wui.grid = function(args){
+	Wui.Grid = function(args){
 		$.extend(this,{
 			bbar:   		[],
 			columns: 		[],
@@ -102,7 +102,7 @@
 		},args); 
 		this.init();
 	};
-	Wui.grid.prototype = $.extend(new Wui.Pane(),{
+	Wui.Grid.prototype = $.extend(new Wui.Pane(),{
 		addRows:		function(source){
 							var me = this;
 							me.tbl.items = [];
