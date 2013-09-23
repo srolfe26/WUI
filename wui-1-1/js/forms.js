@@ -607,7 +607,7 @@
 	                        this.dd.children().removeClass('selected');
 	                        this.selectItm = itmTarget.addClass('selected');
 	                    },
-		beforeLoad:		function(srchVal){
+		setParams:		function(srchVal){
 							if(this.searchFilter)
 								$.extend(this.params,{srch: this.searchFilter});
 						},
@@ -620,7 +620,7 @@
 								this.dd.children(':contains(' +srchVal+ ')').show();
 	                            this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
 							}else{
-								if(srchVal.length >= this.minKeys)
+								if(srchVal.length >= this.minKeys || srchVal.length == 0)
 									this.loadData();
 							}
 	                    },
@@ -789,7 +789,7 @@
                         me.el.append(me.elAlias = $('<div>').addClass('wui-hyperlink'));
                         
                         //additional listeners and initial value for target
-                        me.setLisners(me.urlField,me.titleField,me.targetField);
+                        me.setListeners(me.urlField,me.titleField,me.targetField);
                         me.targetField.val(me.value.target);
                        
                         me.urlField.field.keyup(function(e){
@@ -801,7 +801,7 @@
                         })
                         .blur(function(){me.value.title = me.titleField.val()});
                     },
-		setLisners: function(){
+		setListeners:function(){
                         var me = this,
                         	flds = arguments;
                         	

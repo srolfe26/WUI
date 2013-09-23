@@ -81,33 +81,31 @@
 	Wui.Grid = function(args){
 		$.extend(this,{
 			bbar:   		[],
+			beforeMake:		function(){},
 			columns: 		[],
 			data:			null,
 			defaultDataType:'string',
 			multiSelect:	false,
-			onDataLoad:		function(){},
 			onDoubleClick:	function(rec){},
-			onRecordSelect:	function(rec){},
+			// me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
 			paging:			null,
 							/*{
 								limit:	page size,
 								start:	0 - a very good place to start
 								sort:	{dataItem:, order:}
 							}*/
-			remoteParams:	{},
-			remoteUrl:  	null,
 			hideHeader:		false,
 			selected:		[],
 			tbar:   		[]
 		},args); 
 		this.init();
 	};
-	Wui.Grid.prototype = $.extend(new Wui.Pane(),{
+	Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.Data(),{
 		addRows:		function(source){
 							var me = this;
 							me.tbl.items = [];
 							me.tbl.children().remove();
-							var a = new Date();
+							
 							$.each(source,function(idx,dataItem){
 								me.tplt.data = dataItem;
 								var a = {el:me.tplt.make(), rec:dataItem, originalSrt:idx};
@@ -135,22 +133,19 @@
 										 
 										  $('html').click(); // gets rid of the outline from the HTML elements
 									 }
-									 me.onRecordSelect(a.rec);
+									 me.el.trigger($.Event('recordclick'),[me, a.el, a.rec]);
 									 
 									 return false // stops propagation & prevents default
 								 })
 								 .dblclick(function(e){
 									 me.selectSingle($(this),a);
-									 me.onDoubleClick(a.rec);
+									 me.el.trigger($.Event('dblclickrecord'),[me, a.el, a.rec]);
 									 return false // stops propagation & prevents default
 								 });
 								me.tbl.append(a.el);
 							});
-							var b = new Date();
-							console.log(b.getTime() - a.getTime());
 							return source;
 						},
-		beforeMake:		function(){ this.makeGrid(); },
 		calcColWidth:	function (){
 							var tcw = 0;
 							this.heading.children().each(function(){ tcw += $(this).outerWidth(); });
@@ -175,8 +170,8 @@
 										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
 										break;
 									case 'numeric':
-										compA = parseFloat(compA);
-										compB = parseFloat(compB);
+										compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
+										compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
 										compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
 										break;
 									default:
@@ -189,30 +184,21 @@
 								return (a.originalSrt > b.originalSrt) ? 1 : -1;
 							}
 						},
-		getData:		function(){
+		setParams:		function(params){
 							var me = this;
-							// Set up paging parameters
-							if(me.paging !== null && typeof me.paging == 'object'){
-								me.isPaging = true;
-								$.extend(me.remoteParams,{limit:me.paging.limit, start: me.paging.start, sort:JSON.stringify(me.paging.sort)});
-							}
 							
-							if(!me.waiting){
-								me.waiting = true;
-								
-								$.ajax(me.remoteUrl, {
-									data:       me.remoteParams,
-									dataType:	'json',
-									success:	function(response){ var retData = me.processData(response); }
-								});
+							if(params == 'init'){
+								// Set up paging parameters
+								if(me.paging !== null && typeof me.paging == 'object'){
+									me.isPaging = true;
+									$.extend(me.params,{limit:me.paging.limit, start: me.paging.start, sort:JSON.stringify(me.paging.sort)});
+								}
+							}else if(params && typeof params === 'object'){
+								$.extend(me.params,params);
 							}
 						},
-		processData:	function(response){ this.postDataProcess(response); },
-		postDataProcess:function(retData){
+		afterSet:		function(){
 							var me = this;
-							me.waiting = false;
-							me.data = retData.payload;
-							me.total = retData.total;
 							
 							if(me.isPaging && me.tbl.children().length > 0){
 								if(me.total > me.data.length){
@@ -222,10 +208,8 @@
 									me.matchCols();
 								}
 							}else{
-								me.beforeMake();
+								me.makeGrid();
 							}
-							
-							me.onDataLoad();
 						},
 		getSelected:	function(){ return (this.selected.length > 0) ? this.selected : Wui.errRpt('No row selected.','Select Something');},
 		init:			function(){
@@ -269,23 +253,24 @@
 											
 											var actualStart = page * me.paging.limit + ((page != 0) ? -1 * Math.round(me.paging.limit / 2) : 0),
 												actualLimit = (me.paging.limit * 3 < 100) ? me.paging.limit * 3 : 100;
+											
+											
+											// Hijack the onSuccess fn to do something different for paging
+											var currentOnSuccess = me.onSuccess;
+											me.onSuccess = function(){
+												var me = this;
 												
-											//if(me.sorters.length > 0) 
+												me.tbl.css({top:(actualStart * me.rowHeight) + 'px'});
+												if(me.currPage != Math.floor(($(theTbl).scrollTop() + me.tblContainer.height()) / (me.totalHeight / me.totalPages))){
+													pagingScroll.call(theTbl);
+												}
+												me.matchCols();
+												me.resetSelect();
 												
-											$.ajax(me.remoteUrl, {
-												data:       $.extend(me.remoteParams, {start:actualStart, limit:actualLimit, sort:JSON.stringify(me.paging.sort)}),
-												dataType:	'json',
-												success:	function(response){
-																me.waiting = false;
-																me.data = me.addRows(me.processData(response).payload);
-																me.tbl.css({top:(actualStart * me.rowHeight) + 'px'});
-																if(me.currPage != Math.floor(($(theTbl).scrollTop() + me.tblContainer.height()) / (me.totalHeight / me.totalPages))){
-																	pagingScroll.call(theTbl);
-																}
-																me.matchCols();
-																me.resetSelect();
-															}
-											});
+												currentOnSuccess();
+												me.onSuccess = currentOnSuccess;
+											};
+											me.loadData({start:actualStart, limit:actualLimit, sort:JSON.stringify(me.paging.sort)});
 										}
 									}
 								}
@@ -300,7 +285,9 @@
 						},
 		makeGrid:		function(){
 							var me = this, t = '<tr>';
-
+							
+							me.beforeMake();
+							
 							if(me.columns[0] && typeof me.columns[0].heading === 'string'){
 								me.heading.html('');
 								me.renderers = [];
@@ -424,7 +411,7 @@
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2); // 2 accounts for borders
+								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.5); // 2 accounts for borders
 							});
 						},
 		onRender:		function (){
@@ -433,8 +420,8 @@
 							me.posDataWin();
 							
 							// Add data to grid
-							if(me.data !== null)	{ if(me.total === undefined) { me.total = me.data.length; me.beforeMake(); } }
-							else					{ me.getData(); }
+							if(me.data !== null)	me.setData(me.data);
+							else					me.loadData('init');
 						},
 		posDataWin:		function(){
 							var me = this,
@@ -443,8 +430,8 @@
 							me.tblContainer.css({height:me.container.height() - hh, top:hh});
 						},
 		refresh:		function(newData){
-							if(this.remoteUrl !== null)	{ this.getData(); }
-							else						{ this.data = newData; this.total = this.data.length; this.makeGrid(); }
+							if(newData)	me.setData(newData);
+							else		this.loadData();
 						},
 		resetSelect:	function(){
 							var me = this,
@@ -485,7 +472,7 @@
 							for(var a in me.tbl.items){
 								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
 									me.selectSingle(me.tbl.items[a].el,me.tbl.items[a]);
-									me.onRecordSelect(me.tbl.items[a].rec);
+									me.el.trigger($.Event('recordselected'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
 									break;
 								}
 							}

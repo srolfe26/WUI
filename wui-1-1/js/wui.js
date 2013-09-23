@@ -390,6 +390,7 @@ var Wui = Wui || {};
 							
 							if(!me.waiting){
 								me.waiting = true;
+								me.setParams.apply(me,arguments);
 								me.beforeLoad.apply(me,arguments);
 								$.ajax(me.url,config);
 							}else{
@@ -398,6 +399,7 @@ var Wui = Wui || {};
 								}, me.ajaxWait);
 							}
 						},
+		setParams:		function(){},
 		setData:		function(d,t){
 							var me = this;
 							

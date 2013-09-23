@@ -238,7 +238,14 @@
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 	.wui-gc:last-child {border-right:none;}
-	.wui-gc .ui-resizable-handle.ui-resizable-e {width:15px; right:-8px; cursor: col-resize;}
+	.wui-gc .ui-resizable-handle.ui-resizable-e {
+	    cursor: col-resize;
+	    height: 100%;
+	    position: absolute;
+	    right: 0;
+	    top: 0;
+	    width: 10px;
+    }
     
 .grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
 

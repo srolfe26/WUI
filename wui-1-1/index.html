@@ -16,20 +16,30 @@
 	<script type="text/javascript" src="js/wui.js"></script>
 	<script type="text/javascript" src="js/forms.js"></script>
 	<script type="text/javascript" src="js/grid.js"></script>
+	<script type="text/javascript" src="js/state.js"></script>
 	
 	<script type="text/javascript">
-		var kSink = null;
+		var kSink = {};
 		
 		$(document).ready(function(){
-			kSink = new Wui.Pane({
+			//create state machine
+			kSink.sm = new Wui.stateMachine();
+			
+			kSink.sm.setChangeAction(function(state){
+				var page = kSink.sm.getParam('main','t');
+				if(page) setPage(page);	
+			});
+			
+			kSink.main = new Wui.Pane({
 				height:		'100%',
 				title:		'Wui 1.1 Kitchen Sink',
 				appendTo: 	$('body'),
 				fitDimension:'width',
 				cls:		'wui-kitchen-sink',
 			    items:		[
-			    				selector = new Wui.Grid({
+			    				kSink.selectorGrid = new Wui.Grid({
 				    				data:			[
+						    							{link:'docs/about.html', title:'WUI Home'},
 						    							{link:'docs/o.html', title:'WUI Object'},
 						    							{link:'docs/text.html', title:'Text Box'},
 						    							{link:'docs/textarea.html', title:'Text Area'},
@@ -45,28 +55,42 @@
 						    							{link:'docs/link.html', title:'Link Input'},
 						    							{link:'docs/datetime.html', title:'Date/Time Input'},
 						    							{link:'docs/file.html', title:'File'},
-						    							{link:'docs/fit.html', title:'WUI.fit'},
+						    							{link:'docs/fit.html', title:'WUI Fit'},
+						    							{link:'docs/grid.html', title:'Grid'},
 						    						],
 				    				columns:		[{heading:'Feature', dataItem:'title'}],
 				    				borderStyle:	{borderWidth: '0 6px 0 0'},
 				    				fit: 			1,
-				    				height:			'100%',
-				    				onRecordSelect: function(rec){
-									    				var now = new Date();
-									    				if(!rec.target)	frame.el.attr({src:rec.link + '?_dc=' + now.toString()});
-									    				else			window.location = rec.link;
-								    				}
+				    				height:			'100%'
 			    				}),
-			    				frame = new Wui.O({
+			    				kSink.frame = new Wui.O({
 				    				cls:			'iframe-pane',
-				    				el: 			$('<iframe>').attr({src:'docs/about.html'}).css({border:'none', backgroundColor:'#fff'}),
+				    				attr:			{name:'iframe_pane'},
+				    				el: 			$('<iframe>').css({border:'none', backgroundColor:'#fff'}),
 				    				fit: 			5,
 				    				height:			'100%'
 			    				})
 			    			]
 
 			});
-			kSink.place();
+			kSink.main.place();
+			
+			kSink.selectorGrid.el.on('recordclick',function(event,grid,el,rec){
+				if(!rec.target)	kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
+				else			window.location = rec.link;
+			});
+			
+			// When the page loads, see if there is anything on the URL, else load the default
+			var page = kSink.sm.getParam('main','t');
+			if(page)	setPage(page);
+			else		kSink.sm.setState('main?t=docs_about');
+			
+			// Load the selected page with a cache buster, then select the item on the grid
+			function setPage(p){
+				var now = new Date();
+				window.frames['iframe_pane'].location.replace(p.replace('_','/') + '.html?_dc=' + now.getMilliseconds());
+				kSink.selectorGrid.selectItem({link:p.replace('_','/') + '.html'});
+			}
 		}); // end document.ready
 	</script>
 </head>

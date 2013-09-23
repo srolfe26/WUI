@@ -1614,7 +1614,7 @@
         "date": "3/12/13",
         "amount": "432",
         "check_number": "",
-        "description": "CAAH TAX EFT 8015383200 1112273404 LASTNAME,STEPH#####1000"
+        "description": "ca TAX EFT 8015383200 1112273404 LASTNAME,STEPH#####1000"
     },
     {
         "tx_id": "216",
@@ -1691,7 +1691,7 @@
         "date": "2/27/13",
         "amount": "-2.44",
         "check_number": "",
-        "description": "CAAH STATE UNIVE WEBCKFEB25 181395 SOME GAL"
+        "description": "ca STATE UNIVE WEBCKFEB25 181395 SOME GAL"
     },
     {
         "tx_id": "205",
