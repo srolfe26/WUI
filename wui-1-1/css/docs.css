@@ -54,3 +54,7 @@ pre {font-weight:bold; display:block; line-height:1.25em !important;}
 #button-row .wui-btn {margin-right:1em;}
 
 #content > div:last-child  {padding-bottom:12em;}
+
+img {
+    max-width: 100%;
+}
