@@ -4,13 +4,107 @@
     <meta charset="utf-8">
     <title>Web Team User Interface (WUI)</title>
     
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Coda|Russo+One|Source+Sans+Pro" media="all">
     <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    <script type="text/javascript" src="../js/wui-1-1.js"></script>
 </head>
-<body class="wui-docs">
-<h1>Web Team User Interface 1.1 (WUI)</h1>
-<h2>Why use jQuery?</h2>
+<body>
+
+<h1>WUI
+    <span>Webteam User Interface</span>
+    <span>version 1.1</span>
+</h1>
+
+
+<h2>Goals / Why Use it</h2>
+
+<ul>
+    <li>Its lightweight (currently @ 290K) on principle.</li>
+    <li>Stay close to fundamental HTML, CSS and JavaScript</li>
+    <li>Facilitate rapid app development</li>
+</ul>
+
+
+<h2>History</h2>
+
+<ul>
+    <li>Started out as a simple modal window interface I built for the web team at the USU Research Foundation. This inspired the totally original name.</li>
+    <li>Expanded on by building some lightweight form elements for a content management system - ITS NOT A FRAMEWORK!!!</li>
+    <li>Added some more advanced and really cool form elements (more on this later)</li>
+    <li>Okay, its getting big, there's stuff that the CMS does that I want the forms to do, and maybe its a framework...</li>
+    <li>
+        <h3>Yep, I'll admit it, its a framework, here is the file structure:</h3>
+        <div class="workspace structure">
+            <h4>Webteam User Interface</h4>
+            <div id="grid">grid.js</div>
+            <div id="state">state.js</div>
+            <div id="forms">forms.js</div>
+            <div id="wui">wui.js</div>
+            <div id="jquery">jQuery</div>
+        </div>
+    <li>Definitely a framework, and I want to use this externally. Check it in to <a href="https://github.com/srolfe26/WUI">GitHub</a></li>
+    <li>AAAAAHHH! People want to use it, I haven't written any documentation! Its actually kind of a mess! Aaaah! &mdash; Working on this one.</li>
+</ul>
+
+<h2>Why build on jQuery?</h2>
+
 <p>
-	This is it friends.
+	The WUI was built on jQuery initially because that was how I knew how to do the most, the easiest, with JavaScript.  As my understanding of
+	JavaScript increased I was tempted to write everything in native JS, but I wanted to make this framework as easy for a beginner as possible,
+	and using jQuery facilitates that because it is so widely used.
 </p>
+
+
+<h2>Some Code</h2>
+<ul>
+	<li>With a very small amount of code you can have a very nice date/time control that can understand many common ways of expressing time (in English).
+    	You can try typing in things such as, "Today at noon", "Yesterday at four thirty pm", "Five months from next Thursday", or something boring like
+    	"9/22/2013 13:21". Go ahead and try it out. Notice that if you use the date picker that any time you entered will be retained. I think this
+    	is a really neat control.
+        <pre>
+var a = new Wui.datetime({blankText:'Type a date and time in here', appendTo:$('#text-example')});
+a.place();
+        </pre>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                var a = new Wui.Datetime({blankText:'Type a date and time in here', appendTo:$('#text-example')});
+                a.place();
+            });
+        </script>
+        <div class="example" id="text-example"></div>
+    </li>
+</ul>
+<h2>A Diagram</h2>
+<ul>
+    <li>First, a diagram of everything available (this is actually the WUI 1.0 diagram, I need to update!):
+    	<img src="../img/docs/wui-map.png" alt="wui-map" width="1444" height="2950">
+    </li>
+</ul>
+
+<h2>Core Concepts</h2>
+<ul>
+    <li>Prototypal Inheritance</li>
+    <li>Its JavaScript!!! Yes, its built on jQuery, but its all just JavaScript, so relax. You can use it with other frameworks, you can write your own stuff. Its awesome.</li>
+    <li>Check out the WUI Object to get a feeling for placing, hierarchy, push, splice and onRender.</li>
+</ul>
+
+
+<h1>Going Forward 
+    <span>Road Map</span>
+    <span>(aka Current Weaknesses)</span>
+</h1>
+
+<ul>
+    <li>1. Documentation needs some work</li>
+    <li>1. More testing. Its young! Increase the test bed, and create more unit tests.</li>
+    <li>1. Uniformity - Update, this is 95% better since I first wrote this document, almost done.
+        <ul>
+            <li>ValChange vs. OnChange</li>
+        </ul>
+    </li>
+    <li>How to structure apps - its not exactly MVC, but it'd sure be nice to get close, but not have it strictly enforced.</li>
+</ul>
+
 </body>
 </html>
