@@ -432,9 +432,11 @@ var Wui = Wui || {};
 		afterSet:		function(){},
 		beforeSet:		function(){},
 		success:		function(r){
-							var me = this, 
-								response	= (me.dataContainer && r[me.dataContainer]) ? r[me.dataContainer] : r,
-								total 		= (me.totalContainer && r[me.totalContainer]) ? r[me.totalContainer] : response.length;
+							var me = this,
+								dc			= me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
+								tc			= me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
+								response	= (dc && r[dc]) ? r[dc] : r,
+								total 		= (tc && r[tc]) ? r[tc] : response.length;
 							me.waiting = false;
 							me.onSuccess(r);
 							me.setData(response,total);
@@ -2861,9 +2863,10 @@ var Wui = Wui || {};
 							Wui.Pane.prototype.init.call(this);
 						},
 		tabsBottom:		false,
-		cls:			'wui-tabs',
 		place:      	function(){
 							var me = this;
+							
+							me.el.addClass('wui-tabs');
 							
 							//adds the objects items if any
 							if(me.items === undefined) me.items = [];
@@ -2880,13 +2883,13 @@ var Wui = Wui || {};
 								}));
 							});
 							
-							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.wrap($('<div>').addClass('wui-tab-panel')); }); });
+							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
 						},
 		giveFocus:		function(tab){
 							$.each(this.items,function(idx,itm){
 								var isActive = itm === tab;
 								itm.tab.el.toggleClass('selected', isActive);
-								itm.el.parent().toggleClass('active', isActive);
+								itm.el.toggleClass('active', isActive);
 							});
 						},
 		onRender:		function(){

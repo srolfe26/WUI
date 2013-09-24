@@ -43,9 +43,10 @@
 							Wui.Pane.prototype.init.call(this);
 						},
 		tabsBottom:		false,
-		cls:			'wui-tabs',
 		place:      	function(){
 							var me = this;
+							
+							me.el.addClass('wui-tabs');
 							
 							//adds the objects items if any
 							if(me.items === undefined) me.items = [];
@@ -62,13 +63,13 @@
 								}));
 							});
 							
-							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.wrap($('<div>').addClass('wui-tab-panel')); }); });
+							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
 						},
 		giveFocus:		function(tab){
 							$.each(this.items,function(idx,itm){
 								var isActive = itm === tab;
 								itm.tab.el.toggleClass('selected', isActive);
-								itm.el.parent().toggleClass('active', isActive);
+								itm.el.toggleClass('active', isActive);
 							});
 						},
 		onRender:		function(){

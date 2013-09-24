@@ -220,12 +220,6 @@
 .wui-form-err.wui-disabled.wui-fe input[type=text][disabled], .wui-form-err.wui-disabled.wui-fe textarea[disabled] {border-color:#fff; color:#fdd;}
 .wui-fe.wui-disabled > label { font-style: italic; font-weight: normal; }
 
-/**********************************************   nested panes   ***********************************************/
-.wui-pane > .wui-pane-wrap > .wui-pane-content > .wui-pane > .wui-pane-header,
-.wui-pane > .wui-pane-wrap > .wui-pane-content > .wui-pane > .wui-pane-footer {background:#fff; text-shadow:none; border: none;}
-	.wui-pane > .wui-pane-wrap > .wui-pane-content > .wui-pane > .wui-pane-header h1 {color:#555;}
-	.wui-pane > .wui-pane-wrap > .wui-pane-content > .wui-pane > .wui-pane-wrap > .wui-pane-content {background-color:#ccc;}
-
 /**********************************************   grid styles   ************************************************/
 .wui-ghs {height:1px !important; overflow:hidden; margin:-1px 0 0;}
 .wui-gh {width:100%; overflow:hidden; position: absolute; background-color:#555;}
@@ -281,14 +275,36 @@
 
 .wui-tabs .wui-pane-header {border-top: 1px solid #888; border-bottom:none;}
 .wui-tabs .wui-pane-footer {border-top: none; border-bottom: 1px solid #888;}
-
+.wui-tab.wui-btn {text-shadow: none !important; border:0;}
 .wui-tabs .wui-pane-header .wui-tab.wui-btn:hover { box-shadow: 0 -4px 4px rgba(0, 0, 0, 0.5) inset; }
 .wui-tabs .wui-pane-footer .wui-tab.wui-btn:hover { box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5) inset; }
 .wui-tabs .wui-pane-header .wui-tab.wui-btn.selected:hover, .wui-tabs .wui-pane-footer .wui-tab.wui-btn.selected:hover {box-shadow: none;}
 
+.wui-pane.wui-tab-panel {border:0;}
+.wui-pane.wui-tab-panel > .wui-pane-wrap {padding-top:0 !important;}
+	.wui-pane.wui-tab-panel > .wui-pane-wrap > .wui-pane-content {background-color:#fff !important;}
+.wui-pane.wui-tab-panel > .wui-pane-header {display:none;}
 
+/**********************************************   Nested Panes - Level 1,3,5  **********************************************/
+.wui-pane  .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane {float:left; border-color:#fff;}
+	.wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane-footer,
+	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer,
+	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-header,
+	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-footer {background:#fff; text-shadow:none; border: none;}
+		.wui-pane  .wui-pane  .wui-pane-header h1 {color:#555;}
+		.wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
+		.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
+		
+/**********************************************   Nested Panes - Level 2,4  **********************************************/
+.wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane {border-color:#ccc;}
+	.wui-pane .wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane .wui-pane-footer,
+	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-header, 
+	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer {background:#ccc; text-shadow:none;}
+		.wui-pane .wui-pane .wui-pane .wui-pane-header h1 {font-weight: normal;}
+		.wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
 
-
+/**********************************************   Form Elements in TBar and BBar  **********************************************/
+		
 /****************************************   WUI Test Suite and Docs   ****************************************/
 .wui-docs {font-family: Arial, Helvetica, Verdana, sans-serif;}
 .wui-docs pre {

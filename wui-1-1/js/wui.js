@@ -419,9 +419,11 @@ var Wui = Wui || {};
 		afterSet:		function(){},
 		beforeSet:		function(){},
 		success:		function(r){
-							var me = this, 
-								response	= (me.dataContainer && r[me.dataContainer]) ? r[me.dataContainer] : r,
-								total 		= (me.totalContainer && r[me.totalContainer]) ? r[me.totalContainer] : response.length;
+							var me = this,
+								dc			= me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
+								tc			= me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
+								response	= (dc && r[dc]) ? r[dc] : r,
+								total 		= (tc && r[tc]) ? r[tc] : response.length;
 							me.waiting = false;
 							me.onSuccess(r);
 							me.setData(response,total);
