@@ -5,6 +5,7 @@
     <title>WUI Object - WUI 1.1</title>
     
 	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
 
 	<style type="text/css" class="wui-doc-code">
 		.stage {
@@ -25,6 +26,7 @@
 	<script type="text/javascript" src="../js/wui.js"></script>
 	<script type="text/javascript" src="../js/forms.js"></script>
 	<script type="text/javascript" src="../js/grid.js"></script>
+	<script type="text/javascript" src="../js/docs.js"></script>
 	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
@@ -34,7 +36,11 @@
 				prependTo:	$('body')
 			})
 			a.place();
-
+		});
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
 			// SHOW ITEM CREATION CODE
 			Wui.docCode();
 			
@@ -125,5 +131,178 @@
 </head>
 <body class="wui-docs">
 <h1>WUI Object</h1>
+
+<table class="wui-test-results">
+	<thead>
+		<tr><th>Configs</th></tr>
+	</thead>
+	<tbody>
+		<tr><td><strong>el</strong><p>The DOM element of the object. Though not an officially specified config for a Wui.O, many of the methods below are meant to manipulate the el, though don't rely on its existence.</p></td></tr>
+		<tr><td><strong>elAlias</strong><p>Similar to the el, the elAlias pre-empts the el, is usually a child of the el, and is where objects are added or removed from a WUI object's DOM element.</p></td></tr>
+	</tbody>
+</table>
+
+<table class="wui-test-results">
+	<thead>
+		<tr><th>Methods</th></tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+				<strong>addToDOM(object, [target, action])</strong><br>
+				<pre>
+					object: A WUI or jQuery object to be added to the DOM
+					target: An item already on the DOM that the action will be performed on the object relative to
+					action: The jQuery DOM manipulation method
+					
+					returns: true
+					
+					Adds an object to the DOM and applies any CSS styles defined for the object by calling 
+					cssByParam() if its a WUI object.
+					
+					If the object has a 'appendTo' or 'prependTo' config, target and action will be ignored whether 
+					passed in or not, if target is defined it will then be used, if target is not defined, and 
+					'appendTo' and 'prependTo' are not defined, the objects 'parent' will be used for appending. If 
+					the object has no parent, it will be appended to the body.
+					
+					If the object has a 'appendTo' or 'prependTo' config, that action will be used, otherwise the
+					passed in action is used if defined, otherwise uses 'append'.
+				</pre>
+			</td>
+		</tr><tr>
+			<td>
+				<strong>append(item)</strong><br>
+				<pre>
+					item: A jQuery object to be added
+						
+					Appends item to the WUI Object's 'elAlias' or 'el', whichever is defined.
+				</pre>
+			</td>
+		</tr><tr>
+			<td>
+				<strong>clear()</strong><br>
+				<pre>
+					Removes items from the WUI Object's 'elAlias' or 'el', whichever is defined.
+				</pre>
+			</td>
+		</tr><tr>
+			<strong>callRender()</strong><br>
+			<pre>
+				A function that gets called when an object is placed and gets called on all of a placed object's items.
+				Adds CSS styles via cssByParam, calls onRender() if it exists on the object, determines whether the 
+				object is using a 'fit' layout and performs layout on the item, calls its children's callRender(), 
+				and finally calls its own afterRender() if it exists.
+			</pre></td>
+		</tr><tr>
+			<td>method cssByParam<br><pre>function (m) { 
+                        var m = m || this;
+                        
+                        if(m.el &amp;&amp; m.el.addClass){
+                        	if(m.attr)	m.el.attr(m.attr);
+                        	
+                        	// calculate dimensions
+                        	if(Wui.isNumeric(m.height))	m.el.css({height: m.height});
+                        	if(Wui.isNumeric(m.width))	m.el.css({width: m.width});
+                        	if(m.width &amp;&amp; m.width.indexOf &amp;&amp; m.width.indexOf('%') != -1)
+								m.el.css({width: Math.floor((parseFloat(m.width) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).width())});
+							if(m.height &amp;&amp; m.height.indexOf &amp;&amp; m.height.indexOf('%') != -1){
+								m.el.css({height: Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height())});
+							}
+                        	return m.el.addClass(m.cls);
+                        }else{
+                        	return m;
+                        }
+                    }</pre></td>
+		</tr><tr>
+			<td>method each<br><pre>function (f){
+						for(var i = this.items.length - 1; i &gt;= 0; i--)	f(this.items[i],i);
+						return true;
+			    	}</pre></td>
+		</tr><tr>
+			<td>method hide<br><pre>function (speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);}</pre></td>
+		</tr><tr>
+			<td>method place<br><pre>function (after){
+                        var me = this;
+						
+						//adds the objects items if any
+						if(me.items === undefined) me.items = [];
+						for(var i in me.items){
+							me.items[i].parent = me;
+							if(me.items[i].place)	me.items[i].place();
+							else					me.addToDOM(me.items[i]);
+						}
+						
+                        //adds the object to the DOM and starts the recursive callRender to render properties on the children
+                        me.addToDOM(me);
+                        
+                        // perform operations on the object after its placed on the DOM but before onRender
+                        if(after &amp;&amp; typeof after == 'function')	after(me);
+                        
+                        // run through a parent object and all of its children to run onRender
+						if(me.parent === undefined) me.callRender();
+						
+                        return me;
+                    }</pre></td>
+		</tr><tr>
+			<td>method push<br><pre>function (){
+                        var me = this;
+						
+						if(me.items === undefined) me.items = [];
+						for(var i in arguments){
+							arguments[i].parent = me;
+							if(arguments[i].place)	arguments[i].place();
+							else					me.addToDOM(arguments[i]);
+						}		
+						
+						return Array.prototype.push.apply(me.items,arguments);
+                    }</pre></td>
+		</tr><tr>
+			<td>method remove<br><pre>function (){
+                        var me = this, spliceVal = null;
+                        if(me.parent){
+	                        me.parent.each(function(itm,idx){ if(itm === me) spliceVal = idx;});
+	                        if(spliceVal !== null)
+	                        	me.parent.splice(spliceVal,1);
+                        }
+                        this.el.remove();
+                        delete this;
+                    }</pre></td>
+		</tr><tr>
+			<td>method show<br><pre>function (speed, callback){ var args = ['fadeIn']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);}</pre></td>
+		</tr><tr>
+			<td>method showHide<br><pre>function (fn,speed,callback){
+				    	 var speed = (typeof speed == 'number') ? speed : 250;
+				    	 if(typeof arguments[1] == 'function') callback = arguments[0];
+				    	 return (this.elAlias || this.el)[fn](speed, callback);
+			        }</pre></td>
+		</tr><tr>
+			<td>method splice<br><pre>function (idx, howMany){
+            			var me = this,
+                        	el = me.elAlias || me.el;
+							idx = parseInt(idx);
+                        
+						if(me.items === undefined) me.items = [];
+						
+                        //remove specified elements
+                        for(var i = idx; i &lt; (idx + howMany); i++)
+                            if(me.items[i]) me.items[i].el.remove();
+                        
+                        //standard splice functionality on array and calcs
+                        var retVal      = Array.prototype.splice.apply(me.items, arguments),
+                            numAdded    = arguments.length - 2;
+							
+                        //append any additional el's in proper order
+                        if(me.items.length == numAdded){                      //items ended up replacing the array
+                            for(var i = 0; i &lt; me.items.length; i++)          { me.addToDOM(me.items[i],el); me.items[i].parent = me; }
+                        }else if(me.items[(idx + numAdded)] == undefined){    //meaning the new items were inserted at the end of the array
+                            for(var i = idx; i &lt; me.items.length; i++)        { me.addToDOM(me.items[i],me.items[i-1].el,'after'); me.items[i].parent = me; }
+                        }else if (numAdded != 0){                             //items at the beginning/middle of the array
+                            for(var i = (idx + numAdded); i &gt; 0; i--)         { me.addToDOM(me.items[i-1],me.items[i].el,'before'); me.items[i-1].parent = me; }
+                        }
+                        
+                        return retVal;
+                    }</pre></td>
+		</tr></tbody>
+</table>
 </body>
 </html>

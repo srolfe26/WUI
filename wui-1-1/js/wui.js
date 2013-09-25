@@ -150,7 +150,7 @@ var Wui = Wui || {};
 						var me = this, el = me.elAlias || me.el;
 						el.append(obj);
 					},
-		clear:		function(obj){
+		clear:		function(){
 						var me = this, el = me.elAlias || me.el;
 						el.children().remove();
 					},
@@ -237,7 +237,6 @@ var Wui = Wui || {};
                     },
 		remove:     function(){
                         var me = this, spliceVal = null;
-                        console.log(me.parent);
                         if(me.parent){
 	                        me.parent.each(function(itm,idx){ if(itm === me) spliceVal = idx;});
 	                        if(spliceVal !== null)
@@ -527,9 +526,7 @@ var Wui = Wui || {};
 			disabled:	false,
 			toolTip:    null,
 			text:       'Button'
-	    }, args, {
-			cls:		'wui-btn ' + (args.cls || '')
-		});
+	    }, args);
 		this.init();
 	};
 	Wui.Button.prototype = $.extend(new Wui.O(),{
@@ -538,8 +535,13 @@ var Wui = Wui || {};
 	                    var me = this;
 						if(me.disabled)	me.disable();
 	                    
+						me.el.addClass('wui-btn');
+						
 	                    me.el.click(function(e){
-	                    	if(!me.disabled) me.click(arguments);
+	                    	if(!me.disabled){
+								me.click(arguments);
+								me.el.trigger($.Event('wuibtnclick'),[me]);
+							}
 	                    	return false;
 	                    })
 	                    .html(me.text)

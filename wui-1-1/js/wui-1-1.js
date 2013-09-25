@@ -663,7 +663,10 @@ var Wui = Wui || {};
 						if(me.disabled)	me.disable();
 	                    
 	                    me.el.click(function(e){
-	                    	if(!me.disabled) me.click(arguments);
+	                    	if(!me.disabled){
+								me.click(arguments);
+								me.el.trigger($.Event('wuibtnclick'),[me]);
+							}
 	                    	return false;
 	                    })
 	                    .html(me.text)
