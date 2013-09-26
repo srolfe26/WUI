@@ -1,5 +1,42 @@
 ﻿(function($,window) {
 	/****************** WUI Docs & Test Suite *****************/
+	
+	
+	
+	
+	
+	Wui.getJsObjectFromString = function(s){
+		var i = 1,
+			braceCount = 1;	// The beginning of the passed in string ought to start with a bracket, this assumption is vital to the working of the method
+		
+		for( ; i < s.length; i++){
+			if(s[i] === '{') 		braceCount++;
+			if(s[i] === '}')  		braceCount--;
+			if(braceCount === 0)	break;
+		}
+		
+		return s.substr(0, i + 1);
+	};
+	
+	
+	Wui.findObjsInFile = function(filetext, obj){
+		filetext.replace(/\/\*\*([^\*]|[\r\n]|(\*+([^\*/]|[\r\n])))*\*+\/[\s]*Wui.O[\s]*=[\s]*function\([^)]*\)\{/,function(){
+			// do something
+			console.log(arguments);
+		});
+	};
+	
+	
+	Wui.getObjDoc = function(fileUrl, findObj){
+		$.ajax(fileUrl,{
+			dataType:	'script',
+			success:	function(r){
+							Wui.findObjsInFile(r, findObj);
+						}
+		});
+		return true;
+	};
+	
 	Wui.HTMLifyCode = function(c){
 		var e = document.createElement('i'),
 			r = '<pre>' + c.replace(/</g,'&lt;').replace(/>/g,'&gt;')+ '</pre>';
