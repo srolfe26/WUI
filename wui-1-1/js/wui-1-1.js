@@ -214,6 +214,25 @@ var Wui = Wui || {};
 						return true;
 			    	},
 		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		layout:		function(){
+						var me = this;
+			        	
+			        	// run css styles
+						me.cssByParam(me);
+			        	
+			        	// Perform Wui.fit on items that need it
+			        	var needFit = false;
+			        	
+			        	for(var i in me.items)
+			        		if(me.items[i].fit)
+				        		needFit = true;
+								
+						if(me.fitDimension || needFit)
+			        		Wui.fit(me.items, (me.fitDimension || undefined));
+			        		
+			        	// Perform layout for child elements
+			        	for(var i in me.items) if(me.items[i].layout) me.items[i].layout();
+					},
 		place:      function(after){
                         var me = this;
 						
@@ -3104,6 +3123,7 @@ var Wui = Wui || {};
 							if(me.hideHeader)	me.headingContainer.height(0);
 						},
 		layout:			function(){
+							Wui.O.prototype.layout.call(this);
 							this.posDataWin();
 							this.sizeCols();
 						},
@@ -3235,7 +3255,7 @@ var Wui = Wui || {};
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.5); // 2 accounts for borders
+								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.8); // 2 accounts for borders
 							});
 						},
 		onRender:		function (){

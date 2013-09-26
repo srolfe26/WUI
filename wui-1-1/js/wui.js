@@ -121,9 +121,31 @@ var Wui = Wui || {};
 	};
 	
 	
-	/** The basic WUI object */
+	/** The base object from which all other WUI Objects extend
+     *  @author     Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
+     *  @creation   2013-09-26
+     *  @version    1.1
+    */
 	Wui.O = function(args){ $.extend(this,args); };
 	Wui.O.prototype = {
+		/**
+		@param {object}	object	A WUI or jQuery object to be added to the DOM
+		@param {object}	target	An item already on the DOM that the action will be performed on the object relative to
+		@param {string}	action	The jQuery DOM manipulation method
+		
+		@return true
+		
+		Adds an object to the DOM and applies any CSS styles defined for the object by calling 
+		cssByParam() if its a WUI object.
+		
+		If the object has a 'appendTo' or 'prependTo' config, target and action will be ignored whether 
+		passed in or not, if target is defined it will then be used, if target is not defined, and 
+		'appendTo' and 'prependTo' are not defined, the objects 'parent' will be used for appending. If 
+		the object has no parent, it will be appended to the body.
+		
+		If the object has a 'appendTo' or 'prependTo' config, that action will be used, otherwise the
+		passed in action is used if defined, otherwise uses 'append'.
+		*/
 		addToDOM:	function(obj, tgt, act){
 						// Take the target and action from the passed object first if defined, then default to passed arguments, 
 						// then to a default of $('body') and 'append'
@@ -146,14 +168,26 @@ var Wui = Wui || {};
 						
 						return true;
 					},
+		/**
+		@param {object}	item	A jQuery object to be added
+			
+		Appends item to the WUI Object's 'elAlias' or 'el', whichever is defined.
+		*/
 		append:		function(obj){
 						var me = this, el = me.elAlias || me.el;
 						el.append(obj);
 					},
+		/** Removes items from the WUI Object's 'elAlias' or 'el', whichever is defined. */
 		clear:		function(){
 						var me = this, el = me.elAlias || me.el;
 						el.children().remove();
 					},
+		/**
+			A function that gets called when a WUI Object is placed and gets called on all of a placed object's items.
+			Adds CSS styles via cssByParam, calls onRender() if it exists on the object, determines whether the 
+			object is using a 'fit' layout and performs layout on the item, calls its children's callRender(), 
+			and finally calls its own afterRender() if it exists.
+		*/
 		callRender:	function(){
 			        	var me = this;
 			        	
@@ -177,6 +211,14 @@ var Wui = Wui || {};
 			        	for(var i in me.items) if(me.items[i].callRender) me.items[i].callRender();
 						if(me.afterRender)  me.afterRender();
 			        },
+		/**
+		@param {object} item	A WUI Object, or if undefined, the object that this method is a member of
+		
+		@return	The object's el if it has one, or just the object
+		
+		Adds HTML properties like CSS class, attributes, and sets height and width as either absolute values
+		or percentages of their parent.
+		*/
 		cssByParam: function(m) { 
                         var m = m || this;
                         
@@ -196,11 +238,35 @@ var Wui = Wui || {};
                         	return m;
                         }
                     },
+		/**
+		@param {function} fn: A function that gets called for each item of the object this function is a member of
+		@return: true
+		The passed in function gets called with two parameters the item, and the item's index.
+		*/
         each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)	f(this.items[i],i);
 						return true;
 			    	},
 		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		layout:		function(){
+						var me = this;
+			        	
+			        	// run css styles
+						me.cssByParam(me);
+			        	
+			        	// Perform Wui.fit on items that need it
+			        	var needFit = false;
+			        	
+			        	for(var i in me.items)
+			        		if(me.items[i].fit)
+				        		needFit = true;
+								
+						if(me.fitDimension || needFit)
+			        		Wui.fit(me.items, (me.fitDimension || undefined));
+			        		
+			        	// Perform layout for child elements
+			        	for(var i in me.items) if(me.items[i].layout) me.items[i].layout();
+					},
 		place:      function(after){
                         var me = this;
 						
@@ -738,7 +804,11 @@ var Wui = Wui || {};
 		return false;
 	}
 	
-	
+	/** Displays an 'alert' type message on the screen
+     *  @author     Stephen Nielsen
+     *  @creation   2013-09-26
+     *  @version    1.1
+    */
 	Wui.msg = function(msg, msgTitle, callback, content){
 	    var cntnt   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
 	        msg  = new Wui.Window({

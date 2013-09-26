@@ -281,6 +281,7 @@
 							if(me.hideHeader)	me.headingContainer.height(0);
 						},
 		layout:			function(){
+							Wui.O.prototype.layout.call(this);
 							this.posDataWin();
 							this.sizeCols();
 						},
@@ -412,7 +413,7 @@
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.5); // 2 accounts for borders
+								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.8); // 2 accounts for borders
 							});
 						},
 		onRender:		function (){

@@ -1,10 +1,5 @@
 ﻿(function($,window) {
 	/****************** WUI Docs & Test Suite *****************/
-	
-	
-	
-	
-	
 	Wui.getJsObjectFromString = function(s){
 		var i = 1,
 			braceCount = 1;	// The beginning of the passed in string ought to start with a bracket, this assumption is vital to the working of the method
@@ -20,22 +15,83 @@
 	
 	
 	Wui.findObjsInFile = function(filetext, obj){
-		filetext.replace(/\/\*\*([^\*]|[\r\n]|(\*+([^\*/]|[\r\n])))*\*+\/[\s]*Wui.O[\s]*=[\s]*function\([^)]*\)\{/,function(){
-			// do something
-			console.log(arguments);
+		var obj = obj.replace('.','\\.'), objCode = '', objIntro = '';
+		filetext.replace(new RegExp("\\/\\*\\*((?:[^\\*]|(?:\\*+(?:[^\\*/])))*)\\*+\\/[\\s]*" +obj+ "|" + obj + '\.prototype', "g"),function(match,comment,matchStart){
+			var firstBracket = filetext.indexOf('{', matchStart + match.length);
+			if($.trim(comment).length > 0)
+				objIntro = comment;
+			objCode += Wui.getJsObjectFromString(filetext.substr(firstBracket,filetext.length - firstBracket)) + '\n\n';			
+			return match;
 		});
+		return {code:objCode, intro:objIntro};
 	};
 	
 	
-	Wui.getObjDoc = function(fileUrl, findObj){
+	Wui.getObjDoc = function(fileUrl, findObj, target){
 		$.ajax(fileUrl,{
 			dataType:	'script',
 			success:	function(r){
-							Wui.findObjsInFile(r, findObj);
+							var txt 		= Wui.findObjsInFile(r, findObj),
+								doc			= {
+												doc:	txt.intro,
+												configs:[],
+												methods:[]
+											  };
+								
+							// Get methods
+							txt.code.replace(/(\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*function)/g,function(m,all,comment,itemName,charIndex){
+								doc.methods.push({item:itemName, doc:comment});
+								return '';
+							});
+							
+							// Get configs - the similar regex will not match the functions because they were removed in the last step
+							txt.code.replace(/\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]([^\,^\s]+)/g,function(m,comment,itemName,defaultVal){
+								if(defaultVal.match(/\bfunction\b/) === null)
+									doc.configs.push({item:itemName, doc:comment});
+							});
+							(target || $('body')).append(Wui.transformJavaDoc(doc.doc,findObj));
 						}
 		});
 		return true;
 	};
+	
+	Wui.transformJavaDoc = function(m,obj){
+		var keyInfo = [],
+			engine  = new Wui.Template({template:'<div class="wui-doc-info-row"><div>{title}</div><div>{val}</div></div>'}),
+			key = new $('<div class="wui-doc"><h3>' + obj + '</h3></div>');
+		
+		//get parameters
+		m = m.replace(/\@param\s+\{([\w]+)\}\s+([\w]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
+			keyInfo.push({title:'Param', val:'<span class="wui-doc-var-name">'+varname+'</span><span class="wui-doc-var-type">' +dt+ '</span><span class="wui-doc-var-desc">' +desc+ '</span>'});
+			return '';
+		});
+		//return & throws
+		m = m.replace(/\@return\s+([^\n]+)/,function(mch,returns){ keyInfo.push({title:'Returns', val:returns}); return ''; })
+			 .replace(/\@throws\s+([^\n]+)/,function(mch,returns){ keyInfo.push({title:'Throws', val:returns}); return ''; });
+		
+		// get Author Info
+		m = m.replace(/\@author\s+([^\n]+)/,function(m,author){
+			var email = null;
+			author = author.replace(/\(([^\)]+)\)/, function(mch,eml){ email = eml; return ''; });
+			var auth = (email !== null) ? '<a href="mailto:' +email+ '">' +$.trim(author)+ '</a>' : '<span>' +$.trim(author)+ '</span>';
+			keyInfo.push({title:'Author', val:auth});
+			return '';
+		});
+		
+		//get creation date & Flags
+		m = m.replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver}); return ''; })
+			 .replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate}); return ''; })
+			 .replace(/\@deprecated/,function(mch){ key.el.children('h3').append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
+			 .replace(/\@private/,function(mch){ key.children('h3').append('<span class="wui-doc-private">private</span>'); return ''; })
+			 .replace(/\@awesome/,function(mch){ key.children('h3').append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
+		
+		$(keyInfo).each(function(o){
+			engine.data = keyInfo[o];
+			key.append(engine.make());
+		});
+		
+		return key.append($('<p>').html(m.replace(/\*/g,'')));
+	}
 	
 	Wui.HTMLifyCode = function(c){
 		var e = document.createElement('i'),
