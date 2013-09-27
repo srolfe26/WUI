@@ -557,7 +557,10 @@ var Wui = Wui || {};
 						for(var i = 0; i < holdingData.length; i++){
 							var rec = me.data = holdingData[i],
 								a = {el:Wui.Template.prototype.make.call(me), rec:rec};
-							
+								doAppend(a);
+						}
+						
+						function doAppend(a){
 							me.append(
 								a.el.click(function(){
 									if(me.selected && me.selected === a){

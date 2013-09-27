@@ -27,7 +27,7 @@
 	};
 	
 	
-	Wui.getObjDoc = function(fileUrl, findObj, target){
+	Wui.makeObjDoc = function(fileUrl, findObj, target, showObjName){
 		$.ajax(fileUrl,{
 			dataType:	'script',
 			success:	function(r){
@@ -49,16 +49,20 @@
 								if(defaultVal.match(/\bfunction\b/) === null)
 									doc.configs.push({item:itemName, doc:comment});
 							});
-							(target || $('body')).append(Wui.transformJavaDoc(doc.doc,findObj));
+							(target || $('body')).append(Wui.transformJavaDoc(doc,findObj,showObjName));
 						}
 		});
 		return true;
 	};
 	
-	Wui.transformJavaDoc = function(m,obj){
-		var keyInfo = [],
+	Wui.transformJavaDoc = function(documentation,obj,showObjName){
+		var m		= documentation.doc || documentation,
+			keyInfo = [],
 			engine  = new Wui.Template({template:'<div class="wui-doc-info-row"><div>{title}</div><div>{val}</div></div>'}),
-			key = new $('<div class="wui-doc"><h3>' + obj + '</h3></div>');
+			key		= new $('<div>').addClass('wui-doc');
+			
+			if(obj && showObjName)
+				key.append('<h3>').text(obj);
 		
 		//get parameters
 		m = m.replace(/\@param\s+\{([\w]+)\}\s+([\w]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
@@ -90,18 +94,74 @@
 			key.append(engine.make());
 		});
 		
-		return key.append($('<p>').html(m.replace(/\*/g,'')));
+		var pre = $(Wui.HTMLifyCode(m.replace(/\*/g,'')));
+		var p = $('<p>').html(
+			pre.text().replace(/([\n\r]+?\s*)/g,function(m){ 
+				var ret = ''; 
+				for(var i = 0; i < m.length; i++) if(m[i] === '\n') ret += '<br />'; 
+				return ret; 
+			})
+		);
+		key.append(p);
+		
+		if(documentation.methods && documentation.methods.length > 0){
+			var methods = new Wui.DataList({
+					data:		documentation.methods,
+					appendTo:	key,
+					el:			$('<table>\n'+
+									'\t<thead>\n'+
+										'\t\t<tr><th>Methods</th></tr>\n'+
+									'\t</thead>\n' +
+									'\t<tbody>\n\t</tbody>\n' +
+								'</table>\n').addClass('wui-test-results'),
+								
+					template:	'\n\t\t<tr>\n' +
+									'\t\t\t<td>{item}<div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
+								'\n\t\t</tr>\n',
+					init:		function(){
+									this.elAlias = this.el.children('tbody');
+								}
+				});
+				methods.place();
+				methods.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
+				methods.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });
+		}
+		
+		if(documentation.configs && documentation.configs.length > 0){
+			var configs = new Wui.DataList({
+					data:		documentation.configs,
+					appendTo:	key,
+					el:			$('<table>\n'+
+									'\t<thead>\n'+
+										'\t\t<tr><th>Methods</th></tr>\n'+
+									'\t</thead>\n' +
+									'\t<tbody>\n\t</tbody>\n' +
+								'</table>\n').addClass('wui-test-results'),
+								
+					template:	'\n\t\t<tr>\n' +
+									'\t\t\t<td>{item}<div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
+								'\n\t\t</tr>\n',
+					init:		function(){
+									this.elAlias = this.el.children('tbody');
+								}
+				});
+				configs.place();
+		}
+		
+		return key;
 	}
 	
 	Wui.HTMLifyCode = function(c){
 		var e = document.createElement('i'),
-			r = '<pre>' + c.replace(/</g,'&lt;').replace(/>/g,'&gt;')+ '</pre>';
+			r = '<pre>' + $.trim(c.replace(/</g,'&lt;').replace(/>/g,'&gt;')) + '</pre>';
+			
 		// replace tabs with 4 spaces where the browser doesn't support tab size
 		if(e.style.tabSize !== '' && e.style.MozTabSize !== '' && e.style.oTabSize !== '')	r.replace(/\t/g,'    ');
+		
 		return r;
 	};
 	
-	Wui.docCode = function(){
+	Wui.docCode = function(file,obj){
 		var wuiCode = $('.wui-doc-code');
 			if(wuiCode.length > 0){
 				var	docCode = '';
@@ -123,7 +183,6 @@
 						preVisible:	false,
 						text:		'Show Source',
 						appendTo:	testsNCode.el,
-						cls:		'wui-docs',
 						click:		function(){
 										if(this.preVisible){ preObj.fadeOut(1000); this.setText('Show Source'); }
 										else{ preObj.fadeIn(1000); this.setText('Hide Source'); }
@@ -135,7 +194,6 @@
 						vis:	false,
 						text:		'Show Unit Tests',
 						appendTo:	testsNCode.el,
-						cls:		'wui-docs',
 						click:		function(){
 										if(this.vis){ testObj.fadeOut(1000); this.setText('Show Unit Tests'); }
 										else{ testObj.fadeIn(1000); this.setText('Hide Unit Tests'); }
@@ -148,6 +206,9 @@
 				srcBtn.place();
 				testsNCode.addToDOM(testsNCode,$('h1'),'after');
 				testsNCode.el.append(testObj.hide(), preObj.hide());
+				
+				//document object if defined
+				if(file && obj) Wui.makeObjDoc(file,obj);
 			}
 	};
 	
