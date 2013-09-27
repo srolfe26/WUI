@@ -15,14 +15,14 @@
 	Wui.Form = function(args){
 	    $.extend(this,{
 			afterCreate:function(){},
-			disabled:	false,
-			errCls:		'wui-form-err',
-			labelPos:	'top'
+			disabled:		false,
+			errCls:			'wui-form-err',
+			labelPosition:	'top'
 		}, args, {
-	    	dataValid:  null,
-	    	formChanged:false,
-			el:			$('<div>'),
-			errs:       []
+	    	dataValid:  	null,
+	    	formChanged:	false,
+			el:				$('<div>'),
+			errs:       	[]
 	    });
 	    
 	    this.init();
@@ -36,7 +36,7 @@
 	                },
 		each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)
-							if(!(itm instanceof Wui.Note))
+							if(!(this.items[i] instanceof Wui.Note))
 								f(this.items[i],i);
 						return true;
 			    	},
@@ -63,13 +63,22 @@
 					    this.el.addClass('wui-form labels-' + this.labelPos);
 				    },
 		normFrmItem:function(itm){
-						var me = this;
+						var me = this,
+							extendItem = { labelPosition: me.labelPosition };
+							
 						if(itm.ftype && !(itm instanceof Wui.FormField)){
 							var ft = itm.ftype.split('.');
-							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,((itm.disabled && itm.disabled === true) ? {disabled:me.disabled} : {})) );
+							
+							// If a form is disabled, the field needs to be disabled too
+							if(!(itm.disabled && itm.disabled === true)) $.extend(extendItem,{disabled:me.disabled});
+							
+							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,extendItem) );
 							else										throw('Object type ' +itm.ftype+ ' is not defined.');
 						}else if(itm instanceof Wui.FormField){
-							return $.extend(itm,{disabled:me.disabled});
+							// reset label position for fields that don't have it defined for themselves
+							if(!itm.hasOwnProperty('labelPosition'))
+								itm.el.removeClass('lbl-' + itm.labelPosition).addClass('lbl-' + extendItem.labelPosition);
+							return $.extend(itm, extendItem);
 						}else{
 							return itm;
 						}
@@ -165,7 +174,7 @@
 						}
 						return me.el;
                     },
-		onRender:	function(){ if(this.disabled) this.setDisabled(this.disabled); },
+		onRender:	function(){ if(this.disabled) this.disable(); },
         disable:	function(){
 				        this.disabled = true;
 				        if(this.el && this.el.addClass)
@@ -465,6 +474,7 @@
         itmChange:	function(elem){ this.valChange(this); },
 		getVal:		function(){ return this.calcVal(); },
 		setVal:		function(sv){
+						var me = this;
 						if(me.options.length == 1 && (typeof sv == 'number' || typeof sv == 'string')){
 							me.el.find('input').attr('checked',!!sv).siblings('li').toggleClass('checked',!!sv);
 						}else{

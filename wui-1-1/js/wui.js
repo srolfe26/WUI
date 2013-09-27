@@ -239,15 +239,27 @@ var Wui = Wui || {};
                         }
                     },
 		/**
-		@param {function} fn: A function that gets called for each item of the object this function is a member of
-		@return: true
+		@param {function} fn A function that gets called for each item of the object this function is a member of
+		
+		@return true
 		The passed in function gets called with two parameters the item, and the item's index.
 		*/
         each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)	f(this.items[i],i);
 						return true;
 			    	},
+		/**
+		@param {number} [speed] Time in milliseconds for the hiding element to fade out
+		@param {function} [callback] A function that gets called at the end of the fadeout/hide
+		
+		@return The el or elAlias of the object being hidden
+		Hides an object with the options of an animated fadeout and callback function
+		*/
 		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		/**
+		Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
+		but without the rendering of objects - useful to resize things that are already rendered.
+		*/
 		layout:		function(){
 						var me = this;
 			        	
@@ -267,6 +279,14 @@ var Wui = Wui || {};
 			        	// Perform layout for child elements
 			        	for(var i in me.items) if(me.items[i].layout) me.items[i].layout();
 					},
+		/**
+		@param {function} [after]	A function to be called after an object has been placed
+		@return The object that was placed 
+		Adds the elements of any child objects to itself, then puts its own el on the DOM by 
+		calling addToDOM.  Then executes the 'after' function if provided, then runs the 
+		callRender() function to perform rendering, fit, and any other listners on itself and
+		its children.
+		*/
 		place:      function(after){
                         var me = this;
 						
@@ -289,6 +309,11 @@ var Wui = Wui || {};
 						
                         return me;
                     },
+		/**
+		@param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
+		@return {number} The new length of the array 
+		Adds passed in items to the end of the items array and adds those objects to the DOM.
+		*/
 		push:       function(){
                         var me = this;
 						
@@ -301,6 +326,10 @@ var Wui = Wui || {};
 						
 						return Array.prototype.push.apply(me.items,arguments);
                     },
+		/**
+		Removes the object from its parent's items array (if attached to a parent Wui object) and
+		removes its el from the DOM. Then deletes the object from memory.
+		*/
 		remove:     function(){
                         var me = this, spliceVal = null;
                         if(me.parent){
@@ -311,12 +340,37 @@ var Wui = Wui || {};
                         this.el.remove();
                         delete this;
                     },
-        show:		function(speed, callback){ var args = ['fadeIn']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+        /**
+		@param {number} [speed] Time in milliseconds for the showing element to fade in
+		@param {function} [callback] A function that gets called at the end of the fadein/show
+		@return The el or elAlias of the object being shown
+		Shows an object with the options of an animated fadein and callback function
+		*/
+		show:		function(speed, callback){ var args = ['fadeIn']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		/**
+		@param {string} fn The name of the jQuery method for showing or hiding
+		@param {number} [speed] Time in milliseconds for the showing/hiding element to fade in
+		@param {function} [callback] A function that gets called at the end of the show/hide
+		@return The el or elAlias of the object being shown/hidden
+		This is an internal function used by show() and hide(). Fn is required, but speed and callback
+		are optional and their order is interchangeable.
+		*/
 		showHide:	function(fn,speed,callback){
-				    	 var speed = (typeof speed == 'number') ? speed : 250;
+				    	 var speed = (typeof speed == 'number') ? speed : 1;
 				    	 if(typeof arguments[1] == 'function') callback = arguments[0];
 				    	 return (this.elAlias || this.el)[fn](speed, callback);
 			        },
+		/**
+		@param {number} index The point in the array to start
+		@param {number} howMany The number of items to remove
+		@param {object} [obj,...] Additional WUI Objects can be passed as parameters and will be inserted at the index
+		
+		@return An array of the objects removed, if any
+		
+		Follows the convention of JavaScript's Array.prototype.splice on the object's items array. Items
+		spliced into the array will be spliced in position on the DOM as well. Removed items are removed
+		from the DOM.
+		*/
 		splice:     function(idx, howMany){
             			var me = this,
                         	el = me.elAlias || me.el;
@@ -405,9 +459,6 @@ var Wui = Wui || {};
 						
 						//tie viewport to the window
 						$(window).resize(function(){me.resize();});
-						
-						// resize viewport when DOM elements are added
-						// me.el.bind('DOMNodeInserted', me.DOMNodeAdded); DEPRECATED
 						
 						// add mutation observer for when things get added to the viewport
 						me.el.addClass('wui-viewport').focus();

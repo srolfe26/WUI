@@ -65,7 +65,7 @@
 				key.append('<h3>').text(obj);
 		
 		//get parameters
-		m = m.replace(/\@param\s+\{([\w]+)\}\s+([\w]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
+		m = m.replace(/\@param\s+\{([\w]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
 			keyInfo.push({title:'Param', val:'<span class="wui-doc-var-name">'+varname+'</span><span class="wui-doc-var-type">' +dt+ '</span><span class="wui-doc-var-desc">' +desc+ '</span>'});
 			return '';
 		});
@@ -179,6 +179,33 @@
 					}),
 					preObj = $(Wui.HTMLifyCode(docCode)),
 					testObj = $('<div>').attr({id:'wui-unit-tests'}),
+					
+					/* THIS IS PROBABLY BETTER BUT IT SCREWS UP EXT :-(
+						if(me.el === null) throw('WUI Viewport requires an \'el\' element to be specified.');
+						
+						//calculate initial values of items on page
+						me.offset = me.el.offset();
+						me.calcVPadding();
+						
+						//initial resizing of viewport
+						me.resize();
+						
+						//tie viewport to the window
+						$(window).resize(function(){me.resize();});
+						
+						// resize viewport when DOM elements are added
+						// me.el.bind('DOMNodeInserted', me.DOMNodeAdded); DEPRECATED
+						
+						// add mutation observer for when things get added to the viewport
+						me.el.addClass('wui-viewport').focus();
+						document.addEventListener("animationstart", me.DOMNodeAdded, false); // standard + firefox
+						document.addEventListener("MSAnimationStart", me.DOMNodeAdded, false); // IE
+						document.addEventListener("webkitAnimationStart", me.DOMNodeAdded, false); // Chrome + Safari
+						*/
+					
+					
+					
+					
 					srcBtn = new Wui.Button({
 						preVisible:	false,
 						text:		'Show Source',
@@ -204,7 +231,7 @@
 				// append everything on the body
 				testBtn.place();
 				srcBtn.place();
-				testsNCode.addToDOM(testsNCode,$('h1'),'after');
+				testsNCode.addToDOM(testsNCode,$('body > h1:first'),'after');
 				testsNCode.el.append(testObj.hide(), preObj.hide());
 				
 				//document object if defined

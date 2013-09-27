@@ -57,7 +57,7 @@
 									text:	itm.title || 'Tab ' + (parseInt(idx) + 1),
 									click:	function(){ 
 												me.giveFocus(itm);
-												if(itm.layout && typeof itm.layout == 'function')	itm.layout();		
+												if(itm.layout && typeof itm.layout === 'function')	itm.layout();
 											},
 									cls:	itm.tabCls
 								}));
@@ -65,12 +65,26 @@
 							
 							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
 						},
-		giveFocus:		function(tab){
-							$.each(this.items,function(idx,itm){
+		giveFocus:		function(tab, supressEvent){
+							var me = this, supressEvent = (supressEvent !== undefined) ? supressEvent : false;
+							
+							$.each(me.items,function(idx,itm){
 								var isActive = itm === tab;
 								itm.tab.el.toggleClass('selected', isActive);
 								itm.el.toggleClass('active', isActive);
+								if(!supressEvent && isActive)
+									me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
 							});
+						},
+		selectTabByText:function(txt, supressEvent){
+							var me = this, retVal = undefined;
+							$.each(me.items,function(idx,itm){
+								if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase()){
+									me.giveFocus(itm, supressEvent);
+									retVal = itm;
+								}
+							});
+							return retVal;
 						},
 		onRender:		function(){
 							this.giveFocus(this.items[0]);

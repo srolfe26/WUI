@@ -9,17 +9,23 @@ body, body * {
     box-sizing:         border-box !important;
 }
 
-h1 { margin-top:1.5em !important; color:#000;}
+h1 { margin-top:1.5em !important; color:#060;}
 
 /* SOURCE AND BUTTONS */
 .wui-doc-btn-dock {
-    background-color: #333333;
+    background-color: #369;
     margin: 0 0 2em;
     padding: 0.5em;
     text-align: right;
 }
-	.wui-doc-btn-dock .wui-btn {border:1px solid #ccc; height: 40px; line-height: 40px; margin-right:1em;}
-	.wui-doc-btn-dock pre {background:#444; color: #fff; margin:0.5em 0; padding: 1em; -moz-tab-size:4; -o-tab-size:4; tab-size:4; white-space: pre-wrap; font-family:monospace; text-align:left;}
+	.wui-doc-btn-dock .wui-btn {border:1px solid #ccc; height: 40px; line-height: 40px; margin-right:1em; color:#fff; background:transparent;}
+	.wui-doc-btn-dock pre {
+		background:rgba(0,0,0,0.65); color: #fff; 
+		margin:0.5em 0; padding: 1em; 
+		-moz-tab-size:4; -o-tab-size:4; tab-size:4; 
+		white-space: pre-wrap;
+		font-family:monospace; text-align:left; font-size:0.8em;
+	}
 
 /* UNIT TESTS */
 .wui-test-results { margin-top:0.5em; width: 100%; border-collapse:separate; border-spacing:1px; table-layout:fixed; text-align:left;}
@@ -64,91 +70,3 @@ h1 { margin-top:1.5em !important; color:#000;}
 .wui-doc-private { width:5em; color:#194;  border-color:#194; }
 .wui-doc-deprecated { width:7em;  color:#F90;  border-color:#F9O; }
 .wui-doc-awesome{ width:6.5em;  color: #09F;  border-color: #09F; letter-spacing:1px; }
-
-/*
-
-
-
-h1 span:first-child {font-size:0.5em;}
-h1 span:last-child {font-size:0.45em; display:block; font-weight:normal; line-height:1em;}
-
-h2 {margin: 2em 0 0.5em !important; color:#C8FF00;}
-h3 {text-transform:uppercase; font-size:1em; color:#e300b1;}
-
-li {background-color:#fff; margin:0.5em -2em; padding:0.5em; max-width: 96%; list-style-type: none;}
-
-.workspace, .workspace * {-moz-box-sizing:    border-box !important;
-    -webkit-box-sizing: border-box !important;
-    box-sizing:         border-box !important;
-	background: url("../img/docs/little_pluses.png") repeat scroll 0 0 transparent;
-}
-
-.workspace, pre {
-    margin: 1em !important;
-    padding: 1em !important;
-}
-.workspace div {padding: 0.5em;}
-
-pre {font-weight:bold; display:block; line-height:1.25em !important;}
-
-.workspace.structure { background-color: rgba(0, 100, 150, 0.5); }
-
-.workspace > div {height:2em; line-height:1em; margin:1%;}
-
-#forms {
-    background-color: #e300b1;
-    float: left;
-    width: 31.33%;
-}
-#grid {
-    background-color: rgba(200, 255, 0, 0.7);
-    float: left;
-    width: 31.33%;
-}
-#state {
-    background-color: rgba(0, 255, 200, 0.7);
-    float: left;
-    width: 31.33%;
-}
-#wui { background-color: rgba(255,255,255, 0.7); clear:both; }
-#jquery { background-color: rgba(0, 50, 100, 0.7); color:white; }
-
-#content a {color:#06f; text-decoration:underline; font-weight:bold;}
-
-.example {margin-bottom:2em;}
-
-#button-row .wui-btn {margin-right:1em;}
-
-#content > div:last-child  {padding-bottom:12em;}
-
-img {
-    max-width: 100%;
-}
-
-/****************************************   WUI Test Suite and Docs   ***************************************
-
-.wui-docs pre {
-    background:#444; color: #fff; margin: 2em 0; padding: 1em; -moz-tab-size:4; -o-tab-size:4; tab-size:4; white-space: pre-wrap; font-family:monospace; text-align:left;
-}
-
-.wui-doc-btn-dock {
-    background-color: #333333;
-    margin: 0 0 2em;
-    padding: 0.5em;
-    text-align: right;
-}
-.wui-doc-btn-dock .wui-btn.wui-docs {border:1px solid #ccc; height: 40px; line-height: 40px; margin-right:1em;}
-
-
-
-
-    
-    
-
-.wui-doc-private, .wui-doc-deprecated, .wui-doc-awesome {
-	display:inline-block; border-radius:3px; font-size:0.7em; text-transform:uppercase; height:1.5em; line-height:1.5em;
-    text-align:center; margin-left:0.5em; border:1px solid;
-}
-.wui-doc-private { width:5em; color:#194;  border-color:#194; }
-.wui-doc-deprecated { width:7em;  color:#F90;  border-color:#F9O; }
-.wui-doc-awesome{ width:6.5em;  color: #09F;  border-color: #09F; letter-spacing:1px; }/*

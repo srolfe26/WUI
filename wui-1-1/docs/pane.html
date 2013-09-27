@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Pane - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+	
+	<script type="text/javascript" src="../js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="../js/wui.js"></script>
+	<script type="text/javascript" src="../js/forms.js"></script>
+	<script type="text/javascript" src="../js/grid.js"></script>
+	<script type="text/javascript" src="../js/docs.js"></script>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		$(document).ready(function(){
+			pane = new Wui.Pane({
+				height:		500,
+				appendTo:	$('body'),
+				title:		'Pane 1',
+				items:		[
+								new Wui.Pane({
+									title:	'Pane 2',
+									height:	'100%',
+									items:	[
+												new Wui.Pane({
+													title:	'Pane 3',
+													height:	'100%',
+													items:	[
+																new Wui.Pane({
+																	title:	'Pane 4',
+																	height:	'100%',
+																	items:	[
+																				new Wui.Pane({
+																					title:	'Pane 5',
+																					height:	'100%'
+																				})
+																			]
+																})
+															]
+												})
+											]
+								})
+							]
+			})
+			pane.place();
+		});
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// SHOW ITEM CREATION CODE
+			Wui.docCode('../js/wui.js','Wui.Pane');
+			
+			// TESTING
+			ts = new Wui.ts();
+			
+			//ts.test('Push a new WUI object on to the \'stage\'', function(){});
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+<h1>WUI Pane</h1>
+</body>
+</html>

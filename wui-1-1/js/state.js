@@ -65,6 +65,11 @@
 									state[i].view = newView;
 							this.setState(state);
 						},
+		setView:		function(viewName,params){
+							var newState = [{view:viewName}];
+							if(params) newState[0].params = params;
+							this.setState(newState);
+						},
 		getViews:		function(){
 							/** Lists all of the views */
 							var state = this.getState(),
