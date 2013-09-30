@@ -1,5 +1,6 @@
 ﻿(function($,window) {
-	/****************** WUI Docs & Test Suite *****************/
+
+
 	Wui.getJsObjectFromString = function(s){
 		var i = 1,
 			braceCount = 1;	// The beginning of the passed in string ought to start with a bracket, this assumption is vital to the working of the method
@@ -15,45 +16,137 @@
 	
 	
 	Wui.findObjsInFile = function(filetext, obj){
-		var obj = obj.replace('.','\\.'), objCode = '', objIntro = '';
-		filetext.replace(new RegExp("\\/\\*\\*((?:[^\\*]|(?:\\*+(?:[^\\*/])))*)\\*+\\/[\\s]*" +obj+ "|" + obj + '\.prototype', "g"),function(match,comment,matchStart){
-			var firstBracket = filetext.indexOf('{', matchStart + match.length);
+		var obj = obj.replace('.','\\.'), objCode = '', objIntro = '', betweenBrace = '', success = false;
+		
+		filetext.replace(new RegExp("\\/\\*\\*((?:[^\\*]|(?:\\*+(?:[^\\*/])))*)\\*+\\/[\\s]*" +obj+ " \=|" + obj + '\.prototype \=', "g"),function(match,comment,matchStart){
+			var endOfMatch = matchStart + match.length,
+				firstBrace = filetext.indexOf('{', endOfMatch);
+			
+			// indicates that there was in fact a match
+			success = true;
+			// gets what's between the match and the opening of the object deifintion
+			// allowing the code to catch extended objects
+			betweenBrace = filetext.substr(matchStart + match.length,firstBrace - (matchStart + match.length)); 
+			
 			if($.trim(comment).length > 0)
 				objIntro = comment;
-			objCode += Wui.getJsObjectFromString(filetext.substr(firstBracket,filetext.length - firstBracket)) + '\n\n';			
+			objCode += Wui.getJsObjectFromString(filetext.substr(firstBrace,filetext.length - firstBrace)) + '\n\n';			
 			return match;
 		});
-		return {code:objCode, intro:objIntro};
+		return {success:success, code:objCode, intro:objIntro, between:betweenBrace};
 	};
 	
 	
-	Wui.makeObjDoc = function(fileUrl, findObj, target, showObjName){
-		$.ajax(fileUrl,{
-			dataType:	'script',
-			success:	function(r){
-							var txt 		= Wui.findObjsInFile(r, findObj),
-								doc			= {
-												doc:	txt.intro,
-												configs:[],
-												methods:[]
-											  };
-								
-							// Get methods
-							txt.code.replace(/(\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*function)/g,function(m,all,comment,itemName,charIndex){
-								doc.methods.push({item:itemName, doc:comment});
-								return '';
-							});
-							
-							// Get configs - the similar regex will not match the functions because they were removed in the last step
-							txt.code.replace(/\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]([^\,^\s]+)/g,function(m,comment,itemName,defaultVal){
-								if(defaultVal.match(/\bfunction\b/) === null)
-									doc.configs.push({item:itemName, doc:comment});
-							});
-							(target || $('body')).append(Wui.transformJavaDoc(doc,findObj,showObjName));
-						}
-		});
-		return true;
+	Wui.docObj = function(args){
+		var me = this;
+		$.extend(me, new Wui.O, {
+			conglomerate: 		{},
+			paused:				false,
+			queue:				[],
+			extendedObjs:		[],
+			defaultURL:			'../js/wui.js',
+			fileURL:			'../js/wui.js',				
+			queueExtended:		function(obj){
+									me.queue.push(function(){
+										me.pause();
+										me.extendedObjs.push( new Wui.docObj({fileURL:me.fileURL, parent:me, defaultURL:me.defaultURL ,obj:obj}) );
+									});
+									me.getCode();
+								},
+			pause:				function(){ me.paused = true; },
+			resume:				function(){
+									me.paused = false;
+									setTimeout(me.getCode,1);
+									if(me.queue.length === 0){
+										me.processCode();
+									}
+								},
+			pauseProcessedCode:	null,
+			processCode:		function(code){
+									var code = code || me.pauseProcessedCode,
+										extConglomerates = [];
+									
+									// having extended objects them overlap one another just like they would be extended in code
+									for(var i in me.extendedObjs){
+										var docObj = me.extendedObjs[i];
+										
+										for(var itemName in docObj.conglomerate)
+											addToConglomerate(itemName,docObj.conglomerate[itemName].doc,docObj,docObj.conglomerate[itemName].type);
+									}
+									
+									// THEN OVERRRIDE THE CONGLOMERATE WITH THE CODE FROM THE CURRENT METHOD
+									// Get methods
+									code.code.replace(/(\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*function)/g,function(m,all,comment,itemName,charIndex){
+										addToConglomerate(itemName,comment,me,'method');
+										return '';
+									});
+										
+									// Get configs - the similar regex will not match the functions because they were removed in the last step
+									code.code.replace(/\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]([^\,^\s]+)/g,function(m,comment,itemName,defaultVal){
+										if(defaultVal.match(/\bfunction\b/) === null)
+											me.conglomerate[itemName] = { doc:comment, source:me, type:'config' };
+									});
+									
+									function addToConglomerate(itemName,comment,docObj,type){
+										me.conglomerate[itemName] = { doc:comment, source:docObj.obj, type:type };
+									};
+									
+									// The parent (being the object that doesn't have a parent) will then convert its information
+									if(!me.parent){
+										// Get the documentation for this given object
+										me.doc = code.intro;
+										
+										// Pull out events
+										me.doc = me.doc.replace(/\@event\s+([\w]+)\s+([^\n]+)/g,function(mch,evnt,desc){ me.events.push({title:evnt, doc:desc, source:me.obj});    return ''; });
+
+										// Pull out methods and events
+										for(var i in me.conglomerate)
+											me[me.conglomerate[i].type + 's'].push( {title:me.conglomerate[i], doc:me.conglomerate[i].doc, source:me.conglomerate[i].source} );
+										
+										// put it on the DOM
+										me.toHTML();
+									}
+								},
+			toHTML:				function(){
+									me.place();
+								},
+			getCode:			function(){
+									if (!me.paused && me.queue.length) {
+										me.queue.shift()();
+										if (!me.paused) me.resume();
+									}
+								},
+			doc:				'',
+			obj:				'Wui.O',
+			el:					$('<div>').addClass('wui-doc'),
+			init:				function(){
+									$.ajax(me.fileURL,{
+										dataType:	'script',
+										cache:		true,
+										success:	function(r){
+														var code = Wui.findObjsInFile(r, me.obj);
+														
+														// Get extended objects
+														var extended = code.between.match(/(Wui.(([^\(])+)\(\))/g);
+														if(extended !== null){
+															me.pauseProcessedCode = code;
+															for(var i in extended)
+																me.queueExtended(extended[i].replace(/[^\w\.]+/g,''));
+														}else{
+															me.processCode(code);
+															if(me.parent)	me.parent.resume();
+														}
+													}
+									});
+								},
+			methods:			[],
+			configs:			[],
+			events:				[]
+		}, args);
+		
+		me.init();
 	};
+
 	
 	Wui.transformJavaDoc = function(documentation,obj,showObjName){
 		var m		= documentation.doc || documentation,
@@ -105,10 +198,18 @@
 		key.append(p);
 		
 		if(documentation.methods && documentation.methods.length > 0){
+			
+			var methodList = null;
+			key.prepend(methodList = $('<ul>').addClass('doc-nav-list').append($('<li>Methods</li>').addClass('doc-nav-header')));
+			
+			for(var i = 0; i < documentation.methods.length; i++){
+				methodList.append($('<li><a href="#' +documentation.methods[i].item+ '">' +documentation.methods[i].item+ '</a></li>'));
+			}
+			
 			var methods = new Wui.DataList({
 					data:		documentation.methods,
 					appendTo:	key,
-					el:			$('<table>\n'+
+					el:			$('<table class="wui-doc-methods">\n'+
 									'\t<thead>\n'+
 										'\t\t<tr><th>Methods</th></tr>\n'+
 									'\t</thead>\n' +
@@ -116,24 +217,24 @@
 								'</table>\n').addClass('wui-test-results'),
 								
 					template:	'\n\t\t<tr>\n' +
-									'\t\t\t<td>{item}<div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
+									'\t\t\t<td><a id="{item}" class="doc-item-title">{item}</a><div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
 								'\n\t\t</tr>\n',
 					init:		function(){
 									this.elAlias = this.el.children('tbody');
 								}
 				});
-				methods.place();
-				methods.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
-				methods.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });
+			methods.place();
+			methods.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
+			methods.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });
 		}
 		
 		if(documentation.configs && documentation.configs.length > 0){
 			var configs = new Wui.DataList({
 					data:		documentation.configs,
 					appendTo:	key,
-					el:			$('<table>\n'+
+					el:			$('<table class="wui-doc-configs">\n'+
 									'\t<thead>\n'+
-										'\t\t<tr><th>Methods</th></tr>\n'+
+										'\t\t<tr><th>Configs</th></tr>\n'+
 									'\t</thead>\n' +
 									'\t<tbody>\n\t</tbody>\n' +
 								'</table>\n').addClass('wui-test-results'),
@@ -179,33 +280,6 @@
 					}),
 					preObj = $(Wui.HTMLifyCode(docCode)),
 					testObj = $('<div>').attr({id:'wui-unit-tests'}),
-					
-					/* THIS IS PROBABLY BETTER BUT IT SCREWS UP EXT :-(
-						if(me.el === null) throw('WUI Viewport requires an \'el\' element to be specified.');
-						
-						//calculate initial values of items on page
-						me.offset = me.el.offset();
-						me.calcVPadding();
-						
-						//initial resizing of viewport
-						me.resize();
-						
-						//tie viewport to the window
-						$(window).resize(function(){me.resize();});
-						
-						// resize viewport when DOM elements are added
-						// me.el.bind('DOMNodeInserted', me.DOMNodeAdded); DEPRECATED
-						
-						// add mutation observer for when things get added to the viewport
-						me.el.addClass('wui-viewport').focus();
-						document.addEventListener("animationstart", me.DOMNodeAdded, false); // standard + firefox
-						document.addEventListener("MSAnimationStart", me.DOMNodeAdded, false); // IE
-						document.addEventListener("webkitAnimationStart", me.DOMNodeAdded, false); // Chrome + Safari
-						*/
-					
-					
-					
-					
 					srcBtn = new Wui.Button({
 						preVisible:	false,
 						text:		'Show Source',
@@ -217,13 +291,13 @@
 									}
 					}),
 					// show/hide unit tests button
-					testBtn = new Wui.Button({
+					testBtn = Wui.testBtn = new Wui.Button({
 						vis:	false,
-						text:		'Show Unit Tests',
+						text:		'<span class="show-hide">Show Unit Tests</span>',
 						appendTo:	testsNCode.el,
 						click:		function(){
-										if(this.vis){ testObj.fadeOut(1000); this.setText('Show Unit Tests'); }
-										else{ testObj.fadeIn(1000); this.setText('Hide Unit Tests'); }
+										if(this.vis){ testObj.fadeOut(1000); this.el.children('.show-hide').text('Show Unit Tests'); }
+										else{ testObj.fadeIn(1000); this.el.children('.show-hide').text('Hide Unit Tests'); }
 										this.vis = !this.vis;
 									}
 					});
@@ -235,7 +309,8 @@
 				testsNCode.el.append(testObj.hide(), preObj.hide());
 				
 				//document object if defined
-				if(file && obj) Wui.makeObjDoc(file,obj);
+				sam = new Wui.docObj({fileURL:file, obj:obj});
+				// if(file && obj) Wui.makeObjDoc(file,obj);
 			}
 	};
 	
@@ -264,8 +339,7 @@
 							data:	testData
 						});
 			
-			if($('#wui-test-results tbody').length == 0){
-			
+		if($('#wui-test-results tbody').length == 0){
 			var docMode = $('#wui-unit-tests');
 			(docMode.length > 0 ? docMode : $('body')).append($(
 				'<table class="wui-test-results" id="wui-test-results">' +
@@ -282,9 +356,25 @@
 			));	
 		};
 		
+		// Print overall test results
+		if(Wui.testBtn){
+			var successCt	= $('#wui-test-results .pass').length,
+				failCt		= $('#wui-test-results .fail').length,
+				resultsMsg	= ' (' + successCt + ' of ' + (successCt + failCt) + ' passed)';
+				
+			if(Wui.testBtn.el.children('.unit-results').length > 0)	Wui.testBtn.el.children('.unit-results').text(resultsMsg);
+			else													Wui.testBtn.el.append('<span class="unit-results">' +resultsMsg+ '</span>');
+		}else{
+			// put code here to make a report on the body
+		}
+		
 		$('#wui-test-results tbody').prepend(tplt.make());
 		return testData;
 	};
+	
+	
+	
+	
 	
 	
 	Wui.ts = function(){

@@ -183,7 +183,7 @@ var Wui = Wui || {};
 						el.children().remove();
 					},
 		/**
-			A function that gets called when a WUI Object is placed and gets called on all of a placed object's items.
+			Gets called when a WUI Object is placed and gets called on all of a placed object's items.
 			Adds CSS styles via cssByParam, calls onRender() if it exists on the object, determines whether the 
 			object is using a 'fit' layout and performs layout on the item, calls its children's callRender(), 
 			and finally calls its own afterRender() if it exists.
@@ -311,7 +311,7 @@ var Wui = Wui || {};
                     },
 		/**
 		@param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
-		@return {number} The new length of the array 
+		@return The new length of the array 
 		Adds passed in items to the end of the items array and adds those objects to the DOM.
 		*/
 		push:       function(){
@@ -491,6 +491,12 @@ var Wui = Wui || {};
 		totalContainer:	null,
 		ajaxWait:		10,
 		dataChanged:	function(newdata){},
+		/**
+		@param {function} fn A function that gets called for each item in the object's data array
+		
+		@return true
+		The passed in function gets called with two parameters the item, and the item's index.
+		*/
 		dataEach:		function(f){
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
 							return true;
@@ -559,6 +565,7 @@ var Wui = Wui || {};
 	Wui.Template.prototype = {
 		// template:	null, * required
 		// data:		null, * required
+		/** I'm hoping this gets overridden */
 		make:	function(){
 					var me = this;
 					if(me.data && me.template){
@@ -592,49 +599,79 @@ var Wui = Wui || {};
 	};
 	
 	
-	/****************** WUI Data List Control *****************/
+	/** WUI Data List
+     @event		select		A data template is selected ( DataList, el, record )
+	 @event		change		The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
+	 @event		deselect	A selected item is clicked again, and thus deselected ( DataList, el, record )
+	 
+	 @author     Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
+     @creation   2013-09-30
+     @version    1.1
+    */
 	Wui.DataList = function(args){
-		$.extend(this, {el:$('<div>')}, args);
+		$.extend(this, {
+			/** DOM element where all of the data templates will be appended. */
+			el:			$('<div>'),
+			
+			/** Maximum number of data elements to display, even if data set is larger. */
+			displayMax: -1,
+			
+			/** Method that will run immediately when the object is constructed. */
+			init:		function(){}
+		}, args);
 		this.init();
 	};
 	Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(), {
-		beforeSet:	function(){ this.clear(); },
+		/** Overrides the Wui.Data method that serves as an event hook. Calls the DataList's make() method. */
 		dataChanged:function(){ this.make(); },
-		init:		function(){},
+		
+		/** Creates the templates based on current data. Then appends them to the el with listeners */
 		make:		function(){
 						var me = this,
-							holdingData = me.data || [];
-
-						for(var i = 0; i < holdingData.length; i++){
+							holdingData = me.data || [],
+							holder = $('<div>');
+						
+						for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
 							var rec = me.data = holdingData[i],
 								a = {el:Wui.Template.prototype.make.call(me), rec:rec};
 								doAppend(a);
 						}
 						
 						function doAppend(a){
-							me.append(
+							holder.append(
 								a.el.click(function(){
 									if(me.selected && me.selected === a){
 										a.el.removeClass('wui-selected');
 										me.selected = null;
 										me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
 									}else{
+										var alreadySelected = me.selected;
+										
 										me.el.find('.wui-selected').removeClass('wui-selected');
 										a.el.addClass('wui-selected');
 										me.selected = a;
+										
+										// Fire different events depending whether there was already a record selected
+										me.el.trigger($.Event('change'), [me, a.el, a.rec, alreadySelected.el, alreadySelected.rec]);
 										me.el.trigger($.Event('select'), [me, a.el, a.rec]);
 									}
 								})
 							);
 						}
 						
+						me.clear();
+						me.append(holder.children().unwrap());
 						me.data = holdingData;
 						me.el.trigger($.Event('refresh'),[me,me.data]);
 					},
+					
+		/** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
 		onRender:	function(){
 						if(this.url === null)	this.make();
 						else					this.loadData();
 					},
+					
+		/** Reruns the make() method. */
 		refresh:	function(){ this.onRender(); }
 	});
 	

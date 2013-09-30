@@ -27,7 +27,7 @@
 								'</thead>' +
 								'<tbody></tbody>' +
 							'</table>').addClass('wui-test-results'),
-							
+				displayMax:	4,			
 				template:	'<tr>' +
 								'<td>{date}</td><td>{amount}</td><td>{check_number}</td><td>{description}</td>' +
 							'</tr>',
@@ -43,7 +43,7 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			// SHOW ITEM CREATION CODE
-			Wui.docCode();
+			Wui.docCode('../js/wui.js','Wui.DataList');
 			
 			// TESTING
 			ts = new Wui.ts();
