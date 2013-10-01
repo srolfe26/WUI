@@ -13,18 +13,21 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Link','Link Input');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.Link({ label:'Link Input Field', name:'link', attr:{name:'link'} });
+			a = new Wui.Link({ label:'Link Input Field', name:'link', attr:{name:'link'}, appendTo:$('#wui-doc-example') });
 			a.place();
 		});
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -33,8 +36,5 @@
 		}); // end document.ready		
 	</script>
 </head>
-<body class="wui-docs">
-<h1>Link Input</h1>
-
-</body>
+<body class="wui-docs"></body>
 </html>

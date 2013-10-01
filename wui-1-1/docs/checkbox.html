@@ -13,6 +13,12 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Checkbox','Checkbox');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
@@ -20,7 +26,7 @@
 				label:			'Should I stay or should I go?',
 				name:			'82s',
 				//buttonStyle:	true,
-				appendTo:		$('body'),
+				appendTo:		$('#wui-doc-example'),
 				labelPosition:	'left',
 				options:		[
 									 {val:0, title:'Stay = trouble.'},
@@ -28,17 +34,14 @@
 								]
 			});
 			a.place();
+			
+			b = new Wui.Checkbox({label:'Single Checkbox Button', name:'booyas', buttonStyle:true, appendTo:$('#wui-doc-example') });
+			b.place();
 		});
 	</script>
 	
 	<script type="text/javascript">
 		$(document).ready(function(){			
-			b = new Wui.Checkbox({label:'Single Checkbox Button', name:'booyas', buttonStyle:true, appendTo:$('body') });
-			b.place();
-			
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			/* TESTING
 			ts = new Wui.ts();
 			ts.test("Get value on blank text field",function(){ return a.val() == null; });
@@ -48,6 +51,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Checkbox</h1>
 </body>
 </html>

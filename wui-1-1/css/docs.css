@@ -30,6 +30,10 @@ h1 {
 		text-transform: none;
 		font-family:monospace; text-align:left; font-size:0.8em;
 	}
+	#wui-doc-example {margin:0.5em 0;}
+.wui-doc-btn-dock .wui-lbl > label {
+    color: #FFFFFF;
+}
 
 /* UNIT TESTS */
 .wui-test-results { margin-top:0.5em; width: 100%; border-collapse:separate; border-spacing:1px; table-layout:fixed; text-align:left;}
@@ -70,6 +74,7 @@ h1 {
     text-overflow: ellipsis;
     white-space: nowrap;
     clear:both;
+	max-width: 70%;
     display:none;
 }
 
@@ -129,9 +134,17 @@ h1 {
 
 /* FLAGS */
 .wui-doc-private, .wui-doc-deprecated, .wui-doc-awesome {
-	display:inline-block; border-radius:3px; font-size:0.7em; text-transform:uppercase; height:1.5em; line-height:1.5em;
-    text-align:center; margin-left:0.5em; border:1px solid;
+	border-radius: 3px;
+    display: inline-block;
+    font-size: 0.7em;
+    left: -6px;
+    position: relative;
+    text-align: center;
+	margin-left: 0.25em;
+    text-transform: uppercase;
+    top: -6px;
+	border:1px solid;
 }
 .wui-doc-private { width:5em; color:#194;  border-color:#194; }
-.wui-doc-deprecated { width:7em;  color:#F90;  border-color:#F9O; }
+.wui-doc-deprecated { width:7em;  color:#F60;  border-color:#F9O; }
 .wui-doc-awesome{ width:6.5em;  color: #09F;  border-color: #09F; letter-spacing:1px; }

@@ -13,6 +13,12 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.Template','Template Engine');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Some random data
@@ -29,7 +35,7 @@
 			});
 			
 			// Display something on the body
-			var target = $('<ul>').insertAfter('h1');
+			var target = $('<ul>').appendTo('#wui-doc-example');
 			
 			for(var i in data){
 				a.data = data[i];
@@ -40,16 +46,11 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function(){
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
 		}); // end document.ready		
 	</script>
 </head>
-<body class="wui-docs">
-<h1>Template Engine</h1>
-</body>
+<body class="wui-docs"></body>
 </html>

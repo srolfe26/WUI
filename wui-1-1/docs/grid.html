@@ -13,11 +13,18 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/grid.js','Wui.Grid','Grid');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a new grid on the body
 			a = new Wui.Grid({
 				height:	'50%',
+				appendTo:$('#wui-doc-example'),
 				url:	'data.json',
 				columns:[
 							{heading:'Date', dataItem:'date', dataType:'date', fit:1},
@@ -31,9 +38,6 @@
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -42,7 +46,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Grid</h1>
-
 </body>
 </html>

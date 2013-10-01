@@ -25,7 +25,7 @@
 @-webkit-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-ms-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-o-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
-.wui-viewport * {
+.wui-pane, .wui-viewport * {
     animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
     animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
@@ -344,6 +344,9 @@
 		.wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
 		
 /**********************************************   Buttons in nested tbar and bbar  **********************************************/
-.wui-pane .wui-pane .wui-pane-header .wui-btn, .wui-pane .wui-pane .wui-pane-footer .wui-btn {border: 1px solid #777; background-color:transparent; height:26px; line-height:26px;  margin: 7px 0.5em 0 0.5em;}
+.wui-pane .wui-pane .wui-pane-header .wui-btn, .wui-pane .wui-pane .wui-pane-footer .wui-btn {border: 1px solid #777; background-color:#ddd; height:26px; line-height:26px;  margin: 7px 0.5em 0 0.5em;}
+.wui-pane .wui-pane .wui-pane-header .wui-btn.disabled, .wui-pane .wui-pane .wui-pane-footer .wui-btn.disabled { opacity: 0.5; background-color:transparent;}
+.wui-pane .wui-pane .wui-pane-header .wui-btn:active, .wui-pane .wui-pane .wui-pane-footer .wui-btn:active { box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+.wui-pane .wui-pane .wui-pane-header .wui-btn.disabled:active, .wui-pane .wui-pane .wui-pane-footer .wui-btn.disabled:active { box-shadow:none; background-color:transparent; }
 
 /**********************************************   Form Elements in TBar and BBar  **********************************************/

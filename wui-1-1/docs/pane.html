@@ -13,11 +13,17 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.Pane','WUI Pane');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			pane = new Wui.Pane({
 				height:		500,
-				appendTo:	$('body'),
+				appendTo:	$('#wui-doc-example'),
 				title:		'Pane 1',
 				items:		[
 								new Wui.Pane({
@@ -50,9 +56,6 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function(){
-			// SHOW ITEM CREATION CODE
-			Wui.docCode('../js/wui.js','Wui.Pane');
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -60,7 +63,5 @@
 		}); // end document.ready		
 	</script>
 </head>
-<body class="wui-docs">
-<h1>WUI Pane</h1>
-</body>
+<body class="wui-docs"></body>
 </html>

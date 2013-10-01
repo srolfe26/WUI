@@ -13,19 +13,22 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Text','Text Box');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.Text({ label:'Text Field', blankText:'Type Something', name:'textfield', attr:{name:'textfield'}});
-			a.addToDOM(a,$('h1'),'after');
+			a = new Wui.Text({ label:'Text Field', blankText:'Type Something', name:'textfield', attr:{name:'textfield'}, appendTo:	$('#wui-doc-example') });
+			a.place();
 		});
 	</script>
 	
 	<script type="text/javascript">
 		$(document).ready(function(){			
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -66,9 +69,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Textbox</h1>
-<div class="wui-form labels-top"></div>
-<div class="wui-form labels-left"></div>
-<div class="wui-form labels-proper"></div>
 </body>
 </html>

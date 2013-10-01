@@ -72,6 +72,9 @@
 								var isActive = itm === tab;
 								itm.tab.el.toggleClass('selected', isActive);
 								itm.el.toggleClass('active', isActive);
+								if(isActive){
+									itm.layout();
+								}
 								if(!supressEvent && isActive)
 									me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
 							});
@@ -79,7 +82,7 @@
 		selectTabByText:function(txt, supressEvent){
 							var me = this, retVal = undefined;
 							$.each(me.items,function(idx,itm){
-								if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase()){
+								if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
 									me.giveFocus(itm, supressEvent);
 									retVal = itm;
 								}
@@ -427,7 +430,7 @@
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.8); // 2 accounts for borders
+								me.tbl.find('td:eq(' +i+ ')').width($(col.heading).outerWidth() - 2.8); // 2 accounts for borders
 							});
 						},
 		onRender:		function (){
@@ -530,7 +533,7 @@
 							fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
 							for(var i in me.columns) {
 								var col = me.columns[i];
-								col.heading.css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
+								$(col.heading).css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
 							}
 							
 							var newColWid = me.calcColWidth();

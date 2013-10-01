@@ -13,6 +13,12 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Combo','Combo');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
@@ -36,16 +42,13 @@
 								return r;							
 							},
 				url: 		'data.json',
-				appendTo:	$('body')
+				appendTo:	$('#wui-doc-example')
 			});
 			a.place();
 		});
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -55,7 +58,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Combo</h1>
-
 </body>
 </html>

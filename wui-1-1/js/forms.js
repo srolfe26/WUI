@@ -148,20 +148,44 @@
     });
 	
 	
-	/* WUI FormField */
+	/**
+		@event valchange When a value changes on a form field (WUI FormField, value)
+		@event hiddenchange Same as valchange but for fields without an 'el' property (like hidden fields. Called on the window (WUI FormField, value)
+		
+		The base object that WUI form elements extend from
+	*/
 	Wui.FormField = function(args){
 		$.extend(this,{
+			/** Whether or not the field will be disabled. A disabled field is still accessible to the form, just not to the user. */
 			disabled:		false,
+			
+			/** Message to display to the user when validation fails. If not specified the form will attempt to use the field's label. */
 			invalidMsg: 	null,
+			
+			/** An optional config that labels the field. */
 			label:      	null,
+			
+			/** Defines the position of the label relative to the field, options are 'top', 'left', 'right' and 'bottom' */
 			labelPosition:	'top',
+			
+			/** A special class to put on the label if desired */
 			labelCls:		null,
+			
+			/** Whether or not the field is required. May be pre-empted by other validation. See validate() method. */
 			required:   	false,
+			
+			/** A regular expression whereby to validate a field's input. May be pre-empted by other validation. See validate() method. */
 			validRegEx:		null,
+			
+			/** A function to validate field input. */
 			validTest:  	null
 		},args);
 	};
 	Wui.FormField.prototype = $.extend(new Wui.O(),{
+		/**
+			@return The el of the object
+			Runs immediately when the object is constructed. Wraps the field in a label if a label has been defined.
+		*/
 		init:  		function(){
                         var me = this;
 						me.value = null;
@@ -174,17 +198,39 @@
 						}
 						return me.el;
                     },
+					
+		/** Will disable the object if its disabled property is set to true */
 		onRender:	function(){ if(this.disabled) this.disable(); },
+		/** Disables the field so the user cannot interact with it. */
         disable:	function(){
 				        this.disabled = true;
 				        if(this.el && this.el.addClass)
 				        	this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
 			        },
+		/** Enables the field so the user can interact with it. */
         enable:		function(){
 				        this.disabled = false;
 				        if(this.el && this.el.addClass)
 				        	this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
 			        },
+		
+		/**
+		@return True or False
+		Validate will construct an error message based on the following precedence:
+		1. Custom message (invalidMsg)
+		2. The label on the field
+		3. The name attribute of the field (attr: {name: 'n'})
+		4. Report that "A required field has an improper value."
+		
+		Then, validates a field using the following order of validation precedence:
+		1. Custom testing function (validTest)
+		2. Regular Expression (validRegEx)
+		3. Required flag (required)
+		4. No validation - returns true.
+		
+		Then sends the error message, if any, to the parent form's throwErr() method where the invalidation messages are concatenated and the fields
+		are hilighted for the user to see what fields need their attention.
+		*/
         validate:   function(){
                         var me = this,
                         	errMsg = (me.invalidMsg !== null) ? me.invalidMsg : 
@@ -208,6 +254,14 @@
                         // Default return value is true
                         return true;
                     },
+		/**
+		@param {[any]}	newVal	The type of this parameter depends on the type of form field
+		@return Either the value of the field if no arguments are passed, or the value of the arguments passed in
+		
+		Works similarly to jQuery's val() method. If arguments are omitted the value of the FormField 
+		will be returned. If arguments are specified the field's setVal() method and setChanged() method
+		are called, and the values passed in are passed through		
+		*/
 		val:		function(){
 						if(!arguments.length){
 							return this.getVal();
@@ -220,6 +274,11 @@
 							return arguments;
 						}
 					},
+		/** 
+		@private
+		Marks the parent form as changed if the field belongs to a form, calls the valChange event hooks and listeners
+		if the field doesn't have an 'el' property, it will call 'hiddenchange'
+		*/
 		setChanged:	function(){
 						// Marks the parent form as 'changed'
 						if(this.parent && this.parent instanceof Wui.Form)
@@ -236,12 +295,30 @@
 								this.parent.el.trigger($.Event('hiddenchange'), [this, this.value]);
 						}
 					},
+		
+		/** 
+		@private
+		Generally do not use this function. Use val() instead which acts as both a getter and a setter depending whether
+		arguments are passed. val() will fire all of the needed events and event hooks.
+		*/
 		getVal:		function(){
 						return this.value;
 					},
+		
+		/** 
+		@param {string}	sv	Value to set the value of the field to
+		@private
+		Generally do not use this function. Use val() instead which acts as both a getter and a setter depending whether
+		arguments are passed. val() will fire all of the needed events and event hooks.
+		*/
 		setVal:		function(sv){
 						this.value = sv;
 					},
+		
+		/** 
+		@param {string}	newVal	New value being set on the field
+		An event hook for when the value changes. Useful for extending objects, but generally use the 'valchange' event listener
+		*/
 		valChange:	function(newVal){}
 	});
 	
@@ -254,17 +331,21 @@
 	Wui.Hidden.prototype = $.extend(new Wui.FormField(),{ init: function(){} });
 	
 	
-	/* WUI Text */
+	/** WUI Text */
 	Wui.Text = function(args){
 		$.extend(this,{
+			/** The CSS class that denotes an empty field */
 			blankCls:   'empty',
+			/** A value that appears in the field until text is entered (HTML 5), or focus is gained (JavaScript implemented) */
 			blankText:  ''
 		},args,{
+			/** The HTML element */
 			field:$('<input>').attr({type:'text'})
 		}); 
 		this.init();
 	};
 	Wui.Text.prototype = $.extend(new Wui.FormField(),{
+		/** Runs immediately when the object is created */
 		init:			function(){
 	            			var me = this;
 	            			Wui.FormField.prototype.init.call(me);
@@ -273,6 +354,8 @@
 	            			
 	                        me.append(Wui.Text.prototype.setListeners.call(me,me));
 	                    },
+						
+		/** Sets the blank text on the field. If the HTML 5 placeholder isn't supported, mimic it by replacing the native jQuery val function */
         setBlankText:	function(bt){
 	                        var me = this, f = me.field;
 	                        
@@ -308,6 +391,12 @@
 							
 							return bt;
 	                    },
+						
+		/** 
+		@param  {Wui Object}	The object to have listeners applied to the field
+		Puts listeners on the field, mostly to handle blankText in the event that HTML 5 placeholder isn't supported 
+		Also calls the setListeners() of any extending object automagically.
+		*/
 		setListeners:	function(t){
 	                        var me = this,
 	                        	fieldState = null;
@@ -319,6 +408,10 @@
 							if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
 	                        return t.field;
 	                    },
+		/** 
+		@param {string}	sv	Value to set the field text to
+		Changes the value of the text in the field without changing the value of the object
+		*/
 	    fieldText:		function(sv){
 						    this.field.val(sv);
 						    if(this.blankText && this.blankText.length)	this.setBlankText(this.blankText);
@@ -331,17 +424,21 @@
     });
 
 	
-	/* WUI Text Area */
+	/** WUI Text Area */
 	Wui.Textarea = function(args){
-	    $.extend(this, args, { field:$('<textarea>') });
+	    $.extend(this, args, { 
+			/** The HTML element */
+			field:	$('<textarea>')
+		});
 	    this.init();
 	};
-	Wui.Textarea.prototype = new Wui.Text();
+	Wui.Textarea.prototype = $.extend(new Wui.Text(), {});
 	
 	
-	/* WUI WYSIWYG */
+	/** WUI WYSIWYG */
 	Wui.Wysiwyg = function(args){
 	    $.extend(this,{
+			/** Whether or not to show the button that will give the user a view of the HTML generated by the WYSIWYG */
 			showHTML:	false
 		},args,{
 			blankText:null,
@@ -350,6 +447,7 @@
 	    this.init();
 	};
 	Wui.Wysiwyg.prototype = $.extend(new Wui.Textarea(),{
+		/** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
 		onRender:	function(){
                     	var tb = [['bold','italic','underline','strikethrough'], 
                     	          ['link','unlink','unorderedlist','orderedlist'],
@@ -376,10 +474,16 @@
                         });
 						Wui.FormField.prototype.onRender.call(this);
                     },
+		
+		/** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
 		setBlankText:function(){},
+		
+		/** In this instance lets the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
 		setListeners:function(t){
 						$(t.field).change(function(){ t.val(); });
 					},
+					
+		/** Overrides the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
 		valChange:	function(){ this.field.keyup(); }
 	});
 	

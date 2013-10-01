@@ -13,18 +13,21 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Datetime','Date/Time Input');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.Datetime({ label:'Enter a date &amp; time', blankText:'Type a date in any format you wish.', name:'datetime', attr:{name:'datetime'} });
+			a = new Wui.Datetime({ label:'Enter a date &amp; time', blankText:'Type a date in any format you wish.', name:'datetime', attr:{name:'datetime'}, appendTo:$('#wui-doc-example') });
 			a.place();
 		});
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -37,7 +40,6 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Date/Time Input</h1>
 
 </body>
 </html>

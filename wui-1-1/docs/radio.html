@@ -13,6 +13,12 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Radio','Radio');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
@@ -20,7 +26,7 @@
 				label:			'Should I stay or should I go?',
 				name:			'82s',
 				//buttonStyle:	true,
-				appendTo:		$('body'),
+				appendTo:		$('#wui-doc-example'),
 				labelPosition:	'left',
 				options:		[
 									 {val:0, title:'Stay = trouble.'},
@@ -33,9 +39,6 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function(){			
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			/* TESTING
 			ts = new Wui.ts();
 			ts.test("Get value on blank text field",function(){ return a.val() == null; });
@@ -44,7 +47,5 @@
 		}); // end document.ready		
 	</script>
 </head>
-<body class="wui-docs">
-<h1>Radio</h1>
-</body>
+<body class="wui-docs"></body>
 </html>

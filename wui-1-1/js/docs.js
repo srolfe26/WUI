@@ -33,6 +33,7 @@
 			objCode += Wui.getJsObjectFromString(filetext.substr(firstBrace,filetext.length - firstBrace)) + '\n\n';			
 			return match;
 		});
+		
 		return {success:success, code:objCode, intro:objIntro, between:betweenBrace};
 	};
 	
@@ -94,7 +95,7 @@
 									
 									// Pull out events
 									code.intro = code.intro.replace(/\@event\s+([\w]+)\s+([^\n]+)/g,function(mch,evnt,desc){
-										me.events.push({title:evnt, doc:desc, source:me.obj});
+										me.events.push({title:evnt, doc:desc, source:me.obj, type:'event'});
 										return '';
 									});
 									
@@ -116,6 +117,12 @@
 
 										// put it on the DOM
 										me.toHTML();
+										
+										// Console.log it for posterity
+										console.log(me);
+									}else{
+										// Resume operations on the parent
+										this.parent.resume();
 									}
 								},
 			createNav:			function(element){
@@ -198,6 +205,17 @@
 			title:				null,
 			obj:				'Wui.O',
 			el:					$('<div>').addClass('wui-doc'),
+			preProcessCode:		function(code){
+									// Get extended objects
+									var extended = code.between.match(/(Wui.(([^\(])+)\(\))/g);
+									if(extended !== null){
+										this.pauseProcessedCode = code;
+										for(var i in extended)
+											this.queueExtended(extended[i].replace(/[^\w\.]+/g,''));
+									}else{
+										this.processCode(code);
+									}
+								},
 			init:				function(){
 									me.title = me.title || me.obj;
 									
@@ -206,17 +224,16 @@
 										cache:		true,
 										success:	function(r){
 														var code = Wui.findObjsInFile(r, me.obj);
-														
-														// Get extended objects
-														var extended = code.between.match(/(Wui.(([^\(])+)\(\))/g);
-														if(extended !== null){
-															me.pauseProcessedCode = code;
-															for(var i in extended)
-																me.queueExtended(extended[i].replace(/[^\w\.]+/g,''));
-														}else{
-															me.processCode(code);
-															if(me.parent)	me.parent.resume();
-														}
+														if(code.success)	me.preProcessCode(code);
+														else				$.ajax(me.defaultURL,{
+																				dataType:	'script',
+																				cache:		true,
+																				success:	function(t){
+																								var code = Wui.findObjsInFile(t, me.obj);
+																								if(code.success)	me.preProcessCode(code);
+																								else				throw('This object cannot be processed');
+																							}
+																			});
 													}
 									});
 								},
@@ -256,9 +273,9 @@
 		//get creation date & Flags
 		m = m.replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver}); return ''; })
 			 .replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate}); return ''; })
-			 .replace(/\@deprecated/,function(mch){ key.el.children('h3').append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
-			 .replace(/\@private/,function(mch){ key.children('h3').append('<span class="wui-doc-private">private</span>'); return ''; })
-			 .replace(/\@awesome/,function(mch){ key.children('h3').append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
+			 .replace(/\@deprecated/,function(mch){ key.append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
+			 .replace(/\@private/,function(mch){ key.append('<span class="wui-doc-private">private</span>'); return ''; })
+			 .replace(/\@awesome/,function(mch){ key.append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
 		
 		$(keyInfo).each(function(o){
 			engine.data = keyInfo[o];
@@ -291,7 +308,7 @@
 	
 	Wui.docCode = function(file,obj,title){
 		//document object if defined
-		var doc = new Wui.docObj({fileURL:file, obj:obj, title:title});
+		doc = new Wui.docObj({fileURL:file, obj:obj, title:title});
 		
 		var wuiCode = $('.wui-doc-code');
 			if(wuiCode.length > 0){

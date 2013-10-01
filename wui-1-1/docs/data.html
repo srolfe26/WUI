@@ -13,6 +13,12 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.Data','WUI Data');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			a = new Wui.Data({
@@ -23,9 +29,6 @@
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			// SHOW ITEM CREATION CODE
-			Wui.docCode('../js/wui.js','Wui.Data');
-			
 			// TESTING
 			ts = new Wui.ts();
 			

@@ -14,9 +14,9 @@
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
 	<style type="text/css" class="wui-doc-code">
-		.fit-test-container {background:#ddd; position:relative; margin:2em; float:left;}
+		.fit-test-container {background:#ddd; position:relative; margin:2em; display:inline-block;}
 		.fit-test-container > div {
-			display:block; width:100%; color:#fff; padding:1em;
+			display:block; width:100%; color:#fff; font-weight:bold; text-shadow:0 0 5px rgba(0,0,0,0.5); padding:1em;
 			-moz-box-sizing:    border-box !important;
 		    -webkit-box-sizing: border-box !important;
 		    box-sizing:         border-box !important;
@@ -27,6 +27,12 @@
 		.e {float:left; background:#9f0;}
 	</style>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.fit','WUI Fit');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
@@ -34,7 +40,7 @@
 				b = new Wui.O({width:137, height:'100%', cls:'b', el:$('<div>').text('Width = 137px') }),
 				c = new Wui.O({width:'20%', height:'100%', cls:'c', el:$('<div>').text('Width = 20%') }),
 				d = new Wui.O({fit:1, height:'100%', cls:'d', el:$('<div>').text('Fit = 1') })
-			] });
+			], appendTo:$('#wui-doc-example') });
 			a.place();
 			
 			e = new Wui.O({ width:500, height:500, el:$('<div>'), cls:'fit-test-container', fitDimension:'height', items:[
@@ -42,22 +48,19 @@
 				g = new Wui.O({height:'37%', cls:'c', el:$('<div>').text('Height = 37%') }),
 				h = new Wui.O({fit:1, cls:'d', el:$('<div>').text('Fit = 1') }),
 				i = new Wui.O({fit:3, cls:'e', el:$('<div>').text('Fit = 3') })
-			] });
+			], appendTo:$('#wui-doc-example') });
 			e.place();
 			
 			j = new Wui.O({ width:500, height:500, el:$('<div>'), cls:'fit-test-container', items:[
 				k = new Wui.O({fit:2, cls:'b', el:$('<div>').text('Fit = 2') }),
 				l = new Wui.O({cls:'c', el:$('<div>').text('No sizing information whatever (will default to fit = 1)') }),
 				m = new Wui.O({fit:3, cls:'d', el:$('<div>').text('Fit = 3') })
-			] });
+			], appendTo:$('#wui-doc-example') });
 			j.place();
 		});
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -67,7 +70,6 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>WUI Fit</h1>
 
 </body>
 </html>

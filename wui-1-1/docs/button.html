@@ -17,21 +17,24 @@
 		.wui-btn.test-page {height: 40px; line-height: 40px;}
 	</style>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.Button','Button');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			a = new Wui.Button({
 				text:	'Test Button',
 				cls:	'test-page',
-				appendTo:$('body')
+				appendTo:$('#wui-doc-example')
 			});
 			a.place();
 		});
 	</script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 
@@ -41,6 +44,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>Button</h1>
 </body>
 </html>

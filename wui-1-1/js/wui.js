@@ -1,4 +1,4 @@
-/**
+/*
 * Avoid 'console' errors in browsers that lack a console by defining a variable named console.
 * For example, when using console.log() on a browser that does not have a console, execution of code
 * will continue because the console variable is defined. 
@@ -22,11 +22,11 @@
 }());
 
 
-/** Make sure the WUI is defined */
+// Make sure the WUI is defined
 var Wui = Wui || {};
 
 (function($,window) {
-	/** AJAX error reporting and caching */
+	// AJAX error reporting and caching
 	$.ajaxSetup({ 
 		cache:	false,
 		error:	function(response){
@@ -38,7 +38,16 @@ var Wui = Wui || {};
 					}
 	});
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	@creation   2013-09-26
+	@version    1.1
 	
+	@param {any} n A value that will be tested for whether its numeric
+	@return Boolean
+	
+	Determines whether a passed in value is a number or not
+	*/
 	Wui.isNumeric = function(n) {
 	  return !isNaN(parseFloat(n)) && isFinite(n);
 	}
@@ -57,7 +66,13 @@ var Wui = Wui || {};
 		return retArray.sort();
 	},
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	@creation   2013-09-26
+	@version    1.1
 	
+	@return Number specifying the scrollbar width for the current page in pixels
+	*/
 	Wui.scrollbarWidth = function() {
 	  var parent, child, width;
 	
@@ -71,13 +86,31 @@ var Wui = Wui || {};
 	 return width;
 	};
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	@creation   2013-09-26
+	@version    1.1
 	
+	@param	{number} lower	Lower bound for generating the random number
+	@param	{number} upper	Upper bound for generating the random number
+	@return A random number within the bounds specified
+	
+	Generates a random number
+	*/
 	Wui.randNum = function(lower,upper) {
 	    upper = upper - lower + 1 ;
 	    return ( lower + Math.floor(Math.random() * upper) );
 	}
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	@creation   2013-09-26
+	@version    1.1
 	
+	@return A number representing the maximum z-index on the page
+	
+	Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined
+	*/
 	Wui.maxZ = function(){
 	    return Math.max.apply(null, 
 	            $.map($('body > *'), function(e,n) {
@@ -87,7 +120,15 @@ var Wui = Wui || {};
 	        );
 	};
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	@creation   2013-09-26
+	@version    1.1
 	
+	@param {array} collection A collection of items that will be fit within a container
+	
+	This function will size items relative to each other via a 'fit' value, as well as percentages and fixed values.
+	*/
 	Wui.fit = function(collection){
 		var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
 		
@@ -491,35 +532,56 @@ var Wui = Wui || {};
 	/** WUI Data Object
      @event		datachanged	When the data changes (name, data object)
 	 @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
-     @example	
-     	// setting up a data object
-     	a = new Wui.Data({
-			url: 	'data.json',
-			name:	'unit-test-data'
-		});
-		
-		// listening on event
-		$(window).on('datachanged',function(event,name,dataObj){
-			// All data object events post to the window since they may or may not have
-			// an object on the DOM. They can be differentiated by a given name.
-		});
+
+	The object for handling data whether remote or local
     */
 	Wui.Data = function(args){
 		$.extend(this,{
+			/** Array of data that will be stored in the object. Can be specified for the object or loaded remotely */
 			data:			[],
+			
+			/** Name of the data object. Allows the object to be identified in the listeners */
 			name:			null,
+			
+			/** Object containing keys that will be passed remotely */
 			params:			{},
+			
+			/** URL of the remote resource from which to obtain data */
 			url:	  		null,
+			
+			/** Whether the object is waiting for a remote response */
 			waiting: 		false,
+			
+			/** Special configuration of the ajax method. Defaults are:
+			
+				data:       me.params,
+				dataType:	'json',
+				success:	function(r){ me.success.call(me,r); },
+				error:		function(e){ me.success.call(me,e); },
+			*/
 			ajaxConfig:		{},
+			
+			/** The total number of records contained in the data object */
 			total:			0
 		},args);
 	}
 	Wui.Data.prototype = {
+		/** An object in the remote response actually containing the data.
+		Best set modifying the prototype eg. Wui.Data.prototype.dataContainer = 'payload'; */
 		dataContainer:	null,
+		/** An object in the remote response specifying the total number of records. Setting this
+		feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
 		totalContainer:	null,
+		
+		/** When the object is waiting, default amount of time before trying to perform loadData() again */
 		ajaxWait:		10,
+		
+		/** 
+		@param {array}	newData	Array of the new data
+		Event hook for when data is changed.
+		*/
 		dataChanged:	function(newdata){},
+		
 		/**
 		@param {function} fn A function that gets called for each item in the object's data array
 		
@@ -530,13 +592,21 @@ var Wui = Wui || {};
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
 							return true;
 				    	},
+		
 		/**
-		@param {object} item	A WUI Object, or if undefined, the object that this method is a member of
+		Performs a remote call sensitive to whether it is already waiting for a response.
+		Between loadData(), success() and setData() fires several event hooks in this order:
 		
-		@return	The object's el if it has one, or just the object
+		1. setParams()
+		2. beforeLoad()
+		3. onSuccess()
+		4. beforeSet()
+		5. processData()
+		6. dataChanged()
+		-  'datachanged' event is fired
+		7. afterSet()
 		
-		Adds HTML properties like CSS class, attributes, and sets height and width as either absolute values
-		or percentages of their parent.
+		Upon failure will fire onFailure()
 		*/
 		loadData:		function(){
 							var me = this,
@@ -558,7 +628,17 @@ var Wui = Wui || {};
 								}, me.ajaxWait);
 							}
 						},
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		setParams:		function(){},
+		
+		/**
+		@param {array} d Data to be set on the ojbect
+		@param {[number]} t Total number of records in the data set. If not specified setData will count the data set.
+		
+		Can be called to set data locally or called by loadData(). Fires a number of events and event hooks. See loadData().
+		*/
 		setData:		function(d,t){
 							var me = this;
 							
@@ -574,9 +654,27 @@ var Wui = Wui || {};
 							$(window).trigger($.Event('datachanged'),[(me.name || 'wui-data'), me]);
 							me.afterSet();
 						},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		beforeLoad:		function(){},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		afterSet:		function(){},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		beforeSet:		function(){},
+		
+		/**
+		@param {object or array} r Response from the server in JSON format
+		Runs when loadData() successfully completes a remote call. Gets data straight or gets it out of the dataContainer and totalContainer. See loadData().
+		Calls setData() passing the response and total.
+		*/
 		success:		function(r){
 							var me = this,
 								dc			= me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
@@ -587,22 +685,43 @@ var Wui = Wui || {};
 							me.onSuccess(r);
 							me.setData(response,total);
 						},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		onSuccess:		function(){},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		onFailure:		function(){},
 		failure:		function(e){
 							this.waiting = false;
 							this.onFailure(e);
 						},
+		
+		/** 
+		@param {array} Data to be processed.
+		Allows for pre-processing of the data before it is taken into the data object. Meant to be overridden, otherwise will act as a pass-through. See loadData().*/
 		processData:	function(response){ return response; }
 	};
 
 
-	/****************** WUI Template Engine *****************/
+	/**
+	
+	*/
 	Wui.Template = function(args){ $.extend(this,args); }
 	Wui.Template.prototype = {
-		// template:	null, * required
-		// data:		null, * required
-		/** I'm hoping this gets overridden */
+		/** The HTML template that the data will fit into */
+		template:	null,
+		
+		/** A single record to be applied to the template.  */
+		data:		null,
+		
+		/**
+		@return A jQuery object containing the template paired with its data
+		Creates the template 
+		*/
 		make:	function(){
 					var me = this;
 					if(me.data && me.template){
@@ -715,18 +834,32 @@ var Wui = Wui || {};
 	});
 	
 	
-	/****************** WUI Button *****************/
+	/**
+     @event		wuibtnclick		Fires when the button is pressed and not disabled. Avoided using the standard 'click' event for this reason ( Button Object )
+	 
+	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+    */
 	Wui.Button = function(args){
 	    $.extend(this, {
-	    	el:			$('<div>').attr({unselectable:'on'}),
+	    	/** The button element. Can be overridden according to the needs of the design. */
+			el:			$('<div>').attr({unselectable:'on'}),
+			
+			/** Whether the button is disabled. */
 			disabled:	false,
+			
+			/** Tool tip text for the button. */
 			toolTip:    null,
+			
+			/** Text to appear on the button. Can be HTML if a more complex button design is desired. */
 			text:       'Button'
 	    }, args);
 		this.init();
 	};
 	Wui.Button.prototype = $.extend(new Wui.O(),{
+		/** Event hook for the button click. */
 		click:      function(){},
+		
+		/** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
 		init:       function(){ 
 	                    var me = this;
 						if(me.disabled)	me.disable();
@@ -743,33 +876,55 @@ var Wui = Wui || {};
 	                    .html(me.text)
 	                    .attr({title:me.toolTip});
 	                },
+		
+		/** Disables the button */
 		disable:	function(){
 						this.disabled = true;
 						this.el.toggleClass('disabled',this.disabled).attr('disabled',true);
 					},
+		/** Enables the button */
 		enable:		function(){
 						this.disabled = false;
 						this.el.toggleClass('disabled',this.disabled).removeAttr('disabled');
 					},
+		/** Sets the button text. Can be HTML. */
 		setText:    function(txt){ return this.el.html(txt); },
 	});
 	
 	
-	/****************** WUI Pane/Panel *****************/
+	/**
+    @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+    
+	WUI Pane
+	*/
 	Wui.Pane = function(args){ 
 		$.extend(this,{
+			/** An array of items that will be added to the footer */
 			bbar:       [],
+			
+			/** Whether or not the pane has a border */
 			border:		true,
+			
+			/** Configuration for the pane border - follows the jQuery CSS convention */
 			borderStyle:{borderWidth:6},
+			
+			/** An array of items that will be added to the header */
 			tbar:       [],
+			
+			/** Whether or not the pane is disabled on load */
 			disabled:	false,
+			
+			/** HTML to show in the mask when the pane is disabled */
 			maskHTML:	'Loading...',
+			
+			/** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
 			title:		null
 		},args); 
 		this.init();
 	}
 	Wui.Pane.prototype = $.extend(new Wui.O(),{
-        disable:	function(){
+        /** Disables the pane by masking it and disabling all buttons */
+		disable:	function(){
 						this.disabled = true;
 						// cover pane contents
 						this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
@@ -777,6 +932,8 @@ var Wui = Wui || {};
 						this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
 						this.header.each(function(itm){ if(itm.disable) itm.disable(); });
 					},
+		
+		/** Enables the pane by removing the mask and enabling all buttons */
 		enable:		function(){
 						var me = this, mask = me.mask;
 						me.disabled = false;
@@ -788,6 +945,8 @@ var Wui = Wui || {};
 							me.header.each(function(itm){ if(itm.enable) itm.enable(); });
 						});
 					},
+		
+		/** Method that will run immediately when the object is constructed. */
 		init:		function(wuiPane){
 						var me = wuiPane || this;
 						me.el		 = $('<div>').addClass('wui-pane').append(
@@ -799,8 +958,8 @@ var Wui = Wui || {};
 						me.header    = new Wui.O({el:$('<div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
 	                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
 	                    me.elAlias	 = me.container;
-	                    
-	                    // Set  border if applicable
+						
+						// Set  border if applicable
 	                    if(me.border) me.el.css(me.borderStyle);
 	                    
 	                    // Add header and footer to the pane if theres something to put in them
@@ -815,35 +974,80 @@ var Wui = Wui || {};
 		                    }
 	                    }
 					},
+
+		/** Places the footer on the pane and adjusts the content as necessary. */
 		placeFooter:function(){
 						this.sureEl.css({borderBottom:'none'});
 						this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
 						this.footer.place();
 					},
+		
+		/** Places the header on the pane and adjusts the content as necessary. */
 		placeHeader:function(){
 						this.sureEl.css({borderTop:'none'});
 						this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
 						this.header.place();
 					},
-		setTitle:   function(t){ this.header.el.children('h1:first').text(t); }
+		
+		/** Changes the title on the pane. */
+		setTitle:   function(t){ this.header.el.children('h1:first').text(t); },
+		
+		afterRender:function(){
+						var me = this;
+						
+						document.addEventListener("animationstart", doLayout, false); // standard + firefox
+						document.addEventListener("MSAnimationStart", doLayout, false); // IE
+						document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
+						
+						function doLayout(){
+							if(!me.parent) me.layout();
+						}
+					}
 	});
 	
 	
+	/**
+    @event		open	When the window is opened (window)
+	@event		resize	When the window is resized (width, height)
+	@event		close	When the window is closed (window)
+	
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+    
+	WUI Window
+	*/
 	Wui.Window = function(args){ 
 		$.extend(this,{
+			/** An array of items that will be added to the footer */
 			bbar:       [],
+			
+			/** Whether or not the pane has a border */
 			border:		false,
+			
+			/** Set the height of the window */
 			height:		400,
+			
+			/** Determines whether objects behind the window are accessible */
 			isModal:	false,
+			
+			/** Event hook for when the window closes */
 			onWinClose:	function(){},
+			
+			/** Event hook for when the window opens */
 			onWinOpen:	function(){},
+			
+			/** An array of items that will be added to the header */
 			tbar:       [], 
+			
+			/** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
 			title:		'Window',
+			
+			/** Set the width of the window */
 			width:		600
 		},args);  
 		this.init(); 
 	}
 	Wui.Window.prototype = $.extend(new Wui.Pane(),{
+		/** Closes the window unless onWinClose() event hook returns false. */
 		close:		function(){ 
 						var me = this;
 						if(me.onWinClose(me) !== false){
@@ -851,10 +1055,14 @@ var Wui = Wui || {};
 							me.remove();
 						}
 					},
+		
+		/** Disables the window by masking it and disabling all buttons besides the close window button. */
 		disable:	function(){
 						Wui.Pane.prototype.disable.call(this);
 						this.winClose.enable(); // Enable the close button for the window - esp. important if its modal
 					},
+					
+		/** Method that will run immediately when the object is constructed. */
 		init:       function(){
             	        var me = this;
 	    				me.appendTo = $('body');
@@ -901,6 +1109,13 @@ var Wui = Wui || {};
                             }
                         }
                     },
+		/** 
+		@param {[number]} resizeWidth Number of pixels for the window width
+		@param {[number]} resizeHeight Number of pixels for the window height
+		
+		If width and height aren't specified, the window is sized vertically to try to fit its contents 
+		without getting larger than the browser viewport.
+		*/
         resize:		function(resizeWidth, resizeHeight){
 				        var me = this,
 							totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
@@ -920,7 +1135,14 @@ var Wui = Wui || {};
 			        }
 	});
 	
+	/** Shows an error message
+    @param {string}			errMsg		Message explaining the error
+	@param {[string]}		msgTitle	Title for the window. Default is 'Error'
+	@param {[array]}		buttons		Array containing Wui.Button(s) to give additional functionality.
+	@param {[function]}		callback	Function to perform when the error window closes - returning false will prevent the window from closing.
 	
+	@author     Stephen Nielsen
+    */
 	Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
 		var newErr = new Wui.Window({
 			isModal:    true,
@@ -934,10 +1156,12 @@ var Wui = Wui || {};
 		return false;
 	}
 	
-	/** Displays an 'alert' type message on the screen
-     *  @author     Stephen Nielsen
-     *  @creation   2013-09-26
-     *  @version    1.1
+	/** Shows an message in a modal window
+    @param {string}			msg			A message for the user
+	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
+	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
+	@param {[string]}		content		HTML content to include after the message
+	@author     Stephen Nielsen
     */
 	Wui.msg = function(msg, msgTitle, callback, content){
 	    var cntnt   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
@@ -952,7 +1176,15 @@ var Wui = Wui || {};
 			return true;
 	}
 	
+	/** Shows an message in a modal window with yes and no buttons. Answers are passed to callback().
+	The window will not close until an aswer is selected.
 	
+    @param {string}			msg			A message for the user
+	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
+	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
+	@param {[string]}		content		HTML content to include after the message
+	@author     Stephen Nielsen
+    */
 	Wui.confirm = function(msg, msgTitle, callback, content){
 	    var itms   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
 	        Msg  = new Wui.Window({

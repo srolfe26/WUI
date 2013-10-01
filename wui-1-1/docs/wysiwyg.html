@@ -14,19 +14,22 @@
 	<script type="text/javascript" src="../js/docs.js"></script>
 
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/forms.js','Wui.Wysiwyg','WYSIWYG');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a text formItem onto the body
-			a = new Wui.Wysiwyg({ label:'WYSIWYG', labelPosition:'left', name:'wysiwyg', attr:{name:'wysiwyg'}, height:150, appendTo:$('body')});
+			a = new Wui.Wysiwyg({ label:'WYSIWYG', labelPosition:'left', name:'wysiwyg', attr:{name:'wysiwyg'}, height:150, appendTo:$('#wui-doc-example')});
 			a.place();
 		});
 	</script>
 	
 	<script type="text/javascript">
 		$(document).ready(function(){
-			// SHOW ITEM CREATION CODE
-			Wui.docCode();
-			
 			// TESTING
 			ts = new Wui.ts();
 			ts.test("Get value on blank text field",function(){ return a.val() == null; });
@@ -53,6 +56,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>WYSIWYG</h1>
 </body>
 </html>
