@@ -21,10 +21,9 @@
 							var stateStr	= '';
 							
 							for(var i in stateArray){
-								// Keep keys in alphabetical order so that comparing states works
-								var keys = [];
-								for(var key in stateArray[i].params)	keys.push(key);
-								keys.sort();
+								// Get keys in alphabetical order so that comparing states works
+								var keys = Wui.getKeys(stateArray[i].params);
+
 								// State the location
 								stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
 								

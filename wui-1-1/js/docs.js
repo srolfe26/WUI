@@ -70,8 +70,13 @@
 									for(var i in me.extendedObjs){
 										var docObj = me.extendedObjs[i];
 										
+										// for methods and configs
 										for(var itemName in docObj.conglomerate)
 											addToConglomerate(itemName,docObj.conglomerate[itemName].doc,docObj,docObj.conglomerate[itemName].type);
+											
+										// for events which will not override each other (though may fire in concert)
+										for(var evt in docObj.events)
+											me.events.push(docObj.events[evt]);
 									}
 									
 									// THEN OVERRRIDE THE CONGLOMERATE WITH THE CODE FROM THE CURRENT METHOD
@@ -84,7 +89,13 @@
 									// Get configs - the similar regex will not match the functions because they were removed in the last step
 									code.code.replace(/\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]([^\,^\s]+)/g,function(m,comment,itemName,defaultVal){
 										if(defaultVal.match(/\bfunction\b/) === null)
-											me.conglomerate[itemName] = { doc:comment, source:me, type:'config' };
+											addToConglomerate(itemName,comment,me,'config');
+									});
+									
+									// Pull out events
+									code.intro = code.intro.replace(/\@event\s+([\w]+)\s+([^\n]+)/g,function(mch,evnt,desc){
+										me.events.push({title:evnt, doc:desc, source:me.obj});
+										return '';
 									});
 									
 									function addToConglomerate(itemName,comment,docObj,type){
@@ -96,18 +107,85 @@
 										// Get the documentation for this given object
 										me.doc = code.intro;
 										
-										// Pull out events
-										me.doc = me.doc.replace(/\@event\s+([\w]+)\s+([^\n]+)/g,function(mch,evnt,desc){ me.events.push({title:evnt, doc:desc, source:me.obj});    return ''; });
+										// Pull out methods and events ordered alphabetically
+										var keys = Wui.getKeys(me.conglomerate);
+										for(var i = 0; i < keys.length; i++){
+											var c = me.conglomerate[keys[i]];
+											me[c.type + 's'].push( {title:keys[i], doc:c.doc, source:c.source, type:c.type} );
+										}
 
-										// Pull out methods and events
-										for(var i in me.conglomerate)
-											me[me.conglomerate[i].type + 's'].push( {title:me.conglomerate[i], doc:me.conglomerate[i].doc, source:me.conglomerate[i].source} );
-										
 										// put it on the DOM
 										me.toHTML();
 									}
 								},
+			createNav:			function(element){
+									if(me[element].length){
+										var methodList = $('<ul>')
+														.addClass('doc-nav-list')
+														.click(function(){
+															if($(this).hasClass('wui-doc-open'))	$(this).removeClass('wui-doc-open');
+															else									$(this).addClass('wui-doc-open');
+														}),
+											listHeader = $('<li>' +element+ '</li>').addClass('doc-nav-header');
+													
+										methodList.append(listHeader);
+										
+										var btn = new Wui.Button({
+											appendTo:	listHeader,
+											text:		'Hide Extended',
+											click:		function(){
+															if(methodList.hasClass('wui-hide-inherited'))	{ this.setText('Hide Extended'); methodList.removeClass('wui-hide-inherited'); }
+															else											{ this.setText('Show Extended'); methodList.addClass('wui-hide-inherited'); }
+														}
+										});
+										btn.place();
+										
+										for(var i = 0; i < me[element].length; i++){
+											var a = $('<li><a href="#' +me[element][i].type+ '_' +me[element][i].title+ '">' +me[element][i].title+ '</a></li>');
+											if(me[element][i].source !== me.obj)	a.addClass('inherited');
+											methodList.append(a);
+										}
+										
+										me.el.append(methodList);
+									}	
+								},
+			createDocList:		function(element){
+									if(me[element].length){
+										var list = new Wui.DataList({
+											data:		me[element],
+											appendTo:	me.el,
+											el:			$('<table class="wui-doc-methods">\n'+
+															'\t<thead>\n'+
+																'\t\t<tr><th>' +element+ '</th></tr>\n'+
+															'\t</thead>\n' +
+															'\t<tbody>\n\t</tbody>\n' +
+														'</table>\n').addClass('wui-test-results'),
+														
+											template:	'\n\t\t<tr>\n' +
+															'\t\t\t<td><a id="{type}_{title}" class="doc-item-title">{title}</a><div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
+														'\n\t\t</tr>\n',
+											init:		function(){
+															this.elAlias = this.el.children('tbody');
+														}
+										});
+										list.place();
+										list.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
+										list.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });	
+									}
+								},
 			toHTML:				function(){
+									me.createNav('methods');
+									me.createNav('configs');
+									me.createNav('events');
+									
+									me.append($('<h1>').text(me.title));
+									
+									me.append(Wui.transformJavaDoc(me.doc));
+									
+									me.createDocList('methods');
+									me.createDocList('configs');
+									me.createDocList('events');
+									
 									me.place();
 								},
 			getCode:			function(){
@@ -117,9 +195,12 @@
 									}
 								},
 			doc:				'',
+			title:				null,
 			obj:				'Wui.O',
 			el:					$('<div>').addClass('wui-doc'),
 			init:				function(){
+									me.title = me.title || me.obj;
+									
 									$.ajax(me.fileURL,{
 										dataType:	'script',
 										cache:		true,
@@ -148,14 +229,11 @@
 	};
 
 	
-	Wui.transformJavaDoc = function(documentation,obj,showObjName){
+	Wui.transformJavaDoc = function(documentation){
 		var m		= documentation.doc || documentation,
 			keyInfo = [],
-			engine  = new Wui.Template({template:'<div class="wui-doc-info-row"><div>{title}</div><div>{val}</div></div>'}),
-			key		= new $('<div>').addClass('wui-doc');
-			
-			if(obj && showObjName)
-				key.append('<h3>').text(obj);
+			engine  = new Wui.Template({template:'<p><span class="wui-doc-param">{title}</span><span class="wui-doc-param-val">{val}</span></p>'}),
+			key	= $('<span>');
 		
 		//get parameters
 		m = m.replace(/\@param\s+\{([\w]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
@@ -188,7 +266,7 @@
 		});
 		
 		var pre = $(Wui.HTMLifyCode(m.replace(/\*/g,'')));
-		var p = $('<p>').html(
+		var p = $('<p>').addClass('wui-doc-evershow').html(
 			pre.text().replace(/([\n\r]+?\s*)/g,function(m){ 
 				var ret = ''; 
 				for(var i = 0; i < m.length; i++) if(m[i] === '\n') ret += '<br />'; 
@@ -196,61 +274,9 @@
 			})
 		);
 		key.append(p);
-		
-		if(documentation.methods && documentation.methods.length > 0){
-			
-			var methodList = null;
-			key.prepend(methodList = $('<ul>').addClass('doc-nav-list').append($('<li>Methods</li>').addClass('doc-nav-header')));
-			
-			for(var i = 0; i < documentation.methods.length; i++){
-				methodList.append($('<li><a href="#' +documentation.methods[i].item+ '">' +documentation.methods[i].item+ '</a></li>'));
-			}
-			
-			var methods = new Wui.DataList({
-					data:		documentation.methods,
-					appendTo:	key,
-					el:			$('<table class="wui-doc-methods">\n'+
-									'\t<thead>\n'+
-										'\t\t<tr><th>Methods</th></tr>\n'+
-									'\t</thead>\n' +
-									'\t<tbody>\n\t</tbody>\n' +
-								'</table>\n').addClass('wui-test-results'),
-								
-					template:	'\n\t\t<tr>\n' +
-									'\t\t\t<td><a id="{item}" class="doc-item-title">{item}</a><div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
-								'\n\t\t</tr>\n',
-					init:		function(){
-									this.elAlias = this.el.children('tbody');
-								}
-				});
-			methods.place();
-			methods.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
-			methods.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });
-		}
-		
-		if(documentation.configs && documentation.configs.length > 0){
-			var configs = new Wui.DataList({
-					data:		documentation.configs,
-					appendTo:	key,
-					el:			$('<table class="wui-doc-configs">\n'+
-									'\t<thead>\n'+
-										'\t\t<tr><th>Configs</th></tr>\n'+
-									'\t</thead>\n' +
-									'\t<tbody>\n\t</tbody>\n' +
-								'</table>\n').addClass('wui-test-results'),
-								
-					template:	'\n\t\t<tr>\n' +
-									'\t\t\t<td>{item}<div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
-								'\n\t\t</tr>\n',
-					init:		function(){
-									this.elAlias = this.el.children('tbody');
-								}
-				});
-				configs.place();
-		}
-		
 		return key;
 	}
+	
 	
 	Wui.HTMLifyCode = function(c){
 		var e = document.createElement('i'),
@@ -262,7 +288,11 @@
 		return r;
 	};
 	
-	Wui.docCode = function(file,obj){
+	
+	Wui.docCode = function(file,obj,title){
+		//document object if defined
+		var doc = new Wui.docObj({fileURL:file, obj:obj, title:title});
+		
 		var wuiCode = $('.wui-doc-code');
 			if(wuiCode.length > 0){
 				var	docCode = '';
@@ -275,42 +305,46 @@
 				});
 				
 				// create the <pre> object with associated button to show and hide it
-				var	testsNCode = new Wui.O({
-						el:		$('<div>').addClass('wui-doc-btn-dock')
-					}),
-					preObj = $(Wui.HTMLifyCode(docCode)),
+				var	preObj = $(Wui.HTMLifyCode(docCode)),
 					testObj = $('<div>').attr({id:'wui-unit-tests'}),
-					srcBtn = new Wui.Button({
-						preVisible:	false,
-						text:		'Show Source',
-						appendTo:	testsNCode.el,
-						click:		function(){
-										if(this.preVisible){ preObj.fadeOut(1000); this.setText('Show Source'); }
-										else{ preObj.fadeIn(1000); this.setText('Hide Source'); }
-										this.preVisible = !this.preVisible;
-									}
-					}),
-					// show/hide unit tests button
-					testBtn = Wui.testBtn = new Wui.Button({
-						vis:	false,
-						text:		'<span class="show-hide">Show Unit Tests</span>',
-						appendTo:	testsNCode.el,
-						click:		function(){
-										if(this.vis){ testObj.fadeOut(1000); this.el.children('.show-hide').text('Show Unit Tests'); }
-										else{ testObj.fadeIn(1000); this.el.children('.show-hide').text('Hide Unit Tests'); }
-										this.vis = !this.vis;
-									}
+					exampleObj = $('<div>').attr({id:'wui-doc-example'}),
+					testsNCode = new Wui.O({
+						el:		$('<div>').addClass('wui-doc-btn-dock'),
+						appendTo:$('body'),
+						items:	[
+									new Wui.Button({
+										vis:		false,
+										text:		'Show Example',
+										click:		function(){
+														if(this.vis){ exampleObj.fadeOut(1000); this.setText('Show Example'); }
+														else{ exampleObj.fadeIn(1000); this.setText('Hide Example'); }
+														this.vis = !this.vis;
+													}
+									}),
+									new Wui.Button({
+										vis:		false,
+										text:		'Show Example Source',
+										click:		function(){
+														if(this.vis){ preObj.fadeOut(1000); this.setText('Show Example Source'); }
+														else{ preObj.fadeIn(1000); this.setText('Hide Example Source'); }
+														this.vis = !this.vis;
+													}
+									}),
+									Wui.testBtn = new Wui.Button({
+										vis:		false,
+										text:		'<span class="show-hide">Show Unit Tests</span>',
+										click:		function(){
+														if(this.vis){ testObj.fadeOut(1000); this.el.children('.show-hide').text('Show Unit Tests'); }
+														else{ testObj.fadeIn(1000); this.el.children('.show-hide').text('Hide Unit Tests'); }
+														this.vis = !this.vis;
+													}
+									})
+								]
 					});
 				
 				// append everything on the body
-				testBtn.place();
-				srcBtn.place();
-				testsNCode.addToDOM(testsNCode,$('body > h1:first'),'after');
-				testsNCode.el.append(testObj.hide(), preObj.hide());
-				
-				//document object if defined
-				sam = new Wui.docObj({fileURL:file, obj:obj});
-				// if(file && obj) Wui.makeObjDoc(file,obj);
+				testsNCode.place();
+				testsNCode.el.append(exampleObj.hide(), preObj.hide(), testObj.hide());
 			}
 	};
 	
@@ -371,10 +405,6 @@
 		$('#wui-test-results tbody').prepend(tplt.make());
 		return testData;
 	};
-	
-	
-	
-	
 	
 	
 	Wui.ts = function(){

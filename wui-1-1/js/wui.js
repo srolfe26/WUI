@@ -44,6 +44,20 @@ var Wui = Wui || {};
 	}
 	
 	
+	/**
+		@param {object} Object containing named keys
+		@return Array containing the key names of the passed in object in alphabetical order
+		
+		@example var keys = Wui.getKeys(stateArray[i].params);
+	*/
+	Wui.getKeys = function(obj){
+		var retArray = [];
+		for(var key in obj)
+			retArray.push(key);
+		return retArray.sort();
+	},
+	
+	
 	Wui.scrollbarWidth = function() {
 	  var parent, child, width;
 	
@@ -122,7 +136,7 @@ var Wui = Wui || {};
 	
 	
 	/** The base object from which all other WUI Objects extend
-     *  @author     Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
+     *  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
      *  @creation   2013-09-26
      *  @version    1.1
     */
@@ -474,7 +488,22 @@ var Wui = Wui || {};
 	Wui.Viewport.prototype = new Wui.O();
 
 	
-	/****************** WUI Data Object *****************/
+	/** WUI Data Object
+     @event		datachanged	When the data changes (name, data object)
+	 @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
+     @example	
+     	// setting up a data object
+     	a = new Wui.Data({
+			url: 	'data.json',
+			name:	'unit-test-data'
+		});
+		
+		// listening on event
+		$(window).on('datachanged',function(event,name,dataObj){
+			// All data object events post to the window since they may or may not have
+			// an object on the DOM. They can be differentiated by a given name.
+		});
+    */
 	Wui.Data = function(args){
 		$.extend(this,{
 			data:			[],
@@ -501,6 +530,14 @@ var Wui = Wui || {};
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
 							return true;
 				    	},
+		/**
+		@param {object} item	A WUI Object, or if undefined, the object that this method is a member of
+		
+		@return	The object's el if it has one, or just the object
+		
+		Adds HTML properties like CSS class, attributes, and sets height and width as either absolute values
+		or percentages of their parent.
+		*/
 		loadData:		function(){
 							var me = this,
 								config = $.extend({
@@ -604,7 +641,7 @@ var Wui = Wui || {};
 	 @event		change		The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
 	 @event		deselect	A selected item is clicked again, and thus deselected ( DataList, el, record )
 	 
-	 @author     Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
+	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
      @creation   2013-09-30
      @version    1.1
     */
@@ -645,14 +682,16 @@ var Wui = Wui || {};
 										me.selected = null;
 										me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
 									}else{
-										var alreadySelected = me.selected;
+										var alreadySelected = me.selected,
+											oldEl = (alreadySelected) ? alreadySelected.el : undefined,
+											oldRec = (alreadySelected) ? alreadySelected.rec : undefined;
 										
 										me.el.find('.wui-selected').removeClass('wui-selected');
 										a.el.addClass('wui-selected');
 										me.selected = a;
 										
 										// Fire different events depending whether there was already a record selected
-										me.el.trigger($.Event('change'), [me, a.el, a.rec, alreadySelected.el, alreadySelected.rec]);
+										me.el.trigger($.Event('change'), [me, a.el, a.rec, oldEl, oldRec]);
 										me.el.trigger($.Event('select'), [me, a.el, a.rec]);
 									}
 								})

@@ -9,7 +9,11 @@ body, body * {
     box-sizing:         border-box !important;
 }
 
-h1 { margin-top:1.5em !important; color:#060;}
+h1 {
+    color: #000000;
+    margin: 0 0 2em;
+    text-transform: uppercase;
+}
 
 /* SOURCE AND BUTTONS */
 .wui-doc-btn-dock {
@@ -17,12 +21,13 @@ h1 { margin-top:1.5em !important; color:#060;}
     padding: 0.5em;
     text-align: right;
 }
-	.wui-doc-btn-dock .wui-btn {border:1px solid #ccc; height: 40px; line-height: 40px; margin-right:1em; color:#fff; background:transparent;}
+	.wui-doc-btn-dock .wui-btn {border:1px solid #ccc; height: 40px; line-height: 40px; margin-right:1em; color:#fff; background:transparent; text-transform: none;}
 	.wui-doc-btn-dock pre {
 		background:rgba(0,0,0,0.65); color: #fff; 
 		margin:0.5em 0; padding: 1em; 
 		-moz-tab-size:4; -o-tab-size:4; tab-size:4; 
 		white-space: pre-wrap;
+		text-transform: none;
 		font-family:monospace; text-align:left; font-size:0.8em;
 	}
 
@@ -43,45 +48,52 @@ h1 { margin-top:1.5em !important; color:#060;}
 
 /* DOCUMENTATION */
 .wui-doc {border:1px solid #aaa; margin:0.5em; padding:1em;}
-.doc-item-title {
+.wui-doc a {color:#930; text-decoration: none; font-size: 0.8em;}
+.wui-doc a.doc-item-title {
 	float: left;
     font-weight: bold;
     margin-right: 1em;
+    font-size: 1em; 
+    color: #333;
 }
 
-.wui-doc-btn-dock, .wui-doc-methods.wui-test-results th, .wui-doc-configs.wui-test-results th { background-color: #369;}
+.wui-doc-btn-dock, .wui-doc-methods.wui-test-results th, .wui-doc-configs.wui-test-results th, .doc-nav-list li.doc-nav-header { background-color: #369; text-transform: capitalize; }
 
 .wui-test-results  .wui-doc-info-row{
     font-size: 0.8em; display:none;
 }
-.wui-test-results  .doc-info p { 
+.wui-test-results .doc-info p { 
 	color: #777777;
     font-size: 0.8em;
 	margin: 0.25em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    clear:both;
+    display:none;
 }
+
+.wui-test-results .doc-info p.wui-doc-evershow {display:inline-block;}
 .wui-test-results  .doc-info br {display:none;}
 
-.wui-test-results .show-doc .wui-doc-info-row { display:block; }
+.show-doc > td { padding: 3em 1em; }
     .wui-test-results .show-doc .doc-item-title {float:none; margin:0;}
-	.wui-test-results .show-doc .doc-info p {margin:2em 1em 1em 3em; color:#333; white-space:normal; text-overflow:none; overflow:auto;}
+	.wui-test-results .show-doc .doc-info p {display:block; color:#333; white-space:normal; text-overflow:none; overflow:auto;}
+	.wui-test-results .show-doc .doc-info p.wui-doc-evershow {margin:2em 1em 1em 3em;}
 	.wui-test-results .show-doc .doc-info br {display:inline;}
     
-    .wui-doc-info-row {margin-top:0.33em;}
-    .wui-doc-info-row:first-child { margin: 0; }
-	    .wui-doc-info-row div:first-child {display:inline-table; vertical-align:top; width:15%; font-weight:bold; text-align:right; padding-right:2.5em;}
-	    .wui-doc-info-row div:last-child {display:inline-block; width:85%;}
-		    .wui-doc-var-name {display:inline-table; vertical-align:top; width:8%; font-weight:bold; color:#036;}
-		    .wui-doc-var-type {display:inline-table; vertical-align:top; width:4%;  font-style:italic;}
-		    .wui-doc-var-desc {display:inline-block; width:88%;}
+    
+    .wui-doc-param {font-weight:bold; color:#369; display:inline-block; min-width:15%; text-align: right; padding-right:1em;}
+    .wui-doc-param-val {}
+    .wui-doc-var-name {display:inline-table; vertical-align:top; width:8%; font-weight:bold; color:#930;}
+    .wui-doc-var-type {display:inline-table; vertical-align:top; width:4%;  font-style:italic;}
+    .wui-doc-var-desc {display:inline-block; width:65%;}
 
 .doc-nav-list {
     float: right;
-    font-size: 0.9em;
     list-style: none outside none;
-    margin: 0em 0em 1em 1em;
+    margin: 0 0 1em 0.15em;
+    padding: 0;
     width: 200px;
 }
 
@@ -89,15 +101,29 @@ h1 { margin-top:1.5em !important; color:#060;}
     background-color: #DDDDDD;
     margin-bottom: 1px;
     padding: 0.15em 1em;
+    height:0px;
+    overflow:hidden;
 }
 
+.doc-nav-list.wui-hide-inherited li.inherited {display:none;}
+
 .doc-nav-list li.doc-nav-header {
-    background-color: #336699;
     color: #FFFFFF;
-    font-size: 1em;
+    font-size: 0.9em;
     font-weight: bold;
     padding: 0.25em 1em;
+    height:auto !important;
+    cursor:pointer;
 }
+.doc-nav-list li.doc-nav-header .wui-btn {
+	border:1px solid #ccc; float:right; clear:right; 
+	border-radius: 4px; color:#fff; font-weight: normal; 
+	background:transparent; text-transform: none;
+	height: 19px; margin-right:-1em;
+    line-height: 19px;
+}
+
+.doc-nav-list.wui-doc-open li { height:auto; }
 
 .doc-nav-list a {text-decoration:none; color:#333;}
 

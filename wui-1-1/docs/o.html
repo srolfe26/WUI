@@ -9,9 +9,9 @@
 
 	<style type="text/css" class="wui-doc-code">
 		.stage {
-			background:#556577; margin:1em; padding:1em; 
+			background:rgba(0, 0, 0, 0.65); margin:1em; padding:1em; 
 			width:800px; height:100px; overflow:hidden;
-			position:relative;
+			position:relative; text-align: left;
 			-moz-box-sizing: border-box !important; -webkit-box-sizing: border-box !important; box-sizing: border-box !important;
 		}
 		.stage:after {position:absolute; right:1em; bottom:1em; color:#fff; content:"Stage";}
@@ -28,12 +28,18 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.O','WUI Object');
+		}); // end document.ready		
+	</script>
+	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			a = new Wui.O({
 				el:			$('<div>'),
 				cls:		'stage',
-				prependTo:	$('body')
+				appendTo:	$('#wui-doc-example'),
 			})
 			a.place();
 		});
@@ -41,9 +47,6 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function(){
-			// SHOW ITEM CREATION CODE
-			Wui.docCode('../js/wui.js','Wui.O');
-			
 			// TESTING
 			ts = new Wui.ts();
 			
@@ -130,6 +133,5 @@
 	</script>
 </head>
 <body class="wui-docs">
-<h1>WUI Object</h1>
 </body>
 </html>
