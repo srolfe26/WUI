@@ -1,4 +1,4 @@
-(function($) {
+﻿(function($) {
 	$.fn.overrideNodeMethod = function(methodName, action) {
 	    var originalVal = $.fn[methodName];
 	    var thisNode = this;
@@ -11,28 +11,45 @@
 	    };
 	};
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+	A WUI Form is a collection of Wui.FormField objects with methods to
+	both collectively and individually interact with those objects.
+	*/
 	Wui.Form = function(args){
 	    $.extend(this,{
-			afterCreate:function(){},
+			/** Config to disable the entire form */ 
 			disabled:		false,
+			
+			/** Class to hilight form fields when they fail validation */
 			errCls:			'wui-form-err',
+			
+			/**
+			Position of the label relative to the form fields that is generally applied unless
+			specifically defined on a particular field.
+			*/
 			labelPosition:	'top'
 		}, args, {
-	    	dataValid:  	null,
+	    	/** Flag for whether data on the form has been changed - set by the individual fields */
 	    	formChanged:	false,
+			/** DOM element of the form */
 			el:				$('<div>'),
+			/** @private Array to store one or more errors when a form is validated */
 			errs:       	[]
 	    });
 	    
 	    this.init();
 	};
 	Wui.Form.prototype = $.extend(new Wui.O(),{
+		/** Blanks out the values of all form fields */
 		clearData:  function(){ this.setData(); },
+		
+		/** Display  */
 		dispErrs:   function(){
 	                    var msg = '';
 	                    for(var e in this.errs) msg += this.errs[e] + '<br/>';
-	                    Wui.errRpt(msg,'Form Errors')
+	                    Wui.errRpt(msg,'Form Errors');
 	                },
 		each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)
@@ -88,7 +105,6 @@
 						if(me.items === undefined) me.items = [];
 						$.each(me.items, function(i,itm){ me.items[i] = me.normFrmItem(itm); });
 						Wui.O.prototype.place.call(this);
-		                this.afterCreate();
                     },
 		push:		function(){
 						for(var i in arguments) arguments[i] = this.normFrmItem(arguments[i]);

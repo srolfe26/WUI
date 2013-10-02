@@ -287,7 +287,7 @@
 			key	= $('<span>');
 		
 		//get parameters
-		m = m.replace(/\@param\s+\{([\w]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
+		m = m.replace(/\@param\s+\{([^\}]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
 			keyInfo.push({title:'Param', val:'<span class="wui-doc-var-name">'+varname+'</span><span class="wui-doc-var-type">' +dt+ '</span><span class="wui-doc-var-desc">' +desc+ '</span>'});
 			return '';
 		});

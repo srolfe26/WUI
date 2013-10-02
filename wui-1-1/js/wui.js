@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Avoid 'console' errors in browsers that lack a console by defining a variable named console.
 * For example, when using console.log() on a browser that does not have a console, execution of code
 * will continue because the console variable is defined. 
@@ -549,7 +549,7 @@ var Wui = Wui || {};
 		
 		/**
 		@param {array} d Data to be set on the ojbect
-		@param {[number]} t Total number of records in the data set. If not specified setData will count the data set.
+		@param {number} [t] Total number of records in the data set. If not specified setData will count the data set.
 		
 		Can be called to set data locally or called by loadData(). Fires a number of events and event hooks. See loadData().
 		*/
@@ -680,6 +680,9 @@ var Wui = Wui || {};
     */
 	Wui.DataList = function(args){
 		$.extend(this, {
+			/** Determines whether templates are made immediately when the DataList is rendered */
+			autoLoad:	true,
+			
 			/** DOM element where all of the data templates will be appended. */
 			el:			$('<div>'),
 			
@@ -739,8 +742,10 @@ var Wui = Wui || {};
 					
 		/** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
 		onRender:	function(){
-						if(this.url === null)	this.make();
-						else					this.loadData();
+						if(this.autoLoad){
+							if(this.url === null)	this.make();
+							else					this.loadData();
+						}
 					},
 					
 		/** Reruns the make() method. */

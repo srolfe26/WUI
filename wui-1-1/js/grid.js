@@ -1,4 +1,4 @@
-(function($) {
+﻿(function($) {
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
@@ -51,7 +51,7 @@
 	
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
-	Creates a tab pane
+	Tab pane
 	*/
 	Wui.Tabs = function(args){ 
 		$.extend(this,{
@@ -151,7 +151,32 @@
 	
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
-	Creates a tab pane
+	The grid pane provides table-like functionality for data sets. Grids can be populated remotely
+	or have their data locally defined. Grids also support infinite scrolling by defining paging
+	parameters. Columns for the grid are defined in an array and with the following options:
+	
+	heading		- The title of the column heading
+	dataType	- The type of data used in the column (used for sorting)
+	dataItem	- The item in the record that correlates to this column
+	width		- A pixel value for the width of the column
+	fit			- A numeric indicator of the relative size of the column
+	
+	Custom renderers can be applied to columns.  These renderers are defined as function that can
+	either be defined in the column definition, or defined elsewhere in scope and simply named by
+	a string. The rendering function is defined passed the following parameters as below:
+	
+	renderer: function(grid, cell, value, record, row){}
+	
+	Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
+	descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
+	is possible with the a number indicating the precedence of the sort and an arrow for the direction of the sort 
+	appearing on the right side of the column heading.
+	
+	Columns can be resized by dragging the heading borders left and right. Columns can be sized to 
+	extend beyond the width of the grid frame, but when sized smaller will pop back into position.
+	
+	While not using Wui.fit(), the same principles apply in the sizing of elements, although percentage
+	values are not supported at this time.
 	*/
 	Wui.Grid = function(args){
 		$.extend(this,{
@@ -169,21 +194,44 @@
 			
 			/** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
 			defaultDataType:'string',
+			
+			/** Whether multiple rows/records can be selected at once */
 			multiSelect:	false,
+			
+			/** 
+			@param {object}	rec		Data object that is the record of the double-clicked on row.
+			Event hook for the double click
+			*/
 			onDoubleClick:	function(rec){},
+			
+			/**
+			If paging is anything other than null, the grid will sort remotely and scroll infinitely.
+			
+			Example paging parameters are:
+			{
+				limit:	page size,
+				start:	0 - a very good place to start
+				sort:	{dataItem:, order:}
+			}
+			*/
 			paging:			null,
-							/*{
-								limit:	page size,
-								start:	0 - a very good place to start
-								sort:	{dataItem:, order:}
-							}*/
+			
+			/** Whether or not to hide the column headers */
 			hideHeader:		false,
+			
+			/** An array of the currently selected records */
 			selected:		[],
+			
+			/** An array of items that will be added to the header */
 			tbar:   		[]
 		},args); 
 		this.init();
 	};
 	Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.Data(),{
+		/** 
+		@param {array}	source		Array containing the data to add rows for.
+		Adds rows to the table along with event listeners and column renderers.
+		*/
 		addRows:		function(source){
 							var me = this;
 							me.tbl.items = [];
@@ -229,11 +277,27 @@
 							});
 							return source;
 						},
+		
+		/** 
+		Calculates the width of each of the columns as they presently are.
+		@private
+		*/
 		calcColWidth:	function (){
 							var tcw = 0;
 							this.heading.children().each(function(){ tcw += $(this).outerWidth(); });
 							return tcw;
 						},
+						
+		/** 
+		Recursive function for sorting on multiple columns
+		@param {number}	depth	Depth of the recursive call
+		@param {number}	a		First item to compare
+		@param {number}	b		Second item to compare
+		
+		@return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+		
+		@private
+		*/
 		doSort:			function(depth,a,b){
 							var me = this;
 							if(me.sorters.length > 0){
@@ -252,11 +316,6 @@
 										compB = new Date(compB);
 										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
 										break;
-									/*case 'boolean':
-										compA = !!compA;
-										compB = new Date(compB);
-										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
-										break;*/
 									case 'numeric':
 										compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
 										compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
@@ -272,6 +331,10 @@
 								return (a.originalSrt > b.originalSrt) ? 1 : -1;
 							}
 						},
+		/** 
+		@param {string|object} params	Params to be set
+		If params == 'init' then it sets up paging parameters. If params is an object then the parameters are set to the object.
+		*/
 		setParams:		function(params){
 							var me = this;
 							
@@ -285,6 +348,9 @@
 								$.extend(me.params,params);
 							}
 						},
+		/** 
+		Overrides an event hook on Wui.Data and makes the grid after new data is set
+		*/
 		afterSet:		function(){
 							var me = this;
 							
@@ -299,7 +365,17 @@
 								me.makeGrid();
 							}
 						},
+		/** 
+		@returns Returns the currently selected row or rows
+		
+		If there is no row selected, a Wui.errRpt will display a 'No row selected.' message to the user.
+		*/
 		getSelected:	function(){ return (this.selected.length > 0) ? this.selected : Wui.errRpt('No row selected.','Select Something');},
+		
+		/** 
+		Method that will run immediately when the object is constructed. Creates necessary 
+		DOM elements for the grid. Establishes whether the grid is remote or local, paging
+		or not. */
 		init:			function(){
 							var me = this;
 								
@@ -367,11 +443,20 @@
 							me.elAlias.append(me.tblContainer,me.headingContainer);
 							if(me.hideHeader)	me.headingContainer.height(0);
 						},
+		
+		/** 
+		Overrides the Wui.O layout function and positions the data and sizes the columns.
+		*/
 		layout:			function(){
 							Wui.O.prototype.layout.call(this);
 							this.posDataWin();
 							this.sizeCols();
 						},
+						
+		/** 
+		Builds the headings if they don't exist, calls addRows() and sizeCols()
+		@private
+		*/
 		makeGrid:		function(){
 							var me = this, t = '<tr>';
 							
@@ -456,6 +541,11 @@
 
 							me.sizeCols();
 						},
+		/** 
+		@param	{object}	col	An object containing the sort direction and DOM element of the heading
+		#param	{string}	dir	The direction of the sort
+		Manages the sorters for the grid by keeping them in an array. 
+		*/
 		mngSorters:		function(col,dir){
 							var me = this,
 								sortClasses = ['one','two','three','four','five'];
@@ -497,12 +587,21 @@
 									me.paging.sort.push({dataItem:itm.dataItem, order:itm.sortDir});
 							});
 						},
+		
+		/** 
+		Size up the columns of the table to match the headings
+		@private
+		*/
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
 								me.tbl.find('td:eq(' +i+ ')').width($(col.heading).outerWidth() - 2.8); // 2 accounts for borders
 							});
 						},
+						
+		/** 
+		Runs posDataWin() and starts the rendering of the data.
+		*/
 		onRender:		function (){
 							var me = this;
 							
@@ -512,16 +611,25 @@
 							if(me.data !== null)	me.setData(me.data);
 							else					me.loadData('init');
 						},
+		
+		/** 
+		Positions the height and width of the data table's container
+		@private
+		*/
 		posDataWin:		function(){
 							var me = this,
 								hh = me.headingContainer.height();
 							me.heading.css({paddingRight:((me.total * me.rowHeight > me.container.height() - hh) ? Wui.scrollbarWidth() : 0) + 'px'});
 							me.tblContainer.css({height:me.container.height() - hh, top:hh});
 						},
+		
+		/**  Refresh the data in the grid */
 		refresh:		function(newData){
 							if(newData)	me.setData(newData);
 							else		this.loadData();
 						},
+						
+		/**  Reselects previously selected rows after a data change or sort. Scrolls to the first currently selected row. */
 		resetSelect:	function(){
 							var me = this,
 								selList = me.selected;
@@ -549,6 +657,8 @@
 								ofstP.animate({scrollTop: firstSelect.offset().top - ofstP.offset().top },500);
 							}
 						},
+						
+		/**  Selects an item on the grid according to a key value pair to be found in a record */
 		selectItem:		function(kvp){
 							var me = this,
 								key = null,
@@ -566,11 +676,18 @@
 								}
 							}
 						},
+						
+		/** 
+		@param {object}	jQuery object containing the DOM element of the row
+		@param {object}	Data object of the selected row
+		Selects a single item. */
 		selectSingle:	function(row,data){
 							this.tbl.find('.wui-selected').removeClass('wui-selected');
 							row.addClass('wui-selected');
 							this.selected = [data];
 						},
+		
+		/** Size columns according to the size of the grid and the columns fit and width values */
 		sizeCols:		function(){
 							var me		= this,
 								tcw		= me.calcColWidth(),
@@ -612,6 +729,12 @@
 							me.tblHSize.width(newColWid);
 							me.matchCols();
 						},
+		
+		/**
+		@param	{object}	Column object associated with a particular column element
+		Sort the grid based on the values of one or more columns. If the grid is paging
+		then sort remotely.
+		*/
 		sortList:		function(col) {
 							var me = this;
 							
