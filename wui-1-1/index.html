@@ -35,7 +35,7 @@
 			    items:		[
 			    				kSink.selectorGrid = new Wui.Grid({
 				    				data:			[
-						    							{link:'docs/about.html', title:'WUI Home'},
+						    							{link:'docs/about.html', title:'-- About --'},
 						    							{link:'docs/o.html', title:'WUI Object'},
 						    							{link:'docs/text.html', title:'Text Box'},
 						    							{link:'docs/textarea.html', title:'Text Area'},
@@ -55,7 +55,13 @@
 						    							{link:'docs/pane.html', title:'Pane'},
 														{link:'docs/forms.html', title:'Form'},
 														{link:'docs/grid.html', title:'Grid'},
+														{link:'docs/is-numeric.html', title:'isNumeric'},
 						    						],
+						    		processData:	function(d){
+											    		return d.sort(function(a,b){
+												    		return $.trim(a.title).toUpperCase().localeCompare($.trim(b.title).toUpperCase());
+											    		});
+										    		},
 				    				columns:		[{heading:'Feature', dataItem:'title'}],
 				    				borderStyle:	{borderWidth: '0 6px 0 0', borderColor:'#888'},
 				    				fit: 			1,

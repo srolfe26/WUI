@@ -40,13 +40,11 @@ var Wui = Wui || {};
 	
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	@creation   2013-09-26
-	@version    1.1
 	
 	@param {any} n A value that will be tested for whether its numeric
 	@return Boolean
 	
-	Determines whether a passed in value is a number or not
+	Determines whether a passed in value is a number or not.
 	*/
 	Wui.isNumeric = function(n) {
 	  return !isNaN(parseFloat(n)) && isFinite(n);
@@ -68,8 +66,6 @@ var Wui = Wui || {};
 	
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	@creation   2013-09-26
-	@version    1.1
 	
 	@return Number specifying the scrollbar width for the current page in pixels
 	*/
@@ -88,8 +84,6 @@ var Wui = Wui || {};
 	
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	@creation   2013-09-26
-	@version    1.1
 	
 	@param	{number} lower	Lower bound for generating the random number
 	@param	{number} upper	Upper bound for generating the random number
@@ -104,8 +98,6 @@ var Wui = Wui || {};
 	
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	@creation   2013-09-26
-	@version    1.1
 	
 	@return A number representing the maximum z-index on the page
 	
@@ -122,8 +114,6 @@ var Wui = Wui || {};
 	
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	@creation   2013-09-26
-	@version    1.1
 	
 	@param {array} collection A collection of items that will be fit within a container
 	
@@ -178,8 +168,6 @@ var Wui = Wui || {};
 	
 	/** The base object from which all other WUI Objects extend
      *  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-     *  @creation   2013-09-26
-     *  @version    1.1
     */
 	Wui.O = function(args){ $.extend(this,args); };
 	Wui.O.prototype = {
@@ -453,80 +441,6 @@ var Wui = Wui || {};
                         return retVal;
                     }
 	};
-	
-	
-	/****************** WUI Viewport *****************/
-	Wui.Viewport = function(args){
-		var me = this,
-			params = $.extend({
-				el:	$('body'),
-				offset:	null,
-				vPadding:	0,
-				vObjects:	[],	
-				calcVPadding: function(){ for(var i in me.vObjects) me.vPadding += (parseInt(me.vObjects[i]) || 0); },
-				matchWindow:	null,
-				contentHeight:	null,
-				height:	null,
-				forceMatchWin: false,
-				resize:	function(){
-							me.beforeResize();
-
-							me.contentHeight = me.el.children('div:first').outerHeight(true);
-							me.matchWindow = Math.round($.viewportH() - me.offset.top - me.vPadding);
-							me.height = (me.matchWindow < me.contentHeight || me.forceMatchWin) ? me.matchWindow : me.contentHeight;
-							me.el.height(me.height);
-							me.afterResize();
-						},
-				beforeResize:	function(){},
-				afterResize:	function(){},
-				onInit:	function(){},
-				DOMNodeAdded: function(){ me.resize(); },
-				init: function(){
-						//calculate initial values of items on page
-						me.offset = me.el.offset();
-						me.calcVPadding();
-
-						//initial resizing of viewport
-						me.resize();
-
-						//tie viewport to the window
-						$(window).resize(me.resize);
-
-						//give focus to the viewport
-						me.el.focus();
-
-						//resize viewport when DOM elements are added
-						me.el.bind('DOMNodeInserted', me.DOMNodeAdded);
-
-						//allow for further extension
-						me.onInit();
-						
-						
-						/* THIS IS PROBABLY BETTER BUT IT SCREWS UP EXT :-(
-						if(me.el === null) throw('WUI Viewport requires an \'el\' element to be specified.');
-						
-						//calculate initial values of items on page
-						me.offset = me.el.offset();
-						me.calcVPadding();
-						
-						//initial resizing of viewport
-						me.resize();
-						
-						//tie viewport to the window
-						$(window).resize(function(){me.resize();});
-						
-						// add mutation observer for when things get added to the viewport
-						me.el.addClass('wui-viewport').focus();
-						document.addEventListener("animationstart", me.DOMNodeAdded, false); // standard + firefox
-						document.addEventListener("MSAnimationStart", me.DOMNodeAdded, false); // IE
-						document.addEventListener("webkitAnimationStart", me.DOMNodeAdded, false); // Chrome + Safari
-						*/
-					}
-			},args);
-			$.extend(me,params);
-			me.init();
-	}
-	Wui.Viewport.prototype = new Wui.O();
 
 	
 	/** WUI Data Object
@@ -546,7 +460,7 @@ var Wui = Wui || {};
 			/** Object containing keys that will be passed remotely */
 			params:			{},
 			
-			/** URL of the remote resource from which to obtain data */
+			/** URL of the remote resource from which to obtain data. A null URL will assume a local data definition. */
 			url:	  		null,
 			
 			/** Whether the object is waiting for a remote response */
@@ -573,7 +487,7 @@ var Wui = Wui || {};
 		feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
 		totalContainer:	null,
 		
-		/** When the object is waiting, default amount of time before trying to perform loadData() again */
+		/** When the object is waiting, default amount of time in milliseconds before trying to perform loadData() again */
 		ajaxWait:		10,
 		
 		/** 
@@ -712,10 +626,10 @@ var Wui = Wui || {};
 	*/
 	Wui.Template = function(args){ $.extend(this,args); }
 	Wui.Template.prototype = {
-		/** The HTML template that the data will fit into */
+		/** The HTML template that the data will fit into. Null value will cause an error to be thrown. Specification required. */
 		template:	null,
 		
-		/** A single record to be applied to the template.  */
+		/** A single record to be applied to the template. Null value will cause an error to be thrown. Specification required.  */
 		data:		null,
 		
 		/**
@@ -731,7 +645,7 @@ var Wui = Wui || {};
 							// replaces straight values
 							.replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
 							// accounts for complex expressions
-							.replace(/\{\((.*)\)\}/g,function(m,fn){
+							.replace(/\{\((.*?)\)\}/g,function(m,fn){
 								var keys = [],
 									vals = [];
 								

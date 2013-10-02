@@ -73,7 +73,13 @@
 										
 										// for methods and configs
 										for(var itemName in docObj.conglomerate)
-											addToConglomerate(itemName,docObj.conglomerate[itemName].doc,docObj,docObj.conglomerate[itemName].type);
+											addToConglomerate(
+												itemName
+												,docObj.conglomerate[itemName].doc
+												,docObj
+												,docObj.conglomerate[itemName].type
+												,docObj.conglomerate[itemName].defaultVal || ''
+											);
 											
 										// for events which will not override each other (though may fire in concert)
 										for(var evt in docObj.events)
@@ -86,21 +92,26 @@
 										addToConglomerate(itemName,comment,me,'method');
 										return '';
 									});
-										
+									
 									// Get configs - the similar regex will not match the functions because they were removed in the last step
-									code.code.replace(/\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]([^\,^\s]+)/g,function(m,comment,itemName,defaultVal){
+									code.code.replace(/\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*([^\,^\s]+)/g,function(m,comment,itemName,defaultVal){
 										if(defaultVal.match(/\bfunction\b/) === null)
-											addToConglomerate(itemName,comment,me,'config');
+											addToConglomerate(itemName,comment,me,'config',defaultVal);
 									});
 									
 									// Pull out events
 									code.intro = code.intro.replace(/\@event\s+([\w]+)\s+([^\n]+)/g,function(mch,evnt,desc){
-										me.events.push({title:evnt, doc:desc, source:me.obj, type:'event'});
+										me.events.push({title:evnt, doc:desc, source:me.obj, type:'event', extension:[], defaultVal:''});
 										return '';
 									});
 									
-									function addToConglomerate(itemName,comment,docObj,type){
-										me.conglomerate[itemName] = { doc:comment, source:docObj.obj, type:type };
+									function addToConglomerate(itemName,comment,docObj,type,val){
+										var base = { doc:comment, source:docObj.obj, type:type },
+											itm = me.conglomerate[itemName],
+											dflt = (val !== undefined) ? {defaultVal:val.toString()} : {};
+										
+										if(itm)	{ $.extend(itm, base, dflt); itm.extension.push(docObj.obj); }
+										else	{ me.conglomerate[itemName] = $.extend(base, {extension:[docObj.obj] }, dflt); }
 									};
 									
 									// The parent (being the object that doesn't have a parent) will then convert its information
@@ -112,7 +123,14 @@
 										var keys = Wui.getKeys(me.conglomerate);
 										for(var i = 0; i < keys.length; i++){
 											var c = me.conglomerate[keys[i]];
-											me[c.type + 's'].push( {title:keys[i], doc:c.doc, source:c.source, type:c.type} );
+											me[c.type + 's'].push({
+												title:		keys[i], 
+												doc:		c.doc, 
+												source:		c.source, 
+												type:		c.type, 
+												extension:	c.extension, 
+												defaultVal:	c.defaultVal || ''
+											});
 										}
 
 										// put it on the DOM
@@ -137,16 +155,6 @@
 													
 										methodList.append(listHeader);
 										
-										var btn = new Wui.Button({
-											appendTo:	listHeader,
-											text:		'Hide Extended',
-											click:		function(){
-															if(methodList.hasClass('wui-hide-inherited'))	{ this.setText('Hide Extended'); methodList.removeClass('wui-hide-inherited'); }
-															else											{ this.setText('Show Extended'); methodList.addClass('wui-hide-inherited'); }
-														}
-										});
-										btn.place();
-										
 										for(var i = 0; i < me[element].length; i++){
 											var a = $('<li><a href="#' +me[element][i].type+ '_' +me[element][i].title+ '">' +me[element][i].title+ '</a></li>');
 											if(me[element][i].source !== me.obj)	a.addClass('inherited');
@@ -158,23 +166,33 @@
 								},
 			createDocList:		function(element){
 									if(me[element].length){
-										var list = new Wui.DataList({
-											data:		me[element],
-											appendTo:	me.el,
-											el:			$('<table class="wui-doc-methods">\n'+
-															'\t<thead>\n'+
-																'\t\t<tr><th>' +element+ '</th></tr>\n'+
-															'\t</thead>\n' +
-															'\t<tbody>\n\t</tbody>\n' +
-														'</table>\n').addClass('wui-test-results'),
-														
-											template:	'\n\t\t<tr>\n' +
-															'\t\t\t<td><a id="{type}_{title}" class="doc-item-title">{title}</a><div class="doc-info">{(Wui.transformJavaDoc(doc).html())}</div></td>' +
-														'\n\t\t</tr>\n',
-											init:		function(){
-															this.elAlias = this.el.children('tbody');
-														}
-										});
+										var sourceTest = function(src){
+												return (src == me.obj) ? '' : 'inherited';
+											},
+											list = new Wui.DataList({
+												data:		me[element],
+												appendTo:	me.el,
+												el:			$('<table class="wui-doc-methods">\n'+
+																'\t<thead>\n'+
+																	'\t\t<tr><th>' +element+ '</th></tr>\n'+
+																'\t</thead>\n' +
+																'\t<tbody>\n\t</tbody>\n' +
+															'</table>\n').addClass('wui-test-results'),
+															
+												template:	'\n\t\t<tr class="{((source == "' +me.obj+ '") ? "" : "inherited")}">\n' +
+																'\t\t\t<td>' +
+																	'<a id="{type}_{title}" class="doc-item-title">{title} ' +
+																	'{( (defaultVal.length) ? \'<span class=\"default-value\">default: \' + Wui.escapeTags(defaultVal) + \'</span>\' : \'\' )}</a>' +
+																	
+																	'<div class="doc-info">{(Wui.transformJavaDoc(doc).html())}' +
+																		'<div class="wui-source-str">source: {(extension.toString() == source ? source : extension.toString())}</div>' +
+																	'</div>' + 
+																'</td>' +
+															'\n\t\t</tr>\n',
+												init:		function(){
+																this.elAlias = this.el.children('tbody');
+															}
+											});
 										list.place();
 										list.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
 										list.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });	
@@ -185,13 +203,29 @@
 									me.createNav('configs');
 									me.createNav('events');
 									
-									me.append($('<h1>').text(me.title));
+									if(me.events.length || me.methods.length || me.configs.length){
+										var btn = new Wui.Button({
+											appendTo:	me.el,
+											text:		'Hide Extended',
+											cls:		'wui-inherited-toggle',
+											click:		function(){
+															if($('body').hasClass('wui-hide-inherited'))	{ this.setText('Hide Extended'); $('body').removeClass('wui-hide-inherited'); }
+															else											{ this.setText('Show Extended'); $('body').addClass('wui-hide-inherited'); }
+														}
+										});
+										btn.place();
+									}
+									
+									var acheOne = null;
+									me.append(acheOne = $('<h1>').text(me.title));
+									for(var i in me.extendedObjs)
+										acheOne.append($('<span>').text(((i == 0)?'extends: ':'') + me.extendedObjs[i].obj));
 									
 									me.append(Wui.transformJavaDoc(me.doc));
 									
-									me.createDocList('methods');
-									me.createDocList('configs');
 									me.createDocList('events');
+									me.createDocList('configs');
+									me.createDocList('methods');
 									
 									me.place();
 								},
@@ -297,12 +331,17 @@
 	
 	Wui.HTMLifyCode = function(c){
 		var e = document.createElement('i'),
-			r = '<pre>' + $.trim(c.replace(/</g,'&lt;').replace(/>/g,'&gt;')) + '</pre>';
+			r = '<pre>' + $.trim(Wui.escapeTags(c)) + '</pre>';
 			
 		// replace tabs with 4 spaces where the browser doesn't support tab size
 		if(e.style.tabSize !== '' && e.style.MozTabSize !== '' && e.style.oTabSize !== '')	r.replace(/\t/g,'    ');
 		
 		return r;
+	};
+	
+	
+	Wui.escapeTags = function(str){
+		return str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
 	};
 	
 	
@@ -407,6 +446,8 @@
 			));	
 		};
 		
+		$('#wui-test-results tbody').prepend(tplt.make());
+		
 		// Print overall test results
 		if(Wui.testBtn){
 			var successCt	= $('#wui-test-results .pass').length,
@@ -419,7 +460,6 @@
 			// put code here to make a report on the body
 		}
 		
-		$('#wui-test-results tbody').prepend(tplt.make());
 		return testData;
 	};
 	

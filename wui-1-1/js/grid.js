@@ -1,14 +1,29 @@
 (function($) {
-	// Method which creates a Wui layout - Wui layouts are meant to be heavily CSS dependent
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	Creates a Wui layout - Wui layouts are meant to be heavily CSS dependent 
+	by defining objects with names that the WUI can use, but leaving all styles
+	to the CSS, unlike simply using Wui.fit().
+	
+	Child items in a Wui.Layout must have an attribute 'target' with a name of
+	one of the objects in the targets array.
+	*/
 	Wui.Layout = function(args){ 
 		$.extend(this, {
+			/** An array of items that will be added to the footer */
 			bbar:   [],
+			
+			/** An array of named items with CSS properties defined */
 			targets:[],
+			
+			/** An array of items that will be added to the header */
 			tbar:   []
 		}, args); 
 		this.init(); 
 	}
 	Wui.Layout.prototype = $.extend(new Wui.Pane(),{
+		/** Method that will run immediately when the object is constructed. Lays out targets.*/
 		init:			function(){
 							var me = this;
 							me.itemsHolder = me.items;
@@ -18,6 +33,8 @@
 							Wui.Pane.prototype.init.call(me);
 
 						},
+		
+		/** Appends items to targets */
 		onRender:		function(){
 							var me = this;
 							me.items = me.itemsHolder;
@@ -29,20 +46,36 @@
 	});
 	
 	
-	// Method which creates a Wui Tab Pane
+	/** 
+	@event		tabchange When a tab changes (tab pane, tab button, tab item)
+	
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	Creates a tab pane
+	*/
 	Wui.Tabs = function(args){ 
 		$.extend(this,{
+			/** An array of items that will be added to the footer */
 			bbar:   [],
+			
+			/** An array of items that will be added to the content */
 			items:	[],
+			
+			/** An array of items that will be added to the header */
 			tbar:	[]
 		},args); 
 		this.init();
 	}
 	Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
+		/** Method that will run immediately when the object is constructed. Lays out targets. */
 		init:			function(){
 							Wui.Pane.prototype.init.call(this);
 						},
+		
+		/** Whether to put the tabs on the header or the footer. */
 		tabsBottom:		false,
+		
+		/** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
 		place:      	function(){
 							var me = this;
 							
@@ -65,6 +98,13 @@
 							
 							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
 						},
+		
+		/** 
+		@param {object} itm A WUI Object that will be matched in the items array. 
+		@param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
+		
+		Sets the specified tab to active. Runs layout on the newly activated item.
+		*/
 		giveFocus:		function(tab, supressEvent){
 							var me = this, supressEvent = (supressEvent !== undefined) ? supressEvent : false;
 							
@@ -79,6 +119,15 @@
 									me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
 							});
 						},
+		
+		/** 
+		@param {string} txt The text of the tab button
+		@param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
+		@return The tab that was selected or undefined if the text didn't match any tabs
+		
+		Gives focus to the tab with text that matches the value of txt. Strings with underscores
+		are converted to spaces (eg. 'conferences_detail' = 'conferences detail')
+		*/
 		selectTabByText:function(txt, supressEvent){
 							var me = this, retVal = undefined;
 							$.each(me.items,function(idx,itm){
@@ -95,17 +144,33 @@
 	});
 	
 	
-	// Method which creates a Wui Grid
+	/** 
+	@event		select 			When a record is clicked (grid, row el, record)
+	@event		dblclickrecord 	When a record is  double clicked clicked (grid, row el, record)
+	
+	
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	Creates a tab pane
+	*/
 	Wui.Grid = function(args){
 		$.extend(this,{
+			/** Array of items that will be added to the footer */
 			bbar:   		[],
+			
+			/** Event hook fired before the grid columns and data are made up */
 			beforeMake:		function(){},
+			
+			/** Array of items that will make up the columns of the grid table */
 			columns: 		[],
+			
+			/** Array of data for the grid */
 			data:			null,
+			
+			/** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
 			defaultDataType:'string',
 			multiSelect:	false,
 			onDoubleClick:	function(rec){},
-			// me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
 			paging:			null,
 							/*{
 								limit:	page size,
@@ -151,7 +216,7 @@
 										 
 										  $('html').click(); // gets rid of the outline from the HTML elements
 									 }
-									 me.el.trigger($.Event('recordclick'),[me, a.el, a.rec]);
+									 me.el.trigger($.Event('select'),[me, a.el, a.rec]);
 									 
 									 return false // stops propagation & prevents default
 								 })
@@ -187,6 +252,11 @@
 										compB = new Date(compB);
 										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
 										break;
+									/*case 'boolean':
+										compA = !!compA;
+										compB = new Date(compB);
+										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
+										break;*/
 									case 'numeric':
 										compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
 										compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
@@ -491,7 +561,7 @@
 							for(var a in me.tbl.items){
 								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
 									me.selectSingle(me.tbl.items[a].el,me.tbl.items[a]);
-									me.el.trigger($.Event('recordselected'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
+									me.el.trigger($.Event('select'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
 									break;
 								}
 							}

@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title> - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+	
+	<script type="text/javascript" src="../js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="../js/wui.js"></script>
+	<script type="text/javascript" src="../js/forms.js"></script>
+	<script type="text/javascript" src="../js/grid.js"></script>
+	<script type="text/javascript" src="../js/docs.js"></script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.isNumeric','Wui.isNumeric()');
+		}); // end document.ready		
+	</script>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		var a = Wui.isNumeric('5.49');
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// TESTING
+			ts = new Wui.ts();
+
+			ts.test('\'5.49\'', true == Wui.isNumeric('5.49'));
+			ts.test('\'Candy\' is not numeric', false == Wui.isNumeric('Candy'));
+			ts.test('\'4\'', true == Wui.isNumeric('4'));
+			ts.test('25', true == Wui.isNumeric(25));
+			ts.test('\'1E23\'', true == Wui.isNumeric('1E23'));
+			ts.test('\'6.02e23\'', true == Wui.isNumeric('6.02e23'));
+			ts.test('\'-1.00000589\'', true == Wui.isNumeric('-1.00000589'));
+			ts.test('\'Infinity\' is not numeric', false == Wui.isNumeric('Infinity'));
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

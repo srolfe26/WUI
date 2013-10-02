@@ -12,7 +12,13 @@ body, body * {
 h1 {
     color: #000000;
     margin: 0 0 2em;
-    text-transform: uppercase;
+}
+h1 span {
+    color: #777777;
+    font-size: 0.4em;
+    font-style: italic;
+    font-weight: normal;
+    padding: 0 0.5em;
 }
 
 /* SOURCE AND BUTTONS */
@@ -60,14 +66,22 @@ h1 {
     font-size: 1em; 
     color: #333;
 }
+	.default-value {
+		color: #777;
+	    font-size: 0.6em;
+	    font-weight: normal;
+	    padding-left: 1em;
+	    text-transform: uppercase;
+	}
 
-.wui-doc-btn-dock, .wui-doc-methods.wui-test-results th, .wui-doc-configs.wui-test-results th, .doc-nav-list li.doc-nav-header { background-color: #369; text-transform: capitalize; }
+
+.wui-doc-btn-dock, .wui-doc-methods.wui-test-results th, .wui-doc-configs.wui-test-results th, .doc-nav-list li.doc-nav-header { background-color: #369; }
 
 .wui-test-results  .wui-doc-info-row{
     font-size: 0.8em; display:none;
 }
 .wui-test-results .doc-info p { 
-	color: #777777;
+	color: #555;
     font-size: 0.8em;
 	margin: 0.25em;
     overflow: hidden;
@@ -78,21 +92,33 @@ h1 {
     display:none;
 }
 
+.doc-info { position: relative; }
 .wui-test-results .doc-info p.wui-doc-evershow {display:inline-block;}
 .wui-test-results  .doc-info br {display:none;}
+
+.wui-source-str {
+    bottom: -5em;
+    color: #777777;
+    font-size: 0.65em;
+    font-style: italic;
+    position: absolute;
+    right: 0;
+    text-align: right;
+}
 
 .show-doc > td { padding: 3em 1em; }
     .wui-test-results .show-doc .doc-item-title {float:none; margin:0;}
 	.wui-test-results .show-doc .doc-info p {display:block; color:#333; white-space:normal; text-overflow:none; overflow:auto;}
 	.wui-test-results .show-doc .doc-info p.wui-doc-evershow {margin:2em 1em 1em 3em;}
 	.wui-test-results .show-doc .doc-info br {display:inline;}
-    
+    .wui-test-results .show-doc .wui-source-str {display:block;}
     
     .wui-doc-param {font-weight:bold; color:#369; display:inline-block; min-width:15%; text-align: right; padding-right:1em;}
     .wui-doc-param-val {}
     .wui-doc-var-name {display:inline-table; vertical-align:top; width:8%; font-weight:bold; color:#930;}
     .wui-doc-var-type {display:inline-table; vertical-align:top; width:4%;  font-style:italic;}
     .wui-doc-var-desc {display:inline-block; width:65%;}
+    
 
 .doc-nav-list {
     float: right;
@@ -110,7 +136,7 @@ h1 {
     overflow:hidden;
 }
 
-.doc-nav-list.wui-hide-inherited li.inherited {display:none;}
+.wui-hide-inherited .inherited {display:none;}
 
 .doc-nav-list li.doc-nav-header {
     color: #FFFFFF;
@@ -118,15 +144,20 @@ h1 {
     font-weight: bold;
     padding: 0.25em 1em;
     height:auto !important;
+    text-transform: capitalize;
     cursor:pointer;
 }
-.doc-nav-list li.doc-nav-header .wui-btn {
-	border:1px solid #ccc; float:right; clear:right; 
-	border-radius: 4px; color:#fff; font-weight: normal; 
-	background:transparent; text-transform: none;
-	height: 19px; margin-right:-1em;
-    line-height: 19px;
+
+.wui-inherited-toggle {
+    background-color: transparent;
+    color:#369; border-color:#369;
+    float: right;
+    height: 26px;
+    line-height: 24px;
+    margin: 0 0 1em 0.15em;
 }
+.wui-inherited-toggle:hover, .wui-inherited-toggle:active {color:#fff; background-color:#369; border-color:#036;}
+.wui-inherited-toggle:active {box-shadow:inset 0 0 5px rgba(0,0,0,0.5); border:1px solid #036;}
 
 .doc-nav-list.wui-doc-open li { height:auto; }
 
