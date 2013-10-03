@@ -123,7 +123,7 @@ var Wui = Wui || {};
 		var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
 		
 		// Ensure the collection is an array of Wui Objects
-		if(collection instanceof Array && collection.length > 0 && collection[0] instanceof Wui.O){
+		if(collection instanceof Array && collection.length > 0){
 			var parent		= (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
 				parentEl	= (parent.el) ? (parent.elAlias || parent.el) : parent,
 				parentSize	= (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim](),

@@ -14,18 +14,33 @@
 
 .wui-pane {
 	position: relative; border:0px solid #888; width:100%; background:#fff;
-	animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
-    animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
 .wui-pane-header, .wui-pane-footer {
 	position: absolute; left:0; height:40px; line-height:40px; width:100%; text-align:right; overflow:hidden;
-    background:#888; text-shadow:0 0 3px #333; border-top: 1px solid #888; border-bottom: 1px solid #888;
+    background:#888; border-top: 1px solid #888; border-bottom: 1px solid #888; color:#eee;
 }
 .wui-pane-header {top:0;}
 .wui-pane-footer {bottom:0;}
-    .wui-pane-header h1 {color:#eee; font-size:1em; text-transform: capitalize; margin:0.05em !important; line-height:40px; display:inline-block; position:absolute; left:0.33em; width: auto;}
+    .wui-pane-header h1 {
+    	font-size:1em; 
+    	text-transform: capitalize; 
+    	margin:0.05em !important; 
+    	line-height:40px; 
+    	display:inline-block; 
+    	position:absolute; 
+    	left:0.33em; width:auto;
+    	text-shadow:0 0 3px #333;
+    	color:inherit !important;
+    }
 .wui-pane-wrap {height:100%; overflow:hidden;}
-.wui-pane-content {height:100%; overflow:auto; position: relative;}
+.wui-pane-content {
+	height:100%; overflow:auto; position: relative;
+}
+.wui-pane, .wui-form{
+	animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
+    animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
+}
+
     .wui-pane-content p { margin:0.5em 0.5em 1em; font-size:0.8em;}
     .wui-pane p.err { padding:1em; font-weight:bold; color:#900;}
 	
@@ -72,14 +87,14 @@
 .wui-btn:active {box-shadow: inset 0 0 10px #333; border:none;}
 
 /*********************   FIELD/BUTTON STYLES ***********************/
-.wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form, .wui-fe input[type=text] {height:26px;}
+.wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form, .wui-fe input[type=text] {height:26px !important;}
 .wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form {line-height:26px;}
 .wui-btn.field-btn, .wui-browse-btn {
     position: absolute; right:0; border-radius:0 4px 4px 0; top:0; background-color:#ccc; border:1px solid #aaa; border-left:transparent;
 }
 
 /***********************************************   FORM   ***********************************************/
-.wui-form {margin:.5em; clear:both; position:relative; background-color:#fff;}
+.wui-form {margin:.5em; clear:both; position:relative; text-align: left;}
 /* Enforce the meaning of these tags */
 .wui-form strong {font-weight:bold !important;}
 .wui-form em {font-style:italic !important;}
@@ -111,8 +126,8 @@
 .wui-radio ul, .wui-checkbox ul {list-style:none; display:block; margin:0; padding:0;}
 .wui-radio input, .wui-checkbox input, .wui-radio ul label, .wui-checkbox ul label {width:auto; display:inline-block; font-weight:normal; text-transform:none; margin:0; padding:0.2em 0.5em;}
 
-.wui-radio ul.button, .wui-checkbox ul.button {margin-top:0.5em; -moz-user-select:none; -webkit-user-select:none;}
-.button li {overflow:hidden; display:inline-block;}
+.wui-radio ul.button, .wui-checkbox ul.button {margin-top:0.5em; -moz-user-select:none; -webkit-user-select:none; text-align: left;}
+.button li {overflow:hidden; display:inline-block; line-height: 1;}
 .wui-fe ul.button label {display:inline-block; width:auto; margin:0; padding:0.25em 0.5em;}
 	.button li > input {display:none;}
 	.button li > input:checked + label { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
@@ -132,7 +147,7 @@
 .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
     .wui-combo-dd li.selected { background:#19f; color:#fff; }
 .dd-wrapper, .wui-file {position:relative;}
-.wui-btn.field-btn.dd-switch { padding:0; width:26px; background-image:url(../img/wui-icons.png); background-position: -12px -10px; }
+.wui-btn.field-btn.dd-switch { padding:0; width:26px; background-image:url(../img/wui-icons.png); background-position: -12px -10px; margin: 0; }
 
 /* hyperlink */
 .wui-link-third {
@@ -253,10 +268,26 @@
 
 /******************************************   disabled form styles   *******************************************/
 .wui-fe input[type=text][disabled], .wui-fe textarea[disabled] { background-color:transparent; border:1px dotted #ccc; color:#ccc; }
+.wui-fe input[type=text][placeholder][disabled] {color:#555;}
 .wui-disabled .ui-datepicker-trigger, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn, .wui-disabled .wui-html > div { display:none; }
 .wui-disabled .wui-html textarea {display:inline-block !important;}
 .wui-form-err.wui-disabled.wui-fe input[type=text][disabled], .wui-form-err.wui-disabled.wui-fe textarea[disabled] {border-color:#fff; color:#fdd;}
-.wui-fe.wui-disabled > label { font-style: italic; font-weight: normal; }
+.wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
+.wui-disabled .button label { background-color:transparent; border-style: dotted; color: #999; }
+
+/******************************************   validation styles   *******************************************/
+.wui-form-err {background-color:rgba(255,100,100,0.5);}
+.wui-form-err.wui-lbl{padding:26px 0.5em 0.5em 0.5em;}
+.wui-form-err.wui-lbl.lbl-left { padding: 0.5em 0.5em 0.5em 200px; }
+.wui-form-err.wui-lbl.lbl-right { padding:0.5em 200px 0.5em 0.5em; }
+.wui-form-err.wui-lbl.lbl-bottom { padding: 0.5em 0.5em 26px 0.5em; }
+
+.wui-pane-header .wui-form-err { background-color: rgba(255, 0, 0, 0.5); padding-right: 0.5em !important; }
+
+.wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a {color:#900;}
+.wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
+.wui-form .wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text] {border-color:#c00; background-color:white;}
+
 
 /**********************************************   grid styles   ************************************************/
 .wui-ghs {height:1px !important; overflow:hidden; margin:-1px 0 0;}
@@ -328,16 +359,16 @@
 	.wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane-footer,
 	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer,
 	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-header,
-	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-footer {background:#fff; text-shadow:none; border: none;}
-		.wui-pane  .wui-pane  .wui-pane-header h1 {color:#555;}
-		.wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
+	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-footer {color:#555; background:#fff; text-shadow:none; border: none;}
+		.wui-pane .wui-pane .wui-pane-header h1 { text-shadow:none;}
+		.wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
 		.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
 		
 /**********************************************   Nested Panes - Level 2,4  **********************************************/
 .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane {border-color:#ccc;}
 	.wui-pane .wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane .wui-pane-footer,
 	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-header, 
-	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer {background:#ccc; text-shadow:none;}
+	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer {background:#ccc;}
 		.wui-pane .wui-pane .wui-pane .wui-pane-header h1 {font-weight: normal;}
 		.wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
 		
@@ -348,3 +379,41 @@
 .wui-pane .wui-pane .wui-pane-header .wui-btn.disabled:active, .wui-pane .wui-pane .wui-pane-footer .wui-btn.disabled:active { box-shadow:none; background-color:transparent; }
 
 /**********************************************   Form Elements in TBar and BBar  **********************************************/
+.wui-pane-footer .wui-form, .wui-pane-header .wui-form {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border: 0 none;
+    display: inline-block;
+    margin: 0;
+}
+.wui-pane-footer .wui-fe, .wui-pane-header .wui-fe {
+    float: right;
+    line-height: 1;
+    margin-left: 5px;
+    max-width: 300px;
+    top:7px;
+}
+.wui-pane-footer .wui-fe input, .wui-pane-header .wui-fe input {border: 1px solid #777;}
+/* For labels */
+.wui-pane-footer .wui-lbl, .wui-pane-header .wui-lbl,
+.wui-pane-footer .wui-lbl.lbl-bottom, .wui-pane-header .wui-lbl.lbl-bottom,
+.wui-pane-footer .wui-lbl.lbl-right, .wui-pane-header .wui-lbl.lbl-right,
+.wui-pane-footer .wui-lbl.lbl-top, .wui-pane-header .wui-lbl.lbl-top,
+.wui-pane-footer .wui-lbl.lbl-left, .wui-pane-header .wui-lbl.lbl-left {position:relative; padding:0 0 0 150px; height:auto; float:right; min-width:350px; margin: 0 0 0 5px; line-height: 40px;}
+	.wui-pane-footer .wui-lbl.lbl-top >label, .wui-pane-header .wui-lbl.lbl-top > label,
+	.wui-pane-footer .wui-lbl.lbl-right >label, .wui-pane-header .wui-lbl.lbl-right > label,
+	.wui-pane-footer .wui-lbl.lbl-bottom >label, .wui-pane-header .wui-lbl.lbl-bottom > label,
+	.wui-pane-footer .wui-lbl.lbl-left >label, .wui-pane-header .wui-lbl.lbl-left > label {
+		color:inherit; display:block; font-weight:normal; font-size:0.8em; 
+		width:150px; position:absolute; left:0; top:0; line-height:40px; 
+		padding-right:0.5em; text-align:right;
+	}
+	.wui-pane-footer .wui-lbl .wui-fe, .wui-pane-header .wui-lbl .wui-fe {width:100%;}
+
+/* For Hyperlink */
+.wui-pane-footer .wui-fe.wui-link-third, .wui-pane-header .wui-fe.wui-link-third { top: 0; margin-left: 0; float:none; }
+.wui-pane-footer .feedback { font-size: 0.5em; }
+/* For Combo */
+.wui-pane-header .wui-btn.field-btn, .wui-pane-footer .wui-btn.field-btn {margin:0 !important; border:1px solid #777 !important; border-left:0 !important; background-color:#ccc !important;}
+/* For Radio & Checkbox */
+.wui-pane-footer .button li label, .wui-pane-header .button li label {border-color:#777; background:#ccc; color:#555; font-size: 0.75em; height:26px; line-height: 22px;}
+.wui-pane-header .button li > input:checked + label, .wui-pane-footer .button li > input:checked + label {border-color:#444; color:#eee; background-color:#555;}

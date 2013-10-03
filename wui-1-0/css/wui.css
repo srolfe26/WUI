@@ -121,7 +121,7 @@
     .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
         .wui-combo-dd li.selected { background:#19f; color:#fff; }
     .dd-wrapper, .file-wrapper {position:relative;}
-    .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-image:url(../img/wui-icons.png); background-position: -12px -10px; }
+    .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-image:url(../img/wui-icons.png); line-height: 1; background-position: -12px -10px; }
     
     /* files */
     .file-wrapper input[type=text] {padding-right:85px;}

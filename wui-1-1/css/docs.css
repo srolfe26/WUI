@@ -37,7 +37,8 @@ h1 span {
 		font-family:monospace; text-align:left; font-size:0.8em;
 	}
 	#wui-doc-example {margin:0.5em 0;}
-.wui-doc-btn-dock .wui-lbl > label {
+
+.wui-doc-btn-dock > .wui-lbl > label {
     color: #FFFFFF;
 }
 
