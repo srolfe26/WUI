@@ -61,6 +61,9 @@
 			/** An array of items that will be added to the content */
 			items:	[],
 			
+			/** Config to place on child items of WUI tabs to make their heading not show up */
+			tabsHideHeader: null,
+			
 			/** An array of items that will be added to the header */
 			tbar:	[]
 		},args); 
@@ -69,6 +72,7 @@
 	Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
 		/** Method that will run immediately when the object is constructed. Lays out targets. */
 		init:			function(){
+							if(this.title === null)	this.title = '';
 							Wui.Pane.prototype.init.call(this);
 						},
 		
@@ -85,7 +89,12 @@
 							if(me.items === undefined) me.items = [];
 							$.each(me.items,function(idx,itm){
 								itm.tabCls = 'wui-tab ' + ((itm.tabCls) ? ' ' + itm.tabCls : '');
-									
+								
+								if(itm.tabsHideHeader){
+									itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
+									itm.el.addClass('wui-hide-heading');
+								}
+								
 								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
 									text:	itm.title || 'Tab ' + (parseInt(idx) + 1),
 									click:	function(){ 
@@ -649,14 +658,20 @@
 								});
 							});
 
-							// scroll the list to the currently selected item will make the paging wig out!
+							me.scrollToCurrent();
+						},
+						
+		/** Scroll the list to the currently selected item will make the paging wig out! */				
+		scrollToCurrent:function(){
+							var me = this;
+							
 							if(!me.isPaging && me.tbl.find('.wui-selected:first').length){
 								var firstSelect = me.tbl.find('.wui-selected:first'),
 									ofstP = firstSelect.offsetParent();
 								ofstP.animate({scrollTop:0},0);
 								ofstP.animate({scrollTop: firstSelect.offset().top - ofstP.offset().top },500);
 							}
-						},
+						},		
 						
 		/**  Selects an item on the grid according to a key value pair to be found in a record */
 		selectItem:		function(kvp){
@@ -689,45 +704,47 @@
 		
 		/** Size columns according to the size of the grid and the columns fit and width values */
 		sizeCols:		function(){
-							var me		= this,
-								tcw		= me.calcColWidth(),
-								scrollbarWidth = (me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0,
-								hc		= me.headingContainer.width() - scrollbarWidth,
-								hw		= me.heading.width(),
-								fitCt	= 0,
-								fixdWid = 0,
-								fitMux	= 0;
+							if(typeof this.columns[0].heading !== 'string'){
+								var me		= this,
+									tcw		= me.calcColWidth(),
+									scrollbarWidth = (me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0,
+									hc		= me.headingContainer.width() - scrollbarWidth,
+									hw		= me.heading.width(),
+									fitCt	= 0,
+									fixdWid = 0,
+									fitMux	= 0;
 
-							$.each(me.columns,function(i,col){
-								fitCt += col.fit;
-								fixdWid += col.width;
-							});
-						
-							var sizeNow = (tcw < hw && fixdWid < hw);
-							if(sizeNow){
-								if(fitCt == 0){
-									fixdWid = 0;
-									for(var i in me.columns) {
-										var col = me.columns[i]; 
-										col.fit = hc / (col.width != 0 ? col.width : col.heading.width()); 
-										col.width = 0;
-										fitCt += col.fit;
-										fixdWid += col.width;
+								$.each(me.columns,function(i,col){
+									fitCt += col.fit;
+									fixdWid += col.width;
+								});
+							
+								var sizeNow = (tcw < hw && fixdWid < hw);
+								if(sizeNow){
+									if(fitCt == 0){
+										fixdWid = 0;
+										for(var i in me.columns) {
+											var col = me.columns[i]; 
+											col.fit = hc / (col.width != 0 ? col.width : $(col.heading).width()); 
+											col.width = 0;
+											fitCt += col.fit;
+											fixdWid += col.width;
+										}
 									}
 								}
+								
+								fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
+								for(var i in me.columns) {
+									var col = me.columns[i];
+									$(col.heading).css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
+								}
+								
+								var newColWid = me.calcColWidth();
+								me.heading.width(newColWid + scrollbarWidth);
+								me.tbl.width(newColWid);
+								me.tblHSize.width(newColWid);
+								me.matchCols();
 							}
-							
-							fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
-							for(var i in me.columns) {
-								var col = me.columns[i];
-								$(col.heading).css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
-							}
-							
-							var newColWid = me.calcColWidth();
-							me.heading.width(newColWid + scrollbarWidth);
-							me.tbl.width(newColWid);
-							me.tblHSize.width(newColWid);
-							me.matchCols();
 						},
 		
 		/**

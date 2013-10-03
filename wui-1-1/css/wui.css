@@ -13,7 +13,7 @@
 }
 
 .wui-pane {
-	position: relative; border:0px solid #888; width:100%; background:#fff;
+	position: relative; border:0px solid #888; width:100%; background:#fff; overflow:hidden;
 }
 .wui-pane-header, .wui-pane-footer {
 	position: absolute; left:0; height:40px; line-height:40px; width:100%; text-align:right; overflow:hidden;

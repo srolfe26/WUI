@@ -169,7 +169,10 @@ var Wui = Wui || {};
 	/** The base object from which all other WUI Objects extend
      *  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
     */
-	Wui.O = function(args){ $.extend(this,args); };
+	Wui.O = function(args){ $.extend(this,{
+		/** Whether the object is hidden on the DOM */
+		hidden:	false
+	},args); };
 	Wui.O.prototype = {
 		/**
 		@param {object}	object	A WUI or jQuery object to be added to the DOM
@@ -276,7 +279,14 @@ var Wui = Wui || {};
 							if(m.height && m.height.indexOf && m.height.indexOf('%') != -1){
 								m.el.css({height: Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height())});
 							}
-                        	return m.el.addClass(m.cls);
+							
+							// hide an object based on its hidden value
+							if(m.hidden){
+								if(m.hide)	m.hide(0);
+								else		m.el.css('display','none');
+							}
+                        	
+							return m.el.addClass(m.cls);
                         }else{
                         	return m;
                         }
@@ -298,7 +308,15 @@ var Wui = Wui || {};
 		@return The el or elAlias of the object being hidden
 		Hides an object with the options of an animated fadeout and callback function
 		*/
-		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		hide:		function(speed, callback){ 
+						var args = ['fadeOut'];
+						for(var i in arguments) 
+							args.push(arguments[i]);
+						
+						this.hidden = true;
+						
+						return this.showHide.apply(this,args);
+					},
 		/**
 		Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
 		but without the rendering of objects - useful to resize things that are already rendered.
@@ -389,7 +407,15 @@ var Wui = Wui || {};
 		@return The el or elAlias of the object being shown
 		Shows an object with the options of an animated fadein and callback function
 		*/
-		show:		function(speed, callback){ var args = ['fadeIn']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		show:		function(speed, callback){ 
+						var args = ['fadeIn'];
+						for(var i in arguments) 
+							args.push(arguments[i]);
+						
+						this.hidden = false;
+						
+						return this.showHide.apply(this,args);
+					},
 		/**
 		@param {string} fn The name of the jQuery method for showing or hiding
 		@param {number} [speed] Time in milliseconds for the showing/hiding element to fade in
@@ -401,7 +427,7 @@ var Wui = Wui || {};
 		showHide:	function(fn,speed,callback){
 				    	 var speed = (typeof speed == 'number') ? speed : 1;
 				    	 if(typeof arguments[1] == 'function') callback = arguments[0];
-				    	 return (this.elAlias || this.el)[fn](speed, callback);
+				    	 return this.el[fn](speed, callback);
 			        },
 		/**
 		@param {number} index The point in the array to start
@@ -832,7 +858,10 @@ var Wui = Wui || {};
 			
 			/** Whether or not the pane is disabled on load */
 			disabled:	false,
-			
+					
+			/** Default height */
+			height:	'100%',
+		
 			/** HTML to show in the mask when the pane is disabled */
 			maskHTML:	'Loading...',
 			
@@ -896,14 +925,14 @@ var Wui = Wui || {};
 
 		/** Places the footer on the pane and adjusts the content as necessary. */
 		placeFooter:function(){
-						this.sureEl.css({borderBottom:'none'});
+						this.sureEl.css({borderBottomWidth:0});
 						this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
 						this.footer.place();
 					},
 		
 		/** Places the header on the pane and adjusts the content as necessary. */
 		placeHeader:function(){
-						this.sureEl.css({borderTop:'none'});
+						this.sureEl.css({borderTopWidth:0});
 						this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
 						this.header.place();
 					},
