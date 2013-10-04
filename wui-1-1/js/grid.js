@@ -61,6 +61,12 @@
 			/** An array of items that will be added to the content */
 			items:	[],
 			
+			/** Tabs default to the right side of the pane unless this is true. */
+			tabsLeft:	false,
+			
+			/** Whether to put the tabs on the header or the footer. */
+			tabsBottom:		false,
+			
 			/** Config to place on child items of WUI tabs to make their heading not show up */
 			tabsHideHeader: null,
 			
@@ -76,9 +82,6 @@
 							Wui.Pane.prototype.init.call(this);
 						},
 		
-		/** Whether to put the tabs on the header or the footer. */
-		tabsBottom:		false,
-		
 		/** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
 		place:      	function(){
 							var me = this;
@@ -88,7 +91,9 @@
 							//adds the objects items if any
 							if(me.items === undefined) me.items = [];
 							$.each(me.items,function(idx,itm){
-								itm.tabCls = 'wui-tab ' + ((itm.tabCls) ? ' ' + itm.tabCls : '');
+								itm.tabCls =	'wui-tab ' +
+												((itm.tabCls) ? ' ' + itm.tabCls : '') +
+												((me.tabsLeft) ? ' left' : '');
 								
 								if(itm.tabsHideHeader){
 									itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
@@ -103,6 +108,7 @@
 											},
 									cls:	itm.tabCls
 								}));
+								if(me.bbar.length != 0) me.placeFooter();
 							});
 							
 							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')

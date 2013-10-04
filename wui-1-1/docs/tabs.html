@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Grid - WUI 1.1</title>
+    <title>Tabs - WUI 1.1</title>
     
 	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
 	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
@@ -15,23 +15,44 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function(){
-			Wui.docCode('../js/grid.js','Wui.Grid','Grid');
+			Wui.docCode('../js/grid.js','Wui.Tabs','Tabs');
 		}); // end document.ready		
 	</script>
 	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			// Add a new grid on the body
-			a = new Wui.Grid({
-				height:	500,
+			a = new Wui.Tabs({
+				height:	400,
+				title:	'Sub-Tabs Example',
+				tbar:	[ new Wui.Button({text:'Button Test!'}) ],
 				appendTo:$('#wui-doc-example'),
-				url:	'data.json',
-				columns:[
-							{heading:'Date', dataItem:'date', dataType:'date', fit:1},
-							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', fit:1},
-							{heading:'Description', dataItem:'description', fit:7},
-							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
-						],
+				items:	[
+							
+							new Wui.Tabs({
+								title:			'Sub Tabs!',
+								tabsHideHeader:	true,
+								tabsBottom: 	true,
+								borderStyle:	{borderWidth:6},
+								items:			[
+													new Wui.Tabs({
+														title:	'Sub 1',
+														titleAlign:'center',
+														tabsLeft:true,
+														tbar:	[ new Wui.Button({text:'Button Test!'}) ],
+														items:	[
+																	new Wui.Pane({
+																		title:	'Third 1'
+																	}),
+																	new Wui.Pane({title: 'Third 2', items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
+																]
+													}),
+													new Wui.Pane({title: 'Sub 2', items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
+												]
+							}),
+							new Wui.Pane({}),
+							new Wui.Pane({ items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
+						]
 			});
 			a.place();
 		});

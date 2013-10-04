@@ -370,6 +370,7 @@
 						items:	[
 									new Wui.Button({
 										vis:		false,
+										cls:		'toggler',
 										text:		'Show Example',
 										click:		function(){
 														if(this.vis){ exampleObj.fadeOut(1000); this.setText('Show Example'); }
@@ -379,6 +380,7 @@
 									}),
 									new Wui.Button({
 										vis:		false,
+										cls:		'toggler',
 										text:		'Show Example Source',
 										click:		function(){
 														if(this.vis){ preObj.fadeOut(1000); this.setText('Show Example Source'); }
@@ -388,6 +390,7 @@
 									}),
 									Wui.testBtn = new Wui.Button({
 										vis:		false,
+										cls:		'toggler',
 										text:		'<span class="show-hide">Show Unit Tests</span>',
 										click:		function(){
 														if(this.vis){ testObj.fadeOut(1000); this.el.children('.show-hide').text('Show Unit Tests'); }

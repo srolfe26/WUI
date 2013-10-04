@@ -798,6 +798,7 @@ var Wui = Wui || {};
 			/** Text to appear on the button. Can be HTML if a more complex button design is desired. */
 			text:       'Button'
 	    }, args);
+	    
 		this.init();
 	};
 	Wui.Button.prototype = $.extend(new Wui.O(),{
@@ -858,9 +859,12 @@ var Wui = Wui || {};
 			
 			/** Whether or not the pane is disabled on load */
 			disabled:	false,
+			
+			/** Alignment of the heading title (left,center,right) */
+			titleAlign:	'left',
 					
 			/** Default height */
-			height:	'100%',
+			height:		'100%',
 		
 			/** HTML to show in the mask when the pane is disabled */
 			maskHTML:	'Loading...',
@@ -872,85 +876,97 @@ var Wui = Wui || {};
 	}
 	Wui.Pane.prototype = $.extend(new Wui.O(),{
         /** Disables the pane by masking it and disabling all buttons */
-		disable:	function(){
-						this.disabled = true;
-						// cover pane contents
-						this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
-						// disable header & footer objects
-						this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
-						this.header.each(function(itm){ if(itm.disable) itm.disable(); });
-					},
+		disable:		function(){
+							this.disabled = true;
+							// cover pane contents
+							this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+							// disable header & footer objects
+							this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
+							this.header.each(function(itm){ if(itm.disable) itm.disable(); });
+						},
 		
 		/** Enables the pane by removing the mask and enabling all buttons */
-		enable:		function(){
-						var me = this, mask = me.mask;
-						me.disabled = false;
-						me.mask.fadeOut(500,function(){ 
-							// remove mask and enable header and footer buttons (all of them)
-							me.mask.remove();
-							me.mask = undefined;
-							me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
-							me.header.each(function(itm){ if(itm.enable) itm.enable(); });
-						});
-					},
+		enable:			function(){
+							var me = this, mask = me.mask;
+							me.disabled = false;
+							me.mask.fadeOut(500,function(){ 
+								// remove mask and enable header and footer buttons (all of them)
+								me.mask.remove();
+								me.mask = undefined;
+								me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
+								me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+							});
+						},
 		
 		/** Method that will run immediately when the object is constructed. */
-		init:		function(wuiPane){
-						var me = wuiPane || this;
-						me.el		 = $('<div>').addClass('wui-pane').append(
-										   $('<div>').addClass('wui-pane-wrap').append(
-											   me.container = $('<div>').addClass('wui-pane-content')
-										   )
-									   );
-						me.sureEl	 = me.el;
-						me.header    = new Wui.O({el:$('<div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
-	                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
-	                    me.elAlias	 = me.container;
-						
-						// Set  border if applicable
-	                    if(me.border) me.el.css(me.borderStyle);
-	                    
-	                    // Add header and footer to the pane if theres something to put in them
-	                    if(me.bbar.length != 0) me.placeFooter();
-	                    if(me.tbar.length != 0 || me.title !== null){
-	                        me.placeHeader();
-	                        
-	                        // Set the title on the pane
-		                    if(me.title !== null){
-			                    me.header.el.append($("<h1>"));
-								me.setTitle(me.title);
+		init:			function(wuiPane){
+							var me = wuiPane || this;
+							me.el		 = $('<div>').addClass('wui-pane').append(
+											   $('<div>').addClass('wui-pane-wrap').append(
+												   me.container = $('<div>').addClass('wui-pane-content')
+											   )
+										   );
+							me.sureEl	 = me.el;
+							me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
+		                    			   me.header.elAlias = me.header.el.children('.wui-h-cntnt');
+		                    			   me.header.title = me.header.el.children('h1');
+		                    			   
+		                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
+		                    me.elAlias	 = me.container;
+							
+							// Set  border if applicable
+		                    if(me.border) me.el.css(me.borderStyle);
+		                    
+		                    // Add header and footer to the pane if theres something to put in them
+		                    if(me.bbar.length != 0) me.placeFooter();
+		                    if(me.tbar.length != 0 || me.title !== null){
+		                        me.placeHeader();
+		                        
+		                        // Set the title on the pane
+			                    me.setTitle(me.title);
 		                    }
-	                    }
-					},
+						},
 
 		/** Places the footer on the pane and adjusts the content as necessary. */
-		placeFooter:function(){
-						this.sureEl.css({borderBottomWidth:0});
-						this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
-						this.footer.place();
-					},
+		placeFooter:	function(){
+							this.sureEl.css({borderBottomWidth:0});
+							this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
+							this.footer.place();
+						},
 		
 		/** Places the header on the pane and adjusts the content as necessary. */
-		placeHeader:function(){
-						this.sureEl.css({borderTopWidth:0});
-						this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
-						this.header.place();
-					},
+		placeHeader:	function(){
+							this.sureEl.css({borderTopWidth:0});
+							this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
+							this.setTitleAlign();
+							this.header.place();
+						},
 		
 		/** Changes the title on the pane. */
-		setTitle:   function(t){ this.header.el.children('h1:first').text(t); },
+		setTitle:   	function(t){ this.header.title.text(t); },
 		
-		afterRender:function(){
-						var me = this;
-						
-						document.addEventListener("animationstart", doLayout, false); // standard + firefox
-						document.addEventListener("MSAnimationStart", doLayout, false); // IE
-						document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
-						
-						function doLayout(){
-							if(!me.parent) me.layout();
+		/** Changes the title on the pane. */
+		setTitleAlign:	function(t){ 
+							var me = this;
+							
+							me.titleAlign = t || me.titleAlign;
+							me.header.title.addClass(me.titleAlign);
+							
+							var itemsAlignment = me.titleAlign === 'right' ? 'left' : 'right'; 
+							me.header.elAlias.css('text-align',itemsAlignment);
+						},
+		
+		afterRender:	function(){
+							var me = this;
+							
+							document.addEventListener("animationstart", doLayout, false); 		// standard + firefox
+							document.addEventListener("MSAnimationStart", doLayout, false); 	// IE
+							document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
+							
+							function doLayout(){
+								if(!me.parent) me.layout();
+							}
 						}
-					}
 	});
 	
 	
