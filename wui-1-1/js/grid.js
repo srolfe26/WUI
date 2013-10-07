@@ -522,7 +522,7 @@
 														handles:	'e',
 														resize:		function(event,ui){
 																		me.heading.css({
-																			paddingRight:((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0) + 'px',
+																			paddingRight:Wui.scrollbarWidth(),//((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0) + 'px',
 																			width:me.calcColWidth() + 'px'
 																		});
 																		
