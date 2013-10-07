@@ -309,6 +309,7 @@
 			 .replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate}); return ''; })
 			 .replace(/\@deprecated/,function(mch){ key.append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
 			 .replace(/\@private/,function(mch){ key.append('<span class="wui-doc-private">private</span>'); return ''; })
+			 .replace(/\@required/,function(mch){ key.append('<span class="wui-doc-required"></span>'); return ''; })
 			 .replace(/\@awesome/,function(mch){ key.append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
 		
 		$(keyInfo).each(function(o){

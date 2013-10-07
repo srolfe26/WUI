@@ -81,7 +81,7 @@
 }
 
 /***********************************************   FORM   ***********************************************/
-.wui-form {margin:.5em; clear:both; position:relative; text-align: left;}
+.wui-form {padding:.5em; margin:0; clear:both; position:relative; text-align: left;}
 /* Enforce the meaning of these tags */
 .wui-form strong {font-weight:bold !important;}
 .wui-form em {font-style:italic !important;}
@@ -297,7 +297,6 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.wui-gc:last-child {border-right:none;}
 	
 	.has-vert-columns .wui-gh ul {height:150px;}
 	.has-vert-columns .wui-gc {height:150px;}

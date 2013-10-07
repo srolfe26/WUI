@@ -282,8 +282,6 @@
 										  $('html').click(); // gets rid of the outline from the HTML elements
 									 }
 									 me.el.trigger($.Event('select'),[me, a.el, a.rec]);
-									 
-									 return false // stops propagation & prevents default
 								 })
 								 .dblclick(function(e){
 									 me.selectSingle($(this),a);
@@ -522,7 +520,7 @@
 														handles:	'e',
 														resize:		function(event,ui){
 																		me.heading.css({
-																			paddingRight:Wui.scrollbarWidth(),//((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0) + 'px',
+																			paddingRight:((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0) + 'px',
 																			width:me.calcColWidth() + 'px'
 																		});
 																		
@@ -729,11 +727,11 @@
 									tcw		= me.calcColWidth(),
 									scrollbarWidth = (me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0,
 									hc		= me.headingContainer.width() - scrollbarWidth,
-									hw		= me.heading.width(),
+									hw		= me.heading.width() - scrollbarWidth,
 									fitCt	= 0,
 									fixdWid = 0,
 									fitMux	= 0;
-
+									
 								$.each(me.columns,function(i,col){
 									fitCt += col.fit;
 									fixdWid += col.width;
@@ -754,6 +752,7 @@
 								}
 								
 								fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
+								
 								for(var i in me.columns) {
 									var col = me.columns[i];
 									$(col.heading).css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});

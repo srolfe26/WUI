@@ -38,9 +38,7 @@ h1 span {
 	}
 	#wui-doc-example {margin:0.5em 0;}
 
-.wui-doc-btn-dock > .wui-lbl > label {
-    color: #FFFFFF;
-}
+#wui-doc-example > .wui-lbl > label { color: #FFF; }
 
 /* UNIT TESTS */
 .wui-test-results { margin-top:0.5em; width: 100%; border-collapse:separate; border-spacing:1px; table-layout:fixed; text-align:left;}
@@ -166,7 +164,7 @@ h1 span {
 .doc-nav-list a {text-decoration:none; color:#333;}
 
 /* FLAGS */
-.wui-doc-private, .wui-doc-deprecated, .wui-doc-awesome {
+.wui-doc-private, .wui-doc-deprecated, .wui-doc-awesome, .wui-doc-required {
 	border-radius: 3px;
     display: inline-block;
     font-size: 0.7em;
@@ -179,5 +177,7 @@ h1 span {
 	border:1px solid;
 }
 .wui-doc-private { width:5em; color:#194;  border-color:#194; }
+.wui-doc-required { width:5em; color:#900;  border-color:#900; }
+	.wui-doc-required:before {content:"Required";}
 .wui-doc-deprecated { width:7em;  color:#F60;  border-color:#F9O; }
 .wui-doc-awesome{ width:6.5em;  color: #09F;  border-color: #09F; letter-spacing:1px; }

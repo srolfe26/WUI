@@ -668,17 +668,18 @@
 					        	tplEngine.make(tplEngine.data = itm)
 					        	.children('label').attr({unselectable:'on'}).end()
 					        	.children('input')
-					        	.change(function(){ me.val($(this).val()); })
+					        	.change(function(){ me.elemChange($(this)); })
 					        	.focus(function(){ul.addClass('has-focus');})
 					        	.blur(function(){ul.removeClass('has-focus');})
 					        	.end()
 					        );
 						});
                     },
-					
-		/**
-		If buttonStyle = true, the actual radio input is hidden 
-		*/
+		
+		/** What to do when an individual element changes */
+		elemChange:	function(elem){ this.val(elem.val()); },
+		
+		/** If buttonStyle = true, the actual radio input is hidden  */
 		onRender:	function(){
 				        var me = this;
         				me.el.find('input').each(function(){
@@ -709,13 +710,18 @@
 	Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
         /** Collects the values of all the checked boxes in the group */
 		calcVal:	function(){
-						var me = this;
-        				me.value = [];
+						var me = this, a = [];
+						
         				me.el.find('input:checked').each(function(){
-			        		me.value.push($(this).attr('value'));
+			        		a.push($(this).val());
 			        	});
-						return ((me.value.length > 0) ? (me.value.length > 1) ? me.value : me.value[0] : 0);
+						
+						return ((a.length > 0) ? (a.length > 1) ? a : a[0] : null);
 					},
+
+		/** Returns whether or not the box is checked */
+		elemChange:	function(elem){ this.val(this.calcVal()); },					
+	
 		/** Runs immediately when the object is created. Adds listeners and styles */
 		init:       function(){
                         if(this.options.length == 0) this.options.push({val:1,title:''});
@@ -732,15 +738,21 @@
 		getVal:		function(){ return this.calcVal(); },
 		setVal:		function(sv){
 						var me = this;
+						
+						if($.isArray(sv))				{ me.value = sv; }
+						else if(sv === null)			{ me.value = null; }	
+						else							{ me.value = [sv]; }
+						
 						if(me.options.length == 1 && (typeof sv == 'number' || typeof sv == 'string')){
-							me.el.find('input').attr('checked',!!sv).siblings('li').toggleClass('checked',!!sv);
+							me.el.find('input').attr('checked',!!parseInt(sv)).siblings('li').toggleClass('checked',!!parseInt(sv));
 						}else{
 							// clear out all checkboxes
 							me.el.find('input').attr('checked',false);
 							me.el.find('label').removeClass('checked');
 							
 							// set the ones passed in
-							for(var i in setVal) me.el.find('input[value=' +setVal[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
+							for(var i in me.value) 
+								me.el.find('input[value=' +me.value[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
 						}
 					},
 		/** The check-box will validate false if the value is 0 and the box is required.  */
@@ -748,28 +760,56 @@
 	});
 	
 	
-	/***********************************   WUI Combo   ***********************************/
+	
 	// Make jQuery contains case insensitive
 	$.expr[":"].contains = $.expr.createPseudo(function(arg) {
 		return function( elem ) {
 			return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
 		};
 	});
-	
+	/** The WUI Combobox can be set up in a number of different configurations that are really just variations of local and remote operations. See the configs. */
 	Wui.Combo = function(args){ 
 		$.extend(this, {
+			/** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
+			until a search value is entered. */
 			autoLoad:   false,
+			
+			/** CSS class to place on the drop down element. */
 			ddCls:		'',
+			
+			/**  */
 			doSearch:   function(){},
+			
+			/** Text to display in the drop down when no results are returned.  */
 			emptyText:  '(empty)',
+			
+			/** The DOM element for the field */
 			field:		$('<input>').attr({type:'text'}),
+			
+			/** Whether the drop-down DOM element will be kept in place or appended out to the body and absolutely
+			positioned. Keeping the drop-down in line will make it susceptible to being clipped by containing elements.*/
 			keepInline:	false,
+			
+			/** Minimum number of characters entered before the combo will filter remotely. */
 			minKeys:    2,
+			
+			/** Event hook for when the combo loses focus */
 			onBlur:     function(){},
+			
+			/** Whether to filter the drop down amidst the locally loaded results or to go to the server. */
 			searchLocal:true,
+			
+			/**
+			@required
+			The key in the data that will be used for display in the combo box.
+			*/
 			titleItem:  null,
-			valueItem:  null,
-			unsearched: null
+			
+			/**
+			@required
+			The key in the data that will be used as the value for the combo when an item is selected.
+			*/
+			valueItem:  null
 		},args,{
 			cls:(args.cls) ? args.cls + ' wui-combo' : 'wui-combo',
 		}); 

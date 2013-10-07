@@ -133,17 +133,19 @@ var Wui = Wui || {};
 			
 			// Tally all sizes we're dealing with
 			$.each(collection,function(i,itm){
-				if(itm[dim]){
+				if(itm.fit){
+					fitCt += itm.fit; 		// Tally fit values
+					itm[dim] = -1;			/* Set to -1 so that CSSByParam will not act on it (just deleting it was
+											ineffective because this property can be inherited through the prototype chain)*/
+				}else if(itm[dim]){
 					// Tally fixed size values & percentage based size values
-					// Doing this gives percentages precendence over fit
+					// Doing this gives percentages precedence over fit
 					if(Wui.isNumeric(itm[dim]))	{ fixedSize += itm[dim]; }
 					else						{
 												  var itmDimension = Math.floor((parseFloat(itm[dim]) / 100) * parentSize);
 												  fixedSize += (itm[dim] = itmDimension);
 												}
 					delete itm.fit;			// Ensure the item doesn't have a dimension and a fit specified
-				}else if(itm.fit){
-					fitCt += itm.fit; 		// Tally fit values
 				}else{
 					fitCt += (itm.fit = 1); // Add a fit value to an item that doesn't have dimensions specified
 				}
@@ -272,8 +274,10 @@ var Wui = Wui || {};
                         	if(m.attr)	m.el.attr(m.attr);
                         	
                         	// calculate dimensions
-                        	if(Wui.isNumeric(m.height))	m.el.css({height: m.height});
-                        	if(Wui.isNumeric(m.width))	m.el.css({width: m.width});
+                        	if(Wui.isNumeric(m.height) && m.height >= 0)	m.el.css({height: m.height});
+                        	if(Wui.isNumeric(m.width) && m.width >= 0)		m.el.css({width: m.width});
+
+							// calculate percentage based dimensions
                         	if(m.width && m.width.indexOf && m.width.indexOf('%') != -1)
 								m.el.css({width: Math.floor((parseFloat(m.width) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).width())});
 							if(m.height && m.height.indexOf && m.height.indexOf('%') != -1){
