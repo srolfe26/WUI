@@ -171,6 +171,8 @@
 	parameters. Columns for the grid are defined in an array and with the following options:
 	
 	heading		- The title of the column heading
+	cls			- A special class to add to the column
+	vertical	- Makes the column text oriented vertical and the column height at 150px
 	dataType	- The type of data used in the column (used for sorting)
 	dataItem	- The item in the record that correlates to this column
 	width		- A pixel value for the width of the column
@@ -495,20 +497,32 @@
 										}
 									}									
 									
+									// Deal with vertical columns - forces them to be 48px wide
+									if(col.vertical){
+										me.el.addClass('has-vert-columns');
+										if(col.cls)	col.cls += ' vert-col';
+										else		col.cls = 'vert-col';
+										
+										col.width = 48;
+										delete col.fit;
+									}
+									
 									// Build heading and append to DOM
 									$.extend(col,{
 										dataType:	(col.dataType === undefined) ? me.defaultDataType : col.dataType,
 										fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
 										index:		i,
 										width:		col.width === undefined ? 0 : col.width,
-										heading:	$('<li>').text(col.heading)
+										heading:	$('<li>')
+													.append($('<div>').text(col.heading))
 													.attr({unselectable:'on'})
 													.addClass('wui-gc')
+													.addClass(col.cls)
 													.resizable({
 														handles:	'e',
 														resize:		function(event,ui){
 																		me.heading.css({
-																			paddingRight:((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0) + 'px',
+																			paddingRight:Wui.scrollbarWidth(),//((me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0) + 'px',
 																			width:me.calcColWidth() + 'px'
 																		});
 																		
@@ -571,7 +585,7 @@
 								if(col.sortDir){
 									if(col.sortDir == 'desc'){
 										delete col.sortDir;
-										col.heading.removeClass().addClass('wui-gc');
+										col.heading.removeClass().addClass('wui-gc').addClass(col.cls);
 										
 										$.each(me.sorters,function(i,itm){
 											if(itm == col)	me.sorters.splice(i,1);
@@ -582,7 +596,7 @@
 								}else{
 									// Can't sort on more than 5 columns
 									if(me.sorters.length > 5){
-										col.heading.removeClass().addClass('wui-gc');
+										col.heading.removeClass().addClass('wui-gc').addClass(col.cls);
 										return false;
 									}
 									
@@ -596,7 +610,7 @@
 								me.paging.sort = [];
 								
 							$.each(me.sorters,function(i,itm){
-								itm.heading.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir);
+								itm.heading.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
 								
 								if(me.isPaging)
 									me.paging.sort.push({dataItem:itm.dataItem, order:itm.sortDir});

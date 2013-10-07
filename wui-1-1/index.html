@@ -32,6 +32,9 @@
 				appendTo: 	$('body'),
 				fitDimension:'width',
 				cls:		'wui-kitchen-sink',
+				tbar:			[
+									new Wui.Button({ text:'Download WUI 1.1', click:function(){ window.location = ''; } })
+								],
 			    items:		[
 			    				kSink.selectorGrid = new Wui.Grid({
 				    				data:			[
@@ -56,7 +59,8 @@
 														{link:'docs/forms.html', title:'Form'},
 														{link:'docs/grid.html', title:'Grid'},
 														{link:'docs/tabs.html', title:'Tabs'},
-														{link:'docs/is-numeric.html', title:'isNumeric'},
+														{link:'docs/is-numeric.html', title:'isNumeric()'},
+														{link:'docs/scrollbar-width.html', title:'scrollbarWidth()'},
 						    						],
 						    		processData:	function(d){
 											    		return d.sort(function(a,b){

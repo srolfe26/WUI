@@ -282,12 +282,39 @@
 .wui-gh * {-moz-user-select:none; -webkit-user-select:none;}
 .wui-gh ul {margin:0; padding:0; min-width:100%; height:2em; overflow:hidden;}
     .wui-gc {
-        background-color:#555; color:#fff; text-transform:uppercase; font-size:0.9em; 
-        font-weight:bold; padding:0.5em 3em 0.5em 0.5em; text-align:left; float:left; list-style: none; margin:0;
-        border-right:1px solid #fff; text-shadow: 0 0 3px rgba(0,0,0,0.4); position: relative; height:2.25em; min-height:2.25em;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        background-color:#555; color:#fff; text-transform:uppercase; height: 100% !important;
+        font-weight:bold; padding:0.5em 41px 0.5em 0.5em; text-align:left; float:left; list-style: none; margin:0;
+        border-right:1px solid #fff; text-shadow: 0 0 3px rgba(0,0,0,0.4); position: relative;
     }
+	.wui-gc div:first-child {
+		bottom: 0.5em;
+		font-size: 0.9em;
+		left: 0.5em;
+		overflow: hidden;
+		padding-right:41px;
+		max-width:	100%;
+		position: absolute;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 	.wui-gc:last-child {border-right:none;}
+	
+	.has-vert-columns .wui-gh ul {height:150px;}
+	.has-vert-columns .wui-gc {height:150px;}
+	.wui-gc.vert-col {width:48px !important;}
+	.wui-gc.vert-col div:first-child {
+		bottom: auto !important;
+		height: 48px;
+		left: auto !important;
+		line-height: 51px;
+		padding: 0 0.25em 0 30px;
+		position: relative;
+		transform: rotate(-90deg);
+		transform-origin: 44% 158% 0;
+		width: 150px; max-width:150px; min-width:150px;
+	}
+	.wui-gc.vert-col .ui-resizable-handle {display:none !important;}
+	
 	.wui-gc .ui-resizable-handle.ui-resizable-e {
 	    cursor: col-resize;
 	    height: 100%;
@@ -296,6 +323,15 @@
 	    top: 0;
 	    width: 10px;
     }
+	
+	.wui-gc div.vert-col {
+		height: 30px;
+		line-height: 30px;
+		padding-left: 30px;
+		transform: rotate(-90deg);
+		transform-origin: 45% 249% 0;
+		width: 150px;
+	}
     
 .grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
 
@@ -313,8 +349,15 @@
 .grid-body table .wui-selected td {background-color:#0cf;}
 
 .wui-gc:after {
-    background-color: rgba(0, 0, 0, 0.3); border-radius: 1em; color: #FFF; font-size: 0.8em; 
-    padding: 0.2em 0.7em; position: absolute; right: 6px; top: 0.6em; text-shadow:0 0 2px black, 0 0 4px black;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 1em 1em 1em 1em;
+    bottom: 0.4em;
+    color: #FFFFFF;
+    font-size: 0.8em;
+    padding: 0.2em 0.7em;
+    position: absolute;
+    right: 6px;
+    text-shadow: 0 0 2px #000000, 0 0 4px #000000;
 }
 .wui-gc.one.asc:after {content:"1 ↓";} .wui-gc.one.desc:after {content:"1 ↑";}
 .wui-gc.two.asc:after {content:"2 ↓";} .wui-gc.two.desc:after {content:"2 ↑";}

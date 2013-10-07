@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+	<title>WUI Test</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+
+	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	<script type="text/javascript" src="js/docs.js"></script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// Add a new grid on the body
+			a = new Wui.Grid({
+				height:	'90%',
+				width:800,
+				borderStyle:{borderWidth:0},
+				appendTo:$('body'),
+				url:	'docs/data.json',
+				columns:[
+							{heading:'Date', dataItem:'date', dataType:'date', fit:1},
+							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
+							{heading:'Description', dataItem:'description', fit:7},
+							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
+						],
+			});
+			a.place();
+		}); // end document.ready
+	</script>
+</head>
+<body>
+</body>
+</html>
