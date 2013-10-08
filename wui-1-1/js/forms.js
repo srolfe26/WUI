@@ -774,13 +774,13 @@
 			until a search value is entered. */
 			autoLoad:   false,
 			
-			/** CSS class to place on the drop down element. */
+			/** CSS class to place on the drop-down element. */
 			ddCls:		'',
 			
 			/**  */
 			doSearch:   function(){},
 			
-			/** Text to display in the drop down when no results are returned.  */
+			/** Text to display in the drop-down when no results are returned.  */
 			emptyText:  '(empty)',
 			
 			/** The DOM element for the field */
@@ -796,7 +796,7 @@
 			/** Event hook for when the combo loses focus */
 			onBlur:     function(){},
 			
-			/** Whether to filter the drop down amidst the locally loaded results or to go to the server. */
+			/** Whether to filter the drop-down amidst the locally loaded results or to go to the server. */
 			searchLocal:true,
 			
 			/**
@@ -821,9 +821,12 @@
 		this.init(); 
 	};
 	Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
+		/** Fires when the enter key is pressed */
 		enterKey:   	function(){
 	                        if(this.selectItm !== null)   this.selectItm.click();
 	                    },
+						
+		/** Fires when the down arrow is pressed */
 		keyDown:    	function(){
 	                        if(!this.dd.is(':visible')){
 	                            this.selectCurr();
@@ -835,6 +838,8 @@
 								this.rsltHover(this.dd.children(':eq(' + idx + ')'));
 	                        }
 	                    },
+						
+		/** Fires when the down up is pressed */
         keyUp:      	function(){
 	                        if(this.selectItm !== null){
 	                            var idx = this.selectItm.prevAll(':visible:first').index();
@@ -848,7 +853,11 @@
 	                            } 
 	                        }
 	                    },
+						
+		/** Hides the drop-down menu */
 		hideDD:     	function(){this.dd.hide();},
+		
+		/** Method that runs when the object is initiated */
 		init:       	function(){
 	                        var me = this,
 								ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
@@ -857,7 +866,7 @@
 	                        me.tplEngine = new Wui.Template({template:me.template});
 	                        me.selectItm = null;
 	                        
-	                        //put field inside a wrapper and add drop down switch
+	                        //put field inside a wrapper and add drop-down switch
 	                        Wui.Text.prototype.init.call(me);
 	                        
 	                        me.wrapper = $('<div>').addClass('dd-wrapper');
@@ -886,6 +895,8 @@
 	                        if(me.autoLoad)   me.loadData();
 	                        else              me.renderData();
 	                    },
+		
+		/** Populates the drop-down with data/search results or shows empty text  */
 		renderData: 	function(){
 	                        var me = this,
 	                        	holder = $('<ul>');
@@ -905,20 +916,32 @@
 	                        
 	                        return true;
 	                    },
-        rsltClick:  	function(){
+        
+		/** Hides the drop-down and sets the current selection as the combo's value */
+		rsltClick:  	function(){
 	                        this.hideDD();
 	                        this.val(this.data[this.selectItm.index()]);
 	                    },
+						
+		/** Makes an item in the drop-down appear to be selected. This can happen when the 
+		mouse hovers over an item or when its selected with the arrow keys. */
 		rsltHover:  	function(itmTarget){
 	                        if(!itmTarget.addClass)
 	                        	itmTarget = $(itmTarget.currentTarget);
 	                        this.dd.children().removeClass('selected');
 	                        this.selectItm = itmTarget.addClass('selected');
 	                    },
+		
+		/** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
 		setParams:		function(srchVal){
 							if(this.searchFilter)
 								$.extend(this.params,{srch: this.searchFilter});
 						},
+						
+		/** 
+		@param {string} srchVal	A search term
+		Searches locally within the drop-down's data for the srchVal, otherwise if searchLocal is false,
+		the data is searched remotely. */
         searchData: 	function(srchVal){
 	                        this.searchFilter = srchVal;
 	                        
@@ -932,7 +955,14 @@
 									this.loadData();
 							}
 	                    },
-        selectCurr: 	function(i){
+        
+		/** 
+		@param {number}	[i]	An index
+		
+		If i is defined, it is the index of the item to select in the drop-down, else it is determined in this
+		method by the current value of the combo.
+		*/
+		selectCurr: 	function(i){
 	                        if(i === undefined && this.value !== null){
 	                            for(var d in this.data){
 	                                if(this.data[d][this.valueItem] === (this.value[this.valueItem] || this.value))   { i = d; break; }
@@ -940,7 +970,13 @@
 	                        }
 	                        this.rsltHover(this.dd.children(':eq(' +i+ ')'));
 	                    },
+						
+		/** Overrides the event hook in Wui.Data to trigger rendering of new data */
 		afterSet:   	function(newData){ this.renderData(); },
+		
+		/** 
+		@param {Wui Object} t Wui Object to add listeners to
+		Sets additional listeners on the field that give it combo-box like interactions */
 		setListeners:	function(t){
 	                        t.field
 	                        .focus(function(e){
@@ -1003,6 +1039,9 @@
 	                        });
 	                        return t.field;
 	                    },
+		
+		/** Shows the drop-down menu by either simply making it appear, or by positioning it absolutely to appear to drop-down from the combo's text field
+		based on the value of keepInline. */
 		showDD:     	function(){
 							if(!this.keepInline){
 								var fld		= this.field,
@@ -1060,7 +1099,10 @@
 	});
 	
 	
-	/***********************************   WUI Link   ***********************************/
+	/**
+	The link object contains three fields, one for the actual URL, one for the text of the link (if different from the URL) and a combo for
+	whether the link opens in a new window/tab or the same window.
+	*/
 	Wui.Link = function(args){ 
 		$.extend(this,{
 			invalidMsg: 'The value for \'' + ((this.label) ? this.label : (this.args && this.args.name) ? this.args.name : 'a link field') + '\' is not a properly formatted link.'
@@ -1068,6 +1110,7 @@
 		this.init();
 	};
 	Wui.Link.prototype = $.extend(new Wui.FormField(),{
+		/** Builds a preview of the link while it is being entered - gives feedback/validation to the user  @private */
 		buildOutput:function(){
                          if(this.outputFld === undefined)	this.elAlias.append(this.outputFld = $('<div>').attr({tabindex:-1}).addClass('feedback'));
         	
@@ -1079,6 +1122,8 @@
                         }
                             
                     },
+		
+		/** Method that runs when the object is initiated */
 		init:       function(){
                         var me = this;
                         
@@ -1109,6 +1154,8 @@
                         })
                         .blur(function(){me.value.title = me.titleField.val()});
                     },
+		
+		/** Sets listeners on all three of the fields in the link object */
 		setListeners:function(){
                         var me = this,
                         	flds = arguments;
@@ -1127,11 +1174,13 @@
                         });
                     },       
             
-        testLink:   function isUrl() {
+        /** Test for whether the link is a valid URL whether a full or relative path */
+		testLink:   function isUrl() {
                         var fullPath = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                         var relativePath = /(\/|\/([\w#!:.?+=&%@!\-\/]))/
                         return (fullPath.test(this.value.uri) || relativePath.test(this.value.uri));
                     },
+					
         getVal:		function(){
 				        return this.value;
 			        },
@@ -1142,11 +1191,33 @@
                         this.targetField.val(this.value.target);
                         this.buildOutput();
 			        },
+		
+		/** Overrides the Wui.FormField function and provides added validation */
 		validTest:	function(){ if(this.required && !this.testLink()) return false; return true; }
 	});
 	
 	
-	/***********************************   WUI DateTime   ***********************************/
+	/**
+	 * Borrowed from Date.js and tweaked a TON - See license below, and check out the full library if you're doing tons with dates
+	 * Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+	 * License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
+	 * Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
+	 
+	 The Datetime field can be used in conjunction with a calendar-style datepicker. When dates are changed, any time information is
+	 retained.
+	 
+	 Feedback is given to the user so concerns about whether the date is in a proper format can be allayed before validation occurs.
+	 Dates can be entered in a variety of formats of which what is below is a very small sample:
+	 
+	 "Five months after 9/20/2013"
+	 "Yesterday"
+	 "05/26/1983"
+	 "2012-12-12"
+	 "today at noon"
+	 "tomorrow at five thirty pm"
+	 "10-9-2013 5:30 PM"
+	 "ten months from now"
+	*/
 	Wui.Datetime = function(args){ 
 		$.extend(this,{
 			valChange:	function(val){}
@@ -1156,12 +1227,6 @@
 		this.init();
 	};
 	
-	/**
-	 * Borrowed from Date.js and tweaked a little - See license below, and check out the full library if you're doing tons with dates
-	 * Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
-	 * License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
-	 * Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
-	*/
 	$.extend(Date,{
 		CultureInfo:			{
 									name: "en-US",
@@ -1332,10 +1397,10 @@
         shortDays:      ["sun","mon","tue","wed","thu","fri","sat"],
         months:         ["january","february","march","april","may","june","july","august","september","october","november","december"],
         shortMonths:    ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"],
-        sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
+        /** Array of feedback words or phrases to randomly display when a user's input is not understood by the control */
+		sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
         minDate:        null,
 		prevText:       null,
-        value:          null,
 		
         displayDate:    function(overrideText){
                             var me = this;
