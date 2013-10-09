@@ -555,7 +555,10 @@
 	Wui.Textarea = function(args){
 	    $.extend(this, args, { 
 			/** The HTML element */
-			field:	$('<textarea>')
+			field:	$('<textarea>'),
+			
+			/** Determines the height of the field */
+			height:	100
 		});
 	    this.init();
 	};
@@ -1801,7 +1804,62 @@
                     }
 	});
 
-
+	/**
+	@param {string}		msg			Label of the text input if no other inputs are defined.
+	@param {funciton}	callback	Function will receive the value of the text input if no other inputs are defined, or it will get an object containing all form values.
+	@param {string}		[msgTitle]	The title for the window, defaults to 'Input'.
+	@param {array}		[inputs]	Array of Wui.FormFields to display on the window. When this array has only one item it merely replaces the default text field and is required. 
+	@param {string}		[content]	HTML content to display above the form fields.
+	
+	Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
+	*/
+	Wui.input = function(msg, callback, msgTitle, inputs, content){
+		// make sure the inputs will be acceptable on the form
+		if(inputs){
+			if(!inputs.length){
+				if(inputs instanceof Wui.FormField || inputs.ftype)
+					inputs = [inputs];
+				else
+					inputs = [{ftype:'Wui.Text'}];
+			}
+		}else{
+			inputs = [{ftype:'Wui.Text'}];
+		}
+		if(inputs.length == 1)	$.extend(inputs[0],{label:msg, required:true, name:'inputField'});
+		if(content !== undefined) inputs.splice(0,0,{ftype:'Wui.Note', html: content});
+		
+		// create the form and the window
+		var inputFrm = new Wui.Form({ labelPos:'left', items:inputs }),
+			Msg = new Wui.Window({
+				title:      msgTitle || 'Input',
+				bbar:		[ 
+								new Wui.Button({text:'Cancel', click:function(){ Msg.answerRun = true; Msg.close(); }}),
+								new Wui.Button({text:'Submit', click:function(){ Msg.getVal(); }})
+				],
+				isModal:    true,
+				items:      [inputFrm],
+				cls:		'wui-input-window',
+				width:      600, 
+				height:     250,
+				getVal:		function(){
+								var formData = inputFrm.getData();
+								if(formData){
+									if(callback && typeof callback == 'function'){
+										var len = 0;
+										for(var n in formData) len++;
+										if(len == 1 && formData.inputField)	callback(formData.inputField);
+										else 								callback(formData);
+									}
+									Msg.answerRun = true;
+									Msg.close();
+								}
+							},
+				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+			});
+	    return inputFrm;
+	}
+	
+	
 	/**
 	* jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
 	* Copyright (c) 2012 Chris Pietschmann

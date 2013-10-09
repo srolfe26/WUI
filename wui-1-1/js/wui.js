@@ -105,7 +105,7 @@ var Wui = Wui || {};
 	*/
 	Wui.maxZ = function(){
 	    return Math.max.apply(null, 
-	            $.map($('body > *'), function(e,n) {
+	            $.map($('body > *, .wui-window'), function(e,n) {
 	                if ($(e).css('position') != 'static')
 	                  return parseInt($(e).css('z-index')) || 1;
 	            })
@@ -799,6 +799,9 @@ var Wui = Wui || {};
 			/** Tool tip text for the button. */
 			toolTip:    null,
 			
+			/** Tab index will make the button focusable by the browser. Changing this value will result in it receiving a higher precedence than what it would receive in that natural flow of the page. */
+			tabIndex:	0,
+			
 			/** Text to appear on the button. Can be HTML if a more complex button design is desired. */
 			text:       'Button'
 	    }, args);
@@ -812,30 +815,45 @@ var Wui = Wui || {};
 		/** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
 		init:       function(){ 
 	                    var me = this;
-						if(me.disabled)	me.disable();
-	                    
-						me.el.addClass('wui-btn');
 						
-	                    me.el.click(function(e){
-	                    	if(!me.disabled){
+						me.el
+						.addClass('wui-btn')
+						.click(btnClick)
+						.keyup(function(evnt){
+							if(evnt.keyCode == 13 || evnt.keyCode == 32)
+								btnClick(evnt);
+						})
+	                    .html(me.text)
+						.focus(function(){ me.el.addClass('selected'); })
+						.blur(function(){ me.el.removeClass('selected'); })
+	                    .attr({title:me.toolTip, tabindex:me.tabIndex});
+						
+						if(me.disabled)	me.disable();
+						
+						function btnClick(e){
+							if(!me.disabled){
 								me.click(arguments);
 								me.el.trigger($.Event('wuibtnclick'),[me]);
 							}
 	                    	return false;
-	                    })
-	                    .html(me.text)
-	                    .attr({title:me.toolTip});
+						}
 	                },
 		
 		/** Disables the button */
 		disable:	function(){
 						this.disabled = true;
-						this.el.toggleClass('disabled',this.disabled).attr('disabled',true);
+						this.el
+						.toggleClass('disabled',this.disabled)
+						.attr('disabled',true)
+						.removeAttr('tabindex');
 					},
 		/** Enables the button */
 		enable:		function(){
 						this.disabled = false;
-						this.el.toggleClass('disabled',this.disabled).removeAttr('disabled');
+						this.el
+						.toggleClass('disabled',this.disabled)
+						.removeAttr('disabled')
+						.attr({tabindex:me.tabIndex});
 					},
 		/** Sets the button text. Can be HTML. */
 		setText:    function(txt){ return this.el.html(txt); },
@@ -970,6 +988,8 @@ var Wui = Wui || {};
 							function doLayout(){
 								if(!me.parent) me.layout();
 							}
+							
+							this.footer.items[0].el.focus();
 						}
 	});
 	
@@ -1071,8 +1091,8 @@ var Wui = Wui || {};
                         this.onWinOpen(me);
 						me.windowEl.trigger($.Event('open'),[me]);
                         
-                        function bringToFront(){
-                            if(parseInt((me.el.css('z-index')) || 1) < Wui.maxZ()){
+                        function bringToFront(e){
+							if(parseInt((me.el.css('z-index')) || 1) < Wui.maxZ()){
                                 me.el.css('z-index',Wui.maxZ() + 1);
                             }
                         }

@@ -100,7 +100,7 @@
 .wui-lbl.lbl-bottom > label { top:auto; bottom:0; }
 
 /* general form element */
-.wui-fe {position:relative;}
+.wui-fe {position:relative; text-align:left;}
 
 /* textfield / textarea */
 .wui-fe input, .wui-fe textarea { color: #444; padding:4px; width:100%; border-radius:4px; font-size: 0.8em; }
@@ -273,7 +273,7 @@
 
 .wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a {color:#900;}
 .wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
-.wui-form .wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text] {border-color:#c00; background-color:white;}
+.wui-form .wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text], .wui-form-err textarea {border-color:#c00; background-color:white;}
 .wui-form-err .wui-btn.field-btn {border: 1px solid #c00; border-left:none;}
 
 /**********************************************   grid styles   ************************************************/
@@ -411,6 +411,7 @@
 		
 /**********************************************   Buttons in nested tbar and bbar  **********************************************/
 .wui-pane-header .wui-btn, .wui-pane-footer .wui-btn {border: 1px solid #777; background-color:#ddd; height:26px; line-height:26px;  margin: 7px 0.5em 0 0;}
+.wui-btn:active, .wui-btn:hover, .wui-btn.selected  {background-color:#eee; border:1px solid #fff;}
 .wui-pane-header .wui-btn.disabled, .wui-pane-footer .wui-btn.disabled { opacity: 0.5; background-color:transparent;}
 .wui-pane-header .wui-btn:active, .wui-pane-footer .wui-btn:active { box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
 .wui-pane-header .wui-btn.disabled:active, .wui-pane-footer .wui-btn.disabled:active { box-shadow:none; background-color:transparent; }
