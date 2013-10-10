@@ -659,17 +659,19 @@
         				var me = this,
 							tplEngine = new Wui.Template({ template:this.template }),
 							ul = $('<ul>');
-							
-						//make radio group look like buttons
-						if(me.buttonStyle) ul.addClass('button');
 						
-						me.el.append(ul);
 						$.each(me.options,function(i,itm){
 							itm.name = me.name;
 					        itm.id = me.name + '-' + i;
 					        ul.append(
 					        	tplEngine.make(tplEngine.data = itm)
-					        	.children('label').attr({unselectable:'on'}).end()
+					        	.children('label')
+									.attr({unselectable:'on'})
+									.keyup(function(evnt){
+										if(evnt.keyCode == 13 || evnt.keyCode == 32)
+											$(this).click();
+									})
+								.end()
 					        	.children('input')
 					        	.change(function(){ me.elemChange($(this)); })
 					        	.focus(function(){ul.addClass('has-focus');})
@@ -677,6 +679,15 @@
 					        	.end()
 					        );
 						});
+						
+						// make radio group look like buttons
+						if(me.buttonStyle){
+							ul.addClass('button');
+							ul.find('label').attr({tabindex:0});
+						}
+						
+						// Append to DOM
+						me.el.append(ul);
                     },
 		
 		/** What to do when an individual element changes */

@@ -7,7 +7,7 @@
 	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
 	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
 	
-	<style>
+	<style type="text/css" class="wui-doc-code">
 		.forms-of-three {float:left; margin:0; padding:0.5em; clear:none; border-right:1px dashed #ccc;}
 	</style>
 	
@@ -30,6 +30,7 @@
 				appendTo:		$('#wui-doc-example'),
 				title:'Forms',
 				tbar: [
+					new Wui.Button({text:'Test Button'}),
 					tBarForm = new Wui.Form({
 						items: [
 							{ftype:'Wui.Text', label:'Yee Haw!'},
@@ -56,15 +57,21 @@
 							title:'Forms',
 							fitDimension:	'width',
 							tbar: [
-								new Wui.Form({
-									items: [
-										{ftype:'Wui.Text', label:'Yee Haw!'},
-										{ftype:'Wui.Combo', label:'The Parents:', data:[{person_id:1, person:'Kayli'},{person_id:2, person:'Steve'}], valueItem:'person_id', titleItem:'person'},
-										// {ftype:'Wui.Link'},
-										// {ftype:'Wui.Datetime'}
-									]
-									
-								})
+									new Wui.Button({text:'Test Button'}),
+									new Wui.Text({}),
+									new Wui.Combo({data:[{person_id:1, person:'Kayli'},{person_id:2, person:'Steve'}], valueItem:'person_id', titleItem:'person'}),
+									new Wui.Link({}),
+									new Wui.Datetime({}),
+									new Wui.Radio({
+										label:			'Should I stay or should I go?',
+										name:			'82s6',
+										buttonStyle:	true,
+										required:		true,
+										options:		[
+															 {val:0, title:'Stay = trouble.'},
+															 {val:1, title:'Go = double trouble.'}
+														], required:true
+									})
 							],
 							items: [
 										fOne = new Wui.Form({
@@ -169,20 +176,15 @@
 									]})
 								],
 						bbar: [
-							new Wui.Text({}),
-							new Wui.Combo({data:[{person_id:1, person:'Kayli'},{person_id:2, person:'Steve'}], valueItem:'person_id', titleItem:'person'}),
-							 new Wui.Link({}),
-							 new Wui.Datetime({}),
-							 new Wui.Radio({
-															label:			'Should I stay or should I go?',
-															name:			'82s6',
-															buttonStyle:	true,
-															required:		true,
-															options:		[
-																				 {val:0, title:'Stay = trouble.'},
-																				 {val:1, title:'Go = double trouble.'}
-																			], required:true
-														}),
+							new Wui.Form({
+								items: [
+									{ftype:'Wui.Text', label:'Yee Haw!'},
+									{ftype:'Wui.Combo', label:'The Parents:', data:[{person_id:1, person:'Kayli'},{person_id:2, person:'Steve'}], valueItem:'person_id', titleItem:'person'},
+									// {ftype:'Wui.Link'},
+									// {ftype:'Wui.Datetime'}
+								]
+								
+							})
 						]
 					})
 				],

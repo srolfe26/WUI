@@ -159,7 +159,7 @@ var Wui = Wui || {};
 			$.each(collection,function(i,itm){
 				var css = {};
 				if(itm.fit){
-					css[dim] = fitMux * itm.fit;
+					css[dim] = Math.floor(fitMux * itm.fit);
 					$(itm.el).css(css);
 				}
 			});
@@ -729,6 +729,60 @@ var Wui = Wui || {};
 		/** Overrides the Wui.Data method that serves as an event hook. Calls the DataList's make() method. */
 		dataChanged:function(){ this.make(); },
 		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@private
+		Performs mutations and fires listeners when an item is selected
+		*/
+		itmSelected:function(itm){
+						var me = this,
+							alreadySelected = me.selected,
+							oldEl = (alreadySelected) ? alreadySelected.el : undefined,
+							oldRec = (alreadySelected) ? alreadySelected.rec : undefined;
+						
+						me.el.find('.wui-selected').removeClass('wui-selected');
+						itm.el.addClass('wui-selected');
+						me.selected = itm;
+						
+						// Fire different events depending whether there was already a record selected
+						me.el.trigger($.Event('change'), [me, itm.el, itm.rec, oldEl, oldRec]);
+						me.el.trigger($.Event('select'), [me, itm.el, itm.rec]);
+					},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@private
+		Performs mutations and fires listeners when an item is deselected
+		*/		
+		itmDeselect:function(itm){
+						var me = this;
+						itm.el.removeClass('wui-selected');
+						me.selected = null;
+						me.el.trigger($.Event('deselect'),[me, itm.el, itm.rec]);
+					},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@return The item passed in with listeners added
+		Adds the click listeners to the item and calls modifyItem to add greater flexibility
+		*/
+		createItem:	function(itm){
+						var me = this;
+						
+						itm.el.click(function(){
+							if(me.selected && me.selected === itm)	me.itmDeselect(itm);
+							else									me.itmSelected(itm);
+						});
+						return me.modifyItem(itm);
+					},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@return The DOM element
+		Performs any desired modification on an object - this method is meant to be overridden.
+		*/
+		modifyItem:	function(itm){ return itm.el; },
+		
 		/** Creates the templates based on current data. Then appends them to the el with listeners */
 		make:		function(){
 						var me = this,
@@ -736,33 +790,8 @@ var Wui = Wui || {};
 							holder = $('<div>');
 						
 						for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
-							var rec = me.data = holdingData[i],
-								a = {el:Wui.Template.prototype.make.call(me), rec:rec};
-								doAppend(a);
-						}
-						
-						function doAppend(a){
-							holder.append(
-								a.el.click(function(){
-									if(me.selected && me.selected === a){
-										a.el.removeClass('wui-selected');
-										me.selected = null;
-										me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
-									}else{
-										var alreadySelected = me.selected,
-											oldEl = (alreadySelected) ? alreadySelected.el : undefined,
-											oldRec = (alreadySelected) ? alreadySelected.rec : undefined;
-										
-										me.el.find('.wui-selected').removeClass('wui-selected');
-										a.el.addClass('wui-selected');
-										me.selected = a;
-										
-										// Fire different events depending whether there was already a record selected
-										me.el.trigger($.Event('change'), [me, a.el, a.rec, oldEl, oldRec]);
-										me.el.trigger($.Event('select'), [me, a.el, a.rec]);
-									}
-								})
-							);
+							var rec = me.data = holdingData[i];
+							holder.append(me.createItem({el:Wui.Template.prototype.make.call(me), rec:rec}));
 						}
 						
 						me.clear();
@@ -825,14 +854,11 @@ var Wui = Wui || {};
 								btnClick(evnt);
 						})
 	                    .html(me.text)
-						.focus(function(){ if(!me.disabled) me.el.addClass('focus'); })
-						.blur(function(){ me.el.removeClass('focus'); })
 	                    .attr({title:me.toolTip, tabindex:me.tabIndex});
 						
 						if(me.disabled)	me.disable();
 						
 						function btnClick(e){
-							me.el.removeClass('focus');
 							if(!me.disabled){
 								me.click(arguments);
 								me.el.trigger($.Event('wuibtnclick'),[me]);
@@ -855,7 +881,7 @@ var Wui = Wui || {};
 						this.el
 						.toggleClass('disabled',this.disabled)
 						.removeAttr('disabled')
-						.attr({tabindex:me.tabIndex});
+						.attr({tabindex:this.tabIndex});
 					},
 		/** Sets the button text. Can be HTML. */
 		setText:    function(txt){ return this.el.html(txt); },
@@ -931,11 +957,11 @@ var Wui = Wui || {};
 											   )
 										   );
 							me.sureEl	 = me.el;
-							me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
+							me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, appendTo:me.el});
 		                    			   me.header.elAlias = me.header.el.children('.wui-h-cntnt');
 		                    			   me.header.title = me.header.el.children('h1');
 		                    			   
-		                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
+		                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, appendTo:me.el});
 		                    me.elAlias	 = me.container;
 							
 							// Set  border if applicable

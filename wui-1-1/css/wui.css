@@ -12,16 +12,11 @@
     box-sizing:         border-box !important;
 }
 
-.wui-pane {
-	position: relative; border:0px solid #888; width:100%; background:#fff; overflow:hidden; text-align: left;
-}
-.wui-pane-header, .wui-pane-footer {
-	position: absolute; left:0; height:40px; line-height:40px; width:100%; text-align:right; overflow:hidden;
-    background:#888; border-top: 1px solid #888; border-bottom: 1px solid #888; color:#eee;
-}
+.wui-pane { position: relative; border:0px solid #888; width:100%; background:#fff; overflow:hidden; text-align: left; }
+.wui-pane-bar { text-align:right; overflow:hidden; background:#888; color:#eee; }
 .wui-pane-header {top:0;}
 .wui-pane-footer {bottom:0;}
-	.wui-h-cntnt, .wui-pane-header h1 {position:absolute; top:0; left:0; height:40px; width:100%; line-height: 40px;}
+	.wui-pane-bar, .wui-h-cntnt, .wui-pane-header h1 {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}
     .wui-pane-header h1, .wui-pane-header.left h1 {
 	    color: inherit !important;
 	    font-size: 1em;
@@ -44,7 +39,7 @@
 	animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
     animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
-    .wui-pane-content p { margin:0.5em 0.5em 1em; font-size:0.8em;}
+    .wui-pane-content p { margin:0.5em 0 1em; font-size:0.8em;}
     .wui-pane p.err { padding:1em; font-weight:bold; color:#900;}
 	
 /******************   MODAL WINDOW STYLES   ********************/
@@ -62,40 +57,33 @@
 
 /**********************************************   BUTTON - nested, disabled   **********************************************/
 .wui-btn {
-    text-align: center; display:inline-block; background-color:#ccc; width:auto; font-size: 0.8em; border:1px solid transparent;
+    display:inline-block; width:auto; padding:0 1em; text-align: center; font-size: 0.8em;
+	background-color:#ccc; outline:0; border:1px solid #777; color:#555; line-height:2; margin-left:1px;
     -webkit-transition: all 0.1s linear; -moz-transition: all 0.1s linear; -o-transition: all 0.1s linear; transition: all 0.1s linear;
-    color:#555; padding:0 1em; outline:0; cursor:pointer; -moz-user-select:none; -webkit-user-select:none;
+    cursor:pointer; -moz-user-select:none; -webkit-user-select:none;
 }
+.wui-btn:active, .wui-btn:hover {background-color:#fff; color:#333; }
+.wui-btn:active { box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
 
-.wui-btn.active, .wui-btn.hover {background-color:rgba(255,255,255,0.7);}
-.wui-btn.focus, .wui-pane-header .wui-btn.focus, .wui-pane-footer .wui-btn.focus  {
-	background-color: #FFF;
-    border: 1px solid #FFF;
-    box-shadow: 0 0 1px 1px #555;
-} {
-	background-color: #FFF;
-    border: 1px solid #FFF;
+.wui-btn:focus  {
+	background-color: #fff;
+    border: 1px solid #fff;
     box-shadow: 0 0 1px 1px #555;
 }
-.wui-btn.active, .wui-btn.focus.active {box-shadow: inset 0 0 10px #333; border: 1px solid #555;}
-
-.wui-btn.disabled {background-color:transparent;}
+.wui-btn:focus:hover { color:#111; }
+.wui-btn:focus:active { border-color:#777; }
+.wui-pane-bar .wui-btn {height:26px; line-height:26px;  margin: 7px 0.5em 0 0;}
+.wui-btn.disabled {background-color:transparent; opacity: 0.5;}
 .wui-btn.disabled:active, .wui-btn.disabled:hover {box-shadow: none; background-color:transparent;}
-.wui-btn.disabled:active {background-color:transparent;}
-
-.wui-pane-header .wui-btn, .wui-pane-footer .wui-btn {border: 1px solid #777; background-color:#ddd; height:26px; line-height:26px;  margin: 7px 0.5em 0 0;}
-.wui-pane-header .wui-btn.active, .wui-pane-header .wui-btn.hover, .wui-pane-footer .wui-btn.active, .wui-pane-footer .wui-btn.hover {background-color:#fff; border: 1px solid #555;}
-.wui-pane-header .wui-btn.disabled, .wui-pane-footer .wui-btn.disabled { opacity: 0.5; background-color:transparent;}
-.wui-pane-header .wui-btn.active, .wui-pane-footer .wui-btn.active { box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
-.wui-pane-header .wui-btn.disabled:active, .wui-pane-footer .wui-btn.disabled:active { box-shadow:none; background-color:transparent; }
-
 
 /*********************   FIELD/BUTTON STYLES ***********************/
 .wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form, .wui-fe input[type=text] {height:26px !important;}
 .wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form {line-height:26px;}
 .wui-btn.field-btn, .wui-file-upload .wui-btn, .wui-browse-btn {
-    position: absolute; right:0; border-radius:0 4px 4px 0; top:0; background-color:#ccc; border:1px solid #aaa; border-left:transparent;
+    position: absolute; right:0; border-radius:0 4px 4px 0; top:0; border-color:#bbb;
 }
+.wui-btn.field-btn:hover, .wui-file-upload .wui-btn:hover, .wui-browse-btn:hover {background-color:#ccc; border-color:#bbb;}
+.wui-btn.field-btn:focus, .wui-file-upload .wui-btn:focus, .wui-browse-btn:focus {box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
 
 /***********************************************   FORM   ***********************************************/
 .wui-form {padding:.5em; margin:0; clear:both; position:relative; text-align: left;}
@@ -108,10 +96,10 @@
 .wui-lbl > label {display:block; color:#555; font-weight:bold; font-size:0.9em; position:absolute; left:0; top:0; line-height:26px;}
 
 .wui-lbl.lbl-left { padding:0 0 0 200px; }
-.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { width:200px; padding-right:1em; text-align:right; display:inline-table; vertical-align:top;}
+.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { width:200px; padding-right:0.5em; text-align:right; display:inline-table; vertical-align:top;}
 
 .wui-lbl.lbl-right { padding:0 200px 0 0; }
-.wui-lbl.lbl-right > label { width:200px; padding-left:1em; text-align:left; left:auto; right:0; }
+.wui-lbl.lbl-right > label { width:200px; padding-left:0.5em; text-align:left; left:auto; right:0; }
 
 .wui-lbl.lbl-bottom { padding:0 0 26px 0; }
 .wui-lbl.lbl-bottom > label { top:auto; bottom:0; }
@@ -122,6 +110,7 @@
 /* textfield / textarea */
 .wui-fe input, .wui-fe textarea { color: #444; padding:4px; width:100%; border-radius:4px; font-size: 0.8em; }
 .wui-fe input, .wui-fe textarea, .wui-html iframe, .button li label { background-color:#ddd; border:1px solid #ccc; }
+.wui-fe input:focus, .wui-fe textarea:focus, .wui-html iframe:focus, .button li label:focus { background-color:#eee; border-color:#999; }
 .wui-fe .empty { color:#777; }
 .wui-fe textarea { height:100%; width:100%; max-height:100%; max-width:100%; }
 
@@ -286,7 +275,7 @@
 .wui-form-err.wui-lbl.lbl-right { padding:0.5em 200px 0.5em 0.5em; }
 .wui-form-err.wui-lbl.lbl-bottom { padding: 0.5em 0.5em 26px 0.5em; }
 
-.wui-pane-header .wui-form-err { background-color: rgba(255, 0, 0, 0.5); padding-right: 0.5em !important; }
+.wui-pane-bar .wui-form-err { background-color: rgba(255, 0, 0, 0.5); padding-right: 0.5em !important; }
 
 .wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a {color:#900;}
 .wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
@@ -396,7 +385,7 @@
 
 .wui-tabs .wui-pane-header .wui-tab.wui-btn:hover { box-shadow: 0 -4px 4px rgba(0, 0, 0, 0.5) inset; }
 .wui-tabs .wui-pane-footer .wui-tab.wui-btn:hover { box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5) inset; }
-.wui-tabs .wui-pane-header .wui-tab.wui-btn.selected:hover, .wui-tabs .wui-pane-footer .wui-tab.wui-btn.selected:hover {box-shadow: none;}
+.wui-tabs .wui-pane-bar .wui-tab.wui-btn.selected:hover {box-shadow: none;}
 
 .wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-wrap {padding-top:0 !important;}
 	.wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-wrap > .wui-pane-content {background-color:#fff !important;}
@@ -410,58 +399,57 @@
 
 /**********************************************   Nested Panes - Level 1,3,5  **********************************************/
 .wui-pane  .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane {float:left; border-color:#fff;}
-	.wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane-footer,
-	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer,
-	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-header,
-	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-footer {color:#555; background:#fff; text-shadow:none; border: none;}
+	.wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar,
+	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-bar {color:#555; background:#fff; text-shadow:none; border: none;}
 		.wui-pane .wui-pane .wui-pane-header h1 { text-shadow:none;}
 		.wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
 		.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
 		
 /**********************************************   Nested Panes - Level 2,4  **********************************************/
 .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane {border-color:#ccc;}
-	.wui-pane .wui-pane .wui-pane .wui-pane-header, .wui-pane .wui-pane .wui-pane .wui-pane-footer,
-	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-header, 
-	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer {background:#ccc;}
+	.wui-pane .wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar {background:#ccc;}
 		.wui-pane .wui-pane .wui-pane .wui-pane-header h1 {font-weight: normal;}
 		.wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
 
 /**********************************************   Form Elements in TBar and BBar  **********************************************/
-.wui-pane-footer .wui-form, .wui-pane-header .wui-form {
+.wui-pane-bar .wui-form {
     background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
     border: 0 none;
     display: inline-block;
-    margin: 0;
+    margin: 0; padding:0;
 }
-.wui-pane-footer .wui-fe, .wui-pane-header .wui-fe {
-    float: right;
-    line-height: 1;
-    margin-left: 5px;
-    max-width: 300px;
-    top:7px;
+.wui-pane-bar .wui-fe, .wui-pane-bar .wui-lbl {line-height: 1;}
+.wui-pane-bar > .wui-fe, .wui-h-cntnt > .wui-fe {
+    display: inline-block;
+    margin: 9px 0 0 0.5em;
+    top: -2px;
+	max-width:350px;
+	float: none;
 }
-.wui-pane-footer .wui-fe input, .wui-pane-header .wui-fe input {border: 1px solid #777;}
+.wui-pane-bar .wui-fe input {border: 1px solid #777;}
 /* For labels */
-.wui-pane-footer .wui-lbl, .wui-pane-header .wui-lbl,
-.wui-pane-footer .wui-lbl.lbl-bottom, .wui-pane-header .wui-lbl.lbl-bottom,
-.wui-pane-footer .wui-lbl.lbl-right, .wui-pane-header .wui-lbl.lbl-right,
-.wui-pane-footer .wui-lbl.lbl-top, .wui-pane-header .wui-lbl.lbl-top,
-.wui-pane-footer .wui-lbl.lbl-left, .wui-pane-header .wui-lbl.lbl-left {position:relative; padding:0 0 0 150px; height:auto; float:right; min-width:350px; margin: 0 0 0 5px; line-height: 40px;}
-	.wui-pane-footer .wui-lbl.lbl-top >label, .wui-pane-header .wui-lbl.lbl-top > label,
-	.wui-pane-footer .wui-lbl.lbl-right >label, .wui-pane-header .wui-lbl.lbl-right > label,
-	.wui-pane-footer .wui-lbl.lbl-bottom >label, .wui-pane-header .wui-lbl.lbl-bottom > label,
-	.wui-pane-footer .wui-lbl.lbl-left >label, .wui-pane-header .wui-lbl.lbl-left > label {
+.wui-pane-bar .wui-lbl,
+.wui-pane-bar .wui-lbl.lbl-bottom,
+.wui-pane-bar .wui-lbl.lbl-right,
+.wui-pane-bar .wui-lbl.lbl-top,
+.wui-pane-bar .wui-lbl.lbl-left {position:relative; padding:0 0 0 150px; display: inline-block; height:auto; min-width:300px; margin-top:0; margin-bottom:0;}
+	.wui-pane-bar .wui-lbl.lbl-top > label,
+	.wui-pane-bar .wui-lbl.lbl-right > label,
+	.wui-pane-bar .wui-lbl.lbl-bottom > label,
+	.wui-pane-bar .wui-lbl.lbl-left > label {
 		color:inherit; display:block; font-weight:normal; font-size:0.8em; 
-		width:150px; position:absolute; left:0; top:0; line-height:40px; 
-		padding-right:0.5em; text-align:right;
+		width:150px; position:absolute; left:0; top:0; 
+		padding:0 0.25em 0 0.5em; text-align:right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 	}
-	.wui-pane-footer .wui-lbl .wui-fe, .wui-pane-header .wui-lbl .wui-fe {width:100%;}
+	.wui-pane-bar .wui-lbl .wui-fe {width:100%;}
 
 /* For Hyperlink */
-.wui-pane-footer .wui-fe.wui-link-third, .wui-pane-header .wui-fe.wui-link-third { top: 0; margin-left: 0; float:none; }
-.wui-pane-footer .feedback { font-size: 0.5em; }
+.wui-pane-bar .wui-fe.wui-link-third { top: 0; margin-left: 0; float:none; }
+.wui-pane-bar .feedback { font-size: 0.5em; position:absolute; }
 /* For Combo */
-.wui-pane-header .wui-btn.field-btn, .wui-pane-footer .wui-btn.field-btn {margin:0 !important; border:1px solid #777 !important; border-left:0 !important; background-color:#ccc !important;}
+.wui-pane-bar .wui-btn.field-btn {margin:0 !important; border:1px solid #777 !important; border-left:0 !important; background-color:#ccc !important;}
 /* For Radio & Checkbox */
-.wui-pane-footer .button li label, .wui-pane-header .button li label {border-color:#777; background:#ccc; color:#555; font-size: 0.75em; height:26px; line-height: 22px;}
-.wui-pane-header .button li > input:checked + label, .wui-pane-footer .button li > input:checked + label {border-color:#444; color:#eee; background-color:#555;}
+.wui-pane-bar .wui-radio, .wui-pane-bar .wui-checkbox{top: 7px;}
+.wui-pane-bar ul.button {margin-top:0;}
+.wui-pane-bar .button li label {border-color:#777; background:#ccc; color:#555; font-size: 0.75em; height:26px; line-height: 22px;}
+.wui-pane-bar .button li > input:checked + label {border-color:#444; color:#eee; background-color:#555;}

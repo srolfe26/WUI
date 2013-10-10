@@ -28,6 +28,7 @@ h1 span {
     text-align: right;
 }
 	.wui-doc-btn-dock .wui-btn.toggler {border:1px solid #ccc; height: 40px; line-height: 40px; margin-right:1em; color:#fff; background:transparent; text-transform: none;}
+	.wui-doc-btn-dock .wui-btn.toggler:focus {background-color:transparent;}
 	.wui-doc-btn-dock pre {
 		background:rgba(0,0,0,0.65); color: #fff; 
 		margin:0.5em 0; padding: 1em; 
