@@ -104,12 +104,13 @@ var Wui = Wui || {};
 	Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined
 	*/
 	Wui.maxZ = function(){
-	    return Math.max.apply(null, 
-	            $.map($('body > *, .wui-window'), function(e,n) {
-	                if ($(e).css('position') != 'static')
-	                  return parseInt($(e).css('z-index')) || 1;
-	            })
-	        );
+		var topZ =	Math.max.apply(null, 
+					$.map($('body > *, .wui-window'), function(e,n) {
+						if ($(e).css('position') != 'static')
+							return parseInt($(e).css('z-index'));
+					})
+				);
+		return Wui.isNumeric(topZ) ? topZ : 1;
 	};
 	
 	/** 
@@ -824,13 +825,14 @@ var Wui = Wui || {};
 								btnClick(evnt);
 						})
 	                    .html(me.text)
-						.focus(function(){ me.el.addClass('selected'); })
-						.blur(function(){ me.el.removeClass('selected'); })
+						.focus(function(){ if(!me.disabled) me.el.addClass('focus'); })
+						.blur(function(){ me.el.removeClass('focus'); })
 	                    .attr({title:me.toolTip, tabindex:me.tabIndex});
 						
 						if(me.disabled)	me.disable();
 						
 						function btnClick(e){
+							me.el.removeClass('focus');
 							if(!me.disabled){
 								me.click(arguments);
 								me.el.trigger($.Event('wuibtnclick'),[me]);
@@ -940,13 +942,13 @@ var Wui = Wui || {};
 		                    if(me.border) me.el.css(me.borderStyle);
 		                    
 		                    // Add header and footer to the pane if theres something to put in them
-		                    if(me.bbar.length != 0) me.placeFooter();
 		                    if(me.tbar.length != 0 || me.title !== null){
 		                        me.placeHeader();
 		                        
 		                        // Set the title on the pane
 			                    me.setTitle(me.title);
 		                    }
+		                    if(me.bbar.length != 0) me.placeFooter();
 						},
 
 		/** Places the footer on the pane and adjusts the content as necessary. */
@@ -978,6 +980,7 @@ var Wui = Wui || {};
 							me.header.elAlias.css('text-align',itemsAlignment);
 						},
 		
+		/** Runs after a pane is rendered. Sets up layout listeners and sets focus on the bottom-right-most button if any */
 		afterRender:	function(){
 							var me = this;
 							
@@ -989,7 +992,9 @@ var Wui = Wui || {};
 								if(!me.parent) me.layout();
 							}
 							
-							this.footer.items[0].el.focus();
+							// Set focus to the bottom right most button in the pane
+							if(this.footer.items.length)
+								this.footer.items[this.footer.items.length - 1].el.focus();
 						}
 	});
 	

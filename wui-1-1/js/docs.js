@@ -254,7 +254,7 @@
 									me.title = me.title || me.obj;
 									
 									$.ajax(me.fileURL,{
-										dataType:	'script',
+										dataType:	'text',
 										cache:		true,
 										success:	function(r){
 														var code = Wui.findObjsInFile(r, me.obj);

@@ -60,18 +60,35 @@
 .ui-resizable-s {bottom:-4px; left:0px; height:4px; width:96%; cursor:s-resize;}
 .ui-resizable-se {right:-3%; bottom:-3%; width:4%; height:4%; cursor:se-resize;}
 
-/**********************************************   BUTTON    **********************************************/
+/**********************************************   BUTTON - nested, disabled   **********************************************/
 .wui-btn {
     text-align: center; display:inline-block; background-color:#ccc; width:auto; font-size: 0.8em; border:1px solid transparent;
     -webkit-transition: all 0.1s linear; -moz-transition: all 0.1s linear; -o-transition: all 0.1s linear; transition: all 0.1s linear;
     color:#555; padding:0 1em; outline:0; cursor:pointer; -moz-user-select:none; -webkit-user-select:none;
 }
+
+.wui-btn:active, .wui-btn:hover {background-color:rgba(255,255,255,0.7);}
+.wui-btn.focus, .wui-pane-header .wui-btn.focus, .wui-pane-footer .wui-btn.focus  {
+	background-color: #FFF;
+    border: 1px solid #FFF;
+    box-shadow: 0 0 1px 1px #555;
+} {
+	background-color: #FFF;
+    border: 1px solid #FFF;
+    box-shadow: 0 0 1px 1px #555;
+}
+.wui-btn:active, .wui-btn.focus:active {box-shadow: inset 0 0 10px #333; border: 1px solid #555;}
+
 .wui-btn.disabled {background-color:transparent;}
 .wui-btn.disabled:active, .wui-btn.disabled:hover {box-shadow: none; background-color:transparent;}
 .wui-btn.disabled:active {background-color:transparent;}
 
-.wui-btn:active, .wui-btn:hover, .wui-btn.selected  {background-color:#fff; border:1px solid #ccc;}
-.wui-btn:active {box-shadow: inset 0 0 10px #333; border:none;}
+.wui-pane-header .wui-btn, .wui-pane-footer .wui-btn {border: 1px solid #777; background-color:#ddd; height:26px; line-height:26px;  margin: 7px 0.5em 0 0;}
+.wui-pane-header .wui-btn:active, .wui-pane-header .wui-btn:hover, .wui-pane-footer .wui-btn:active, .wui-pane-footer .wui-btn:hover {background-color:#fff; border: 1px solid #555;}
+.wui-pane-header .wui-btn.disabled, .wui-pane-footer .wui-btn.disabled { opacity: 0.5; background-color:transparent;}
+.wui-pane-header .wui-btn:active, .wui-pane-footer .wui-btn:active { box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+.wui-pane-header .wui-btn.disabled:active, .wui-pane-footer .wui-btn.disabled:active { box-shadow:none; background-color:transparent; }
+
 
 /*********************   FIELD/BUTTON STYLES ***********************/
 .wui-btn.field-btn, .wui-browse-btn, .wui-browse-btn > form, .wui-fe input[type=text] {height:26px !important;}
@@ -408,13 +425,6 @@
 	.wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-footer {background:#ccc;}
 		.wui-pane .wui-pane .wui-pane .wui-pane-header h1 {font-weight: normal;}
 		.wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
-		
-/**********************************************   Buttons in nested tbar and bbar  **********************************************/
-.wui-pane-header .wui-btn, .wui-pane-footer .wui-btn {border: 1px solid #777; background-color:#ddd; height:26px; line-height:26px;  margin: 7px 0.5em 0 0;}
-.wui-btn:active, .wui-btn:hover, .wui-btn.selected  {background-color:#eee; border:1px solid #fff;}
-.wui-pane-header .wui-btn.disabled, .wui-pane-footer .wui-btn.disabled { opacity: 0.5; background-color:transparent;}
-.wui-pane-header .wui-btn:active, .wui-pane-footer .wui-btn:active { box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
-.wui-pane-header .wui-btn.disabled:active, .wui-pane-footer .wui-btn.disabled:active { box-shadow:none; background-color:transparent; }
 
 /**********************************************   Form Elements in TBar and BBar  **********************************************/
 .wui-pane-footer .wui-form, .wui-pane-header .wui-form {

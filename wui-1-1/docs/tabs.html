@@ -42,7 +42,8 @@
 														tbar:	[ new Wui.Button({text:'Button Test!'}) ],
 														items:	[
 																	new Wui.Pane({
-																		title:	'Third 1'
+																		title:	'Third 1',
+																		tbar:	[ new Wui.Button({text:'Button Test!'}) ]
 																	}),
 																	new Wui.Pane({title: 'Third 2', items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
 																]
@@ -55,6 +56,8 @@
 						]
 			});
 			a.place();
+			
+			new Wui.Window();
 		});
 	</script>
 	<script type="text/javascript">
