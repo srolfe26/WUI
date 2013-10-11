@@ -559,7 +559,7 @@ var Wui = Wui || {};
 									data:       me.params,
 									dataType:	'json',
 									success:	function(r){ me.success.call(me,r); },
-									error:		function(e){ me.success.call(me,e); },
+									error:		function(e){ me.failure.call(me,e); },
 								},me.ajaxConfig);
 							
 							if(!me.waiting){
@@ -588,7 +588,7 @@ var Wui = Wui || {};
 							var me = this;
 							
 							// Event hook for before the data is set
-							me.beforeSet();
+							me.beforeSet(d);
 							
 							// Set the data
 							me.data = me.processData(d);
@@ -597,23 +597,23 @@ var Wui = Wui || {};
 							// Event hooks for after the data is set
 							me.dataChanged(me.data);
 							$(window).trigger($.Event('datachanged'),[(me.name || 'wui-data'), me]);
-							me.afterSet();
+							me.afterSet(me.data);
 						},
 		
-		/**
-		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
-		*/
+		/** Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
 		beforeLoad:		function(){},
 		
 		/**
-		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		@param	{array}	data	The value of the data cofig of the current object
+		Event hook that fires after data is set. Meant to be overridden. See loadData().
 		*/
-		afterSet:		function(){},
+		afterSet:		function(data){},
 		
 		/**
-		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		@param {array} d Data to be set on the ojbect
+		Event hook that fires after the remote call but before data is set on the object. Meant to be overridden. See loadData().
 		*/
-		beforeSet:		function(){},
+		beforeSet:		function(d){},
 		
 		/**
 		@param {object or array} r Response from the server in JSON format

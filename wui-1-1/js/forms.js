@@ -791,8 +791,8 @@
 			/** CSS class to place on the drop-down element. */
 			ddCls:		'',
 			
-			/**  */
-			doSearch:   function(){},
+			/** Name of a shared data store. Whenever the shared store updates, this updates too. If defined, Pre-empts locally defined data and remote calls on init. */
+			dataName:	null,
 			
 			/** Text to display in the drop-down when no results are returned.  */
 			emptyText:  '(empty)',
@@ -906,8 +906,14 @@
 	                        ));
 	                        me.ddSwitch.place();
 							
-	                        if(me.autoLoad)   me.loadData();
-	                        else              me.renderData();
+	                        if(me.dataName && me.dataName.length > 0){
+								$(window).on('datachanged',function(event,name,dataObj){
+									if(name == me.dataName)	me.setData(dataObj.data);
+								});
+							}else{
+								if(me.autoLoad)   me.loadData();
+								else              me.renderData();
+							}
 	                    },
 		
 		/** Populates the drop-down with data/search results or shows empty text  */

@@ -197,6 +197,9 @@
 	*/
 	Wui.Grid = function(args){
 		$.extend(this,{
+			/** Determines whether the data in the grid loads automatically */
+			autoLoad:	true,
+			
 			/** Array of items that will be added to the footer */
 			bbar:   		[],
 			
@@ -635,8 +638,10 @@
 							me.posDataWin();
 							
 							// Add data to grid
-							if(me.data !== null)	me.setData(me.data);
-							else					me.loadData('init');
+							if(this.autoLoad){
+								if(me.data !== null)	me.setData(me.data);
+								else					me.loadData('init');
+							}
 						},
 		
 		/** 
