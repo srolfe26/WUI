@@ -22,7 +22,7 @@
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
 			a = new Wui.Data({
-				url: 	'data.json',
+				url: 	'data.txt',
 				name:	'unit-test-data'
 			});
 		});
@@ -52,7 +52,7 @@
 			
 			ts.test("test setup",function(){
 				ts.pause();
-				a.url = 'data-wrapped.json';
+				a.url = 'data-wrapped.txt';
 				a.name = 'asdf';
 				a.dataContainer = 'payload';
 				a.totalContainer = 'total';
@@ -60,7 +60,7 @@
 				$(window).on('datachanged',function(event,name,dataObj){
 					ts.resume();
 					$(window).off('datachanged');
-					ts.test('Load wrapped data from data-wrapped.json', function(){ return name == 'asdf'; });
+					ts.test('Load wrapped data from data-wrapped.txt', function(){ return name == 'asdf'; });
 				});
 				a.loadData();
 				return true;

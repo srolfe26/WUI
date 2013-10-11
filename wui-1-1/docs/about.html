@@ -6,105 +6,63 @@
 
     <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
     <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
-    <script type="text/javascript" src="../js/wui-1-1.js"></script>
-	<script type="text/javascript" src="../js/docs.js"></script>
+    <script type="text/javascript" src="../js/wui-1-1-min.js"></script>
 </head>
-<body>
+<body class="about-page">
 
-<h1>WUI
-    <span>Webteam User Interface</span>
-    <span>version 1.1</span>
-</h1>
+<div class="about-header">
+	<img src="../img/docs/wui.png" alt="Wui - Webteam User Interface" width="300" height="300">
+	<span>Webteam User Interface</span>
+	<span class="about-small">version 1.1</span>
+</div>
 
 
-<h2>Goals / Why Use it</h2>
+<h1>What</h1>
+
+<p>The Wui is a framework for developing javascript based applications for web clients.</p>
+
+<h1>Why</h1>
+
+<p>Developing in ExtJS for a couple of years, I was impressed by the framework, but put off by its bulk. 
+Working on the Utah State Research Foundation's Web Team, I created the WebTeam User Interface (WUI). The
+goal of this project is to create a framework that:</p>
 
 <ul>
-    <li>Its lightweight (currently @ 290K) on principle.</li>
-    <li>Stay close to fundamental HTML, CSS and JavaScript</li>
-    <li>Facilitate rapid app development</li>
+	<li>Enables rapid app development.</li>
+	<li>Is lightweight, downloads fast, renders fast, and has a gentle learning curve.</li>
+	<li>Provides a novel user interface.</li>
+	<li>Is easily modified/extended.</li>
 </ul>
 
+<h1>How</h1>
 
-<h2>History</h2>
-
-<ul>
-    <li>Started out as a simple modal window interface I built for the web team at the USU Research Foundation. This inspired the totally original name.</li>
-    <li>Expanded on by building some lightweight form elements for a content management system - ITS NOT A FRAMEWORK!!!</li>
-    <li>Added some more advanced and really cool form elements (more on this later)</li>
-    <li>Okay, its getting big, there's stuff that the CMS does that I want the forms to do, and maybe its a framework...</li>
-    <li>
-        <h3>Yep, I'll admit it, its a framework, here is the file structure:</h3>
-        <div class="workspace structure">
-            <h4>Webteam User Interface</h4>
-            <div id="grid">grid.js</div>
-            <div id="state">state.js</div>
-            <div id="forms">forms.js</div>
-            <div id="wui">wui.js</div>
-            <div id="jquery">jQuery</div>
-        </div>
-    <li>Definitely a framework, and I want to use this externally. Check it in to <a href="https://github.com/srolfe26/WUI">GitHub</a></li>
-    <li>AAAAAHHH! People want to use it, I haven't written any documentation! Its actually kind of a mess! Aaaah! &mdash; Working on this one.</li>
-</ul>
-
-<h2>Why build on jQuery?</h2>
-
-<p>
-	The WUI was built on jQuery initially because that was how I knew how to do the most, the easiest, with JavaScript.  As my understanding of
-	JavaScript increased I was tempted to write everything in native JS, but I wanted to make this framework as easy for a beginner as possible,
-	and using jQuery facilitates that because it is so widely used.
+<p>With a very small amount of code you can have a very nice date/time control that can understand many common ways of expressing time (in English).
+You can try typing in things such as, "Today at noon", "Yesterday at four thirty pm", "Five months from next Thursday", or something boring like
+"9/22/2013 13:21". Go ahead and try it out. Notice that if you use the date picker that any time you entered will be retained. I think this
+is a really neat control.
 </p>
-
-
-<h2>Some Code</h2>
-<ul>
-	<li>With a very small amount of code you can have a very nice date/time control that can understand many common ways of expressing time (in English).
-    	You can try typing in things such as, "Today at noon", "Yesterday at four thirty pm", "Five months from next Thursday", or something boring like
-    	"9/22/2013 13:21". Go ahead and try it out. Notice that if you use the date picker that any time you entered will be retained. I think this
-    	is a really neat control.
-        <pre>
+<pre>
 var a = new Wui.datetime({blankText:'Type a date and time in here', appendTo:$('#text-example')});
 a.place();
-        </pre>
-        <script type="text/javascript">
-            $(document).ready(function(){
-                var a = new Wui.Datetime({blankText:'Type a date and time in here', appendTo:$('#text-example')});
-                a.place();
-            });
-        </script>
-        <div class="example" id="text-example"></div>
-    </li>
-</ul>
-<h2>A Diagram</h2>
-<ul>
-    <li>First, a diagram of everything available (this is actually the WUI 1.0 diagram, I need to update!):
-    	<img src="../img/docs/wui-map.png" alt="wui-map" width="1444" height="2950">
-    </li>
-</ul>
+</pre>
+<script type="text/javascript">
+    $(document).ready(function(){
+        var a = new Wui.Datetime({blankText:'Type a date and time in here', appendTo:$('#date-example')});
+        a.place();
+    });
+</script>
+<div class="example" id="date-example"></div>
 
-<h2>Core Concepts</h2>
-<ul>
-    <li>Prototypal Inheritance</li>
-    <li>Its JavaScript!!! Yes, its built on jQuery, but its all just JavaScript, so relax. You can use it with other frameworks, you can write your own stuff. Its awesome.</li>
-    <li>Check out the WUI Object to get a feeling for placing, hierarchy, push, splice and onRender.</li>
-</ul>
+<h1>You</h1>
 
+<p>I started this project myself, and made the mistake of going down the road myself for a long time
+before I brought other people in.  The WUI is a great project, and I've developed a bunch of code
+to do all sorts of things. It'd be great if you'd like to help me build it. Here's a <a href="">list of issues</a>
+on GitHub that the WUI could use some help with.</p>
 
-<h1>Going Forward 
-    <span>Road Map</span>
-    <span>(aka Current Weaknesses)</span>
-</h1>
-
-<ul>
-    <li>1. Documentation needs some work</li>
-    <li>1. More testing. Its young! Increase the test bed, and create more unit tests.</li>
-    <li>1. Uniformity - Update, this is 95% better since I first wrote this document, almost done.
-        <ul>
-            <li>ValChange vs. OnChange</li>
-        </ul>
-    </li>
-    <li>How to structure apps - its not exactly MVC, but it'd sure be nice to get close, but not have it strictly enforced.</li>
-</ul>
-
+<h1>Me</h1>
+<p>Stephen Nielsen <br/>
+rolfe . nielsen @ gmail . com<br/>
+<a href="http://github.com/srolfe26/WUI">Wui on GitHub</a>
 </body>
 </html>

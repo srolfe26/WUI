@@ -11,7 +11,12 @@ function(a,c,b){return f[b]<d[c]&&m("(min-"+a+":"+d[c]+"px)")?function(){return 
 b.left<=j()};a.inY=function(a,c){var b=g(a,c);return!!b&&0<=b.bottom&&b.top<=k()};a.inViewport=function(a,c){var b=g(a,c);return!!b&&0<=b.bottom&&0<=b.right&&b.top<=k()&&b.left<=j()};return a});
 jQuery.extend(verge);
 
-/**
+/*! WUI 1.1
+Stephen R Nielsen
+Utah State Research Foundation
+license MIT */
+
+/*
 * Avoid 'console' errors in browsers that lack a console by defining a variable named console.
 * For example, when using console.log() on a browser that does not have a console, execution of code
 * will continue because the console variable is defined. 
@@ -35,11 +40,11 @@ jQuery.extend(verge);
 }());
 
 
-/** Make sure the WUI is defined */
+// Make sure the WUI is defined
 var Wui = Wui || {};
 
 (function($,window) {
-	/** AJAX error reporting and caching */
+	// AJAX error reporting and caching
 	$.ajaxSetup({ 
 		cache:	false,
 		error:	function(response){
@@ -51,12 +56,37 @@ var Wui = Wui || {};
 					}
 	});
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+	@param {any} n A value that will be tested for whether its numeric
+	@return Boolean
+	
+	Determines whether a passed in value is a number or not.
+	*/
 	Wui.isNumeric = function(n) {
 	  return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 	
 	
+	/**
+		@param {object} Object containing named keys
+		@return Array containing the key names of the passed in object in alphabetical order
+		
+		@example var keys = Wui.getKeys(stateArray[i].params);
+	*/
+	Wui.getKeys = function(obj){
+		var retArray = [];
+		for(var key in obj)
+			retArray.push(key);
+		return retArray.sort();
+	},
+	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	@return Number specifying the scrollbar width for the current page in pixels
+	*/
 	Wui.scrollbarWidth = function() {
 	  var parent, child, width;
 	
@@ -70,28 +100,49 @@ var Wui = Wui || {};
 	 return width;
 	};
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+	@param	{number} lower	Lower bound for generating the random number
+	@param	{number} upper	Upper bound for generating the random number
+	@return A random number within the bounds specified
+	
+	Generates a random number
+	*/
 	Wui.randNum = function(lower,upper) {
 	    upper = upper - lower + 1 ;
 	    return ( lower + Math.floor(Math.random() * upper) );
 	}
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+	@return A number representing the maximum z-index on the page
+	
+	Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined
+	*/
 	Wui.maxZ = function(){
-	    return Math.max.apply(null, 
-	            $.map($('body > *'), function(e,n) {
-	                if ($(e).css('position') != 'static')
-	                  return parseInt($(e).css('z-index')) || 1;
-	            })
-	        );
+		var topZ =	Math.max.apply(null, 
+					$.map($('body > *, .wui-window'), function(e,n) {
+						if ($(e).css('position') != 'static')
+							return parseInt($(e).css('z-index'));
+					})
+				);
+		return Wui.isNumeric(topZ) ? topZ : 1;
 	};
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+	@param {array} collection A collection of items that will be fit within a container
+	
+	This function will size items relative to each other via a 'fit' value, as well as percentages and fixed values.
+	*/
 	Wui.fit = function(collection){
 		var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
 		
 		// Ensure the collection is an array of Wui Objects
-		if(collection instanceof Array && collection.length > 0 && collection[0] instanceof Wui.O){
+		if(collection instanceof Array && collection.length > 0){
 			var parent		= (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
 				parentEl	= (parent.el) ? (parent.elAlias || parent.el) : parent,
 				parentSize	= (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim](),
@@ -101,17 +152,19 @@ var Wui = Wui || {};
 			
 			// Tally all sizes we're dealing with
 			$.each(collection,function(i,itm){
-				if(itm[dim]){
+				if(itm.fit){
+					fitCt += itm.fit; 		// Tally fit values
+					itm[dim] = -1;			/* Set to -1 so that CSSByParam will not act on it (just deleting it was
+											ineffective because this property can be inherited through the prototype chain)*/
+				}else if(itm[dim]){
 					// Tally fixed size values & percentage based size values
-					// Doing this gives percentages precendence over fit
+					// Doing this gives percentages precedence over fit
 					if(Wui.isNumeric(itm[dim]))	{ fixedSize += itm[dim]; }
 					else						{
 												  var itmDimension = Math.floor((parseFloat(itm[dim]) / 100) * parentSize);
 												  fixedSize += (itm[dim] = itmDimension);
 												}
 					delete itm.fit;			// Ensure the item doesn't have a dimension and a fit specified
-				}else if(itm.fit){
-					fitCt += itm.fit; 		// Tally fit values
 				}else{
 					fitCt += (itm.fit = 1); // Add a fit value to an item that doesn't have dimensions specified
 				}
@@ -124,7 +177,7 @@ var Wui = Wui || {};
 			$.each(collection,function(i,itm){
 				var css = {};
 				if(itm.fit){
-					css[dim] = fitMux * itm.fit;
+					css[dim] = Math.floor(fitMux * itm.fit);
 					$(itm.el).css(css);
 				}
 			});
@@ -135,11 +188,12 @@ var Wui = Wui || {};
 	
 	
 	/** The base object from which all other WUI Objects extend
-     *  @author     Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
-     *  @creation   2013-09-26
-     *  @version    1.1
+     *  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
     */
-	Wui.O = function(args){ $.extend(this,args); };
+	Wui.O = function(args){ $.extend(this,{
+		/** Whether the object is hidden on the DOM */
+		hidden:	false
+	},args); };
 	Wui.O.prototype = {
 		/**
 		@param {object}	object	A WUI or jQuery object to be added to the DOM
@@ -196,7 +250,7 @@ var Wui = Wui || {};
 						el.children().remove();
 					},
 		/**
-			A function that gets called when a WUI Object is placed and gets called on all of a placed object's items.
+			Gets called when a WUI Object is placed and gets called on all of a placed object's items.
 			Adds CSS styles via cssByParam, calls onRender() if it exists on the object, determines whether the 
 			object is using a 'fit' layout and performs layout on the item, calls its children's callRender(), 
 			and finally calls its own afterRender() if it exists.
@@ -239,28 +293,57 @@ var Wui = Wui || {};
                         	if(m.attr)	m.el.attr(m.attr);
                         	
                         	// calculate dimensions
-                        	if(Wui.isNumeric(m.height))	m.el.css({height: m.height});
-                        	if(Wui.isNumeric(m.width))	m.el.css({width: m.width});
+                        	if(Wui.isNumeric(m.height) && m.height >= 0)	m.el.css({height: m.height});
+                        	if(Wui.isNumeric(m.width) && m.width >= 0)		m.el.css({width: m.width});
+
+							// calculate percentage based dimensions
                         	if(m.width && m.width.indexOf && m.width.indexOf('%') != -1)
 								m.el.css({width: Math.floor((parseFloat(m.width) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).width())});
 							if(m.height && m.height.indexOf && m.height.indexOf('%') != -1){
 								m.el.css({height: Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height())});
 							}
-                        	return m.el.addClass(m.cls);
+							
+							// hide an object based on its hidden value
+							if(m.hidden){
+								if(m.hide)	m.hide(0);
+								else		m.el.css('display','none');
+							}
+                        	
+							return m.el.addClass(m.cls);
                         }else{
                         	return m;
                         }
                     },
 		/**
-		@param {function} fn: A function that gets called for each item of the object this function is a member of
-		@return: true
+		@param {function} fn A function that gets called for each item of the object this function is a member of
+		
+		@return true
 		The passed in function gets called with two parameters the item, and the item's index.
 		*/
         each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)	f(this.items[i],i);
 						return true;
 			    	},
-		hide:		function(speed, callback){ var args = ['fadeOut']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+		/**
+		@param {number} [speed] Time in milliseconds for the hiding element to fade out
+		@param {function} [callback] A function that gets called at the end of the fadeout/hide
+		
+		@return The el or elAlias of the object being hidden
+		Hides an object with the options of an animated fadeout and callback function
+		*/
+		hide:		function(speed, callback){ 
+						var args = ['fadeOut'];
+						for(var i in arguments) 
+							args.push(arguments[i]);
+						
+						this.hidden = true;
+						
+						return this.showHide.apply(this,args);
+					},
+		/**
+		Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
+		but without the rendering of objects - useful to resize things that are already rendered.
+		*/
 		layout:		function(){
 						var me = this;
 			        	
@@ -280,6 +363,14 @@ var Wui = Wui || {};
 			        	// Perform layout for child elements
 			        	for(var i in me.items) if(me.items[i].layout) me.items[i].layout();
 					},
+		/**
+		@param {function} [after]	A function to be called after an object has been placed
+		@return The object that was placed 
+		Adds the elements of any child objects to itself, then puts its own el on the DOM by 
+		calling addToDOM.  Then executes the 'after' function if provided, then runs the 
+		callRender() function to perform rendering, fit, and any other listners on itself and
+		its children.
+		*/
 		place:      function(after){
                         var me = this;
 						
@@ -302,6 +393,11 @@ var Wui = Wui || {};
 						
                         return me;
                     },
+		/**
+		@param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
+		@return The new length of the array 
+		Adds passed in items to the end of the items array and adds those objects to the DOM.
+		*/
 		push:       function(){
                         var me = this;
 						
@@ -314,6 +410,10 @@ var Wui = Wui || {};
 						
 						return Array.prototype.push.apply(me.items,arguments);
                     },
+		/**
+		Removes the object from its parent's items array (if attached to a parent Wui object) and
+		removes its el from the DOM. Then deletes the object from memory.
+		*/
 		remove:     function(){
                         var me = this, spliceVal = null;
                         if(me.parent){
@@ -324,12 +424,45 @@ var Wui = Wui || {};
                         this.el.remove();
                         delete this;
                     },
-        show:		function(speed, callback){ var args = ['fadeIn']; for(var i in arguments) args.push(arguments[i]); return this.showHide.apply(this,args);},
+        /**
+		@param {number} [speed] Time in milliseconds for the showing element to fade in
+		@param {function} [callback] A function that gets called at the end of the fadein/show
+		@return The el or elAlias of the object being shown
+		Shows an object with the options of an animated fadein and callback function
+		*/
+		show:		function(speed, callback){ 
+						var args = ['fadeIn'];
+						for(var i in arguments) 
+							args.push(arguments[i]);
+						
+						this.hidden = false;
+						
+						return this.showHide.apply(this,args);
+					},
+		/**
+		@param {string} fn The name of the jQuery method for showing or hiding
+		@param {number} [speed] Time in milliseconds for the showing/hiding element to fade in
+		@param {function} [callback] A function that gets called at the end of the show/hide
+		@return The el or elAlias of the object being shown/hidden
+		This is an internal function used by show() and hide(). Fn is required, but speed and callback
+		are optional and their order is interchangeable.
+		*/
 		showHide:	function(fn,speed,callback){
-				    	 var speed = (typeof speed == 'number') ? speed : 250;
+				    	 var speed = (typeof speed == 'number') ? speed : 1;
 				    	 if(typeof arguments[1] == 'function') callback = arguments[0];
-				    	 return (this.elAlias || this.el)[fn](speed, callback);
+				    	 return this.el[fn](speed, callback);
 			        },
+		/**
+		@param {number} index The point in the array to start
+		@param {number} howMany The number of items to remove
+		@param {object} [obj,...] Additional WUI Objects can be passed as parameters and will be inserted at the index
+		
+		@return An array of the objects removed, if any
+		
+		Follows the convention of JavaScript's Array.prototype.splice on the object's items array. Items
+		spliced into the array will be spliced in position on the DOM as well. Removed items are removed
+		from the DOM.
+		*/
 		splice:     function(idx, howMany){
             			var me = this,
                         	el = me.elAlias || me.el;
@@ -357,106 +490,87 @@ var Wui = Wui || {};
                         return retVal;
                     }
 	};
-	
-	
-	/****************** WUI Viewport *****************/
-	Wui.Viewport = function(args){
-		var me = this,
-			params = $.extend({
-				el:	$('body'),
-				offset:	null,
-				vPadding:	0,
-				vObjects:	[],	
-				calcVPadding: function(){ for(var i in me.vObjects) me.vPadding += (parseInt(me.vObjects[i]) || 0); },
-				matchWindow:	null,
-				contentHeight:	null,
-				height:	null,
-				forceMatchWin: false,
-				resize:	function(){
-							me.beforeResize();
-
-							me.contentHeight = me.el.children('div:first').outerHeight(true);
-							me.matchWindow = Math.round($.viewportH() - me.offset.top - me.vPadding);
-							me.height = (me.matchWindow < me.contentHeight || me.forceMatchWin) ? me.matchWindow : me.contentHeight;
-							me.el.height(me.height);
-							me.afterResize();
-						},
-				beforeResize:	function(){},
-				afterResize:	function(){},
-				onInit:	function(){},
-				DOMNodeAdded: function(){ me.resize(); },
-				init: function(){
-						//calculate initial values of items on page
-						me.offset = me.el.offset();
-						me.calcVPadding();
-
-						//initial resizing of viewport
-						me.resize();
-
-						//tie viewport to the window
-						$(window).resize(me.resize);
-
-						//give focus to the viewport
-						me.el.focus();
-
-						//resize viewport when DOM elements are added
-						me.el.bind('DOMNodeInserted', me.DOMNodeAdded);
-
-						//allow for further extension
-						me.onInit();
-						
-						
-						/* THIS IS PROBABLY BETTER BUT IT SCREWS UP EXT :-(
-						if(me.el === null) throw('WUI Viewport requires an \'el\' element to be specified.');
-						
-						//calculate initial values of items on page
-						me.offset = me.el.offset();
-						me.calcVPadding();
-						
-						//initial resizing of viewport
-						me.resize();
-						
-						//tie viewport to the window
-						$(window).resize(function(){me.resize();});
-						
-						// resize viewport when DOM elements are added
-						// me.el.bind('DOMNodeInserted', me.DOMNodeAdded); DEPRECATED
-						
-						// add mutation observer for when things get added to the viewport
-						me.el.addClass('wui-viewport').focus();
-						document.addEventListener("animationstart", me.DOMNodeAdded, false); // standard + firefox
-						document.addEventListener("MSAnimationStart", me.DOMNodeAdded, false); // IE
-						document.addEventListener("webkitAnimationStart", me.DOMNodeAdded, false); // Chrome + Safari
-						*/
-					}
-			},args);
-			$.extend(me,params);
-			me.init();
-	}
-	Wui.Viewport.prototype = new Wui.O();
 
 	
-	/****************** WUI Data Object *****************/
+	/** WUI Data Object
+     @event		datachanged	When the data changes (name, data object)
+	 @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
+
+	The object for handling data whether remote or local
+    */
 	Wui.Data = function(args){
 		$.extend(this,{
+			/** Array of data that will be stored in the object. Can be specified for the object or loaded remotely */
 			data:			[],
+			
+			/** Name of the data object. Allows the object to be identified in the listeners */
 			name:			null,
+			
+			/** Object containing keys that will be passed remotely */
 			params:			{},
+			
+			/** URL of the remote resource from which to obtain data. A null URL will assume a local data definition. */
 			url:	  		null,
+			
+			/** Whether the object is waiting for a remote response */
 			waiting: 		false,
+			
+			/** Special configuration of the ajax method. Defaults are:
+			
+				data:       me.params,
+				dataType:	'json',
+				success:	function(r){ me.success.call(me,r); },
+				error:		function(e){ me.success.call(me,e); },
+			*/
 			ajaxConfig:		{},
+			
+			/** The total number of records contained in the data object */
 			total:			0
 		},args);
 	}
 	Wui.Data.prototype = {
+		/** An object in the remote response actually containing the data.
+		Best set modifying the prototype eg. Wui.Data.prototype.dataContainer = 'payload'; */
 		dataContainer:	null,
+		/** An object in the remote response specifying the total number of records. Setting this
+		feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
 		totalContainer:	null,
+		
+		/** When the object is waiting, default amount of time in milliseconds before trying to perform loadData() again */
 		ajaxWait:		10,
+		
+		/** 
+		@param {array}	newData	Array of the new data
+		Event hook for when data is changed.
+		*/
 		dataChanged:	function(newdata){},
+		
+		/**
+		@param {function} fn A function that gets called for each item in the object's data array
+		
+		@return true
+		The passed in function gets called with two parameters the item, and the item's index.
+		*/
 		dataEach:		function(f){
 							for(var i = this.data.length - 1; i >= 0; i--)	f(this.data[i],i);
 							return true;
 				    	},
+		
+		/**
+		Performs a remote call sensitive to whether it is already waiting for a response.
+		Between loadData(), success() and setData() fires several event hooks in this order:
+		
+		1. setParams()
+		2. beforeLoad()
+		3. onSuccess()
+		4. beforeSet()
+		5. processData()
+		6. dataChanged()
+		-  'datachanged' event is fired
+		7. afterSet()
+		
+		Upon failure will fire onFailure()
+		*/
 		loadData:		function(){
 							var me = this,
 								config = $.extend({
@@ -477,7 +591,17 @@ var Wui = Wui || {};
 								}, me.ajaxWait);
 							}
 						},
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		setParams:		function(){},
+		
+		/**
+		@param {array} d Data to be set on the ojbect
+		@param {number} [t] Total number of records in the data set. If not specified setData will count the data set.
+		
+		Can be called to set data locally or called by loadData(). Fires a number of events and event hooks. See loadData().
+		*/
 		setData:		function(d,t){
 							var me = this;
 							
@@ -493,9 +617,27 @@ var Wui = Wui || {};
 							$(window).trigger($.Event('datachanged'),[(me.name || 'wui-data'), me]);
 							me.afterSet();
 						},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		beforeLoad:		function(){},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		afterSet:		function(){},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		beforeSet:		function(){},
+		
+		/**
+		@param {object or array} r Response from the server in JSON format
+		Runs when loadData() successfully completes a remote call. Gets data straight or gets it out of the dataContainer and totalContainer. See loadData().
+		Calls setData() passing the response and total.
+		*/
 		success:		function(r){
 							var me = this,
 								dc			= me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
@@ -506,21 +648,43 @@ var Wui = Wui || {};
 							me.onSuccess(r);
 							me.setData(response,total);
 						},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		onSuccess:		function(){},
+		
+		/**
+		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		*/
 		onFailure:		function(){},
 		failure:		function(e){
 							this.waiting = false;
 							this.onFailure(e);
 						},
+		
+		/** 
+		@param {array} Data to be processed.
+		Allows for pre-processing of the data before it is taken into the data object. Meant to be overridden, otherwise will act as a pass-through. See loadData().*/
 		processData:	function(response){ return response; }
 	};
 
 
-	/****************** WUI Template Engine *****************/
+	/**
+	
+	*/
 	Wui.Template = function(args){ $.extend(this,args); }
 	Wui.Template.prototype = {
-		// template:	null, * required
-		// data:		null, * required
+		/** The HTML template that the data will fit into. Null value will cause an error to be thrown. Specification required. */
+		template:	null,
+		
+		/** A single record to be applied to the template. Null value will cause an error to be thrown. Specification required.  */
+		data:		null,
+		
+		/**
+		@return A jQuery object containing the template paired with its data
+		Creates the template 
+		*/
 		make:	function(){
 					var me = this;
 					if(me.data && me.template){
@@ -530,7 +694,7 @@ var Wui = Wui || {};
 							// replaces straight values
 							.replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
 							// accounts for complex expressions
-							.replace(/\{\((.*)\)\}/g,function(m,fn){
+							.replace(/\{\((.*?)\)\}/g,function(m,fn){
 								var keys = [],
 									vals = [];
 								
@@ -554,182 +718,373 @@ var Wui = Wui || {};
 	};
 	
 	
-	/****************** WUI Data List Control *****************/
+	/** WUI Data List
+     @event		select		A data template is selected ( DataList, el, record )
+	 @event		change		The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
+	 @event		deselect	A selected item is clicked again, and thus deselected ( DataList, el, record )
+	 
+	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+     @creation   2013-09-30
+     @version    1.1
+    */
 	Wui.DataList = function(args){
-		$.extend(this, {el:$('<div>')}, args);
+		$.extend(this, {
+			/** Determines whether templates are made immediately when the DataList is rendered */
+			autoLoad:	true,
+			
+			/** DOM element where all of the data templates will be appended. */
+			el:			$('<div>'),
+			
+			/** Maximum number of data elements to display, even if data set is larger. */
+			displayMax: -1,
+			
+			/** Method that will run immediately when the object is constructed. */
+			init:		function(){}
+		}, args);
 		this.init();
 	};
 	Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(), {
-		beforeSet:	function(){ this.clear(); },
+		/** Overrides the Wui.Data method that serves as an event hook. Calls the DataList's make() method. */
 		dataChanged:function(){ this.make(); },
-		init:		function(){},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@private
+		Performs mutations and fires listeners when an item is selected
+		*/
+		itmSelected:function(itm){
+						var me = this,
+							alreadySelected = me.selected,
+							oldEl = (alreadySelected) ? alreadySelected.el : undefined,
+							oldRec = (alreadySelected) ? alreadySelected.rec : undefined;
+						
+						me.el.find('.wui-selected').removeClass('wui-selected');
+						itm.el.addClass('wui-selected');
+						me.selected = itm;
+						
+						// Fire different events depending whether there was already a record selected
+						me.el.trigger($.Event('change'), [me, itm.el, itm.rec, oldEl, oldRec]);
+						me.el.trigger($.Event('select'), [me, itm.el, itm.rec]);
+					},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@private
+		Performs mutations and fires listeners when an item is deselected
+		*/		
+		itmDeselect:function(itm){
+						var me = this;
+						itm.el.removeClass('wui-selected');
+						me.selected = null;
+						me.el.trigger($.Event('deselect'),[me, itm.el, itm.rec]);
+					},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@return The item passed in with listeners added
+		Adds the click listeners to the item and calls modifyItem to add greater flexibility
+		*/
+		createItem:	function(itm){
+						var me = this;
+						
+						itm.el.click(function(){
+							if(me.selected && me.selected === itm)	me.itmDeselect(itm);
+							else									me.itmSelected(itm);
+						});
+						return me.modifyItem(itm);
+					},
+		
+		/**
+		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@return The DOM element
+		Performs any desired modification on an object - this method is meant to be overridden.
+		*/
+		modifyItem:	function(itm){ return itm.el; },
+		
+		/** Creates the templates based on current data. Then appends them to the el with listeners */
 		make:		function(){
 						var me = this,
-							holdingData = me.data || [];
-
-						for(var i = 0; i < holdingData.length; i++){
-							var rec = me.data = holdingData[i],
-								a = {el:Wui.Template.prototype.make.call(me), rec:rec};
-								doAppend(a);
+							holdingData = me.data || [],
+							holder = $('<div>');
+						
+						for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
+							var rec = me.data = holdingData[i];
+							holder.append(me.createItem({el:Wui.Template.prototype.make.call(me), rec:rec}));
 						}
 						
-						function doAppend(a){
-							me.append(
-								a.el.click(function(){
-									if(me.selected && me.selected === a){
-										a.el.removeClass('wui-selected');
-										me.selected = null;
-										me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
-									}else{
-										me.el.find('.wui-selected').removeClass('wui-selected');
-										a.el.addClass('wui-selected');
-										me.selected = a;
-										me.el.trigger($.Event('select'), [me, a.el, a.rec]);
-									}
-								})
-							);
-						}
-						
+						me.clear();
+						me.append(holder.children().unwrap());
 						me.data = holdingData;
 						me.el.trigger($.Event('refresh'),[me,me.data]);
 					},
+					
+		/** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
 		onRender:	function(){
-						if(this.url === null)	this.make();
-						else					this.loadData();
+						if(this.autoLoad){
+							if(this.url === null)	this.make();
+							else					this.loadData();
+						}
 					},
+					
+		/** Reruns the make() method. */
 		refresh:	function(){ this.onRender(); }
 	});
 	
 	
-	/****************** WUI Button *****************/
+	/**
+     @event		wuibtnclick		Fires when the button is pressed and not disabled. Avoided using the standard 'click' event for this reason ( Button Object )
+	 
+	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+    */
 	Wui.Button = function(args){
 	    $.extend(this, {
-	    	el:			$('<div>').attr({unselectable:'on'}),
+	    	/** The button element. Can be overridden according to the needs of the design. */
+			el:			$('<div>').attr({unselectable:'on'}),
+			
+			/** Whether the button is disabled. */
 			disabled:	false,
+			
+			/** Tool tip text for the button. */
 			toolTip:    null,
+			
+			/** Tab index will make the button focusable by the browser. Changing this value will result in it receiving a higher precedence than what it would receive in that natural flow of the page. */
+			tabIndex:	0,
+			
+			/** Text to appear on the button. Can be HTML if a more complex button design is desired. */
 			text:       'Button'
 	    }, args);
+	    
 		this.init();
 	};
 	Wui.Button.prototype = $.extend(new Wui.O(),{
+		/** Event hook for the button click. */
 		click:      function(){},
+		
+		/** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
 		init:       function(){ 
 	                    var me = this;
-						if(me.disabled)	me.disable();
-	                    
-						me.el.addClass('wui-btn');
 						
-	                    me.el.click(function(e){
-	                    	if(!me.disabled){
+						me.el
+						.addClass('wui-btn')
+						.click(btnClick)
+						.keyup(function(evnt){
+							if(evnt.keyCode == 13 || evnt.keyCode == 32)
+								btnClick(evnt);
+						})
+	                    .html(me.text)
+	                    .attr({title:me.toolTip, tabindex:me.tabIndex});
+						
+						if(me.disabled)	me.disable();
+						
+						function btnClick(e){
+							if(!me.disabled){
 								me.click(arguments);
 								me.el.trigger($.Event('wuibtnclick'),[me]);
 							}
 	                    	return false;
-	                    })
-	                    .html(me.text)
-	                    .attr({title:me.toolTip});
+						}
 	                },
+		
+		/** Disables the button */
 		disable:	function(){
 						this.disabled = true;
-						this.el.toggleClass('disabled',this.disabled).attr('disabled',true);
+						this.el
+						.toggleClass('disabled',this.disabled)
+						.attr('disabled',true)
+						.removeAttr('tabindex');
 					},
+		/** Enables the button */
 		enable:		function(){
 						this.disabled = false;
-						this.el.toggleClass('disabled',this.disabled).removeAttr('disabled');
+						this.el
+						.toggleClass('disabled',this.disabled)
+						.removeAttr('disabled')
+						.attr({tabindex:this.tabIndex});
 					},
+		/** Sets the button text. Can be HTML. */
 		setText:    function(txt){ return this.el.html(txt); },
 	});
 	
 	
-	/****************** WUI Pane/Panel *****************/
+	/**
+    @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+    
+	WUI Pane
+	*/
 	Wui.Pane = function(args){ 
 		$.extend(this,{
+			/** An array of items that will be added to the footer */
 			bbar:       [],
+			
+			/** Whether or not the pane has a border */
 			border:		true,
+			
+			/** Configuration for the pane border - follows the jQuery CSS convention */
 			borderStyle:{borderWidth:6},
+			
+			/** An array of items that will be added to the header */
 			tbar:       [],
+			
+			/** Whether or not the pane is disabled on load */
 			disabled:	false,
+			
+			/** Alignment of the heading title (left,center,right) */
+			titleAlign:	'left',
+					
+			/** Default height */
+			height:		'100%',
+		
+			/** HTML to show in the mask when the pane is disabled */
 			maskHTML:	'Loading...',
+			
+			/** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
 			title:		null
 		},args); 
 		this.init();
 	}
 	Wui.Pane.prototype = $.extend(new Wui.O(),{
-        disable:	function(){
-						this.disabled = true;
-						// cover pane contents
-						this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
-						// disable header & footer objects
-						this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
-						this.header.each(function(itm){ if(itm.disable) itm.disable(); });
-					},
-		enable:		function(){
-						var me = this, mask = me.mask;
-						me.disabled = false;
-						me.mask.fadeOut(500,function(){ 
-							// remove mask and enable header and footer buttons (all of them)
-							me.mask.remove();
-							me.mask = undefined;
-							me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
-							me.header.each(function(itm){ if(itm.enable) itm.enable(); });
-						});
-					},
-		init:		function(wuiPane){
-						var me = wuiPane || this;
-						me.el		 = $('<div>').addClass('wui-pane').append(
-										   $('<div>').addClass('wui-pane-wrap').append(
-											   me.container = $('<div>').addClass('wui-pane-content')
-										   )
-									   );
-						me.sureEl	 = me.el;
-						me.header    = new Wui.O({el:$('<div>'), cls:'wui-pane-header', items:me.tbar, appendTo:me.el});
-	                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer', items:me.bbar, appendTo:me.el});
-	                    me.elAlias	 = me.container;
-	                    
-	                    // Set  border if applicable
-	                    if(me.border) me.el.css(me.borderStyle);
-	                    
-	                    // Add header and footer to the pane if theres something to put in them
-	                    if(me.bbar.length != 0) me.placeFooter();
-	                    if(me.tbar.length != 0 || me.title !== null){
-	                        me.placeHeader();
-	                        
-	                        // Set the title on the pane
-		                    if(me.title !== null){
-			                    me.header.el.append($("<h1>"));
-								me.setTitle(me.title);
+        /** Disables the pane by masking it and disabling all buttons */
+		disable:		function(){
+							this.disabled = true;
+							// cover pane contents
+							this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+							// disable header & footer objects
+							this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
+							this.header.each(function(itm){ if(itm.disable) itm.disable(); });
+						},
+		
+		/** Enables the pane by removing the mask and enabling all buttons */
+		enable:			function(){
+							var me = this, mask = me.mask;
+							me.disabled = false;
+							me.mask.fadeOut(500,function(){ 
+								// remove mask and enable header and footer buttons (all of them)
+								me.mask.remove();
+								me.mask = undefined;
+								me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
+								me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+							});
+						},
+		
+		/** Method that will run immediately when the object is constructed. */
+		init:			function(wuiPane){
+							var me = wuiPane || this;
+							me.el		 = $('<div>').addClass('wui-pane').append(
+											   $('<div>').addClass('wui-pane-wrap').append(
+												   me.container = $('<div>').addClass('wui-pane-content')
+											   )
+										   );
+							me.sureEl	 = me.el;
+							me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, appendTo:me.el});
+		                    			   me.header.elAlias = me.header.el.children('.wui-h-cntnt');
+		                    			   me.header.title = me.header.el.children('h1');
+		                    			   
+		                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, appendTo:me.el});
+		                    me.elAlias	 = me.container;
+							
+							// Set  border if applicable
+		                    if(me.border) me.el.css(me.borderStyle);
+		                    
+		                    // Add header and footer to the pane if theres something to put in them
+		                    if(me.tbar.length != 0 || me.title !== null){
+		                        me.placeHeader();
+		                        
+		                        // Set the title on the pane
+			                    me.setTitle(me.title);
 		                    }
-	                    }
-					},
-		placeFooter:function(){
-						this.sureEl.css({borderBottom:'none'});
-						this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
-						this.footer.place();
-					},
-		placeHeader:function(){
-						this.sureEl.css({borderTop:'none'});
-						this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
-						this.header.place();
-					},
-		setTitle:   function(t){ this.header.el.children('h1:first').text(t); }
+		                    if(me.bbar.length != 0) me.placeFooter();
+						},
+
+		/** Places the footer on the pane and adjusts the content as necessary. */
+		placeFooter:	function(){
+							this.sureEl.css({borderBottomWidth:0});
+							this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
+							this.footer.place();
+						},
+		
+		/** Places the header on the pane and adjusts the content as necessary. */
+		placeHeader:	function(){
+							this.sureEl.css({borderTopWidth:0});
+							this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
+							this.setTitleAlign();
+							this.header.place();
+						},
+		
+		/** Changes the title on the pane. */
+		setTitle:   	function(t){ this.header.title.text(t); },
+		
+		/** Changes the title on the pane. */
+		setTitleAlign:	function(t){ 
+							var me = this;
+							
+							me.titleAlign = t || me.titleAlign;
+							me.header.title.addClass(me.titleAlign);
+							
+							var itemsAlignment = me.titleAlign === 'right' ? 'left' : 'right'; 
+							me.header.elAlias.css('text-align',itemsAlignment);
+						},
+		
+		/** Runs after a pane is rendered. Sets up layout listeners and sets focus on the bottom-right-most button if any */
+		afterRender:	function(){
+							var me = this;
+							
+							document.addEventListener("animationstart", doLayout, false); 		// standard + firefox
+							document.addEventListener("MSAnimationStart", doLayout, false); 	// IE
+							document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
+							
+							function doLayout(){
+								if(!me.parent) me.layout();
+							}
+							
+							// Set focus to the bottom right most button in the pane
+							if(this.footer.items.length)
+								this.footer.items[this.footer.items.length - 1].el.focus();
+						}
 	});
 	
 	
+	/**
+    @event		open	When the window is opened (window)
+	@event		resize	When the window is resized (width, height)
+	@event		close	When the window is closed (window)
+	
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+    
+	WUI Window
+	*/
 	Wui.Window = function(args){ 
 		$.extend(this,{
+			/** An array of items that will be added to the footer */
 			bbar:       [],
+			
+			/** Whether or not the pane has a border */
 			border:		false,
+			
+			/** Set the height of the window */
 			height:		400,
+			
+			/** Determines whether objects behind the window are accessible */
 			isModal:	false,
+			
+			/** Event hook for when the window closes */
 			onWinClose:	function(){},
+			
+			/** Event hook for when the window opens */
 			onWinOpen:	function(){},
+			
+			/** An array of items that will be added to the header */
 			tbar:       [], 
+			
+			/** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
 			title:		'Window',
+			
+			/** Set the width of the window */
 			width:		600
 		},args);  
 		this.init(); 
 	}
 	Wui.Window.prototype = $.extend(new Wui.Pane(),{
+		/** Closes the window unless onWinClose() event hook returns false. */
 		close:		function(){ 
 						var me = this;
 						if(me.onWinClose(me) !== false){
@@ -737,10 +1092,14 @@ var Wui = Wui || {};
 							me.remove();
 						}
 					},
+		
+		/** Disables the window by masking it and disabling all buttons besides the close window button. */
 		disable:	function(){
 						Wui.Pane.prototype.disable.call(this);
 						this.winClose.enable(); // Enable the close button for the window - esp. important if its modal
 					},
+					
+		/** Method that will run immediately when the object is constructed. */
 		init:       function(){
             	        var me = this;
 	    				me.appendTo = $('body');
@@ -781,12 +1140,19 @@ var Wui = Wui || {};
                         this.onWinOpen(me);
 						me.windowEl.trigger($.Event('open'),[me]);
                         
-                        function bringToFront(){
-                            if(parseInt((me.el.css('z-index')) || 1) < Wui.maxZ()){
+                        function bringToFront(e){
+							if(parseInt((me.el.css('z-index')) || 1) < Wui.maxZ()){
                                 me.el.css('z-index',Wui.maxZ() + 1);
                             }
                         }
                     },
+		/** 
+		@param {[number]} resizeWidth Number of pixels for the window width
+		@param {[number]} resizeHeight Number of pixels for the window height
+		
+		If width and height aren't specified, the window is sized vertically to try to fit its contents 
+		without getting larger than the browser viewport.
+		*/
         resize:		function(resizeWidth, resizeHeight){
 				        var me = this,
 							totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
@@ -806,7 +1172,14 @@ var Wui = Wui || {};
 			        }
 	});
 	
+	/** Shows an error message
+    @param {string}			errMsg		Message explaining the error
+	@param {[string]}		msgTitle	Title for the window. Default is 'Error'
+	@param {[array]}		buttons		Array containing Wui.Button(s) to give additional functionality.
+	@param {[function]}		callback	Function to perform when the error window closes - returning false will prevent the window from closing.
 	
+	@author     Stephen Nielsen
+    */
 	Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
 		var newErr = new Wui.Window({
 			isModal:    true,
@@ -820,10 +1193,12 @@ var Wui = Wui || {};
 		return false;
 	}
 	
-	/** Displays an 'alert' type message on the screen
-     *  @author     Stephen Nielsen
-     *  @creation   2013-09-26
-     *  @version    1.1
+	/** Shows an message in a modal window
+    @param {string}			msg			A message for the user
+	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
+	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
+	@param {[string]}		content		HTML content to include after the message
+	@author     Stephen Nielsen
     */
 	Wui.msg = function(msg, msgTitle, callback, content){
 	    var cntnt   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
@@ -838,7 +1213,15 @@ var Wui = Wui || {};
 			return true;
 	}
 	
+	/** Shows an message in a modal window with yes and no buttons. Answers are passed to callback().
+	The window will not close until an aswer is selected.
 	
+    @param {string}			msg			A message for the user
+	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
+	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
+	@param {[string]}		content		HTML content to include after the message
+	@author     Stephen Nielsen
+    */
 	Wui.confirm = function(msg, msgTitle, callback, content){
 	    var itms   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
 	        Msg  = new Wui.Window({
@@ -861,7 +1244,488 @@ var Wui = Wui || {};
 	    return true;
 	}
 }(jQuery,this));
+(function($, window) {
+	Wui.stateMachine = function(args){ $.extend(this, args); };
+	Wui.stateMachine.prototype = {
+		setState:		function(state){
+							var url			= window.location.href.split('#'),
+								preHash		= url[0] + '#';
+								
+								// Objects passed in are parsed according to a strict format of 
+								// firstView?param1=1/anotherView?param1=1&param2=2 ...
+								if(state && typeof state === 'object'){
+									window.location = preHash + this.stringify(state);
+								// If a string is passed in just pass it along
+								}else if(state && typeof state === 'string'){
+									window.location = preHash + state;
+								// An undefined value for state will clear out the state
+								}else{
+									window.location = preHash;
+								}
+						},
+		stringify:		function(stateArray){
+							var stateStr	= '';
+							
+							for(var i in stateArray){
+								// Get keys in alphabetical order so that comparing states works
+								var keys = Wui.getKeys(stateArray[i].params);
 
+								// State the location
+								stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
+								
+								for(var j = 0; j < keys.length; j++)
+									stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
+							}
+							
+							return stateStr;
+						},
+		getState:		function(){
+							var state = [];
+							
+							window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
+								var itm = {};
+								viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
+									itm[key] = val;
+									return '';
+								});
+								state.push({view:viewarea, params:itm});
+							});
+							
+							return state;
+						},
+		getParam:		function(target,key){
+							var state	= this.getState(),
+								val		= undefined;
+								
+							for(var i in state)
+								if(state[i].view === target && state[i].params[key])	return state[i].params[key];
+
+							return val;
+						},
+		changeView:		function(oldView,newView){
+							/** Changes a view in place leaving the parameters */
+							var state = this.getState();
+							for(var i in state)
+								if(state[i].view === oldView)
+									state[i].view = newView;
+							this.setState(state);
+						},
+		setView:		function(viewName,params){
+							var newState = [{view:viewName}];
+							if(params) newState[0].params = params;
+							this.setState(newState);
+						},
+		getViews:		function(){
+							/** Lists all of the views */
+							var state = this.getState(),
+								retArr = [];
+								
+							for(var i in state)	retArr.push(state[i].view);
+							return retArr;
+						},
+		clearState:		function(){ this.setState(); },
+		setChangeAction:function(fn){ 
+							var me = this;
+							me.turnOff();
+							$(window).on('hashchange', function(){
+								fn.call(me,me.getState());
+							});
+						},
+		turnOff:		function(){ $(window).off('hashchange'); }
+	};
+}(jQuery, this));
+
+
+/*!
+ * jQuery hashchange event - v1.3 - 7/21/2010
+ * http://benalman.com/projects/jquery-hashchange-plugin/
+ * 
+ * Copyright (c) 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ */
+
+// Script: jQuery hashchange event
+//
+// *Version: 1.3, Last updated: 7/21/2010*
+// 
+// Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
+// GitHub       - http://github.com/cowboy/jquery-hashchange/
+// Source       - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.js
+// (Minified)   - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js (0.8kb gzipped)
+// 
+// About: License
+// 
+// Copyright (c) 2010 "Cowboy" Ben Alman,
+// Dual licensed under the MIT and GPL licenses.
+// http://benalman.com/about/license/
+// 
+// About: Examples
+// 
+// These working examples, complete with fully commented code, illustrate a few
+// ways in which this plugin can be used.
+// 
+// hashchange event - http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/
+// document.domain - http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/
+// 
+// About: Support and Testing
+// 
+// Information about what version or versions of jQuery this plugin has been
+// tested with, what browsers it has been tested in, and where the unit tests
+// reside (so you can test it yourself).
+// 
+// jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
+// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 5-6, Safari 3.2-5,
+//                   Opera 9.6-10.60, iPhone 3.1, Android 1.6-2.2, BlackBerry 4.6-5.
+// Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
+// 
+// About: Known issues
+// 
+// While this jQuery hashchange event implementation is quite stable and
+// robust, there are a few unfortunate browser bugs surrounding expected
+// hashchange event-based behaviors, independent of any JavaScript
+// window.onhashchange abstraction. See the following examples for more
+// information:
+// 
+// Chrome: Back Button - http://benalman.com/code/projects/jquery-hashchange/examples/bug-chrome-back-button/
+// Firefox: Remote XMLHttpRequest - http://benalman.com/code/projects/jquery-hashchange/examples/bug-firefox-remote-xhr/
+// WebKit: Back Button in an Iframe - http://benalman.com/code/projects/jquery-hashchange/examples/bug-webkit-hash-iframe/
+// Safari: Back Button from a different domain - http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/
+// 
+// Also note that should a browser natively support the window.onhashchange 
+// event, but not report that it does, the fallback polling loop will be used.
+// 
+// About: Release History
+// 
+// 1.3   - (7/21/2010) Reorganized IE6/7 Iframe code to make it more
+//         "removable" for mobile-only development. Added IE6/7 document.title
+//         support. Attempted to make Iframe as hidden as possible by using
+//         techniques from http://www.paciellogroup.com/blog/?p=604. Added 
+//         support for the "shortcut" format $(window).hashchange( fn ) and
+//         $(window).hashchange() like jQuery provides for built-in events.
+//         Renamed jQuery.hashchangeDelay to <jQuery.fn.hashchange.delay> and
+//         lowered its default value to 50. Added <jQuery.fn.hashchange.domain>
+//         and <jQuery.fn.hashchange.src> properties plus document-domain.html
+//         file to address access denied issues when setting document.domain in
+//         IE6/7.
+// 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
+//         from a page on another domain would cause an error in Safari 4. Also,
+//         IE6/7 Iframe is now inserted after the body (this actually works),
+//         which prevents the page from scrolling when the event is first bound.
+//         Event can also now be bound before DOM ready, but it won't be usable
+//         before then in IE6/7.
+// 1.1   - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug
+//         where browser version is incorrectly reported as 8.0, despite
+//         inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.
+// 1.0   - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special
+//         window.onhashchange functionality into a separate plugin for users
+//         who want just the basic event & back button support, without all the
+//         extra awesomeness that BBQ provides. This plugin will be included as
+//         part of jQuery BBQ, but also be available separately.
+
+(function($,window,undefined){
+  '$:nomunge'; // Used by YUI compressor.
+  
+  // Reused string.
+  var str_hashchange = 'hashchange',
+    
+    // Method / object references.
+    doc = document,
+    fake_onhashchange,
+    special = $.event.special,
+    
+    // Does the browser support window.onhashchange? Note that IE8 running in
+    // IE7 compatibility mode reports true for 'onhashchange' in window, even
+    // though the event isn't supported, so also test document.documentMode.
+    doc_mode = doc.documentMode,
+    supports_onhashchange = 'on' + str_hashchange in window && ( doc_mode === undefined || doc_mode > 7 );
+  
+  // Get location.hash (or what you'd expect location.hash to be) sans any
+  // leading #. Thanks for making this necessary, Firefox!
+  function get_fragment( url ) {
+    url = url || location.href;
+    return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
+  };
+  
+  // Method: jQuery.fn.hashchange
+  // 
+  // Bind a handler to the window.onhashchange event or trigger all bound
+  // window.onhashchange event handlers. This behavior is consistent with
+  // jQuery's built-in event handlers.
+  // 
+  // Usage:
+  // 
+  // > jQuery(window).hashchange( [ handler ] );
+  // 
+  // Arguments:
+  // 
+  //  handler - (Function) Optional handler to be bound to the hashchange
+  //    event. This is a "shortcut" for the more verbose form:
+  //    jQuery(window).bind( 'hashchange', handler ). If handler is omitted,
+  //    all bound window.onhashchange event handlers will be triggered. This
+  //    is a shortcut for the more verbose
+  //    jQuery(window).trigger( 'hashchange' ). These forms are described in
+  //    the <hashchange event> section.
+  // 
+  // Returns:
+  // 
+  //  (jQuery) The initial jQuery collection of elements.
+  
+  // Allow the "shortcut" format $(elem).hashchange( fn ) for binding and
+  // $(elem).hashchange() for triggering, like jQuery does for built-in events.
+  $.fn[ str_hashchange ] = function( fn ) {
+    return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
+  };
+  
+  // Property: jQuery.fn.hashchange.delay
+  // 
+  // The numeric interval (in milliseconds) at which the <hashchange event>
+  // polling loop executes. Defaults to 50.
+  
+  // Property: jQuery.fn.hashchange.domain
+  // 
+  // If you're setting document.domain in your JavaScript, and you want hash
+  // history to work in IE6/7, not only must this property be set, but you must
+  // also set document.domain BEFORE jQuery is loaded into the page. This
+  // property is only applicable if you are supporting IE6/7 (or IE8 operating
+  // in "IE7 compatibility" mode).
+  // 
+  // In addition, the <jQuery.fn.hashchange.src> property must be set to the
+  // path of the included "document-domain.html" file, which can be renamed or
+  // modified if necessary (note that the document.domain specified must be the
+  // same in both your main JavaScript as well as in this file).
+  // 
+  // Usage:
+  // 
+  // jQuery.fn.hashchange.domain = document.domain;
+  
+  // Property: jQuery.fn.hashchange.src
+  // 
+  // If, for some reason, you need to specify an Iframe src file (for example,
+  // when setting document.domain as in <jQuery.fn.hashchange.domain>), you can
+  // do so using this property. Note that when using this property, history
+  // won't be recorded in IE6/7 until the Iframe src file loads. This property
+  // is only applicable if you are supporting IE6/7 (or IE8 operating in "IE7
+  // compatibility" mode).
+  // 
+  // Usage:
+  // 
+  // jQuery.fn.hashchange.src = 'path/to/file.html';
+  
+  $.fn[ str_hashchange ].delay = 50;
+  /*
+  $.fn[ str_hashchange ].domain = null;
+  $.fn[ str_hashchange ].src = null;
+  */
+  
+  // Event: hashchange event
+  // 
+  // Fired when location.hash changes. In browsers that support it, the native
+  // HTML5 window.onhashchange event is used, otherwise a polling loop is
+  // initialized, running every <jQuery.fn.hashchange.delay> milliseconds to
+  // see if the hash has changed. In IE6/7 (and IE8 operating in "IE7
+  // compatibility" mode), a hidden Iframe is created to allow the back button
+  // and hash-based history to work.
+  // 
+  // Usage as described in <jQuery.fn.hashchange>:
+  // 
+  // > // Bind an event handler.
+  // > jQuery(window).hashchange( function(e) {
+  // >   var hash = location.hash;
+  // >   ...
+  // > });
+  // > 
+  // > // Manually trigger the event handler.
+  // > jQuery(window).hashchange();
+  // 
+  // A more verbose usage that allows for event namespacing:
+  // 
+  // > // Bind an event handler.
+  // > jQuery(window).bind( 'hashchange', function(e) {
+  // >   var hash = location.hash;
+  // >   ...
+  // > });
+  // > 
+  // > // Manually trigger the event handler.
+  // > jQuery(window).trigger( 'hashchange' );
+  // 
+  // Additional Notes:
+  // 
+  // * The polling loop and Iframe are not created until at least one handler
+  //   is actually bound to the 'hashchange' event.
+  // * If you need the bound handler(s) to execute immediately, in cases where
+  //   a location.hash exists on page load, via bookmark or page refresh for
+  //   example, use jQuery(window).hashchange() or the more verbose 
+  //   jQuery(window).trigger( 'hashchange' ).
+  // * The event can be bound before DOM ready, but since it won't be usable
+  //   before then in IE6/7 (due to the necessary Iframe), recommended usage is
+  //   to bind it inside a DOM ready handler.
+  
+  // Override existing $.event.special.hashchange methods (allowing this plugin
+  // to be defined after jQuery BBQ in BBQ's source code).
+  special[ str_hashchange ] = $.extend( special[ str_hashchange ], {
+    
+    // Called only when the first 'hashchange' event is bound to window.
+    setup: function() {
+      // If window.onhashchange is supported natively, there's nothing to do..
+      if ( supports_onhashchange ) { return false; }
+      
+      // Otherwise, we need to create our own. And we don't want to call this
+      // until the user binds to the event, just in case they never do, since it
+      // will create a polling loop and possibly even a hidden Iframe.
+      $( fake_onhashchange.start );
+    },
+    
+    // Called only when the last 'hashchange' event is unbound from window.
+    teardown: function() {
+      // If window.onhashchange is supported natively, there's nothing to do..
+      if ( supports_onhashchange ) { return false; }
+      
+      // Otherwise, we need to stop ours (if possible).
+      $( fake_onhashchange.stop );
+    }
+    
+  });
+  
+  // fake_onhashchange does all the work of triggering the window.onhashchange
+  // event for browsers that don't natively support it, including creating a
+  // polling loop to watch for hash changes and in IE 6/7 creating a hidden
+  // Iframe to enable back and forward.
+  fake_onhashchange = (function(){
+    var self = {},
+      timeout_id,
+      
+      // Remember the initial hash so it doesn't get triggered immediately.
+      last_hash = get_fragment(),
+      
+      fn_retval = function(val){ return val; },
+      history_set = fn_retval,
+      history_get = fn_retval;
+    
+    // Start the polling loop.
+    self.start = function() {
+      timeout_id || poll();
+    };
+    
+    // Stop the polling loop.
+    self.stop = function() {
+      timeout_id && clearTimeout( timeout_id );
+      timeout_id = undefined;
+    };
+    
+    // This polling loop checks every $.fn.hashchange.delay milliseconds to see
+    // if location.hash has changed, and triggers the 'hashchange' event on
+    // window when necessary.
+    function poll() {
+      var hash = get_fragment(),
+        history_hash = history_get( last_hash );
+      
+      if ( hash !== last_hash ) {
+        history_set( last_hash = hash, history_hash );
+        
+        $(window).trigger( str_hashchange );
+        
+      } else if ( history_hash !== last_hash ) {
+        location.href = location.href.replace( /#.*/, '' ) + history_hash;
+      }
+      
+      timeout_id = setTimeout( poll, $.fn[ str_hashchange ].delay );
+    };
+    
+    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    // vvvvvvvvvvvvvvvvvvv REMOVE IF NOT SUPPORTING IE6/7/8 vvvvvvvvvvvvvvvvvvv
+    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    $.browser.msie && !supports_onhashchange && (function(){
+      // Not only do IE6/7 need the "magical" Iframe treatment, but so does IE8
+      // when running in "IE7 compatibility" mode.
+      
+      var iframe,
+        iframe_src;
+      
+      // When the event is bound and polling starts in IE 6/7, create a hidden
+      // Iframe for history handling.
+      self.start = function(){
+        if ( !iframe ) {
+          iframe_src = $.fn[ str_hashchange ].src;
+          iframe_src = iframe_src && iframe_src + get_fragment();
+          
+          // Create hidden Iframe. Attempt to make Iframe as hidden as possible
+          // by using techniques from http://www.paciellogroup.com/blog/?p=604.
+          iframe = $('<iframe tabindex="-1" title="empty"/>').hide()
+            
+            // When Iframe has completely loaded, initialize the history and
+            // start polling.
+            .one( 'load', function(){
+              iframe_src || history_set( get_fragment() );
+              poll();
+            })
+            
+            // Load Iframe src if specified, otherwise nothing.
+            .attr( 'src', iframe_src || 'javascript:0' )
+            
+            // Append Iframe after the end of the body to prevent unnecessary
+            // initial page scrolling (yes, this works).
+            .insertAfter( 'body' )[0].contentWindow;
+          
+          // Whenever `document.title` changes, update the Iframe's title to
+          // prettify the back/next history menu entries. Since IE sometimes
+          // errors with "Unspecified error" the very first time this is set
+          // (yes, very useful) wrap this with a try/catch block.
+          doc.onpropertychange = function(){
+            try {
+              if ( event.propertyName === 'title' ) {
+                iframe.document.title = doc.title;
+              }
+            } catch(e) {}
+          };
+          
+        }
+      };
+      
+      // Override the "stop" method since an IE6/7 Iframe was created. Even
+      // if there are no longer any bound event handlers, the polling loop
+      // is still necessary for back/next to work at all!
+      self.stop = fn_retval;
+      
+      // Get history by looking at the hidden Iframe's location.hash.
+      history_get = function() {
+        return get_fragment( iframe.location.href );
+      };
+      
+      // Set a new history item by opening and then closing the Iframe
+      // document, *then* setting its location.hash. If document.domain has
+      // been set, update that as well.
+      history_set = function( hash, history_hash ) {
+        var iframe_doc = iframe.document,
+          domain = $.fn[ str_hashchange ].domain;
+        
+        if ( hash !== history_hash ) {
+          // Update Iframe with any initial `document.title` that might be set.
+          iframe_doc.title = doc.title;
+          
+          // Opening the Iframe's document after it has been closed is what
+          // actually adds a history entry.
+          iframe_doc.open();
+          
+          // Set document.domain for the Iframe document as well, if necessary.
+          domain && iframe_doc.write( '<script>document.domain="' + domain + '"</script>' );
+          
+          iframe_doc.close();
+          
+          // Update the Iframe's hash, for great justice.
+          iframe.location.hash = hash;
+        }
+      };
+      
+    })();
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^^^^^^^^^^ REMOVE IF NOT SUPPORTING IE6/7/8 ^^^^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    return self;
+  })();
+  
+})(jQuery,this);
 (function($) {
 	$.fn.overrideNodeMethod = function(methodName, action) {
 	    var originalVal = $.fn[methodName];
@@ -875,148 +1739,301 @@ var Wui = Wui || {};
 	    };
 	};
 	
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+	A WUI Form is a collection of Wui.FormField objects with methods to
+	both collectively and individually interact with those objects.
+	*/
 	Wui.Form = function(args){
 	    $.extend(this,{
-			afterCreate:function(){},
-			disabled:	false,
-			errCls:		'wui-form-err',
-			labelPos:	'top'
+			/** Config to disable the entire form */ 
+			disabled:		false,
+			
+			/**
+			Position of the label relative to the form fields that is generally applied unless
+			specifically defined on a particular field.
+			*/
+			labelPosition:	'top'
 		}, args, {
-	    	dataValid:  null,
-	    	formChanged:false,
-			el:			$('<div>'),
-			errs:       []
+	    	/** Flag for whether data on the form has been changed - set by the individual fields */
+	    	formChanged:	false,
+			
+			/** DOM element of the form */
+			el:				$('<div>'),
+			
+			/** @private Array to store one or more errors when a form is validated */
+			errors:       	[]
 	    });
 	    
 	    this.init();
 	};
 	Wui.Form.prototype = $.extend(new Wui.O(),{
+		/** Blanks out the values of all form fields */
 		clearData:  function(){ this.setData(); },
-		dispErrs:   function(){
+		
+		/** Display errors generated by validating the form */
+		dispErrors:	function(){
 	                    var msg = '';
-	                    for(var e in this.errs) msg += this.errs[e] + '<br/>';
-	                    Wui.errRpt(msg,'Form Errors')
+	                    for(var e in this.errors) msg += this.errors[e] + '<br/>';
+	                    Wui.errRpt(msg,'Form Errors');
 	                },
+	    
+	    /**
+		@param {function} fn A function that gets called for each item of the form with the exception of Wui.Note objects
+		
+		@return true
+		The passed in function gets called with two parameters the item, and the item's index.
+		*/
 		each:		function(f){
 						for(var i = this.items.length - 1; i >= 0; i--)
-							if(!(itm instanceof Wui.Note))
+							if(!(this.items[i] instanceof Wui.Note))
 								f(this.items[i],i);
 						return true;
 			    	},
+		
+		/** Class to hilight form fields when they fail validation */
+		errCls:		'wui-form-err',
+		
+		/**
+		@return Object containing the data of the form fields, or false if there was a validation error
+		Performs validation on the form and returns either the form data or false. */
 		getData:    function(){
 	                    if(this.validate())	{ return this.getRawData(); }
-	                    else				{ this.dispErrs(); return false; }
+	                    else				{ this.dispErrors(); return false; }
 	                },
+	    
+	    /**
+		@param {string} fieldname name of the desired field.
+		@return Value of the field
+		Returns a form item's value - does not perform validation. */
 	    getField:   function(fieldname){
 	                    var retval = null;
 	                    this.each(function(itm){ if(itm.name == fieldname) retval = itm.val(); });
 	                    return retval;
 	                },
+	    
+	    /**
+		@param {string} fieldname name of the desired field.
+		@return Form item, not the DOM element, but the item in memory
+		Returns a form item. */
 	    getFrmItm:	function(fieldname){
 	                    var retItm = undefined;
 						this.each(function(itm,idx){ if(itm.name == fieldname) retItm = itm; });
 	                    return retItm;
 					},
+					
+		/**
+		@return Object containing the data of the form fields
+		Gets the values of form fields without performing validation */
 		getRawData: function(){
 	                    var ret = {};
 	                    this.each(function(itm){ ret[itm.name] = itm.val(); });
 	                    return ret;
 	                },
+	                
+	    /** Method that will run immediately when the object is constructed. */           
 	    init:		function(){
 					    this.el.addClass('wui-form labels-' + this.labelPos);
 				    },
+				    
+		/**
+		@param	{object|Wui.FrmField}	itm	Object to be added to a form
+		@return Object with form attributes applied.
+		Passed in items should either be Wui.FormField's which will have some of the form's attributes applied to them,
+		or they will be objects containing an 'ftype' which is a string specifying a constructor.  The
+		object will then be constructed and have form attributes applied. */
 		normFrmItem:function(itm){
-						var me = this;
+						var me = this,
+							extendItem = { labelPosition: me.labelPosition };
+						
+						// If a form is disabled, the field needs to be disabled too
+						if(!(itm.disabled && itm.disabled === true)) $.extend(extendItem,{disabled:me.disabled});	
+						
 						if(itm.ftype && !(itm instanceof Wui.FormField)){
 							var ft = itm.ftype.split('.');
-							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,((itm.disabled && itm.disabled === true) ? {disabled:me.disabled} : {})) );
+							
+							if(window[ft[0]] && window[ft[0]][ft[1]])	return new window[ft[0]][ft[1]]( $.extend(itm,extendItem) );
 							else										throw('Object type ' +itm.ftype+ ' is not defined.');
 						}else if(itm instanceof Wui.FormField){
-							return $.extend(itm,{disabled:me.disabled});
+							// reset label position for fields that don't have it defined for themselves
+							if(!itm.hasOwnProperty('labelPosition'))
+								itm.el.removeClass('lbl-' + itm.labelPosition).addClass('lbl-' + extendItem.labelPosition);
+							return $.extend(itm, extendItem);
 						}else{
 							return itm;
 						}
 					},
+					
+		/**
+		@param {function} [after]	A function to be called after an object has been placed
+		@return The object that was placed 
+		Similar to the Wui.O.place() with the addition of constructing the forms items first. */
 		place:      function(){
 						var me = this;
 						if(me.items === undefined) me.items = [];
 						$.each(me.items, function(i,itm){ me.items[i] = me.normFrmItem(itm); });
-						Wui.O.prototype.place.call(this);
-		                this.afterCreate();
+						Wui.O.prototype.place.apply(this,arguments);
                     },
+        
+        /**
+		@param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
+		@return The new length of the array 
+		Similar to the Wui.O.push() with the addition of runnign normFrmItem() on the item first.
+		*/
 		push:		function(){
 						for(var i in arguments) arguments[i] = this.normFrmItem(arguments[i]);
 						Wui.O.prototype.push.apply(this,arguments);
 					},
+		/**
+		@param {string} fieldname The name of the field to be removed
+		@return True
+		Removes a form field from a form based on its name.
+		*/
 		remFrmItm:	function(fieldname){
 	                    var me = this;
 						this.each(function(itm,idx){ if(itm.name == fieldname) Wui.O.prototype.splice.call(me,idx,1); });
 	                    return true;
 					},
-		setData:    function(d){
-	                    this.each(function(itm){ itm.val((d) ? d[itm.name] : null); });
+		/**
+		@param {object} [data] A collection of data to be set on the form
+		Sets form fields with names matching keys in passed in data. If data is not defined all
+		form values get set to null.
+		*/
+		setData:    function(data){
+	                    if(data)	this.each(function(itm){ 
+										if(data[itm.name]) 
+											itm.val(data[itm.name]);
+									});
+						else		this.each(function(itm){ itm.val(null); });
 	                },
-		disable:	function(val){ return this.each(function(itm){ itm.disable(); }); },
-		enable:		function(val){ return this.each(function(itm){ itm.enable(); }); },
-		setField:   function(fieldname, d){
-		                this.each(function(itm){ if(itm.name == fieldname) itm.val(d); });
+		
+		/** Disable all form fields */
+		disable:	function(){ return this.each(function(itm){ itm.disable(); }); },
+		
+		/** Enable all form fields */
+		enable:		function(){ return this.each(function(itm){ itm.enable(); }); },
+		
+		/**
+		@param {string} fieldname The name of the field to set a value on
+		@param {any} v	Value to set the field to.
+		Sets a field of a given name to a given value.
+		*/
+		setField:   function(fieldname, v){
+		                this.each(function(itm){ if(itm.name == fieldname) itm.val(v); });
 	            	},
-		throwErr:   function(m){this.errs.push(m); return false;},
+		
+		/**
+		@param {string} err An error message.
+		Adds a thrown error to the form's errrs array so that all errors on a form can be reported at once.
+		*/
+		throwError:   function(err){this.errors.push(err); return false;},
+		
+		/**
+		Runs the validate() function for each of a form's fields.
+		*/
 		validate:   function(){
 		                var me = this;
-						me.errs = [];
+						me.errors = [];
 		                me.each(function(itm){ 
 		                	if(itm.el && itm.el.toggleClass) { itm.el.toggleClass(me.errCls,!itm.validate()); }
 		                });
-		                return (me.errs.length == 0);
+		                return (me.errors.length == 0);
 	            	}
 	});
 	
 	
-	/* WUI Note */
-	Wui.Note = function(args){ $.extend(this,{html:''},args); this.init(); };
+	/** 
+		Allows a note to be placed on a form. A HTML string will be converted into DOM elements
+		placed within a paragraph tag.
+	*/
+	Wui.Note = function(args){ 
+		$.extend(this,{
+			/** The HTML to be placed in the note */
+			html:''
+		},args); this.init();
+	};
 	Wui.Note.prototype = $.extend(new Wui.O(),{
+		/** Method that will run immediately when the object is constructed. */
 		init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note'); }
     });
     
 	
-	/* WUI Label */
+	/** 
+		The label object will wrap around a Wui.FormField when the 'label' config is specified
+		on the field.
+	*/
 	Wui.Label = function(args){ 
 		$.extend(this,{
+			/**
+				String that will converted into DOM elements and placed in the label.
+				This is usually the value of the label config on a Wui.FormField.
+			*/
 			html:			'',
+			
+			/** Default position of the label relative to the field (top,right,bottom,left). */
 			labelPosition:	'top'
 		},args);
 		
 		this.init(); 
 	};
 	Wui.Label.prototype = $.extend(new Wui.O(),{
+		/** Method that will run immediately when the object is constructed. */
 		init:       function(){
 						var me = this;
 						me.el = $('<div>')
 								.addClass('wui-lbl' + ' lbl-' + me.labelPosition)
 								.append( me.label = $('<label>').html(me.html).addClass(me.cls).attr(me.attr ? me.attr : {}) );
 					},
+		
+		/**
+		@param {string} newLabel String that will converted into DOM elements and placed in the label.
+		Changes the contents of the label.
+		*/
 		setLabel:	function(newLabel){
 						this.label.html(this.html = newLabel);
 					}
     });
 	
 	
-	/* WUI FormField */
+	/**
+		@event valchange When a value changes on a form field (WUI FormField, value)
+		@event hiddenchange Same as valchange but for fields without an 'el' property (like hidden fields. Called on the window (WUI FormField, value)
+		
+		The base object that WUI form elements extend from
+	*/
 	Wui.FormField = function(args){
 		$.extend(this,{
+			/** Whether or not the field will be disabled. A disabled field is still accessible to the form, just not to the user. */
 			disabled:		false,
+			
+			/** Message to display to the user when validation fails. If not specified the form will attempt to use the field's label. */
 			invalidMsg: 	null,
+			
+			/** An optional config that labels the field. */
 			label:      	null,
+			
+			/** Defines the position of the label relative to the field, options are 'top', 'left', 'right' and 'bottom' */
 			labelPosition:	'top',
+			
+			/** A special class to put on the label if desired */
 			labelCls:		null,
+			
+			/** Whether or not the field is required. May be pre-empted by other validation. See validate() method. */
 			required:   	false,
+			
+			/** A regular expression whereby to validate a field's input. May be pre-empted by other validation. See validate() method. */
 			validRegEx:		null,
+			
+			/** A function to validate field input. */
 			validTest:  	null
 		},args);
 	};
 	Wui.FormField.prototype = $.extend(new Wui.O(),{
+		/**
+			@return The el of the object
+			Runs immediately when the object is constructed. Wraps the field in a label if a label has been defined.
+		*/
 		init:  		function(){
                         var me = this;
 						me.value = null;
@@ -1029,17 +2046,39 @@ var Wui = Wui || {};
 						}
 						return me.el;
                     },
-		onRender:	function(){ if(this.disabled) this.setDisabled(this.disabled); },
+					
+		/** Will disable the object if its disabled property is set to true */
+		onRender:	function(){ if(this.disabled) this.disable(); },
+		/** Disables the field so the user cannot interact with it. */
         disable:	function(){
 				        this.disabled = true;
 				        if(this.el && this.el.addClass)
 				        	this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
 			        },
+		/** Enables the field so the user can interact with it. */
         enable:		function(){
 				        this.disabled = false;
 				        if(this.el && this.el.addClass)
 				        	this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
 			        },
+		
+		/**
+		@return True or False
+		Validate will construct an error message based on the following precedence:
+		1. Custom message (invalidMsg)
+		2. The label on the field
+		3. The name attribute of the field (attr: {name: 'n'})
+		4. Report that "A required field has an improper value."
+		
+		Then, validates a field using the following order of validation precedence:
+		1. Custom testing function (validTest)
+		2. Regular Expression (validRegEx)
+		3. Required flag (required)
+		4. No validation - returns true.
+		
+		Then sends the error message, if any, to the parent form's throwError() method where the invalidation messages are concatenated and the fields
+		are hilighted for the user to see what fields need their attention.
+		*/
         validate:   function(){
                         var me = this,
                         	errMsg = (me.invalidMsg !== null) ? me.invalidMsg : 
@@ -1050,19 +2089,31 @@ var Wui = Wui || {};
                         // If a custom test is defined 
                         if(me.validTest && typeof me.validTest == 'function')
                         	if(me.validTest() == false)
-                        		return me.parent.throwErr(errMsg);
+                        		return parentThrow();
                         						
                         // If a regular expression is defined for a test, this will be tested first
         				if(me.validRegEx !== null)
         					if(!me.validRegEx.test($.trim(me.val())))
-        						return me.parent.throwErr(errMsg);
+        						return parentThrow();
                         					
                         // If no regular expression test exists, test whether a value is required and throw an error if blank
-                        if(me.required && $.trim(me.val()).length == 0) return me.parent.throwErr(errMsg);
+                        if(me.required && $.trim(me.val()).length == 0) return parentThrow();
+                        
+                        function parentThrow(){
+	                        return (me.parent && me.parent.throwError) ? me.parent.throwError(errMsg) : false;
+                        }
                         
                         // Default return value is true
                         return true;
                     },
+		/**
+		@param {[any]}	newVal	The type of this parameter depends on the type of form field
+		@return Either the value of the field if no arguments are passed, or the value of the arguments passed in
+		
+		Works similarly to jQuery's val() method. If arguments are omitted the value of the FormField 
+		will be returned. If arguments are specified the field's setVal() method and setChanged() method
+		are called, and the values passed in are passed through		
+		*/
 		val:		function(){
 						if(!arguments.length){
 							return this.getVal();
@@ -1075,6 +2126,11 @@ var Wui = Wui || {};
 							return arguments;
 						}
 					},
+		/** 
+		@private
+		Marks the parent form as changed if the field belongs to a form, calls the valChange event hooks and listeners
+		if the field doesn't have an 'el' property, it will call 'hiddenchange'
+		*/
 		setChanged:	function(){
 						// Marks the parent form as 'changed'
 						if(this.parent && this.parent instanceof Wui.Form)
@@ -1091,35 +2147,60 @@ var Wui = Wui || {};
 								this.parent.el.trigger($.Event('hiddenchange'), [this, this.value]);
 						}
 					},
+		
+		/** 
+		@private
+		Generally do not use this function. Use val() instead which acts as both a getter and a setter depending whether
+		arguments are passed. val() will fire all of the needed events and event hooks.
+		*/
 		getVal:		function(){
 						return this.value;
 					},
+		
+		/** 
+		@param {string}	sv	Value to set the value of the field to
+		@private
+		Generally do not use this function. Use val() instead which acts as both a getter and a setter depending whether
+		arguments are passed. val() will fire all of the needed events and event hooks.
+		*/
 		setVal:		function(sv){
 						this.value = sv;
 					},
+		
+		/** 
+		@param {string}	newVal	New value being set on the field
+		An event hook for when the value changes. Useful for extending objects, but generally use the 'valchange' event listener
+		*/
 		valChange:	function(newVal){}
 	});
 	
 	
-    /* WUI Hidden */
+    /** A Wui.FormField that has no DOM element. Even more hidden than an HTML hidden input, the hidden field exists only in memory. */
 	Wui.Hidden = function(args){
-		$.extend(this,{el:null},args); 
+		$.extend(this,{
+			/** By default a hidden field produces no DOM element */
+			el:null
+		},args); 
 		this.init();
 	};
 	Wui.Hidden.prototype = $.extend(new Wui.FormField(),{ init: function(){} });
 	
 	
-	/* WUI Text */
+	/** WUI Text */
 	Wui.Text = function(args){
 		$.extend(this,{
+			/** The CSS class that denotes an empty field */
 			blankCls:   'empty',
+			/** A value that appears in the field until text is entered (HTML 5), or focus is gained (JavaScript implemented) */
 			blankText:  ''
 		},args,{
+			/** The HTML element */
 			field:$('<input>').attr({type:'text'})
 		}); 
 		this.init();
 	};
 	Wui.Text.prototype = $.extend(new Wui.FormField(),{
+		/** Runs immediately when the object is created */
 		init:			function(){
 	            			var me = this;
 	            			Wui.FormField.prototype.init.call(me);
@@ -1128,6 +2209,8 @@ var Wui = Wui || {};
 	            			
 	                        me.append(Wui.Text.prototype.setListeners.call(me,me));
 	                    },
+						
+		/** Sets the blank text on the field. If the HTML 5 placeholder isn't supported, mimic it by replacing the native jQuery val function */
         setBlankText:	function(bt){
 	                        var me = this, f = me.field;
 	                        
@@ -1163,6 +2246,12 @@ var Wui = Wui || {};
 							
 							return bt;
 	                    },
+						
+		/** 
+		@param  {Wui Object}	The object to have listeners applied to the field
+		Puts listeners on the field, mostly to handle blankText in the event that HTML 5 placeholder isn't supported 
+		Also calls the setListeners() of any extending object automagically.
+		*/
 		setListeners:	function(t){
 	                        var me = this,
 	                        	fieldState = null;
@@ -1174,6 +2263,10 @@ var Wui = Wui || {};
 							if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
 	                        return t.field;
 	                    },
+		/** 
+		@param {string}	sv	Value to set the field text to
+		Changes the value of the text in the field without changing the value of the object
+		*/
 	    fieldText:		function(sv){
 						    this.field.val(sv);
 						    if(this.blankText && this.blankText.length)	this.setBlankText(this.blankText);
@@ -1186,25 +2279,45 @@ var Wui = Wui || {};
     });
 
 	
-	/* WUI Text Area */
+	/** WUI Text Area */
 	Wui.Textarea = function(args){
-	    $.extend(this, args, { field:$('<textarea>') });
+	    $.extend(this, args, { 
+			/** The HTML element */
+			field:	$('<textarea>'),
+			
+			/** Determines the height of the field */
+			height:	100
+		});
 	    this.init();
 	};
-	Wui.Textarea.prototype = new Wui.Text();
+	Wui.Textarea.prototype = $.extend(new Wui.Text(), {});
 	
 	
-	/* WUI WYSIWYG */
+	/** Creates a WYSIWYG editor from a textfield.  
+	jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
+	* Copyright (c) 2012 Chris Pietschmann
+	* http://jhtmlarea.codeplex.com
+	* Licensed under the Microsoft Reciprocal License (Ms-RL)
+	* http://jhtmlarea.codeplex.com/license
+	* 
+	* Modified 2013 Stephen Nielsen
+	@author Stephen Nielsen
+	@author Chris Pietschmann
+	*/
 	Wui.Wysiwyg = function(args){
 	    $.extend(this,{
+			/** Whether or not to show the button that will give the user a view of the HTML generated by the WYSIWYG */
 			showHTML:	false
 		},args,{
+			/** The blankText property cannot be used on a WYSIWYG and attempts to set it will be overridden with the default value. */
 			blankText:null,
+			/** HTML element */
 			field:$('<textarea>')
 		});
 	    this.init();
 	};
 	Wui.Wysiwyg.prototype = $.extend(new Wui.Textarea(),{
+		/** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
 		onRender:	function(){
                     	var tb = [['bold','italic','underline','strikethrough'], 
                     	          ['link','unlink','unorderedlist','orderedlist'],
@@ -1231,21 +2344,34 @@ var Wui = Wui || {};
                         });
 						Wui.FormField.prototype.onRender.call(this);
                     },
+		
+		/** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
 		setBlankText:function(){},
+		
+		/** In this instance lets the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
 		setListeners:function(t){
 						$(t.field).change(function(){ t.val(); });
 					},
+					
+		/** Overrides the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
 		valChange:	function(){ this.field.keyup(); }
 	});
 	
 	
-	/* WUI Radio */
+	/** Creates a radio group that will appear as normal, or as a button group where only one button at a time
+	can	be depressed. MUST be named uniquely. */
 	Wui.Radio = function(args){ 
 		$.extend(this,{
+			/** A true value converts the normal radio group to a button group */
 			buttonStyle:false,
+			
+			/** A default name that should be overridden */
 			name:       'wui-radio',
+			
+			/** An array of options to populate the radion/button group */
 			options:    [],
-			onChange:   function(){},
+			
+			/** Default template for the radio group */
 			template:		'<li><input type="radio" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
 		},args,{
 			el:$('<div>')
@@ -1253,6 +2379,7 @@ var Wui = Wui || {};
 		this.init();
 	};
 	Wui.Radio.prototype = $.extend(new Wui.FormField(),{
+		/** Runs immediately when the object is created. Adds listeners and styles */
 		init:       function(){
         				Wui.FormField.prototype.init.call(this);
         				this.el.addClass('wui-radio');
@@ -1260,35 +2387,47 @@ var Wui = Wui || {};
         				var me = this,
 							tplEngine = new Wui.Template({ template:this.template }),
 							ul = $('<ul>');
-							
-						//make radio group look like buttons
-						if(me.buttonStyle) ul.addClass('button');
 						
-						me.el.append(ul);
 						$.each(me.options,function(i,itm){
 							itm.name = me.name;
 					        itm.id = me.name + '-' + i;
 					        ul.append(
 					        	tplEngine.make(tplEngine.data = itm)
-					        	.children('label').attr({unselectable:'on'}).end()
+					        	.children('label')
+									.attr({unselectable:'on'})
+									.keyup(function(evnt){
+										if(evnt.keyCode == 13 || evnt.keyCode == 32)
+											$(this).click();
+									})
+								.end()
 					        	.children('input')
-					        	.change(function(){ me.itmChange($(this)); })
+					        	.change(function(){ me.elemChange($(this)); })
 					        	.focus(function(){ul.addClass('has-focus');})
 					        	.blur(function(){ul.removeClass('has-focus');})
 					        	.end()
 					        );
 						});
+						
+						// make radio group look like buttons
+						if(me.buttonStyle){
+							ul.addClass('button');
+							ul.find('label').attr({tabindex:0});
+						}
+						
+						// Append to DOM
+						me.el.append(ul);
                     },
-		itmChange:	function(elem){
-			        	this.value = elem.val();
-					    this.valChange(this);
-			        },
+		
+		/** What to do when an individual element changes */
+		elemChange:	function(elem){ this.val(elem.val()); },
+		
+		/** If buttonStyle = true, the actual radio input is hidden  */
 		onRender:	function(){
 				        var me = this;
         				me.el.find('input').each(function(){
 					        $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
 				        });
-						Wui.FormField.prototype.onRender.call(this);
+						Wui.FormField.prototype.onRender.call(me);
 			        },
 		getVal:		function(){ return this.value; },
 		setVal:		function(sv){
@@ -1298,22 +2437,34 @@ var Wui = Wui || {};
 	});
 	
 	
-	/* WUI Checkbox */
+	/** 
+	Creates a check-box group if options are specified, or as a button group where any/all of the buttons can be
+	depressed at once. 	If options aren't specified, a single boolean check-box will be created. */
 	Wui.Checkbox = function(args){ 
 		$.extend(this,{
+			/** A default name that should be overridden */
 			name:   	'wui-checkbox',
+			
+			/** Default template for the checkbox group */
 			template:	'<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
 		},args);
 	this.init(); };
 	Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
-        calcVal:	function(){
-						var me = this;
-        				me.value = [];
+        /** Collects the values of all the checked boxes in the group */
+		calcVal:	function(){
+						var me = this, a = [];
+						
         				me.el.find('input:checked').each(function(){
-			        		me.value.push($(this).attr('value'));
+			        		a.push($(this).val());
 			        	});
-						return ((me.value.length > 0) ? (me.value.length > 1) ? me.value : me.value[0] : 0);
+						
+						return ((a.length > 0) ? (a.length > 1) ? a : a[0] : null);
 					},
+
+		/** Returns whether or not the box is checked */
+		elemChange:	function(elem){ this.val(this.calcVal()); },					
+	
+		/** Runs immediately when the object is created. Adds listeners and styles */
 		init:       function(){
                         if(this.options.length == 0) this.options.push({val:1,title:''});
         				
@@ -1326,46 +2477,81 @@ var Wui = Wui || {};
         					this.el.children('label').text('');
         				}
                     },
-        itmChange:	function(elem){ this.valChange(this); },
 		getVal:		function(){ return this.calcVal(); },
 		setVal:		function(sv){
+						var me = this;
+						
+						if($.isArray(sv))				{ me.value = sv; }
+						else if(sv === null)			{ me.value = null; }	
+						else							{ me.value = [sv]; }
+						
 						if(me.options.length == 1 && (typeof sv == 'number' || typeof sv == 'string')){
-							me.el.find('input').attr('checked',!!sv).siblings('li').toggleClass('checked',!!sv);
+							me.el.find('input').attr('checked',!!parseInt(sv)).siblings('li').toggleClass('checked',!!parseInt(sv));
 						}else{
 							// clear out all checkboxes
 							me.el.find('input').attr('checked',false);
 							me.el.find('label').removeClass('checked');
 							
 							// set the ones passed in
-							for(var i in setVal) me.el.find('input[value=' +setVal[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
+							for(var i in me.value) 
+								me.el.find('input[value=' +me.value[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
 						}
 					},
+		/** The check-box will validate false if the value is 0 and the box is required.  */
 		validTest:	function(){ if(this.required && this.val() == 0) return false;	return true; }
 	});
 	
 	
-	/***********************************   WUI Combo   ***********************************/
+	
 	// Make jQuery contains case insensitive
 	$.expr[":"].contains = $.expr.createPseudo(function(arg) {
 		return function( elem ) {
 			return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
 		};
 	});
-	
+	/** The WUI Combobox can be set up in a number of different configurations that are really just variations of local and remote operations. See the configs. */
 	Wui.Combo = function(args){ 
 		$.extend(this, {
+			/** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
+			until a search value is entered. */
 			autoLoad:   false,
+			
+			/** CSS class to place on the drop-down element. */
 			ddCls:		'',
+			
+			/**  */
 			doSearch:   function(){},
+			
+			/** Text to display in the drop-down when no results are returned.  */
 			emptyText:  '(empty)',
+			
+			/** The DOM element for the field */
 			field:		$('<input>').attr({type:'text'}),
+			
+			/** Whether the drop-down DOM element will be kept in place or appended out to the body and absolutely
+			positioned. Keeping the drop-down in line will make it susceptible to being clipped by containing elements.*/
 			keepInline:	false,
+			
+			/** Minimum number of characters entered before the combo will filter remotely. */
 			minKeys:    2,
+			
+			/** Event hook for when the combo loses focus */
 			onBlur:     function(){},
+			
+			/** Whether to filter the drop-down amidst the locally loaded results or to go to the server. */
 			searchLocal:true,
+			
+			/**
+			@required
+			The key in the data that will be used for display in the combo box.
+			*/
 			titleItem:  null,
-			valueItem:  null,
-			unsearched: null
+			
+			/**
+			@required
+			The key in the data that will be used as the value for the combo when an item is selected.
+			*/
+			valueItem:  null
 		},args,{
 			cls:(args.cls) ? args.cls + ' wui-combo' : 'wui-combo',
 		}); 
@@ -1377,9 +2563,12 @@ var Wui = Wui || {};
 		this.init(); 
 	};
 	Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
+		/** Fires when the enter key is pressed */
 		enterKey:   	function(){
 	                        if(this.selectItm !== null)   this.selectItm.click();
 	                    },
+						
+		/** Fires when the down arrow is pressed */
 		keyDown:    	function(){
 	                        if(!this.dd.is(':visible')){
 	                            this.selectCurr();
@@ -1391,6 +2580,8 @@ var Wui = Wui || {};
 								this.rsltHover(this.dd.children(':eq(' + idx + ')'));
 	                        }
 	                    },
+						
+		/** Fires when the down up is pressed */
         keyUp:      	function(){
 	                        if(this.selectItm !== null){
 	                            var idx = this.selectItm.prevAll(':visible:first').index();
@@ -1404,7 +2595,11 @@ var Wui = Wui || {};
 	                            } 
 	                        }
 	                    },
+						
+		/** Hides the drop-down menu */
 		hideDD:     	function(){this.dd.hide();},
+		
+		/** Method that runs when the object is initiated */
 		init:       	function(){
 	                        var me = this,
 								ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
@@ -1413,7 +2608,7 @@ var Wui = Wui || {};
 	                        me.tplEngine = new Wui.Template({template:me.template});
 	                        me.selectItm = null;
 	                        
-	                        //put field inside a wrapper and add drop down switch
+	                        //put field inside a wrapper and add drop-down switch
 	                        Wui.Text.prototype.init.call(me);
 	                        
 	                        me.wrapper = $('<div>').addClass('dd-wrapper');
@@ -1442,6 +2637,8 @@ var Wui = Wui || {};
 	                        if(me.autoLoad)   me.loadData();
 	                        else              me.renderData();
 	                    },
+		
+		/** Populates the drop-down with data/search results or shows empty text  */
 		renderData: 	function(){
 	                        var me = this,
 	                        	holder = $('<ul>');
@@ -1461,20 +2658,32 @@ var Wui = Wui || {};
 	                        
 	                        return true;
 	                    },
-        rsltClick:  	function(){
+        
+		/** Hides the drop-down and sets the current selection as the combo's value */
+		rsltClick:  	function(){
 	                        this.hideDD();
 	                        this.val(this.data[this.selectItm.index()]);
 	                    },
+						
+		/** Makes an item in the drop-down appear to be selected. This can happen when the 
+		mouse hovers over an item or when its selected with the arrow keys. */
 		rsltHover:  	function(itmTarget){
 	                        if(!itmTarget.addClass)
 	                        	itmTarget = $(itmTarget.currentTarget);
 	                        this.dd.children().removeClass('selected');
 	                        this.selectItm = itmTarget.addClass('selected');
 	                    },
+		
+		/** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
 		setParams:		function(srchVal){
 							if(this.searchFilter)
 								$.extend(this.params,{srch: this.searchFilter});
 						},
+						
+		/** 
+		@param {string} srchVal	A search term
+		Searches locally within the drop-down's data for the srchVal, otherwise if searchLocal is false,
+		the data is searched remotely. */
         searchData: 	function(srchVal){
 	                        this.searchFilter = srchVal;
 	                        
@@ -1488,7 +2697,14 @@ var Wui = Wui || {};
 									this.loadData();
 							}
 	                    },
-        selectCurr: 	function(i){
+        
+		/** 
+		@param {number}	[i]	An index
+		
+		If i is defined, it is the index of the item to select in the drop-down, else it is determined in this
+		method by the current value of the combo.
+		*/
+		selectCurr: 	function(i){
 	                        if(i === undefined && this.value !== null){
 	                            for(var d in this.data){
 	                                if(this.data[d][this.valueItem] === (this.value[this.valueItem] || this.value))   { i = d; break; }
@@ -1496,7 +2712,13 @@ var Wui = Wui || {};
 	                        }
 	                        this.rsltHover(this.dd.children(':eq(' +i+ ')'));
 	                    },
+						
+		/** Overrides the event hook in Wui.Data to trigger rendering of new data */
 		afterSet:   	function(newData){ this.renderData(); },
+		
+		/** 
+		@param {Wui Object} t Wui Object to add listeners to
+		Sets additional listeners on the field that give it combo-box like interactions */
 		setListeners:	function(t){
 	                        t.field
 	                        .focus(function(e){
@@ -1559,6 +2781,9 @@ var Wui = Wui || {};
 	                        });
 	                        return t.field;
 	                    },
+		
+		/** Shows the drop-down menu by either simply making it appear, or by positioning it absolutely to appear to drop-down from the combo's text field
+		based on the value of keepInline. */
 		showDD:     	function(){
 							if(!this.keepInline){
 								var fld		= this.field,
@@ -1616,7 +2841,10 @@ var Wui = Wui || {};
 	});
 	
 	
-	/***********************************   WUI Link   ***********************************/
+	/**
+	The link object contains three fields, one for the actual URL, one for the text of the link (if different from the URL) and a combo for
+	whether the link opens in a new window/tab or the same window.
+	*/
 	Wui.Link = function(args){ 
 		$.extend(this,{
 			invalidMsg: 'The value for \'' + ((this.label) ? this.label : (this.args && this.args.name) ? this.args.name : 'a link field') + '\' is not a properly formatted link.'
@@ -1624,6 +2852,7 @@ var Wui = Wui || {};
 		this.init();
 	};
 	Wui.Link.prototype = $.extend(new Wui.FormField(),{
+		/** Builds a preview of the link while it is being entered - gives feedback/validation to the user  @private */
 		buildOutput:function(){
                          if(this.outputFld === undefined)	this.elAlias.append(this.outputFld = $('<div>').attr({tabindex:-1}).addClass('feedback'));
         	
@@ -1635,6 +2864,8 @@ var Wui = Wui || {};
                         }
                             
                     },
+		
+		/** Method that runs when the object is initiated */
 		init:       function(){
                         var me = this;
                         
@@ -1665,6 +2896,8 @@ var Wui = Wui || {};
                         })
                         .blur(function(){me.value.title = me.titleField.val()});
                     },
+		
+		/** Sets listeners on all three of the fields in the link object */
 		setListeners:function(){
                         var me = this,
                         	flds = arguments;
@@ -1683,11 +2916,13 @@ var Wui = Wui || {};
                         });
                     },       
             
-        testLink:   function isUrl() {
+        /** Test for whether the link is a valid URL whether a full or relative path */
+		testLink:   function isUrl() {
                         var fullPath = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                         var relativePath = /(\/|\/([\w#!:.?+=&%@!\-\/]))/
                         return (fullPath.test(this.value.uri) || relativePath.test(this.value.uri));
                     },
+					
         getVal:		function(){
 				        return this.value;
 			        },
@@ -1698,11 +2933,33 @@ var Wui = Wui || {};
                         this.targetField.val(this.value.target);
                         this.buildOutput();
 			        },
+		
+		/** Overrides the Wui.FormField function and provides added validation */
 		validTest:	function(){ if(this.required && !this.testLink()) return false; return true; }
 	});
 	
 	
-	/***********************************   WUI DateTime   ***********************************/
+	/**
+	 * Borrowed from Date.js and tweaked a TON - See license below, and check out the full library if you're doing tons with dates
+	 * Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+	 * License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
+	 * Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
+	 
+	 The Datetime field can be used in conjunction with a calendar-style datepicker. When dates are changed, any time information is
+	 retained.
+	 
+	 Feedback is given to the user so concerns about whether the date is in a proper format can be allayed before validation occurs.
+	 Dates can be entered in a variety of formats of which what is below is a very small sample:
+	 
+	 "Five months after 9/20/2013"
+	 "Yesterday"
+	 "05/26/1983"
+	 "2012-12-12"
+	 "today at noon"
+	 "tomorrow at five thirty pm"
+	 "10-9-2013 5:30 PM"
+	 "ten months from now"
+	*/
 	Wui.Datetime = function(args){ 
 		$.extend(this,{
 			valChange:	function(val){}
@@ -1712,12 +2969,6 @@ var Wui = Wui || {};
 		this.init();
 	};
 	
-	/**
-	 * Borrowed from Date.js and tweaked a little - See license below, and check out the full library if you're doing tons with dates
-	 * Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
-	 * License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
-	 * Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
-	*/
 	$.extend(Date,{
 		CultureInfo:			{
 									name: "en-US",
@@ -1888,10 +3139,10 @@ var Wui = Wui || {};
         shortDays:      ["sun","mon","tue","wed","thu","fri","sat"],
         months:         ["january","february","march","april","may","june","july","august","september","october","november","december"],
         shortMonths:    ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"],
-        sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
+        /** Array of feedback words or phrases to randomly display when a user's input is not understood by the control */
+		sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
         minDate:        null,
 		prevText:       null,
-        value:          null,
 		
         displayDate:    function(overrideText){
                             var me = this;
@@ -2292,7 +3543,62 @@ var Wui = Wui || {};
                     }
 	});
 
-
+	/**
+	@param {string}		msg			Label of the text input if no other inputs are defined.
+	@param {funciton}	callback	Function will receive the value of the text input if no other inputs are defined, or it will get an object containing all form values.
+	@param {string}		[msgTitle]	The title for the window, defaults to 'Input'.
+	@param {array}		[inputs]	Array of Wui.FormFields to display on the window. When this array has only one item it merely replaces the default text field and is required. 
+	@param {string}		[content]	HTML content to display above the form fields.
+	
+	Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
+	*/
+	Wui.input = function(msg, callback, msgTitle, inputs, content){
+		// make sure the inputs will be acceptable on the form
+		if(inputs){
+			if(!inputs.length){
+				if(inputs instanceof Wui.FormField || inputs.ftype)
+					inputs = [inputs];
+				else
+					inputs = [{ftype:'Wui.Text'}];
+			}
+		}else{
+			inputs = [{ftype:'Wui.Text'}];
+		}
+		if(inputs.length == 1)	$.extend(inputs[0],{label:msg, required:true, name:'inputField'});
+		if(content !== undefined) inputs.splice(0,0,{ftype:'Wui.Note', html: content});
+		
+		// create the form and the window
+		var inputFrm = new Wui.Form({ labelPos:'left', items:inputs }),
+			Msg = new Wui.Window({
+				title:      msgTitle || 'Input',
+				bbar:		[ 
+								new Wui.Button({text:'Cancel', click:function(){ Msg.answerRun = true; Msg.close(); }}),
+								new Wui.Button({text:'Submit', click:function(){ Msg.getVal(); }})
+				],
+				isModal:    true,
+				items:      [inputFrm],
+				cls:		'wui-input-window',
+				width:      600, 
+				height:     250,
+				getVal:		function(){
+								var formData = inputFrm.getData();
+								if(formData){
+									if(callback && typeof callback == 'function'){
+										var len = 0;
+										for(var n in formData) len++;
+										if(len == 1 && formData.inputField)	callback(formData.inputField);
+										else 								callback(formData);
+									}
+									Msg.answerRun = true;
+									Msg.close();
+								}
+							},
+				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+			});
+	    return inputFrm;
+	}
+	
+	
 	/**
 	* jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
 	* Copyright (c) 2012 Chris Pietschmann
@@ -2779,19 +4085,32 @@ var Wui = Wui || {};
         });
     }
 })(jQuery);
-
-
 (function($) {
-	// Method which creates a Wui layout - Wui layouts are meant to be heavily CSS dependent
+	/** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	Creates a Wui layout - Wui layouts are meant to be heavily CSS dependent 
+	by defining objects with names that the WUI can use, but leaving all styles
+	to the CSS, unlike simply using Wui.fit().
+	
+	Child items in a Wui.Layout must have an attribute 'target' with a name of
+	one of the objects in the targets array.
+	*/
 	Wui.Layout = function(args){ 
 		$.extend(this, {
+			/** An array of items that will be added to the footer */
 			bbar:   [],
+			
+			/** An array of named items with CSS properties defined */
 			targets:[],
+			
+			/** An array of items that will be added to the header */
 			tbar:   []
 		}, args); 
 		this.init(); 
 	}
 	Wui.Layout.prototype = $.extend(new Wui.Pane(),{
+		/** Method that will run immediately when the object is constructed. Lays out targets.*/
 		init:			function(){
 							var me = this;
 							me.itemsHolder = me.items;
@@ -2801,6 +4120,8 @@ var Wui = Wui || {};
 							Wui.Pane.prototype.init.call(me);
 
 						},
+		
+		/** Appends items to targets */
 		onRender:		function(){
 							var me = this;
 							me.items = me.itemsHolder;
@@ -2812,20 +4133,43 @@ var Wui = Wui || {};
 	});
 	
 	
-	// Method which creates a Wui Tab Pane
+	/** 
+	@event		tabchange When a tab changes (tab pane, tab button, tab item)
+	
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	Tab pane
+	*/
 	Wui.Tabs = function(args){ 
 		$.extend(this,{
+			/** An array of items that will be added to the footer */
 			bbar:   [],
+			
+			/** An array of items that will be added to the content */
 			items:	[],
+			
+			/** Tabs default to the right side of the pane unless this is true. */
+			tabsLeft:	false,
+			
+			/** Whether to put the tabs on the header or the footer. */
+			tabsBottom:		false,
+			
+			/** Config to place on child items of WUI tabs to make their heading not show up */
+			tabsHideHeader: null,
+			
+			/** An array of items that will be added to the header */
 			tbar:	[]
 		},args); 
 		this.init();
 	}
 	Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
+		/** Method that will run immediately when the object is constructed. Lays out targets. */
 		init:			function(){
+							if(this.title === null)	this.title = '';
 							Wui.Pane.prototype.init.call(this);
 						},
-		tabsBottom:		false,
+		
+		/** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
 		place:      	function(){
 							var me = this;
 							
@@ -2834,26 +4178,67 @@ var Wui = Wui || {};
 							//adds the objects items if any
 							if(me.items === undefined) me.items = [];
 							$.each(me.items,function(idx,itm){
-								itm.tabCls = 'wui-tab ' + ((itm.tabCls) ? ' ' + itm.tabCls : '');
-									
+								itm.tabCls =	'wui-tab ' +
+												((itm.tabCls) ? ' ' + itm.tabCls : '') +
+												((me.tabsLeft) ? ' left' : '');
+								
+								if(itm.tabsHideHeader){
+									itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
+									itm.el.addClass('wui-hide-heading');
+								}
+								
 								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
 									text:	itm.title || 'Tab ' + (parseInt(idx) + 1),
 									click:	function(){ 
 												me.giveFocus(itm);
-												if(itm.layout && typeof itm.layout == 'function')	itm.layout();		
+												if(itm.layout && typeof itm.layout === 'function')	itm.layout();
 											},
 									cls:	itm.tabCls
 								}));
+								if(me.bbar.length != 0) me.placeFooter();
 							});
 							
 							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
 						},
-		giveFocus:		function(tab){
-							$.each(this.items,function(idx,itm){
+		
+		/** 
+		@param {object} itm A WUI Object that will be matched in the items array. 
+		@param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
+		
+		Sets the specified tab to active. Runs layout on the newly activated item.
+		*/
+		giveFocus:		function(tab, supressEvent){
+							var me = this, supressEvent = (supressEvent !== undefined) ? supressEvent : false;
+							
+							$.each(me.items,function(idx,itm){
 								var isActive = itm === tab;
 								itm.tab.el.toggleClass('selected', isActive);
 								itm.el.toggleClass('active', isActive);
+								if(isActive){
+									itm.layout();
+								}
+								if(!supressEvent && isActive)
+									me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
 							});
+						},
+		
+		/** 
+		@param {string} txt The text of the tab button
+		@param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
+		@return The tab that was selected or undefined if the text didn't match any tabs
+		
+		Gives focus to the tab with text that matches the value of txt. Strings with underscores
+		are converted to spaces (eg. 'conferences_detail' = 'conferences detail')
+		*/
+		selectTabByText:function(txt, supressEvent){
+							var me = this, retVal = undefined;
+							$.each(me.items,function(idx,itm){
+								if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
+									me.giveFocus(itm, supressEvent);
+									retVal = itm;
+								}
+							});
+							return retVal;
 						},
 		onRender:		function(){
 							this.giveFocus(this.items[0]);
@@ -2861,30 +4246,96 @@ var Wui = Wui || {};
 	});
 	
 	
-	// Method which creates a Wui Grid
+	/** 
+	@event		select 			When a record is clicked (grid, row el, record)
+	@event		dblclickrecord 	When a record is  double clicked clicked (grid, row el, record)
+	
+	
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	
+	The grid pane provides table-like functionality for data sets. Grids can be populated remotely
+	or have their data locally defined. Grids also support infinite scrolling by defining paging
+	parameters. Columns for the grid are defined in an array and with the following options:
+	
+	heading		- The title of the column heading
+	cls			- A special class to add to the column
+	vertical	- Makes the column text oriented vertical and the column height at 150px
+	dataType	- The type of data used in the column (used for sorting)
+	dataItem	- The item in the record that correlates to this column
+	width		- A pixel value for the width of the column
+	fit			- A numeric indicator of the relative size of the column
+	
+	Custom renderers can be applied to columns.  These renderers are defined as function that can
+	either be defined in the column definition, or defined elsewhere in scope and simply named by
+	a string. The rendering function is defined passed the following parameters as below:
+	
+	renderer: function(grid, cell, value, record, row){}
+	
+	Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
+	descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
+	is possible with the a number indicating the precedence of the sort and an arrow for the direction of the sort 
+	appearing on the right side of the column heading.
+	
+	Columns can be resized by dragging the heading borders left and right. Columns can be sized to 
+	extend beyond the width of the grid frame, but when sized smaller will pop back into position.
+	
+	While not using Wui.fit(), the same principles apply in the sizing of elements, although percentage
+	values are not supported at this time.
+	*/
 	Wui.Grid = function(args){
 		$.extend(this,{
+			/** Array of items that will be added to the footer */
 			bbar:   		[],
+			
+			/** Event hook fired before the grid columns and data are made up */
 			beforeMake:		function(){},
+			
+			/** Array of items that will make up the columns of the grid table */
 			columns: 		[],
+			
+			/** Array of data for the grid */
 			data:			null,
+			
+			/** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
 			defaultDataType:'string',
+			
+			/** Whether multiple rows/records can be selected at once */
 			multiSelect:	false,
+			
+			/** 
+			@param {object}	rec		Data object that is the record of the double-clicked on row.
+			Event hook for the double click
+			*/
 			onDoubleClick:	function(rec){},
-			// me.el.trigger($.Event('deselect'),[me, a.el, a.rec]);
+			
+			/**
+			If paging is anything other than null, the grid will sort remotely and scroll infinitely.
+			
+			Example paging parameters are:
+			{
+				limit:	page size,
+				start:	0 - a very good place to start
+				sort:	{dataItem:, order:}
+			}
+			*/
 			paging:			null,
-							/*{
-								limit:	page size,
-								start:	0 - a very good place to start
-								sort:	{dataItem:, order:}
-							}*/
+			
+			/** Whether or not to hide the column headers */
 			hideHeader:		false,
+			
+			/** An array of the currently selected records */
 			selected:		[],
+			
+			/** An array of items that will be added to the header */
 			tbar:   		[]
 		},args); 
 		this.init();
 	};
 	Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.Data(),{
+		/** 
+		@param {array}	source		Array containing the data to add rows for.
+		Adds rows to the table along with event listeners and column renderers.
+		*/
 		addRows:		function(source){
 							var me = this;
 							me.tbl.items = [];
@@ -2917,9 +4368,7 @@ var Wui = Wui || {};
 										 
 										  $('html').click(); // gets rid of the outline from the HTML elements
 									 }
-									 me.el.trigger($.Event('recordclick'),[me, a.el, a.rec]);
-									 
-									 return false // stops propagation & prevents default
+									 me.el.trigger($.Event('select'),[me, a.el, a.rec]);
 								 })
 								 .dblclick(function(e){
 									 me.selectSingle($(this),a);
@@ -2930,11 +4379,27 @@ var Wui = Wui || {};
 							});
 							return source;
 						},
+		
+		/** 
+		Calculates the width of each of the columns as they presently are.
+		@private
+		*/
 		calcColWidth:	function (){
 							var tcw = 0;
 							this.heading.children().each(function(){ tcw += $(this).outerWidth(); });
 							return tcw;
 						},
+						
+		/** 
+		Recursive function for sorting on multiple columns
+		@param {number}	depth	Depth of the recursive call
+		@param {number}	a		First item to compare
+		@param {number}	b		Second item to compare
+		
+		@return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+		
+		@private
+		*/
 		doSort:			function(depth,a,b){
 							var me = this;
 							if(me.sorters.length > 0){
@@ -2968,6 +4433,10 @@ var Wui = Wui || {};
 								return (a.originalSrt > b.originalSrt) ? 1 : -1;
 							}
 						},
+		/** 
+		@param {string|object} params	Params to be set
+		If params == 'init' then it sets up paging parameters. If params is an object then the parameters are set to the object.
+		*/
 		setParams:		function(params){
 							var me = this;
 							
@@ -2981,6 +4450,9 @@ var Wui = Wui || {};
 								$.extend(me.params,params);
 							}
 						},
+		/** 
+		Overrides an event hook on Wui.Data and makes the grid after new data is set
+		*/
 		afterSet:		function(){
 							var me = this;
 							
@@ -2995,7 +4467,17 @@ var Wui = Wui || {};
 								me.makeGrid();
 							}
 						},
+		/** 
+		@returns Returns the currently selected row or rows
+		
+		If there is no row selected, a Wui.errRpt will display a 'No row selected.' message to the user.
+		*/
 		getSelected:	function(){ return (this.selected.length > 0) ? this.selected : Wui.errRpt('No row selected.','Select Something');},
+		
+		/** 
+		Method that will run immediately when the object is constructed. Creates necessary 
+		DOM elements for the grid. Establishes whether the grid is remote or local, paging
+		or not. */
 		init:			function(){
 							var me = this;
 								
@@ -3063,11 +4545,20 @@ var Wui = Wui || {};
 							me.elAlias.append(me.tblContainer,me.headingContainer);
 							if(me.hideHeader)	me.headingContainer.height(0);
 						},
+		
+		/** 
+		Overrides the Wui.O layout function and positions the data and sizes the columns.
+		*/
 		layout:			function(){
 							Wui.O.prototype.layout.call(this);
 							this.posDataWin();
 							this.sizeCols();
 						},
+						
+		/** 
+		Builds the headings if they don't exist, calls addRows() and sizeCols()
+		@private
+		*/
 		makeGrid:		function(){
 							var me = this, t = '<tr>';
 							
@@ -3091,15 +4582,27 @@ var Wui = Wui || {};
 										}
 									}									
 									
+									// Deal with vertical columns - forces them to be 48px wide
+									if(col.vertical){
+										me.el.addClass('has-vert-columns');
+										if(col.cls)	col.cls += ' vert-col';
+										else		col.cls = 'vert-col';
+										
+										col.width = 48;
+										delete col.fit;
+									}
+									
 									// Build heading and append to DOM
 									$.extend(col,{
 										dataType:	(col.dataType === undefined) ? me.defaultDataType : col.dataType,
 										fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
 										index:		i,
 										width:		col.width === undefined ? 0 : col.width,
-										heading:	$('<li>').text(col.heading)
+										heading:	$('<li>')
+													.append($('<div>').text(col.heading))
 													.attr({unselectable:'on'})
 													.addClass('wui-gc')
+													.addClass(col.cls)
 													.resizable({
 														handles:	'e',
 														resize:		function(event,ui){
@@ -3152,6 +4655,11 @@ var Wui = Wui || {};
 
 							me.sizeCols();
 						},
+		/** 
+		@param	{object}	col	An object containing the sort direction and DOM element of the heading
+		#param	{string}	dir	The direction of the sort
+		Manages the sorters for the grid by keeping them in an array. 
+		*/
 		mngSorters:		function(col,dir){
 							var me = this,
 								sortClasses = ['one','two','three','four','five'];
@@ -3162,7 +4670,7 @@ var Wui = Wui || {};
 								if(col.sortDir){
 									if(col.sortDir == 'desc'){
 										delete col.sortDir;
-										col.heading.removeClass().addClass('wui-gc');
+										col.heading.removeClass().addClass('wui-gc').addClass(col.cls);
 										
 										$.each(me.sorters,function(i,itm){
 											if(itm == col)	me.sorters.splice(i,1);
@@ -3173,7 +4681,7 @@ var Wui = Wui || {};
 								}else{
 									// Can't sort on more than 5 columns
 									if(me.sorters.length > 5){
-										col.heading.removeClass().addClass('wui-gc');
+										col.heading.removeClass().addClass('wui-gc').addClass(col.cls);
 										return false;
 									}
 									
@@ -3187,18 +4695,27 @@ var Wui = Wui || {};
 								me.paging.sort = [];
 								
 							$.each(me.sorters,function(i,itm){
-								itm.heading.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir);
+								itm.heading.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
 								
 								if(me.isPaging)
 									me.paging.sort.push({dataItem:itm.dataItem, order:itm.sortDir});
 							});
 						},
+		
+		/** 
+		Size up the columns of the table to match the headings
+		@private
+		*/
 		matchCols:		function (){
 							var me = this;
 							$.each(me.columns,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.heading.outerWidth() - 2.8); // 2 accounts for borders
+								me.tbl.find('td:eq(' +i+ ')').width($(col.heading).outerWidth() - 2.8); // 2 accounts for borders
 							});
 						},
+						
+		/** 
+		Runs posDataWin() and starts the rendering of the data.
+		*/
 		onRender:		function (){
 							var me = this;
 							
@@ -3208,16 +4725,25 @@ var Wui = Wui || {};
 							if(me.data !== null)	me.setData(me.data);
 							else					me.loadData('init');
 						},
+		
+		/** 
+		Positions the height and width of the data table's container
+		@private
+		*/
 		posDataWin:		function(){
 							var me = this,
 								hh = me.headingContainer.height();
 							me.heading.css({paddingRight:((me.total * me.rowHeight > me.container.height() - hh) ? Wui.scrollbarWidth() : 0) + 'px'});
 							me.tblContainer.css({height:me.container.height() - hh, top:hh});
 						},
+		
+		/**  Refresh the data in the grid */
 		refresh:		function(newData){
 							if(newData)	me.setData(newData);
 							else		this.loadData();
 						},
+						
+		/**  Reselects previously selected rows after a data change or sort. Scrolls to the first currently selected row. */
 		resetSelect:	function(){
 							var me = this,
 								selList = me.selected;
@@ -3237,14 +4763,22 @@ var Wui = Wui || {};
 								});
 							});
 
-							// scroll the list to the currently selected item will make the paging wig out!
+							me.scrollToCurrent();
+						},
+						
+		/** Scroll the list to the currently selected item will make the paging wig out! */				
+		scrollToCurrent:function(){
+							var me = this;
+							
 							if(!me.isPaging && me.tbl.find('.wui-selected:first').length){
 								var firstSelect = me.tbl.find('.wui-selected:first'),
 									ofstP = firstSelect.offsetParent();
 								ofstP.animate({scrollTop:0},0);
 								ofstP.animate({scrollTop: firstSelect.offset().top - ofstP.offset().top },500);
 							}
-						},
+						},		
+						
+		/**  Selects an item on the grid according to a key value pair to be found in a record */
 		selectItem:		function(kvp){
 							var me = this,
 								key = null,
@@ -3257,57 +4791,73 @@ var Wui = Wui || {};
 							for(var a in me.tbl.items){
 								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
 									me.selectSingle(me.tbl.items[a].el,me.tbl.items[a]);
-									me.el.trigger($.Event('recordselected'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
+									me.el.trigger($.Event('select'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
 									break;
 								}
 							}
 						},
+						
+		/** 
+		@param {object}	jQuery object containing the DOM element of the row
+		@param {object}	Data object of the selected row
+		Selects a single item. */
 		selectSingle:	function(row,data){
 							this.tbl.find('.wui-selected').removeClass('wui-selected');
 							row.addClass('wui-selected');
 							this.selected = [data];
 						},
+		
+		/** Size columns according to the size of the grid and the columns fit and width values */
 		sizeCols:		function(){
-							var me		= this,
-								tcw		= me.calcColWidth(),
-								scrollbarWidth = (me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0,
-								hc		= me.headingContainer.width() - scrollbarWidth,
-								hw		= me.heading.width(),
-								fitCt	= 0,
-								fixdWid = 0,
-								fitMux	= 0;
-
-							$.each(me.columns,function(i,col){
-								fitCt += col.fit;
-								fixdWid += col.width;
-							});
-						
-							var sizeNow = (tcw < hw && fixdWid < hw);
-							if(sizeNow){
-								if(fitCt == 0){
-									fixdWid = 0;
-									for(var i in me.columns) {
-										var col = me.columns[i]; 
-										col.fit = hc / (col.width != 0 ? col.width : col.heading.width()); 
-										col.width = 0;
-										fitCt += col.fit;
-										fixdWid += col.width;
+							if(typeof this.columns[0].heading !== 'string'){
+								var me		= this,
+									tcw		= me.calcColWidth(),
+									scrollbarWidth = (me.total * me.rowHeight > me.tblContainer.height()) ? Wui.scrollbarWidth() : 0,
+									hc		= me.headingContainer.width() - scrollbarWidth,
+									hw		= me.heading.width() - scrollbarWidth,
+									fitCt	= 0,
+									fixdWid = 0,
+									fitMux	= 0;
+									
+								$.each(me.columns,function(i,col){
+									fitCt += col.fit;
+									fixdWid += col.width;
+								});
+							
+								var sizeNow = (tcw < hw && fixdWid < hw);
+								if(sizeNow){
+									if(fitCt == 0){
+										fixdWid = 0;
+										for(var i in me.columns) {
+											var col = me.columns[i]; 
+											col.fit = hc / (col.width != 0 ? col.width : $(col.heading).width()); 
+											col.width = 0;
+											fitCt += col.fit;
+											fixdWid += col.width;
+										}
 									}
 								}
+								
+								fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
+								
+								for(var i in me.columns) {
+									var col = me.columns[i];
+									$(col.heading).css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
+								}
+								
+								var newColWid = me.calcColWidth();
+								me.heading.width(newColWid + scrollbarWidth);
+								me.tbl.width(newColWid);
+								me.tblHSize.width(newColWid);
+								me.matchCols();
 							}
-							
-							fitMux = (fitCt != 0) ? (sizeNow) ? (hc - fixdWid) / fitCt : (hw - fixdWid) / fitCt : 0;
-							for(var i in me.columns) {
-								var col = me.columns[i];
-								col.heading.css({width:Math.floor(col.width + (col.fit * fitMux)) - (i == me.columns.length - 1 ? 1 : 0)});
-							}
-							
-							var newColWid = me.calcColWidth();
-							me.heading.width(newColWid + scrollbarWidth);
-							me.tbl.width(newColWid);
-							me.tblHSize.width(newColWid);
-							me.matchCols();
 						},
+		
+		/**
+		@param	{object}	Column object associated with a particular column element
+		Sort the grid based on the values of one or more columns. If the grid is paging
+		then sort remotely.
+		*/
 		sortList:		function(col) {
 							var me = this;
 							
@@ -3333,483 +4883,3 @@ var Wui = Wui || {};
 						}
 	});
 }(jQuery));
-
-
-(function($, window) {
-	Wui.stateMachine = function(args){ $.extend(this, args); };
-	Wui.stateMachine.prototype = {
-		setState:		function(state){
-							var url			= window.location.href.split('#'),
-								preHash		= url[0] + '#';
-								
-								// Objects passed in are parsed according to a strict format of 
-								// firstView?param1=1/anotherView?param1=1&param2=2 ...
-								if(state && typeof state === 'object'){
-									window.location = preHash + this.stringify(state);
-								// If a string is passed in just pass it along
-								}else if(state && typeof state === 'string'){
-									window.location = preHash + state;
-								// An undefined value for state will clear out the state
-								}else{
-									window.location = preHash;
-								}
-						},
-		stringify:		function(stateArray){
-							var stateStr	= '';
-							
-							for(var i in stateArray){
-								// Keep keys in alphabetical order so that comparing states works
-								var keys = [];
-								for(var key in stateArray[i].params)	keys.push(key);
-								keys.sort();
-								// State the location
-								stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
-								
-								for(var j = 0; j < keys.length; j++)
-									stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
-							}
-							
-							return stateStr;
-						},
-		getState:		function(){
-							var state = [];
-							
-							window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
-								var itm = {};
-								viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
-									itm[key] = val;
-									return '';
-								});
-								state.push({view:viewarea, params:itm});
-							});
-							
-							return state;
-						},
-		getParam:		function(target,key){
-							var state	= this.getState(),
-								val		= undefined;
-								
-							for(var i in state)
-								if(state[i].view === target && state[i].params[key])	return state[i].params[key];
-
-							return val;
-						},
-		changeView:		function(oldView,newView){
-							/** Changes a view in place leaving the parameters */
-							var state = this.getState();
-							for(var i in state)
-								if(state[i].view === oldView)
-									state[i].view = newView;
-							this.setState(state);
-						},
-		getViews:		function(){
-							/** Lists all of the views */
-							var state = this.getState(),
-								retArr = [];
-								
-							for(var i in state)	retArr.push(state[i].view);
-							return retArr;
-						},
-		clearState:		function(){ this.setState(); },
-		setChangeAction:function(fn){ 
-							var me = this;
-							me.turnOff();
-							$(window).on('hashchange', function(){
-								fn.call(me,me.getState());
-							});
-						},
-		turnOff:		function(){ $(window).off('hashchange'); }
-	};
-}(jQuery, this));
-
-
-/*!
- * jQuery hashchange event - v1.3 - 7/21/2010
- * http://benalman.com/projects/jquery-hashchange-plugin/
- * 
- * Copyright (c) 2010 "Cowboy" Ben Alman
- * Dual licensed under the MIT and GPL licenses.
- * http://benalman.com/about/license/
- */
-
-// Script: jQuery hashchange event
-//
-// *Version: 1.3, Last updated: 7/21/2010*
-// 
-// Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
-// GitHub       - http://github.com/cowboy/jquery-hashchange/
-// Source       - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.js
-// (Minified)   - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js (0.8kb gzipped)
-// 
-// About: License
-// 
-// Copyright (c) 2010 "Cowboy" Ben Alman,
-// Dual licensed under the MIT and GPL licenses.
-// http://benalman.com/about/license/
-// 
-// About: Examples
-// 
-// These working examples, complete with fully commented code, illustrate a few
-// ways in which this plugin can be used.
-// 
-// hashchange event - http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/
-// document.domain - http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/
-// 
-// About: Support and Testing
-// 
-// Information about what version or versions of jQuery this plugin has been
-// tested with, what browsers it has been tested in, and where the unit tests
-// reside (so you can test it yourself).
-// 
-// jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
-// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 5-6, Safari 3.2-5,
-//                   Opera 9.6-10.60, iPhone 3.1, Android 1.6-2.2, BlackBerry 4.6-5.
-// Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
-// 
-// About: Known issues
-// 
-// While this jQuery hashchange event implementation is quite stable and
-// robust, there are a few unfortunate browser bugs surrounding expected
-// hashchange event-based behaviors, independent of any JavaScript
-// window.onhashchange abstraction. See the following examples for more
-// information:
-// 
-// Chrome: Back Button - http://benalman.com/code/projects/jquery-hashchange/examples/bug-chrome-back-button/
-// Firefox: Remote XMLHttpRequest - http://benalman.com/code/projects/jquery-hashchange/examples/bug-firefox-remote-xhr/
-// WebKit: Back Button in an Iframe - http://benalman.com/code/projects/jquery-hashchange/examples/bug-webkit-hash-iframe/
-// Safari: Back Button from a different domain - http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/
-// 
-// Also note that should a browser natively support the window.onhashchange 
-// event, but not report that it does, the fallback polling loop will be used.
-// 
-// About: Release History
-// 
-// 1.3   - (7/21/2010) Reorganized IE6/7 Iframe code to make it more
-//         "removable" for mobile-only development. Added IE6/7 document.title
-//         support. Attempted to make Iframe as hidden as possible by using
-//         techniques from http://www.paciellogroup.com/blog/?p=604. Added 
-//         support for the "shortcut" format $(window).hashchange( fn ) and
-//         $(window).hashchange() like jQuery provides for built-in events.
-//         Renamed jQuery.hashchangeDelay to <jQuery.fn.hashchange.delay> and
-//         lowered its default value to 50. Added <jQuery.fn.hashchange.domain>
-//         and <jQuery.fn.hashchange.src> properties plus document-domain.html
-//         file to address access denied issues when setting document.domain in
-//         IE6/7.
-// 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
-//         from a page on another domain would cause an error in Safari 4. Also,
-//         IE6/7 Iframe is now inserted after the body (this actually works),
-//         which prevents the page from scrolling when the event is first bound.
-//         Event can also now be bound before DOM ready, but it won't be usable
-//         before then in IE6/7.
-// 1.1   - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug
-//         where browser version is incorrectly reported as 8.0, despite
-//         inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.
-// 1.0   - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special
-//         window.onhashchange functionality into a separate plugin for users
-//         who want just the basic event & back button support, without all the
-//         extra awesomeness that BBQ provides. This plugin will be included as
-//         part of jQuery BBQ, but also be available separately.
-
-(function($,window,undefined){
-  '$:nomunge'; // Used by YUI compressor.
-  
-  // Reused string.
-  var str_hashchange = 'hashchange',
-    
-    // Method / object references.
-    doc = document,
-    fake_onhashchange,
-    special = $.event.special,
-    
-    // Does the browser support window.onhashchange? Note that IE8 running in
-    // IE7 compatibility mode reports true for 'onhashchange' in window, even
-    // though the event isn't supported, so also test document.documentMode.
-    doc_mode = doc.documentMode,
-    supports_onhashchange = 'on' + str_hashchange in window && ( doc_mode === undefined || doc_mode > 7 );
-  
-  // Get location.hash (or what you'd expect location.hash to be) sans any
-  // leading #. Thanks for making this necessary, Firefox!
-  function get_fragment( url ) {
-    url = url || location.href;
-    return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
-  };
-  
-  // Method: jQuery.fn.hashchange
-  // 
-  // Bind a handler to the window.onhashchange event or trigger all bound
-  // window.onhashchange event handlers. This behavior is consistent with
-  // jQuery's built-in event handlers.
-  // 
-  // Usage:
-  // 
-  // > jQuery(window).hashchange( [ handler ] );
-  // 
-  // Arguments:
-  // 
-  //  handler - (Function) Optional handler to be bound to the hashchange
-  //    event. This is a "shortcut" for the more verbose form:
-  //    jQuery(window).bind( 'hashchange', handler ). If handler is omitted,
-  //    all bound window.onhashchange event handlers will be triggered. This
-  //    is a shortcut for the more verbose
-  //    jQuery(window).trigger( 'hashchange' ). These forms are described in
-  //    the <hashchange event> section.
-  // 
-  // Returns:
-  // 
-  //  (jQuery) The initial jQuery collection of elements.
-  
-  // Allow the "shortcut" format $(elem).hashchange( fn ) for binding and
-  // $(elem).hashchange() for triggering, like jQuery does for built-in events.
-  $.fn[ str_hashchange ] = function( fn ) {
-    return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
-  };
-  
-  // Property: jQuery.fn.hashchange.delay
-  // 
-  // The numeric interval (in milliseconds) at which the <hashchange event>
-  // polling loop executes. Defaults to 50.
-  
-  // Property: jQuery.fn.hashchange.domain
-  // 
-  // If you're setting document.domain in your JavaScript, and you want hash
-  // history to work in IE6/7, not only must this property be set, but you must
-  // also set document.domain BEFORE jQuery is loaded into the page. This
-  // property is only applicable if you are supporting IE6/7 (or IE8 operating
-  // in "IE7 compatibility" mode).
-  // 
-  // In addition, the <jQuery.fn.hashchange.src> property must be set to the
-  // path of the included "document-domain.html" file, which can be renamed or
-  // modified if necessary (note that the document.domain specified must be the
-  // same in both your main JavaScript as well as in this file).
-  // 
-  // Usage:
-  // 
-  // jQuery.fn.hashchange.domain = document.domain;
-  
-  // Property: jQuery.fn.hashchange.src
-  // 
-  // If, for some reason, you need to specify an Iframe src file (for example,
-  // when setting document.domain as in <jQuery.fn.hashchange.domain>), you can
-  // do so using this property. Note that when using this property, history
-  // won't be recorded in IE6/7 until the Iframe src file loads. This property
-  // is only applicable if you are supporting IE6/7 (or IE8 operating in "IE7
-  // compatibility" mode).
-  // 
-  // Usage:
-  // 
-  // jQuery.fn.hashchange.src = 'path/to/file.html';
-  
-  $.fn[ str_hashchange ].delay = 50;
-  /*
-  $.fn[ str_hashchange ].domain = null;
-  $.fn[ str_hashchange ].src = null;
-  */
-  
-  // Event: hashchange event
-  // 
-  // Fired when location.hash changes. In browsers that support it, the native
-  // HTML5 window.onhashchange event is used, otherwise a polling loop is
-  // initialized, running every <jQuery.fn.hashchange.delay> milliseconds to
-  // see if the hash has changed. In IE6/7 (and IE8 operating in "IE7
-  // compatibility" mode), a hidden Iframe is created to allow the back button
-  // and hash-based history to work.
-  // 
-  // Usage as described in <jQuery.fn.hashchange>:
-  // 
-  // > // Bind an event handler.
-  // > jQuery(window).hashchange( function(e) {
-  // >   var hash = location.hash;
-  // >   ...
-  // > });
-  // > 
-  // > // Manually trigger the event handler.
-  // > jQuery(window).hashchange();
-  // 
-  // A more verbose usage that allows for event namespacing:
-  // 
-  // > // Bind an event handler.
-  // > jQuery(window).bind( 'hashchange', function(e) {
-  // >   var hash = location.hash;
-  // >   ...
-  // > });
-  // > 
-  // > // Manually trigger the event handler.
-  // > jQuery(window).trigger( 'hashchange' );
-  // 
-  // Additional Notes:
-  // 
-  // * The polling loop and Iframe are not created until at least one handler
-  //   is actually bound to the 'hashchange' event.
-  // * If you need the bound handler(s) to execute immediately, in cases where
-  //   a location.hash exists on page load, via bookmark or page refresh for
-  //   example, use jQuery(window).hashchange() or the more verbose 
-  //   jQuery(window).trigger( 'hashchange' ).
-  // * The event can be bound before DOM ready, but since it won't be usable
-  //   before then in IE6/7 (due to the necessary Iframe), recommended usage is
-  //   to bind it inside a DOM ready handler.
-  
-  // Override existing $.event.special.hashchange methods (allowing this plugin
-  // to be defined after jQuery BBQ in BBQ's source code).
-  special[ str_hashchange ] = $.extend( special[ str_hashchange ], {
-    
-    // Called only when the first 'hashchange' event is bound to window.
-    setup: function() {
-      // If window.onhashchange is supported natively, there's nothing to do..
-      if ( supports_onhashchange ) { return false; }
-      
-      // Otherwise, we need to create our own. And we don't want to call this
-      // until the user binds to the event, just in case they never do, since it
-      // will create a polling loop and possibly even a hidden Iframe.
-      $( fake_onhashchange.start );
-    },
-    
-    // Called only when the last 'hashchange' event is unbound from window.
-    teardown: function() {
-      // If window.onhashchange is supported natively, there's nothing to do..
-      if ( supports_onhashchange ) { return false; }
-      
-      // Otherwise, we need to stop ours (if possible).
-      $( fake_onhashchange.stop );
-    }
-    
-  });
-  
-  // fake_onhashchange does all the work of triggering the window.onhashchange
-  // event for browsers that don't natively support it, including creating a
-  // polling loop to watch for hash changes and in IE 6/7 creating a hidden
-  // Iframe to enable back and forward.
-  fake_onhashchange = (function(){
-    var self = {},
-      timeout_id,
-      
-      // Remember the initial hash so it doesn't get triggered immediately.
-      last_hash = get_fragment(),
-      
-      fn_retval = function(val){ return val; },
-      history_set = fn_retval,
-      history_get = fn_retval;
-    
-    // Start the polling loop.
-    self.start = function() {
-      timeout_id || poll();
-    };
-    
-    // Stop the polling loop.
-    self.stop = function() {
-      timeout_id && clearTimeout( timeout_id );
-      timeout_id = undefined;
-    };
-    
-    // This polling loop checks every $.fn.hashchange.delay milliseconds to see
-    // if location.hash has changed, and triggers the 'hashchange' event on
-    // window when necessary.
-    function poll() {
-      var hash = get_fragment(),
-        history_hash = history_get( last_hash );
-      
-      if ( hash !== last_hash ) {
-        history_set( last_hash = hash, history_hash );
-        
-        $(window).trigger( str_hashchange );
-        
-      } else if ( history_hash !== last_hash ) {
-        location.href = location.href.replace( /#.*/, '' ) + history_hash;
-      }
-      
-      timeout_id = setTimeout( poll, $.fn[ str_hashchange ].delay );
-    };
-    
-    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // vvvvvvvvvvvvvvvvvvv REMOVE IF NOT SUPPORTING IE6/7/8 vvvvvvvvvvvvvvvvvvv
-    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    $.browser.msie && !supports_onhashchange && (function(){
-      // Not only do IE6/7 need the "magical" Iframe treatment, but so does IE8
-      // when running in "IE7 compatibility" mode.
-      
-      var iframe,
-        iframe_src;
-      
-      // When the event is bound and polling starts in IE 6/7, create a hidden
-      // Iframe for history handling.
-      self.start = function(){
-        if ( !iframe ) {
-          iframe_src = $.fn[ str_hashchange ].src;
-          iframe_src = iframe_src && iframe_src + get_fragment();
-          
-          // Create hidden Iframe. Attempt to make Iframe as hidden as possible
-          // by using techniques from http://www.paciellogroup.com/blog/?p=604.
-          iframe = $('<iframe tabindex="-1" title="empty"/>').hide()
-            
-            // When Iframe has completely loaded, initialize the history and
-            // start polling.
-            .one( 'load', function(){
-              iframe_src || history_set( get_fragment() );
-              poll();
-            })
-            
-            // Load Iframe src if specified, otherwise nothing.
-            .attr( 'src', iframe_src || 'javascript:0' )
-            
-            // Append Iframe after the end of the body to prevent unnecessary
-            // initial page scrolling (yes, this works).
-            .insertAfter( 'body' )[0].contentWindow;
-          
-          // Whenever `document.title` changes, update the Iframe's title to
-          // prettify the back/next history menu entries. Since IE sometimes
-          // errors with "Unspecified error" the very first time this is set
-          // (yes, very useful) wrap this with a try/catch block.
-          doc.onpropertychange = function(){
-            try {
-              if ( event.propertyName === 'title' ) {
-                iframe.document.title = doc.title;
-              }
-            } catch(e) {}
-          };
-          
-        }
-      };
-      
-      // Override the "stop" method since an IE6/7 Iframe was created. Even
-      // if there are no longer any bound event handlers, the polling loop
-      // is still necessary for back/next to work at all!
-      self.stop = fn_retval;
-      
-      // Get history by looking at the hidden Iframe's location.hash.
-      history_get = function() {
-        return get_fragment( iframe.location.href );
-      };
-      
-      // Set a new history item by opening and then closing the Iframe
-      // document, *then* setting its location.hash. If document.domain has
-      // been set, update that as well.
-      history_set = function( hash, history_hash ) {
-        var iframe_doc = iframe.document,
-          domain = $.fn[ str_hashchange ].domain;
-        
-        if ( hash !== history_hash ) {
-          // Update Iframe with any initial `document.title` that might be set.
-          iframe_doc.title = doc.title;
-          
-          // Opening the Iframe's document after it has been closed is what
-          // actually adds a history entry.
-          iframe_doc.open();
-          
-          // Set document.domain for the Iframe document as well, if necessary.
-          domain && iframe_doc.write( '<script>document.domain="' + domain + '"</script>' );
-          
-          iframe_doc.close();
-          
-          // Update the Iframe's hash, for great justice.
-          iframe.location.hash = hash;
-        }
-      };
-      
-    })();
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // ^^^^^^^^^^^^^^^^^^^ REMOVE IF NOT SUPPORTING IE6/7/8 ^^^^^^^^^^^^^^^^^^^
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-    return self;
-  })();
-  
-})(jQuery,this);

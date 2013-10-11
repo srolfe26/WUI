@@ -283,39 +283,51 @@
 	Wui.transformJavaDoc = function(documentation){
 		var m		= documentation.doc || documentation,
 			keyInfo = [],
-			engine  = new Wui.Template({template:'<p><span class="wui-doc-param">{title}</span><span class="wui-doc-param-val">{val}</span></p>'}),
 			key	= $('<span>');
 		
-		//get parameters
-		m = m.replace(/\@param\s+\{([^\}]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
-			keyInfo.push({title:'Param', val:'<span class="wui-doc-var-name">'+varname+'</span><span class="wui-doc-var-type">' +dt+ '</span><span class="wui-doc-var-desc">' +desc+ '</span>'});
-			return '';
-		});
-		//return & throws
-		m = m.replace(/\@return\s+([^\n]+)/,function(mch,returns){ keyInfo.push({title:'Returns', val:returns}); return ''; })
-			 .replace(/\@throws\s+([^\n]+)/,function(mch,returns){ keyInfo.push({title:'Throws', val:returns}); return ''; });
+		m = m
+			//get parameters
+			.replace(/\@param\s+\{([^\}]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
+				keyInfo.push({title:'Param', dt:dt, val:desc, varname:varname});
+				return '';
+			})
+			//return & throws
+			.replace(/\@return\s+([^\n]+)/,function(mch,returns){ keyInfo.push({title:'Returns', val:returns, dt:'', varname:''}); return ''; })
+			.replace(/\@throws\s+([^\n]+)/,function(mch,returns){ keyInfo.push({title:'Throws', val:returns, dt:'', varname:''}); return ''; })
+			// get Author Info
+			.replace(/\@author\s+([^\n]+)/,function(m,author){
+				var email = null,
+					author = $.trim(author.replace(/\(([^\)]+)\)/, function(mch,eml){ email = eml; return ''; })),
+					auth = (email !== null) ? '<a href="mailto:' +email+ '">' +author+ '</a>' : '<span>' +author+ '</span>';
+					
+				keyInfo.push({title:'Author', val:auth, dt:'', varname:''});
+				return '';
+			})
+			//get creation date & Flags
+			.replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver}); return ''; })
+			.replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate}); return ''; })
+			.replace(/\@deprecated/,function(mch){ key.append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
+			.replace(/\@private/,function(mch){ key.append('<span class="wui-doc-private">private</span>'); return ''; })
+			.replace(/\@required/,function(mch){ key.append('<span class="wui-doc-required"></span>'); return ''; })
+			.replace(/\@awesome/,function(mch){ key.append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
 		
-		// get Author Info
-		m = m.replace(/\@author\s+([^\n]+)/,function(m,author){
-			var email = null;
-			author = author.replace(/\(([^\)]+)\)/, function(mch,eml){ email = eml; return ''; });
-			var auth = (email !== null) ? '<a href="mailto:' +email+ '">' +$.trim(author)+ '</a>' : '<span>' +$.trim(author)+ '</span>';
-			keyInfo.push({title:'Author', val:auth});
-			return '';
-		});
-		
-		//get creation date & Flags
-		m = m.replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver}); return ''; })
-			 .replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate}); return ''; })
-			 .replace(/\@deprecated/,function(mch){ key.append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
-			 .replace(/\@private/,function(mch){ key.append('<span class="wui-doc-private">private</span>'); return ''; })
-			 .replace(/\@required/,function(mch){ key.append('<span class="wui-doc-required"></span>'); return ''; })
-			 .replace(/\@awesome/,function(mch){ key.append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
-		
-		$(keyInfo).each(function(o){
-			engine.data = keyInfo[o];
-			key.append(engine.make());
-		});
+		if(keyInfo.length){
+			var tbl = new Wui.DataList({
+				el:			$('<table><tbody></tbody></table>'),
+				init:		function(){
+								this.elAlias = this.el.children('tbody');						
+							},
+				appendTo:	key,
+				data:		keyInfo,
+				template:	'<tr>' +
+								'<td class="wui-doc-param">{title}</td>' + 
+								'{((dt && varname && dt.length && varname.length) ? "<td class=\'wui-doc-var-type\'>" +dt+ "</td>' +
+								'<td class=\'wui-doc-var-name\'>" +varname+ "</td>' +
+								'<td class=\'wui-doc-var-desc\'>" : "<td colspan=\'3\' class=\'wui-doc-var-desc\'>")}{val}</td>' +
+							'</tr>'
+			});
+			tbl.place();
+		}
 		
 		var pre = $(Wui.HTMLifyCode(m.replace(/\*/g,'')));
 		var p = $('<p>').addClass('wui-doc-evershow').html(

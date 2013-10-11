@@ -2,17 +2,17 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-	<title>WUI 1.1 Kitchen Sink</title>
+	<title>WUI 1.1 Docs</title>
 
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
+    <script type="text/javascript" src="js/wui-1-1-min.js"></script>
 
 	<style type="text/css">
 		body {margin:0; padding:0;}
 		.wui-kitchen-sink > .wui-pane-wrap > .wui-pane-content > .wui-pane, .iframe-pane {float:left;}
 	</style>
 
-	<script type="text/javascript" src="js/wui-1-1.js"></script>
+	<script type="text/javascript" src="js/wui-1-1-min.js"></script>
 	
 	<script type="text/javascript">
 		var kSink = {};
@@ -28,7 +28,7 @@
 			
 			kSink.main = new Wui.Pane({
 				height:		'100%',
-				title:		'Wui 1.1 Kitchen Sink',
+				title:		'Wui 1.1 Docs',
 				appendTo: 	$('body'),
 				fitDimension:'width',
 				cls:		'wui-kitchen-sink',
@@ -85,7 +85,7 @@
 			});
 			kSink.main.place();
 			
-			kSink.selectorGrid.el.on('recordclick',function(event,grid,el,rec){
+			kSink.selectorGrid.el.on('select',function(event,grid,el,rec){
 				if(!rec.target)	kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
 				else			window.location = rec.link;
 			});
