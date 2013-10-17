@@ -574,9 +574,15 @@ var Wui = Wui || {};
 							}
 						},
 		/**
-		Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+		@param {object} params	Params to be set
+		Can be used as is to set parameters before an AJAX load, or it can also be used as an event hook and overridden.
+		This method is called from loadData with its arguments passed on, so arguments passed to load data will be sent here. 
+		See loadData().
 		*/
-		setParams:		function(){},
+		setParams:		function(params){
+							if(params && typeof params === 'object')
+								$.extend(this.params,params);
+						},
 		
 		/**
 		@param {array} d Data to be set on the ojbect

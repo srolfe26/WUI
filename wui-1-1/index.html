@@ -5,14 +5,17 @@
 	<title>WUI 1.1 Docs</title>
 
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
-    <script type="text/javascript" src="js/wui-1-1-min.js"></script>
+    <script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/forms.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	<script type="text/javascript" src="js/docs.js"></script>
+	<script type="text/javascript" src="js/state.js"></script>
 
 	<style type="text/css">
 		body {margin:0; padding:0;}
 		.wui-kitchen-sink > .wui-pane-wrap > .wui-pane-content > .wui-pane, .iframe-pane {float:left;}
 	</style>
-
-	<script type="text/javascript" src="js/wui-1-1-min.js"></script>
 	
 	<script type="text/javascript">
 		var kSink = {};
@@ -21,7 +24,7 @@
 			//create state machine
 			kSink.sm = new Wui.stateMachine();
 			
-			kSink.sm.setChangeAction(function(state){
+			kSink.sm.addChangeMethod(function(state){
 				var page = kSink.sm.getParam('main','t');
 				if(page) setPage(page);	
 			});

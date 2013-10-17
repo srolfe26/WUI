@@ -67,7 +67,7 @@ body.about-page {margin:0; padding:0;}
 	-webkit-transition: all 0.1s linear; -moz-transition: all 0.1s linear; -o-transition: all 0.1s linear; transition: all 0.1s linear;
 }
 .wui-test-smaller {width:80px;}
-.wui-test-results th { background-color:#777; color:#fff; font-weight: normal; }
+.wui-test-results th { background-color:#777; color:#fff; font-weight: normal;line-height: 1.5; text-transform: capitalize; }
 .wui-test-results td.pass { background-color: #33B42D; color:#fff; }
 .wui-test-results td.fail { background-color: #B42D33; color:#fff; font-weight:bold; }
 
@@ -147,7 +147,7 @@ body.about-page {margin:0; padding:0;}
     .show-doc .doc-info > table, .show-doc .doc-info > table tr, .show-doc .doc-info > table td { font-size: 1em; font-weight: auto; position: static; text-transform: none; color:#333;}
     .wui-test-results .show-doc table {display:table;}
     	.wui-test-results .show-doc table tr {display: table-row;}
-    	.wui-test-results .show-doc table td {display: table-cell; background-color:transparent; padding-left:1em;}
+    	.wui-test-results .show-doc table td {display: table-cell; background-color:transparent; padding-left:1em; line-height: 1.5;}
 		.wui-test-results .show-doc table td.wui-doc-var-name:after {content:""}
 		
     .wui-test-results .show-doc .wui-doc-param {font-weight:bold; color:#369; text-align: right;}

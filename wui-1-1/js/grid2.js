@@ -64,9 +64,6 @@
 			/** Tabs default to the right side of the pane unless this is true. */
 			tabsLeft:	false,
 			
-			/** A place holder for the currently selected tab. */
-			currentTab:	null,
-			
 			/** Whether to put the tabs on the header or the footer. */
 			tabsBottom:		false,
 			
@@ -131,7 +128,6 @@
 								itm.tab.el.toggleClass('selected', isActive);
 								itm.el.toggleClass('active', isActive);
 								if(isActive){
-									me.currentTab = itm;
 									itm.layout();
 								}
 								if(!supressEvent && isActive)
@@ -201,28 +197,25 @@
 	*/
 	Wui.Grid = function(args){
 		$.extend(this,{
-			/** Determines whether the data in the grid loads automatically. */
+			/** Determines whether the data in the grid loads automatically */
 			autoLoad:	true,
 			
-			/** Array of items that will be added to the footer. */
+			/** Array of items that will be added to the footer */
 			bbar:   		[],
 			
-			/** Event hook fired before the grid columns and rows are made up. */
+			/** Event hook fired before the grid columns and data are made up */
 			beforeMake:		function(){},
 			
-			/** Event hook fired after the grid columns and rows are made up. */
-			afterMake:		function(){},
-			
-			/** Array of items that will make up the columns of the grid table. */
+			/** Array of items that will make up the columns of the grid table */
 			columns: 		[],
 			
-			/** Array of data for the grid. */
+			/** Array of data for the grid */
 			data:			null,
 			
 			/** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
 			defaultDataType:'string',
 			
-			/** Whether multiple rows/records can be selected at once. */
+			/** Whether multiple rows/records can be selected at once */
 			multiSelect:	false,
 			
 			/** 
@@ -577,7 +570,6 @@
 							}
 
 							me.sizeCols();
-							me.afterMake();
 						},
 		/** 
 		@param	{object}	col	An object containing the sort direction and DOM element of the heading
@@ -692,16 +684,15 @@
 							me.scrollToCurrent();
 						},
 						
-		/** Scrolls the grid to the currently selected item. It doesn't work with paging. */			
+		/** Scroll the list to the currently selected item will make the paging wig out! */				
 		scrollToCurrent:function(){
 							var me = this;
 							
 							if(!me.isPaging && me.tbl.find('.wui-selected:first').length){
 								var firstSelect = me.tbl.find('.wui-selected:first'),
-									ofstP = firstSelect.offsetParent(),
-									offset = (function(){ var r = 0; firstSelect.prevAll().each(function(){ r += $(this).outerHeight() }); return  r; })();
-								
-								ofstP.animate({scrollTop:offset },500);
+									ofstP = firstSelect.offsetParent();
+								ofstP.animate({scrollTop:0},0);
+								ofstP.animate({scrollTop: firstSelect.offset().top - ofstP.offset().top },500);
 							}
 						},		
 						

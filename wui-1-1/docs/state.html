@@ -48,10 +48,10 @@
 				var newState = [{view:'AdminView', params:{mode:'edit',wid:'11557'}}];
 				ts.pause();
 				
-				sm.setChangeAction(function(state){
+				sm.addChangeMethod(function(state){
 					ts.resume();
 					ts.test("Set state with Object",function(){
-						// newState = {AdminView:{mode:'edit',wid:'11557'}};
+						newState = {AdminView:{mode:'edit',wid:'11557'}};
 						return sm.stringify(state) === sm.stringify(newState);
 					});
 				});
@@ -63,10 +63,10 @@
 				var newState = 'AdminView?mode=edit&wid=11557';
 				ts.pause();
 				
-				sm.setChangeAction(function(state){
+				sm.addChangeMethod(function(state){
 					ts.resume();
 					ts.test("Set state with String",function(){
-						// newState = 'AdminView?mode=edit&wid=11557';
+						newState = 'AdminView?mode=edit&wid=11557';
 						return sm.stringify(state) === newState;
 					});
 				});
@@ -77,7 +77,7 @@
 			ts.test("test setup",function(){
 				ts.pause();
 				
-				sm.setChangeAction(function(state){
+				sm.addChangeMethod(function(state){
 					ts.resume();
 					ts.finalTests();
 				});
@@ -99,9 +99,9 @@
 				});
 				
 				ts.test("Show Animation",function(){
-					$('h1').after($('<div>').addClass('state-man'));
+					$('#wui-doc-example').append($('<div>').addClass('state-man'));
 					
-					sm.setChangeAction(function(state){
+					sm.addChangeMethod(function(state){
 						ts.resume();
 						$('.state-man').removeClass().addClass('state-man ' + sm.getParam('main','pic'));
 					});

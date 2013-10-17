@@ -173,11 +173,14 @@
 		form values get set to null.
 		*/
 		setData:    function(data){
-	                    if(data)	this.each(function(itm){ 
+	                    if(data){
+									this.setData();
+									this.each(function(itm){ 
 										if(data[itm.name]) 
 											itm.val(data[itm.name]);
 									});
-						else		this.each(function(itm){ itm.val(null); });
+								}
+						else	{	this.each(function(itm){ itm.val(null); }); }
 	                },
 		
 		/** Disable all form fields */
@@ -545,8 +548,7 @@
 					    },
 		getVal:			function(){ return this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null; },
 		setVal:			function(sv){ 
-							this.fieldText(this.value = (sv.length) ? sv : null);
-							
+							this.fieldText(this.value = (sv && sv.length) ? sv : null);
 						}
     });
 
@@ -1806,7 +1808,7 @@
                         $.extend(this.value,sv);
 			        },
 	    val:		function(sv,callback){
-					    Wui.FormField.prototype.apply(this,arguments);
+					    Wui.FormField.prototype.val.apply(this,arguments);
 					    if(this[callback] && typeof this[callback] == 'function') this[callback]();
 				    },
         valChange:  function(){
@@ -1846,7 +1848,7 @@
 		if(content !== undefined) inputs.splice(0,0,{ftype:'Wui.Note', html: content});
 		
 		// create the form and the window
-		var inputFrm = new Wui.Form({ labelPos:'left', items:inputs }),
+		var inputFrm = new Wui.Form({ labelPosition:'left', items:inputs }),
 			Msg = new Wui.Window({
 				title:      msgTitle || 'Input',
 				bbar:		[ 
