@@ -194,7 +194,7 @@
 															}
 											});
 										list.place();
-										list.el.on('select',function(e,obj,row){ row.addClass('show-doc'); });
+										list.el.on('wuiselect',function(e,obj,row){ row.addClass('show-doc'); });
 										list.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });	
 									}
 								},

@@ -121,7 +121,7 @@ var Wui = Wui || {};
 	This function will size items relative to each other via a 'fit' value, as well as percentages and fixed values.
 	*/
 	Wui.fit = function(collection){
-		var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
+		var dim = 'width'; //var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
 		
 		// Ensure the collection is an array of Wui Objects
 		if(collection instanceof Array && collection.length > 0){
@@ -272,7 +272,8 @@ var Wui = Wui || {};
                         var m = m || this;
                         
                         if(m.el && m.el.addClass){
-                        	if(m.attr)	m.el.attr(m.attr);
+                        	// Add attributes if defined
+							try{ if(m.attr && typeof m.attr == 'object') m.el.attr(m.attr); }catch(e){ }
                         	
                         	// calculate dimensions
                         	if(Wui.isNumeric(m.height) && m.height >= 0)	m.el.css({height: m.height});
@@ -386,8 +387,11 @@ var Wui = Wui || {};
 						if(me.items === undefined) me.items = [];
 						for(var i in arguments){
 							arguments[i].parent = me;
-							if(arguments[i].place)	arguments[i].place();
-							else					me.addToDOM(arguments[i]);
+							if(arguments[i].place)		arguments[i].place();
+							else						me.addToDOM(arguments[i]);
+							
+							if(arguments[i].onRender)	arguments[i].onRender();
+							if(arguments[i].layout)		arguments[i].layout();
 						}		
 						
 						return Array.prototype.push.apply(me.items,arguments);
@@ -707,9 +711,9 @@ var Wui = Wui || {};
 	
 	
 	/** WUI Data List
-     @event		select		A data template is selected ( DataList, el, record )
-	 @event		change		The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
-	 @event		deselect	A selected item is clicked again, and thus deselected ( DataList, el, record )
+     @event		wuiselect		A data template is selected ( DataList, el, record )
+	 @event		wuichange		The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
+	 @event		wuideselect		A selected item is clicked again, and thus deselected ( DataList, el, record )
 	 
 	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
      @creation   2013-09-30
@@ -751,8 +755,8 @@ var Wui = Wui || {};
 						me.selected = itm;
 						
 						// Fire different events depending whether there was already a record selected
-						me.el.trigger($.Event('change'), [me, itm.el, itm.rec, oldEl, oldRec]);
-						me.el.trigger($.Event('select'), [me, itm.el, itm.rec]);
+						me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, oldEl, oldRec]);
+						me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
 					},
 		
 		/**
@@ -963,11 +967,11 @@ var Wui = Wui || {};
 											   )
 										   );
 							me.sureEl	 = me.el;
-							me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, appendTo:me.el});
+							me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, parent:me, appendTo:me.el});
 		                    			   me.header.elAlias = me.header.el.children('.wui-h-cntnt');
 		                    			   me.header.title = me.header.el.children('h1');
 		                    			   
-		                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, appendTo:me.el});
+		                    me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, parent:me, appendTo:me.el});
 		                    me.elAlias	 = me.container;
 							
 							// Set  border if applicable
@@ -988,6 +992,7 @@ var Wui = Wui || {};
 							this.sureEl.css({borderBottomWidth:0});
 							this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
 							this.footer.place();
+							this.footer.callRender();
 						},
 		
 		/** Places the header on the pane and adjusts the content as necessary. */
@@ -996,6 +1001,7 @@ var Wui = Wui || {};
 							this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
 							this.setTitleAlign();
 							this.header.place();
+							this.header.callRender();
 						},
 		
 		/** Changes the title on the pane. */
@@ -1024,9 +1030,13 @@ var Wui = Wui || {};
 								if(!me.parent) me.layout();
 							}
 							
-							// Set focus to the bottom right most button in the pane
-							if(this.footer.items.length)
+							if(me.disabled){
+								// If the pane is disabled then it disables it
+								me.disable();
+							}else if(this.footer.items.length){
+								// Set focus to the bottom right most button in the pane
 								this.footer.items[this.footer.items.length - 1].el.focus();
+							}
 						}
 	});
 	
@@ -1084,7 +1094,7 @@ var Wui = Wui || {};
 		/** Disables the window by masking it and disabling all buttons besides the close window button. */
 		disable:	function(){
 						Wui.Pane.prototype.disable.call(this);
-						this.winClose.enable(); // Enable the close button for the window - esp. important if its modal
+						this.closeBtn.enable(); // Enable the close button for the window - esp. important if its modal
 					},
 					
 		/** Method that will run immediately when the object is constructed. */
@@ -1099,7 +1109,7 @@ var Wui = Wui || {};
             	        }
             	        
             	        // Add close buttons where appropriate
-            	        me.tbar.push(new Wui.Button({click:function(){me.close()}, text:'X'}));
+            	        me.tbar.push(me.closeBtn = new Wui.Button({click:function(){me.close()}, text:'X'}));
             	        if(me.bbar.length == 0) me.bbar = [new Wui.Button({click:function(){me.close()}, text:'Close'})];
             	        
             	        // Calls the parent init function

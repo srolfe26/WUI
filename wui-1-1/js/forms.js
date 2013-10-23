@@ -168,19 +168,20 @@
 	                    return true;
 					},
 		/**
-		@param {object} [data] A collection of data to be set on the form
+		@param {object} 	[data]			A collection of data to be set on the form
+		@param {boolean}	[fireEvents]	A boolean value that if set to false will suppress events. 
 		Sets form fields with names matching keys in passed in data. If data is not defined all
 		form values get set to null.
 		*/
-		setData:    function(data){
+		setData:    function(data,fireEvents){
 	                    if(data){
 									this.setData();
 									this.each(function(itm){ 
 										if(data[itm.name]) 
-											itm.val(data[itm.name]);
+											itm.val(data[itm.name],fireEvents);
 									});
 								}
-						else	{	this.each(function(itm){ itm.val(null); }); }
+						else	{	this.each(function(itm){ itm.val(null,fireEvents); }); }
 	                },
 		
 		/** Disable all form fields */
@@ -225,12 +226,14 @@
 	Wui.Note = function(args){ 
 		$.extend(this,{
 			/** The HTML to be placed in the note */
-			html:''
+			html:'',
+			/** The text-align property of the note */
+			align: null
 		},args); this.init();
 	};
 	Wui.Note.prototype = $.extend(new Wui.O(),{
 		/** Method that will run immediately when the object is constructed. */
-		init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note'); }
+		init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note ' + (this.align) ? this.align : ''); }
     });
     
 	
@@ -300,7 +303,7 @@
 			/** A regular expression whereby to validate a field's input. May be pre-empted by other validation. See validate() method. */
 			validRegEx:		null,
 			
-			/** A function to validate field input. */
+			/** A function to validate field input. This function is passed the value of the field, for example: validTest: function(val){ return val == 3; } */
 			validTest:  	null
 		},args);
 	};
@@ -311,7 +314,7 @@
 		*/
 		init:  		function(){
                         var me = this;
-						me.value = null;
+						me.value = me.hasOwnProperty('value') ? me.value : null;
                         me.el = $('<div>').addClass('wui-fe');
 						
 						if(me.label && me.label.length > 0){
@@ -322,8 +325,11 @@
 						return me.el;
                     },
 					
-		/** Will disable the object if its disabled property is set to true */
-		onRender:	function(){ if(this.disabled) this.disable(); },
+		/** Will disable the object if its disabled property is set to true and set a value on the field if one has been defined. */
+		onRender:	function(){
+						if(this.disabled)					this.disable();
+						if(this.hasOwnProperty('value'))	this.val(this.value,false);
+					},
 		/** Disables the field so the user cannot interact with it. */
         disable:	function(){
 				        this.disabled = true;
@@ -363,7 +369,7 @@
                         
                         // If a custom test is defined 
                         if(me.validTest && typeof me.validTest == 'function')
-                        	if(me.validTest() == false)
+                        	if(me.validTest(me.val()) == false)
                         		return parentThrow();
                         						
                         // If a regular expression is defined for a test, this will be tested first
@@ -395,8 +401,11 @@
 						}else{
 							// Set the actual value of the item
 							this.setVal.apply(this,arguments);
+							
 							// Call change listeners
-							this.setChanged();
+							if(arguments[1] !== false)
+								this.setChanged();
+							
 							// Return the passed value(s)
 							return arguments;
 						}
@@ -481,7 +490,7 @@
 	            			Wui.FormField.prototype.init.call(me);
 	            			
 	            			if(me.blankText && me.blankText.length)	me.setBlankText(me.blankText);
-	            			
+							
 	                        me.append(Wui.Text.prototype.setListeners.call(me,me));
 	                    },
 						
@@ -548,7 +557,7 @@
 					    },
 		getVal:			function(){ return this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null; },
 		setVal:			function(sv){ 
-							this.fieldText(this.value = (sv && sv.length) ? sv : null);
+							this.fieldText(this.value = (sv && $.trim(sv).length) ? sv : null);
 						}
     });
 
@@ -760,15 +769,16 @@
 						else							{ me.value = [sv]; }
 						
 						if(me.options.length == 1 && (typeof sv == 'number' || typeof sv == 'string')){
-							me.el.find('input').attr('checked',!!parseInt(sv)).siblings('li').toggleClass('checked',!!parseInt(sv));
+							me.el.find('input').prop('checked',!!parseInt(sv)).siblings('li').toggleClass('checked',!!parseInt(sv));
 						}else{
 							// clear out all checkboxes
 							me.el.find('input').attr('checked',false);
 							me.el.find('label').removeClass('checked');
 							
 							// set the ones passed in
-							for(var i in me.value) 
-								me.el.find('input[value=' +me.value[i]+ ']').attr('checked',true).siblings('li').addClass('checked');
+							for(var i in me.value){
+								me.el.find('input[value=' +me.value[i]+ ']').prop('checked',true).siblings('li').addClass('checked');
+							}
 						}
 					},
 		/** The check-box will validate false if the value is 0 and the box is required.  */
@@ -1604,10 +1614,14 @@
                                      return '';
                                  }
                              })
-                             .replace(/(\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|-)+\b)/g,function(m,f){
+                             .replace(/(\d{1,2})[ -]+([a-z]{3,10})([ -]*)/, function(m,f,s,t){                    // Translate 'DD MMM' to 'MM/DD'
+                                 return ((($.inArray(s,me.months) > -1) ? $.inArray(s,me.months) : 
+                                     $.inArray(s,me.shortMonths)) + 1) + '/' + f + t.replace('-',' ');
+                             })
+							 .replace(/(\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|-)+\b)/g,function(m,f){
                                  return me.num2Dec(f);                                                            // Converts number text to decimals
                              })
-                             .replace(/([a-z]{3,10}) (\d{1,2})[,]*/, function(m,f,s){                             // Translate 'Month DD' to 'MM/DD'
+							 .replace(/([a-z]{3,10}) (\d{1,2})[,]*/, function(m,f,s){                             // Translate 'Month DD' to 'MM/DD'
                                  return ((($.inArray(f,me.months) > -1) ? $.inArray(f,me.months) : 
                                      $.inArray(f,me.shortMonths)) + 1) + '/' + s;
                              })
