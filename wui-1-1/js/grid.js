@@ -705,7 +705,9 @@
 							}
 						},		
 						
-		/**  Selects an item on the grid according to a key value pair to be found in a record */
+		/**
+		@return An object containing the grid, row, and record, or undefined if there was no matching row.
+		Selects an item on the grid according to a key value pair to be found in a record */
 		selectItem:		function(kvp){
 							var me = this,
 								key = null,
@@ -719,9 +721,11 @@
 								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
 									me.selectSingle(me.tbl.items[a].el,me.tbl.items[a]);
 									me.el.trigger($.Event('select'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
-									break;
+									return {grid:me, row:me.tbl.items[a].el, rec:me.tbl.items[a].rec};
 								}
 							}
+							
+							return undefined;
 						},
 						
 		/** 

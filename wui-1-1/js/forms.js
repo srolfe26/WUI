@@ -348,7 +348,7 @@
 		Validate will construct an error message based on the following precedence:
 		1. Custom message (invalidMsg)
 		2. The label on the field
-		3. The name attribute of the field (attr: {name: 'n'})
+		3. The name of the field
 		4. Report that "A required field has an improper value."
 		
 		Then, validates a field using the following order of validation precedence:
@@ -364,7 +364,7 @@
                         var me = this,
                         	errMsg = (me.invalidMsg !== null) ? me.invalidMsg : 
                         				(me.label != null ) ? 'A value for \'' +me.label+ '\' is required.' :
-                        					(me.attr !== undefined && me.attr.name !== undefined) ? 'A value for \'' +me.attr.name+ '\' is required.' :
+                        					(me.name !== undefined) ? 'A value for \'' +me.name+ '\' is required.' :
                         						"A required field has an improper value.";
                         
                         // If a custom test is defined 
@@ -907,7 +907,7 @@
 					                            }
 					                        },
 		                        text:		'',
-		                        attr:		{tabindex:-1},
+		                        tabIndex:	-1,
 		                        appendTo:	me.wrapper,
 		                        cls: 		'field-btn dd-switch'
 		                    });
@@ -1770,13 +1770,13 @@
 											me.changeClick(); 
 										},
 								text:   'X',
-								attr:	{tabindex:-1},
+								tabIndex:-1,
 								cls:    'file-change field-btn',
 								parent:	me
 							})
 						);
                         
-						me.upBtn = new Wui.Button({text:'Browse', cls:'field-btn', attr:{tabindex:-1}});
+						me.upBtn = new Wui.Button({text:'Browse', cls:'field-btn', tabIndex:-1 });
 						me.cssByParam(me.upBtn).appendTo(me.wrapper).upload({
                             name:       this.upFieldName,
                             action:     this.upTarget,

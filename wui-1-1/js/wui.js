@@ -260,6 +260,21 @@ var Wui = Wui || {};
 			        	for(var i in me.items) if(me.items[i].callRender) me.items[i].callRender();
 						if(me.afterRender)  me.afterRender();
 			        },
+		
+		/**
+		@param {string} 		name	Name of the HMTL attribute to set
+		@param {string|number} 	val		Value of the given attribute
+		
+		@return True if the val parameter is a valid string or number, else false.
+		
+		Tests whether the passed in value is valid, then uses the jQuery .attr method to apply an attribute to the el of the WUI object.
+		*/
+		applyAttr:	function(name,val){
+						var validVal = (val !== undefined && (typeof val === 'string' || typeof val === 'number'));
+						if(validVal) $(this.el).attr(name,val);
+						return validVal;
+					},
+		
 		/**
 		@param {object} item	A WUI Object, or if undefined, the object that this method is a member of
 		
@@ -272,7 +287,13 @@ var Wui = Wui || {};
                         var m = m || this;
                         
                         if(m.el && m.el.addClass){
-                        	// Add attributes if defined
+                        	if(m.applyAttr){
+								m.applyAttr('id',m.id);
+								m.applyAttr('name',m.name);
+								m.applyAttr('tabindex',m.tabIndex);
+							}
+							
+							// Add attributes if defined
 							try{ if(m.attr && typeof m.attr == 'object') m.el.attr(m.attr); }catch(e){ }
                         	
                         	// calculate dimensions
