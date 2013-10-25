@@ -698,13 +698,17 @@ var Wui = Wui || {};
 		data:		null,
 		
 		/**
+		@param {number} [index] An optional number to make an index available to the record
 		@return A jQuery object containing the template paired with its data
 		Creates the template 
 		*/
-		make:	function(){
+		make:	function(index){
 					var me = this;
 					if(me.data && me.template){
 					    var tplCopy = me.template;
+						
+						if(Wui.isNumeric(index))	$.extend(me.data,{wuiIndex:index});
+						
 	                    return $(
 							tplCopy
 							// replaces straight values
@@ -740,11 +744,14 @@ var Wui = Wui || {};
 	 @event		wuideselect		A selected item is clicked again, and thus deselected ( DataList, el, record )
 	 
 	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-     @creation   2013-09-30
-     @version    1.1
+     @creation   2013-10-25
+     @version    1.1.2
     */
 	Wui.DataList = function(args){
 		$.extend(this, {
+			/** @eventhook Called after the data's DOM elements are made */
+			afterMake:	function(){},
+			
 			/** Determines whether templates are made immediately when the DataList is rendered */
 			autoLoad:	true,
 			
@@ -757,8 +764,11 @@ var Wui = Wui || {};
 			/** Method that will run immediately when the object is constructed. */
 			init:		function(){},
 			
-			/** @eventhook Called after the data's DOM elements are made */
-			afterMake:	function(){}
+			/** Whether multiple rows/records can be selected at once. */
+			multiSelect:	false,
+			
+			/** An array of the currently selected records */
+			selected:		[]
 		}, args);
 		this.init();
 	};
@@ -768,8 +778,8 @@ var Wui = Wui || {};
 		
 		/**
 		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
-		@private
-		Performs mutations and fires listeners when an item is selected
+		@return The item passed in will be returned.
+		Performs mutations and fires listeners when an item is selected @private
 		*/
 		itmSelected:function(itm){
 						var me = this,
@@ -778,12 +788,15 @@ var Wui = Wui || {};
 							oldRec = (alreadySelected) ? alreadySelected.rec : undefined;
 						
 						me.el.find('.wui-selected').removeClass('wui-selected');
+						console.log(itm.el);
 						itm.el.addClass('wui-selected');
 						me.selected = itm;
 						
 						// Fire different events depending whether there was already a record selected
 						me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, oldEl, oldRec]);
 						me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
+						
+						return itm;
 					},
 		
 		/**
@@ -827,15 +840,28 @@ var Wui = Wui || {};
 							holder = $('<div>');
 						
 						for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
-							var rec = me.data = holdingData[i];
-							holder.append(me.createItem({el:Wui.Template.prototype.make.call(me), rec:rec}));
+							var rec = me.data = holdingData[i],
+								itm = {el:Wui.Template.prototype.make.call(me, i), rec:rec};
+								
+							Array.prototype.push.call(me.items,itm);
+							holder.append(me.createItem(itm));
 						}
 						
+						// Clear out existing items and add new to the DOM
 						me.clear();
 						me.append(holder.children().unwrap());
 						me.data = holdingData;
+						
+						// Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
+						// object has been manually run
+						me.autoLoad = true;
+						
+						// Event hook and event
 						me.afterMake();
 						me.el.trigger($.Event('refresh'),[me,me.data]);
+						
+						// Reset selected items if any
+						me.resetSelect();
 					},
 					
 		/** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
@@ -846,14 +872,60 @@ var Wui = Wui || {};
 						}
 					},
 					
-		/** Reruns the make() method. */
-		refresh:	function(){ this.onRender(); }
+		/** Refreshes the DataList to match the data or reload it from the server */
+		refresh:	function(){ this.onRender(); },
+		
+		/**  Reselects previously selected rows after a data change or sort. Scrolls to the first currently selected row. */
+		resetSelect:function(){
+						var me = this,
+							selList = me.selected;
+						me.selected = [];
+						
+						$.each(selList,function(i,sel){
+							me.each(function(itm,i){
+								if(JSON.stringify(itm.rec) === JSON.stringify(sel.rec)){
+									if(me.multiSelect){
+										itm.el.addClass('wui-selected');
+										me.selected.push(itm);
+									}else{
+										console.log(me.itmSelected(itm));
+									}
+								}
+							});
+						});
+
+						me.scrollToCurrent();
+					},
+						
+		/** Scrolls the grid to the currently selected item. */			
+		scrollToCurrent:function(){
+							var me = this,
+								firstSelect = me.el.find('.wui-selected:first'),
+								ofstP = firstSelect.offsetParent(),
+								offset = (function(){ var r = 0; firstSelect.prevAll().each(function(){ r += $(this).outerHeight() }); return  r; })();
+							ofstP.animate({scrollTop:offset },500);
+						},
+						
+		/**
+		@param	{string} key The data item to look for
+		@param	{string|number} val The value to look for
+		@return An object containing the grid, row, and record, or undefined if there was no matching row.
+		Selects an item according to the key value pair to be found in a record. */
+		selectItem:		function(key,val){
+							var me = this, retVal = undefined;
+							me.each(function(itm,i){
+								if(itm.rec[key] && itm.rec[key] == val)
+									return retVal = me.itmSelected(itm);
+							});
+							me.scrollToCurrent();
+							return retVal;
+						}
 	});
+	
 	
 	
 	/**
      @event		wuibtnclick		Fires when the button is pressed and not disabled. Avoided using the standard 'click' event for this reason ( Button Object )
-	 
 	 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
     */
 	Wui.Button = function(args){

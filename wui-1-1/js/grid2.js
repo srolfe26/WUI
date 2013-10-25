@@ -12,12 +12,13 @@
 		init:		function(){
 						var me = this;
 						
+						// Set the DataList autoload to false so that data isn't loaded until after columns and loadMask
+						me.autoLoad = false;
+						me.disabled = true;
+						
 						// Set up container
 						Wui.Pane.prototype.init.call(me);
 						me.el.addClass('wui-grid');
-						
-						// Set the DataList autoload to false so that data isn't loaded until after columns
-						me.autoLoad = false;
 						
 						// Add grid specific DOM elements and reset elAlias
 						me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
@@ -54,9 +55,8 @@
 		renderColumn:function(col,idx){
 						var me = this;
 						
-						// 
 						me.cols.push(
-							col = $.extend(col,{
+							$.extend(col,{
 								dataType:	col.dataType || me.defaultDataType,
 								fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
 								cls:		col.cls || '',
@@ -69,7 +69,7 @@
 											.resizable({
 												stop: function(){me.sizeCols();}
 											})
-											.click(function(){})
+											.click(function(){ me.sortList(col); })
 							})
 						);
 						
@@ -83,14 +83,25 @@
 						
 						// clear column list
 						me.cols = [];
+						me.items = [];
 						
 						// clear template
-						me.template = '<tr>';
+						me.template = '<tr class="{((wuiIndex % 2 == 0) ? \'even\' : \'odd\')}">';
 						
 						// apply columns on grid
 						$.each(me.columns,function(i,col){
 							// Add to the template string based on column info
 							me.template += '<td><div>' +((col.dataItem) ? '{' +col.dataItem+ '}' : '')+ '</div></td>';
+							
+							// Deal with vertical columns - forces them to be 48px wide
+							if(col.vertical){
+								me.el.addClass('has-vert-columns');
+								if(col.cls)	col.cls += ' vert-col';
+								else		col.cls = 'vert-col';
+								
+								col.width = 48;
+								delete col.fit;
+							}
 							
 							// Add column to cols array
 							me.renderColumn(col,i);
@@ -103,45 +114,139 @@
 					},
 					
 		onRender:	function(){
+						//Wui.Pane.prototype.onRender.call(this);
+						Wui.DataList.prototype.onRender.call(this);
 						this.posDataWin();
 					},
 		
-		
 		afterMake:	function(){
 						this.sizeCols();
+						if(this.disabled) this.enable();
 					},
 		
-		/** 
-		Calculates the width of each of the columns as they presently are.
-		@private
-		*/
-		calcColWidth:	function (){
-							var tcw = 0;
-							this.heading.children().each(function(){ tcw += $(this).outerWidth(); });
-							return tcw;
-						},
-		
-		/** 
-		Size up the columns of the table to match the headings
-		@private
-		*/
+		/** Size up the columns of the table to match the headings @private */
 		sizeCols:		function (){
 							var me = this;
-							Wui.fit(me.cols,'width',true);
-							me.tbl.css({width:me.calcColWidth()});
-							$.each(me.cols,function(i,col){
-								me.tbl.find('td:eq(' +i+ ')').width(col.el.outerWidth() - 3); // 2 accounts for borders
-							});
+							Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * (me.total + 1) > me.tblContainer.height()));
+							me.tbl.css({width:'100%'});
+							for(var i = 0; i < me.cols.length; i++){
+								me.tbl.find('td:eq(' +i+ ')').css({width:me.cols[i].el.outerWidth() - ((i == 0 || i == me.cols.length - 1) ? 2 : 1)}); // account for table borders
+							}
 						},
 				
-		/** 
-		Positions the height and width of the data table's container
-		@private
-		*/
+		/** Positions the height and width of the data table's container @private */
 		posDataWin:		function(){
 							var hh = this.headingContainer.height() - 1;
 							this.tblContainer.css({height:this.container.height() - hh, top:hh});
-						}
+						},
+		
+		/** 
+		@param	{object}	col	An object containing the sort direction and DOM element of the heading
+		@param	{string}	dir	The direction of the sort
+		Manages the sorters for the grid by keeping them in an array. 
+		*/
+		mngSorters:		function(col,dir){
+							var me = this,
+								sortClasses = ['one','two','three','four','five'];
+							if(dir !== undefined){
+								col.sortDir = dir;
+								me.sorters.push(col);
+							}else{
+								if(col.sortDir){
+									if(col.sortDir == 'desc'){
+										delete col.sortDir;
+										col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+										
+										$.each(me.sorters,function(i,itm){
+											if(itm == col)	me.sorters.splice(i,1);
+										});
+									}else{
+										col.sortDir = 'desc';
+									}
+								}else{
+									// Can't sort on more than 5 columns
+									if(me.sorters.length > 5){
+										col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+										return false;
+									}
+									
+									col.sortDir = 'asc';
+									me.sorters.push(col);
+								}
+							}
+								
+							$.each(me.sorters,function(i,itm){
+								itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
+							});
+						},
+						
+		/**
+		@param	{object}	Column object associated with a particular column element
+		Sort the grid based on the values of one or more columns. If the grid is paging
+		then sort remotely.
+		*/
+		sortList:		function(col) {
+							var me = this;
+							
+							me.mngSorters(col);
+							
+							// Sort the list
+							var listitems = me.items;
+							listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+	
+							me.tbl.detach();
+							// Place items and reset alternate coloring
+							$.each(listitems, function(idx, row) { 
+								var isEven = idx % 2 == 0;
+								me.tbl.append(row.el.toggleClass('even',isEven).toggleClass('odd',!isEven));
+							});
+							me.tbl.appendTo(me.tblContainer);
+
+							me.sizeCols();
+							me.resetSelect();
+						},
+						
+		/** 
+		Recursive function for sorting on multiple columns @private
+		@param {number}	depth	Depth of the recursive call
+		@param {number}	a		First item to compare
+		@param {number}	b		Second item to compare
+		
+		@return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+		*/
+		doSort:			function(depth,a,b){
+							var me = this;
+							if(me.sorters.length > 0){
+								var col = me.sorters[depth],
+									compA = a.rec[col.dataItem],
+									compB = b.rec[col.dataItem];
+									
+								//get the direction of the second sort
+								var srtVal = (col.sortDir == 'asc') ? 1 : -1;
+								
+								// perform the comparison based on 
+								var compare = 0;
+								switch(col.dataType){
+									case 'date':
+										compA = new Date(compA);
+										compB = new Date(compB);
+										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
+										break;
+									case 'numeric':
+										compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
+										compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
+										compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
+										break;
+									default:
+										compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
+								}
+								
+								if(compare != 0 || me.sorters[depth + 1] === undefined)	return compare * srtVal;
+								else													return me.doSort(depth + 1,a,b);
+							}else{
+								return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
+							}
+						},
 	});
 	
 	
@@ -245,13 +350,13 @@
 		*/
 		addRows:		function(source){
 							var me = this;
-							me.tbl.items = [];
+							me.items = [];
 							me.tbl.children().remove();
 							
 							$.each(source,function(idx,dataItem){
 								me.tplt.data = dataItem;
 								var a = {el:me.tplt.make(), rec:dataItem, originalSrt:idx};
-								me.tbl.items.push(a);
+								me.items.push(a);
 								
 								// Perform renderers
 								$.each(me.renderers,function(idx, r){
@@ -565,7 +670,7 @@
 						},
 		/** 
 		@param	{object}	col	An object containing the sort direction and DOM element of the heading
-		#param	{string}	dir	The direction of the sort
+		@param	{string}	dir	The direction of the sort
 		Manages the sorters for the grid by keeping them in an array. 
 		*/
 		mngSorters:		function(col,dir){
@@ -661,7 +766,7 @@
 							me.selected = [];
 							
 							$.each(selList,function(i,sel){
-								$.each(me.tbl.items,function(i,itm){
+								$.each(me.items,function(i,itm){
 									if(JSON.stringify(itm.rec) === JSON.stringify(sel.rec)){
 										if(me.multiSelect){
 											itm.el.addClass('wui-selected');
