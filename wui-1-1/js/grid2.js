@@ -1,162 +1,150 @@
 ﻿(function($) {
-	/** 
-	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	
-	Creates a Wui layout - Wui layouts are meant to be heavily CSS dependent 
-	by defining objects with names that the WUI can use, but leaving all styles
-	to the CSS, unlike simply using Wui.fit().
-	
-	Child items in a Wui.Layout must have an attribute 'target' with a name of
-	one of the objects in the targets array.
-	*/
-	Wui.Layout = function(args){ 
-		$.extend(this, {
-			/** An array of items that will be added to the footer */
-			bbar:   [],
-			
-			/** An array of named items with CSS properties defined */
-			targets:[],
-			
-			/** An array of items that will be added to the header */
-			tbar:   []
-		}, args); 
-		this.init(); 
-	}
-	Wui.Layout.prototype = $.extend(new Wui.Pane(),{
-		/** Method that will run immediately when the object is constructed. Lays out targets.*/
-		init:			function(){
-							var me = this;
-							me.itemsHolder = me.items;
-							
-							$.each(me.targets, function(i,t){ me[t.name] = t = new Wui.O(t); t.el.css('overflow','auto') });
-							me.items = me.targets;
-							Wui.Pane.prototype.init.call(me);
-
-						},
-		
-		/** Appends items to targets */
-		onRender:		function(){
-							var me = this;
-							me.items = me.itemsHolder;
-							$.each(me.itemsHolder,function(i,itm){
-								itm.appendTo = me[itm.target].el;
-							});
-							me.push.apply(me,me.itemsHolder);
-						}
-	});
-	
-	
-	/** 
-	@event		tabchange When a tab changes (tab pane, tab button, tab item)
-	
-	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	
-	Tab pane
-	*/
-	Wui.Tabs = function(args){ 
+	Wui.Grid2 = function(args){
 		$.extend(this,{
-			/** An array of items that will be added to the footer */
-			bbar:   [],
-			
-			/** An array of items that will be added to the content */
-			items:	[],
-			
-			/** Tabs default to the right side of the pane unless this is true. */
-			tabsLeft:	false,
-			
-			/** Whether to put the tabs on the header or the footer. */
-			tabsBottom:		false,
-			
-			/** Config to place on child items of WUI tabs to make their heading not show up */
-			tabsHideHeader: null,
-			
-			/** An array of items that will be added to the header */
-			tbar:	[]
+			colUrl:			null,
+			colParams:		{},
+			/** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
+			defaultDataType:'string',
 		},args); 
 		this.init();
-	}
-	Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
-		/** Method that will run immediately when the object is constructed. Lays out targets. */
-		init:			function(){
-							if(this.title === null)	this.title = '';
-							Wui.Pane.prototype.init.call(this);
+	};
+	Wui.Grid2.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
+		init:		function(){
+						var me = this;
+						
+						// Set up container
+						Wui.Pane.prototype.init.call(me);
+						me.el.addClass('wui-grid');
+						
+						// Set the DataList autoload to false so that data isn't loaded until after columns
+						me.autoLoad = false;
+						
+						// Add grid specific DOM elements and reset elAlias
+						me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
+						me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh').appendTo(me.elAlias);
+						me.elAlias = me.tbl = me.tblContainer.children('table');
+						me.heading = me.headingContainer.children('ul');
+						
+						// columns and sorting on multiple columns
+						me.cols = [];
+						me.sorters = [];
+						
+						// Start with getting the columns - Many methods waterfall from here
+						me.getColumns();
+					},
+		
+		/** Verify that columns have been defined on the grid, or that they are available remotely */
+		getColumns: function(){
+						var me = this;
+						
+						if(me.columns.length){
+							// Check for locally defined columns
+							me.setColumns(me.columns);
+						}else if(me.colUrl && me.colUrl.length){
+							// Make remote call for columns
+							me.colProxy = new Wui.Data({url:colUrl, params:colParams, afterSet:me.setColumns});
+							me.colProxy.loadData();
+						}else{
+							throw('There are no columns defined for this WUI Grid.');
+						}
+							
+					},
+		
+		/** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to render/reference columns. The append the column to the DOM */			
+		renderColumn:function(col,idx){
+						var me = this;
+						
+						// 
+						me.cols.push(
+							col = $.extend(col,{
+								dataType:	col.dataType || me.defaultDataType,
+								fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
+								cls:		col.cls || '',
+								index:		idx,
+								width:		col.width === undefined ? 0 : col.width,
+								el:			$('<li>')
+											.append($('<div>').text(col.heading))
+											.attr({unselectable:'on'})
+											.addClass('wui-gc ' + col.cls)
+											.resizable({
+												stop: function(){me.sizeCols();}
+											})
+											.click(function(){})
+							})
+						);
+						
+						// Append newly created el to the DOM
+						me.heading.append(col.el);
+					},
+		
+		/** Ensures that columns have all of the proper information */
+		setColumns: function(cols){
+						var me = this;
+						
+						// clear column list
+						me.cols = [];
+						
+						// clear template
+						me.template = '<tr>';
+						
+						// apply columns on grid
+						$.each(me.columns,function(i,col){
+							// Add to the template string based on column info
+							me.template += '<td><div>' +((col.dataItem) ? '{' +col.dataItem+ '}' : '')+ '</div></td>';
+							
+							// Add column to cols array
+							me.renderColumn(col,i);
+						});
+						
+						// finish template
+						me.template += '</tr>';
+						
+						me.loadData();
+					},
+					
+		onRender:	function(){
+						this.posDataWin();
+					},
+		
+		
+		afterMake:	function(){
+						this.sizeCols();
+					},
+		
+		/** 
+		Calculates the width of each of the columns as they presently are.
+		@private
+		*/
+		calcColWidth:	function (){
+							var tcw = 0;
+							this.heading.children().each(function(){ tcw += $(this).outerWidth(); });
+							return tcw;
 						},
 		
-		/** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
-		place:      	function(){
+		/** 
+		Size up the columns of the table to match the headings
+		@private
+		*/
+		sizeCols:		function (){
 							var me = this;
-							
-							me.el.addClass('wui-tabs');
-							
-							//adds the objects items if any
-							if(me.items === undefined) me.items = [];
-							$.each(me.items,function(idx,itm){
-								itm.tabCls =	'wui-tab ' +
-												((itm.tabCls) ? ' ' + itm.tabCls : '') +
-												((me.tabsLeft) ? ' left' : '');
-								
-								if(itm.tabsHideHeader){
-									itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
-									itm.el.addClass('wui-hide-heading');
-								}
-								
-								me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
-									text:	itm.title || 'Tab ' + (parseInt(idx) + 1),
-									click:	function(){ 
-												me.giveFocus(itm);
-												if(itm.layout && typeof itm.layout === 'function')	itm.layout();
-											},
-									cls:	itm.tabCls
-								}));
-								if(me.bbar.length != 0) me.placeFooter();
+							Wui.fit(me.cols,'width',true);
+							me.tbl.css({width:me.calcColWidth()});
+							$.each(me.cols,function(i,col){
+								me.tbl.find('td:eq(' +i+ ')').width(col.el.outerWidth() - 3); // 2 accounts for borders
 							});
-							
-							return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
 						},
-		
+				
 		/** 
-		@param {object} itm A WUI Object that will be matched in the items array. 
-		@param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
-		
-		Sets the specified tab to active. Runs layout on the newly activated item.
+		Positions the height and width of the data table's container
+		@private
 		*/
-		giveFocus:		function(tab, supressEvent){
-							var me = this, supressEvent = (supressEvent !== undefined) ? supressEvent : false;
-							
-							$.each(me.items,function(idx,itm){
-								var isActive = itm === tab;
-								itm.tab.el.toggleClass('selected', isActive);
-								itm.el.toggleClass('active', isActive);
-								if(isActive){
-									itm.layout();
-								}
-								if(!supressEvent && isActive)
-									me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
-							});
-						},
-		
-		/** 
-		@param {string} txt The text of the tab button
-		@param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
-		@return The tab that was selected or undefined if the text didn't match any tabs
-		
-		Gives focus to the tab with text that matches the value of txt. Strings with underscores
-		are converted to spaces (eg. 'conferences_detail' = 'conferences detail')
-		*/
-		selectTabByText:function(txt, supressEvent){
-							var me = this, retVal = undefined;
-							$.each(me.items,function(idx,itm){
-								if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
-									me.giveFocus(itm, supressEvent);
-									retVal = itm;
-								}
-							});
-							return retVal;
-						},
-		onRender:		function(){
-							this.giveFocus(this.items[0]);
+		posDataWin:		function(){
+							var hh = this.headingContainer.height() - 1;
+							this.tblContainer.css({height:this.container.height() - hh, top:hh});
 						}
 	});
+	
+	
 	
 	
 	/** 
@@ -197,25 +185,28 @@
 	*/
 	Wui.Grid = function(args){
 		$.extend(this,{
-			/** Determines whether the data in the grid loads automatically */
+			/** Determines whether the data in the grid loads automatically. */
 			autoLoad:	true,
 			
-			/** Array of items that will be added to the footer */
+			/** Array of items that will be added to the footer. */
 			bbar:   		[],
 			
-			/** Event hook fired before the grid columns and data are made up */
+			/** Event hook fired before the grid columns and rows are made up. */
 			beforeMake:		function(){},
 			
-			/** Array of items that will make up the columns of the grid table */
+			/** Event hook fired after the grid columns and rows are made up. */
+			afterMake:		function(){},
+			
+			/** Array of items that will make up the columns of the grid table. */
 			columns: 		[],
 			
-			/** Array of data for the grid */
+			/** Array of data for the grid. */
 			data:			null,
 			
 			/** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
 			defaultDataType:'string',
 			
-			/** Whether multiple rows/records can be selected at once */
+			/** Whether multiple rows/records can be selected at once. */
 			multiSelect:	false,
 			
 			/** 
@@ -570,6 +561,7 @@
 							}
 
 							me.sizeCols();
+							me.afterMake();
 						},
 		/** 
 		@param	{object}	col	An object containing the sort direction and DOM element of the heading
@@ -684,19 +676,22 @@
 							me.scrollToCurrent();
 						},
 						
-		/** Scroll the list to the currently selected item will make the paging wig out! */				
+		/** Scrolls the grid to the currently selected item. It doesn't work with paging. */			
 		scrollToCurrent:function(){
 							var me = this;
 							
 							if(!me.isPaging && me.tbl.find('.wui-selected:first').length){
 								var firstSelect = me.tbl.find('.wui-selected:first'),
-									ofstP = firstSelect.offsetParent();
-								ofstP.animate({scrollTop:0},0);
-								ofstP.animate({scrollTop: firstSelect.offset().top - ofstP.offset().top },500);
+									ofstP = firstSelect.offsetParent(),
+									offset = (function(){ var r = 0; firstSelect.prevAll().each(function(){ r += $(this).outerHeight() }); return  r; })();
+								
+								ofstP.animate({scrollTop:offset },500);
 							}
 						},		
 						
-		/**  Selects an item on the grid according to a key value pair to be found in a record */
+		/**
+		@return An object containing the grid, row, and record, or undefined if there was no matching row.
+		Selects an item on the grid according to a key value pair to be found in a record */
 		selectItem:		function(kvp){
 							var me = this,
 								key = null,
@@ -710,9 +705,11 @@
 								if(me.tbl.items[a].rec[key] && me.tbl.items[a].rec[key] == val){
 									me.selectSingle(me.tbl.items[a].el,me.tbl.items[a]);
 									me.el.trigger($.Event('select'),[me, me.tbl.items[a].el, me.tbl.items[a].rec]);
-									break;
+									return {grid:me, row:me.tbl.items[a].el, rec:me.tbl.items[a].rec};
 								}
 							}
+							
+							return undefined;
 						},
 						
 		/** 
@@ -800,4 +797,6 @@
 							}
 						}
 	});
+
+	
 }(jQuery));
