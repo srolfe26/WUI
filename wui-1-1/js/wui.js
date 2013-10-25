@@ -116,18 +116,21 @@ var Wui = Wui || {};
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
-	@param {array} collection A collection of items that will be fit within a container
+	@param {array}		collection			A collection of items that will be fit within a container.
+	@param {string} 	[dim]				The dimension to perform the fit on, 'height','width', height is default.
+	@param {boolean}	[mindTheScrollbar]	Defaults to false, otherwise includes the scrollbar in the calculation.
 	
 	This function will size items relative to each other via a 'fit' value, as well as percentages and fixed values.
 	*/
-	Wui.fit = function(collection){
-		var dim = 'width'; //var dim = (arguments[1] && typeof arguments[1] === 'string') ? arguments[1].toLowerCase() : 'height'; // Direction ['height','width']
+	Wui.fit = function(collection,dim,mindTheScrollbar){
+		var dim = (dim && typeof dim === 'string') ? dim.toLowerCase() : 'height',
+			sbw = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0;
 		
 		// Ensure the collection is an array of Wui Objects
 		if(collection instanceof Array && collection.length > 0){
 			var parent		= (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
 				parentEl	= (parent.el) ? (parent.elAlias || parent.el) : parent,
-				parentSize	= (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim](),
+				parentSize	= (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim]() - sbw,
 				fitCt		= 0,
 				fixedSize 	= 0,
 				fitMux		= 0;
@@ -752,7 +755,10 @@ var Wui = Wui || {};
 			displayMax: -1,
 			
 			/** Method that will run immediately when the object is constructed. */
-			init:		function(){}
+			init:		function(){},
+			
+			/** @eventhook Called after the data's DOM elements are made */
+			afterMake:	function(){}
 		}, args);
 		this.init();
 	};
@@ -828,6 +834,7 @@ var Wui = Wui || {};
 						me.clear();
 						me.append(holder.children().unwrap());
 						me.data = holdingData;
+						me.afterMake();
 						me.el.trigger($.Event('refresh'),[me,me.data]);
 					},
 					

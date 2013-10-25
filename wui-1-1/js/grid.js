@@ -491,9 +491,8 @@
 								me.heading.html('');
 								me.renderers = [];
 								$.each(me.columns,function(i,col){
-									// Build template from specified columns
-									if(col.dataItem && col.heading)	t += '<td><div>{' + col.dataItem + '}</div></td>';
-									else						   	t += '<td><div></div></td>';
+									// Add to the template string based on column info
+									t += '<td><div>' +((col.dataItem) ? '{' +col.dataItem+ '}' : '')+ '</div></td>';
 									
 									// Handles renderer if it exists
 									if(col.renderer){

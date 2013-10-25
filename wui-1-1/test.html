@@ -7,6 +7,10 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 
+	<style>
+		.wui-pane {float:left; margin:1em;}
+	</style>
+
 	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
 	<script type="text/javascript" src="js/wui.js"></script>
 	<script type="text/javascript" src="js/forms.js"></script>
@@ -16,23 +20,40 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			// Add a new grid on the body
-			a = new Wui.Grid({
-				height:	'90%',
-				width:800,
-				borderStyle:{borderWidth:0},
+			
+			id = new Date();
+			/*a = new Wui.Grid2({
+				height:	500,
+				width:950,
 				appendTo:$('body'),
-				url:	'docs/data.json',
+				url:	'docs/data-long.txt',
+				columns:[
+							{heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
+							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
+							{heading:'Description', dataItem:'description', fit:5},
+							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
+						],
+				afterMake: function(){ Wui.Grid2.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
+			});
+			a.place();*/
+			
+			
+			b = new Wui.Grid({
+				height:	500,
+				width:800,
+				appendTo:$('body'),
+				url:	'docs/data-long.txt',
 				columns:[
 							{heading:'Date', dataItem:'date', dataType:'date', fit:1},
 							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
 							{heading:'Description', dataItem:'description', fit:7},
 							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
 						],
+				afterMake: function(){var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
 			});
-			a.place();
+			b.place();
 		}); // end document.ready
 	</script>
 </head>
-<body>
-</body>
+<body></body>
 </html>
