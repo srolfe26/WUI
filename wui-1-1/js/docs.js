@@ -309,7 +309,8 @@
 			.replace(/\@deprecated/,function(mch){ key.append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
 			.replace(/\@private/,function(mch){ key.append('<span class="wui-doc-private">private</span>'); return ''; })
 			.replace(/\@required/,function(mch){ key.append('<span class="wui-doc-required"></span>'); return ''; })
-			.replace(/\@awesome/,function(mch){ key.append('<span class="wui-doc-awesome">awesome</span>'); return ''; });
+			.replace(/\@awesome/,function(mch){ key.append('<span class="wui-doc-awesome">awesome</span>'); return ''; })
+			.replace(/\@eventhook/,function(mch){ key.append('<span class="wui-doc-eventhook">event hook</span>'); return ''; });
 		
 		if(keyInfo.length){
 			var tbl = new Wui.DataList({

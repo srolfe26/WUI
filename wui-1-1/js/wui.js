@@ -1085,10 +1085,16 @@ var Wui = Wui || {};
 			/** Determines whether objects behind the window are accessible */
 			isModal:	false,
 			
-			/** Event hook for when the window closes */
+			/** 
+			@param {WUI Window} win	The window being closed.
+			@eventhook Called just before the window closes. If this function returns false, the window will not be closed. 
+			*/
 			onWinClose:	function(){},
 			
-			/** Event hook for when the window opens */
+			/** 
+			@param {WUI Window} win	The window being opened.
+			@eventhook Called when the window opens. 
+			*/
 			onWinOpen:	function(){},
 			
 			/** An array of items that will be added to the header */
