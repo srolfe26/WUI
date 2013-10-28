@@ -11,10 +11,10 @@
 		.wui-pane {float:left; margin:1em;}
 	</style>
 
-	<script type="text/javascript" src="js/jquery-1-8-3-ui-1-9-2.js"></script>
-	<script type="text/javascript" src="js/wui.js"></script>
+	<script type="text/javascript" src="js/jquery-1-10-2-ui-1-10-3.js"></script>
+	<script type="text/javascript" src="js/wui2.js"></script>
 	<script type="text/javascript" src="js/forms.js"></script>
-	<script type="text/javascript" src="js/grid2.js"></script>
+	<script type="text/javascript" src="js/grid_new.js"></script>
 	<script type="text/javascript" src="js/docs.js"></script>
 	
 	<script type="text/javascript">
@@ -23,18 +23,22 @@
 			
 			id = new Date();
 
-			a = new Wui.Grid2({
+			a = new Wui.GridToo({
 				height:	500,
 				width:950,
 				appendTo:$('body'),
-				url:	'docs/data-long.txt',
+				url:	'docs/data.txt',
 				columns:[
 							{heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
 							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
 							{heading:'Description', dataItem:'description', fit:5},
 							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
+							//{heading:'', dataItem:'amount', dataType:'numeric', fit:1, renderer: function(cell,val,record,row){
+							//	var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
+							//}},
 						],
-				afterMake: function(){ Wui.Grid2.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
+				multiSelect:true,
+				afterMake: function(){ Wui.GridToo.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
 			});
 			a.place();
 			
@@ -43,12 +47,15 @@
 				height:	500,
 				width:800,
 				appendTo:$('body'),
-				url:	'docs/data-long.txt',
+				url:	'docs/data.txt',
 				columns:[
-							{heading:'Date', dataItem:'date', dataType:'date', fit:1},
+							{heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
 							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
-							{heading:'Description', dataItem:'description', fit:7},
-							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
+							{heading:'Description', dataItem:'description', fit:5},
+							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
+							{heading:'', dataItem:'amount', dataType:'numeric', fit:1, renderer: function(cell,val,record,row){
+								var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
+							}},
 						],
 				afterMake: function(){var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
 			});

@@ -51,7 +51,8 @@
 							
 					},
 		
-		/** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to render/reference columns. The append the column to the DOM */			
+		/** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
+		render/reference columns. The append the column to the DOM */			
 		renderColumn:function(col,idx){
 						var me = this;
 						
@@ -60,6 +61,13 @@
 								dataType:	col.dataType || me.defaultDataType,
 								fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
 								cls:		col.cls || '',
+								renderer:	(col.renderer) ?	(function(a){
+																	// Handles renderer if it exists
+																	if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
+																		a = new Function('return ' + a + '.apply(this,arguments)');
+																	if(typeof a === 'function')
+																		me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
+																})(col.renderer) : '',
 								index:		idx,
 								width:		col.width === undefined ? 0 : col.width,
 								el:			$('<li>')
@@ -67,7 +75,12 @@
 											.attr({unselectable:'on'})
 											.addClass('wui-gc ' + col.cls)
 											.resizable({
-												stop: function(){me.sizeCols();}
+												stop:	function(){me.sizeCols();},
+												resize: function(event,ui){
+															col.width = ui.size.width;
+															col.fit = 0;
+															Wui.fit(me.cols,'width',true);
+														},
 											})
 											.click(function(){ me.sortList(col); })
 							})
@@ -84,6 +97,7 @@
 						// clear column list
 						me.cols = [];
 						me.items = [];
+						me.renderers = [];
 						
 						// clear template
 						me.template = '<tr class="{((wuiIndex % 2 == 0) ? \'even\' : \'odd\')}">';
@@ -117,6 +131,18 @@
 						//Wui.Pane.prototype.onRender.call(this);
 						Wui.DataList.prototype.onRender.call(this);
 						this.posDataWin();
+					},
+		
+		modifyItem:	function(itm){
+						var me = this;
+						// Perform renderers (if any)
+						$.each(me.renderers,function(idx, r){
+							var cell = itm.el.children(':eq(' +r.index+ ')'),
+								val = itm.rec[r.dataItem];
+									
+							cell.children('div').text(r.renderer.call(this, cell, val, itm.rec, itm.el));
+						});
+						return itm.el;
 					},
 		
 		afterMake:	function(){
@@ -358,6 +384,16 @@
 								var a = {el:me.tplt.make(), rec:dataItem, originalSrt:idx};
 								me.items.push(a);
 								
+								
+								// Handles renderer if it exists
+									if(col.renderer){
+										if(typeof col.renderer == 'function'){
+											me.renderers.push({dataItem:col.dataItem, renderer:col.renderer, index:i});
+										}else if(eval('typeof ' + col.renderer) == 'function'){
+											var funcFromString = new Function('return ' + col.renderer + '.apply(this,arguments)');
+											me.renderers.push({dataItem:col.dataItem, renderer:funcFromString, index:i});
+										}
+									}	
 								// Perform renderers
 								$.each(me.renderers,function(idx, r){
 									var cell = a.el.children(':eq(' +r.index+ ')'),
@@ -592,7 +628,7 @@
 											var funcFromString = new Function('return ' + col.renderer + '.apply(this,arguments)');
 											me.renderers.push({dataItem:col.dataItem, renderer:funcFromString, index:i});
 										}
-									}									
+									}								
 									
 									// Deal with vertical columns - forces them to be 48px wide
 									if(col.vertical){
