@@ -107,7 +107,7 @@ var Wui = Wui || {};
 		var topZ =	Math.max.apply(null, 
 					$.map($('body > *, .wui-window'), function(e,n) {
 						if ($(e).css('position') != 'static')
-							return parseInt($(e).css('z-index'));
+							return parseInt($(e).css('z-index')) || 0;
 					})
 				);
 		return Wui.isNumeric(topZ) ? topZ : 1;
@@ -1298,7 +1298,7 @@ var Wui = Wui || {};
 						me.windowEl.trigger($.Event('open'),[me]);
                         
                         function bringToFront(e){
-							if(parseInt((me.el.css('z-index')) || 1) < Wui.maxZ()){
+							if(parseInt((me.el.css('z-index')) || 1) <= Wui.maxZ()){
                                 me.el.css('z-index',Wui.maxZ() + 1);
                             }
                         }

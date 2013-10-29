@@ -258,6 +258,14 @@
 						if(me.hideHeader)	me.headingContainer.height(0);
 					},
 		
+		/** Overrides Wui.Pane.disable() This disable simply disables the grid, not the header and footer. 
+		Use the Wui.Pane.prototype.disable.call(this) to disable the header and footer. */
+		disable:		function(){
+							this.disabled = true;
+							// cover pane contents
+							this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+						},
+		
 		/** Verify that columns have been defined on the grid, or that they are available remotely */
 		getColumns: function(){
 						var me = this;
@@ -388,7 +396,7 @@
 						var me = this;
 						// Perform renderers (if any)
 						$.each(me.renderers,function(idx, r){
-							var cell = itm.el.children(':eq(' +r.index+ ')'),
+							var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
 								val = itm.rec[r.dataItem];
 									
 							cell.children('div').html(r.renderer.call(this, cell, val, itm.rec, itm.el));
