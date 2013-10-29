@@ -23,7 +23,7 @@
 			
 			id = new Date();
 
-			a = new Wui.GridToo({
+			a = new Wui.Grid({
 				height:	500,
 				width:950,
 				appendTo:$('body'),
@@ -38,7 +38,7 @@
 							//}},
 						],
 				multiSelect:true,
-				afterMake: function(){ Wui.GridToo.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
+				afterMake: function(){ Wui.Grid.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
 			});
 			a.place();
 			

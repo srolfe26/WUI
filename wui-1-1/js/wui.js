@@ -155,6 +155,16 @@ var Wui = Wui || {};
 				}
 			});
 			
+			// If the grid becomes entirely fixed widths the fit won't work so the items will be set to fit widths
+			if(fitCt == 0 && fixedSize != parentSize){
+				fitCt = 1;
+				
+				$.each(collection,function(i,itm){
+					itm.fit = itm[dim] / fixedSize;
+					itm[dim] = -1;
+				});
+			}
+			
 			// Get the fit multiplier
 			fitMux = (fitCt !== 0) ? (parentSize - fixedSize) / fitCt : 0;
 			
@@ -167,7 +177,8 @@ var Wui = Wui || {};
 				}
 			});
 		}else{
-			throw('Improper collection specified');
+			console.log('Improper collection specified', arguments);
+			//throw('Improper collection specified');
 		}
 	};
 	
@@ -776,39 +787,39 @@ var Wui = Wui || {};
 		/** Overrides the Wui.Data method that serves as an event hook. Calls the DataList's make() method. */
 		dataChanged:function(){ this.make(); },
 		
+		
 		/**
-		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
+		@param	{object}	itm			Object containing an el (jQuery object), and a rec (data object)
+		@param	{boolean}	silent		A true value prevents the 'wuiselect' event from firing
 		@return The item passed in will be returned.
 		Performs mutations and fires listeners when an item is selected @private
 		*/
-		itmSelected:function(itm){
-						var me = this,
-							alreadySelected = me.selected,
-							oldEl = (alreadySelected) ? alreadySelected.el : undefined,
-							oldRec = (alreadySelected) ? alreadySelected.rec : undefined;
-						
+		itemSelect:function(itm, silent){
+						var me = this;
+							
 						me.el.find('.wui-selected').removeClass('wui-selected');
-						console.log(itm.el);
 						itm.el.addClass('wui-selected');
-						me.selected = itm;
+						me.selected = [itm];
 						
-						// Fire different events depending whether there was already a record selected
-						me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, oldEl, oldRec]);
-						me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
+						if(!me.multiSelect && !silent)
+							me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
 						
 						return itm;
 					},
+	
 		
 		/**
 		@param	{object}	itm		Object containing an el (jQuery object), and a rec (data object)
-		@private
-		Performs mutations and fires listeners when an item is deselected
+		@return The item passed in will be returned.
+		Performs mutations and fires listeners when an item is deselected @private
 		*/		
-		itmDeselect:function(itm){
+		itemDeselect:function(itm){
 						var me = this;
 						itm.el.removeClass('wui-selected');
-						me.selected = null;
+						me.selected = [];
 						me.el.trigger($.Event('deselect'),[me, itm.el, itm.rec]);
+						
+						return itm;
 					},
 		
 		/**
@@ -819,9 +830,32 @@ var Wui = Wui || {};
 		createItem:	function(itm){
 						var me = this;
 						
-						itm.el.click(function(){
-							if(me.selected && me.selected === itm)	me.itmDeselect(itm);
-							else									me.itmSelected(itm);
+						itm.el.click(function(e){
+							// Determine the # of selected items before the change
+							var selectedCount = me.selected.length;
+							
+							if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
+								if(selectedCount > 0 && me.selected[0] === itm){
+									//deselect item
+									me.itemDeselect(itm);
+								}else{
+									//change selection
+									me.itemSelect(itm);
+								}
+							}else{
+								var alreadySelected = $(this).hasClass('wui-selected');
+								$(this).toggleClass('wui-selected',!alreadySelected);
+
+								if(alreadySelected)	$.each(me.selected,function(idx,sel){ if(sel == itm) me.selected.splice(idx,1) });
+								else				me.selected.push(itm);
+							}
+							me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+						}).dblclick(function(e){
+							me.itemSelect(itm,true);
+							me.el.trigger($.Event('wuidblclick'),[me, a.el, a.rec])
+								 .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+								 
+							return false // stops propagation & prevents default
 						});
 						return me.modifyItem(itm);
 					},
@@ -839,6 +873,10 @@ var Wui = Wui || {};
 							holdingData = me.data || [],
 							holder = $('<div>');
 						
+						// Clear out items list
+						me.items = [];
+
+						// Add items to me.items
 						for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
 							var rec = me.data = holdingData[i],
 								itm = {el:Wui.Template.prototype.make.call(me, i), rec:rec};
@@ -888,7 +926,7 @@ var Wui = Wui || {};
 										itm.el.addClass('wui-selected');
 										me.selected.push(itm);
 									}else{
-										console.log(me.itmSelected(itm));
+										me.itemSelect(itm, true);
 									}
 								}
 							});
@@ -897,25 +935,25 @@ var Wui = Wui || {};
 						me.scrollToCurrent();
 					},
 						
-		/** Scrolls the grid to the currently selected item. */			
+		/** Scrolls the list to the currently selected item. */			
 		scrollToCurrent:function(){
 							var me = this,
 								firstSelect = me.el.find('.wui-selected:first'),
 								ofstP = firstSelect.offsetParent(),
-								offset = (function(){ var r = 0; firstSelect.prevAll().each(function(){ r += $(this).outerHeight() }); return  r; })();
+								offset = (function(){ var r = 0; firstSelect.prevAll().each(function(){ r += $(this).outerHeight() - 0.55 }); return  r; })();
 							ofstP.animate({scrollTop:offset },500);
 						},
 						
 		/**
 		@param	{string} key The data item to look for
 		@param	{string|number} val The value to look for
-		@return An object containing the grid, row, and record, or undefined if there was no matching row.
+		@return An object containing the dataList, row, and record, or undefined if there was no matching row.
 		Selects an item according to the key value pair to be found in a record. */
-		selectItem:		function(key,val){
+		selectBy:		function(key,val){
 							var me = this, retVal = undefined;
 							me.each(function(itm,i){
 								if(itm.rec[key] && itm.rec[key] == val)
-									return retVal = me.itmSelected(itm);
+									return retVal = me.itemSelect(itm);
 							});
 							me.scrollToCurrent();
 							return retVal;
@@ -1027,7 +1065,7 @@ var Wui = Wui || {};
 			height:		'100%',
 		
 			/** HTML to show in the mask when the pane is disabled */
-			maskHTML:	'Loading...',
+			maskHTML:	'Empty',
 			
 			/** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
 			title:		null
@@ -1047,15 +1085,27 @@ var Wui = Wui || {};
 		
 		/** Enables the pane by removing the mask and enabling all buttons */
 		enable:			function(){
-							var me = this, mask = me.mask;
+							var me = this, mask = me.mask || me.el.find('.wui-mask');
 							me.disabled = false;
-							me.mask.fadeOut(500,function(){ 
-								// remove mask and enable header and footer buttons (all of them)
-								me.mask.remove();
-								me.mask = undefined;
-								me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
-								me.header.each(function(itm){ if(itm.enable) itm.enable(); });
-							});
+							
+							if(mask){
+								mask.fadeOut(500,function(){ 
+									// remove mask and enable header and footer buttons (all of them)
+									mask.remove();
+									me.mask = undefined;
+									me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
+									me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+								});
+							}
+						},
+		
+		/**
+		@param	{string} html	New HTML content to be set on the disabled mask
+		Sets the maskHTML property to the value of html passed in. If mask presently exists it will change the value on the current mask.
+		*/
+		setMaskHTML:	function(html){
+							this.maskHTML = html;
+							if(this.mask)	this.mask.html(html);
 						},
 		
 		/** Method that will run immediately when the object is constructed. */
@@ -1181,6 +1231,9 @@ var Wui = Wui || {};
 			
 			/** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
 			title:		'Window',
+			
+			/** Change what comes by default in the pane */
+			maskHTML:	'Loading <span class="wui-spinner"></span>',
 			
 			/** Set the width of the window */
 			width:		600

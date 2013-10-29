@@ -44,7 +44,8 @@
 	
 /******************   MODAL WINDOW STYLES   ********************/
 .wui-overlay {position: fixed; top:0; left:0; width:100% !important; height:100% !important; background:rgba(100,100,100,0.7);}
-.wui-mask {position:absolute; top:0; left:0; background:rgba(100,100,100,0.25); width:100%; text-align:center; padding-top: 20%; color:#AAA; font-weight:bold; font-size:1.25em;}
+.wui-mask {position:absolute; top:0; left:0; background-color:#fff !important; width:100%; text-align:center; padding-top: 15%; color:#555; font-weight:bold; font-size:1.25em;}
+.wui-spinner { height:16px; width:16px; background:url(../img/16x16-cc.gif) center center; display: inline-block;}
 .wui-window {margin:0 auto; box-shadow: 0 0 15px black; position:absolute;}
 .wui-pane.wui-window {width:auto;}
     .wui-window > .wui-pane-header {cursor:move;}
@@ -130,9 +131,13 @@
 	.button li > input:checked + label { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
 	.button li:first-child label {border-top-left-radius:4px; border-bottom-left-radius:4px;}
 	.button li:last-child label {border-top-right-radius:4px; border-bottom-right-radius:4px;}
+	
+	.button li label:focus { background-color: #fff !important; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; }
+	.button li > input:checked + label:focus { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; background:rgba(0,0,0,0.5) !important; }
+}
 
 .wui-checkbox.button.checked { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
-	.wui-checkbox.button.has-focus {outline:1px dotted #999;}
+
 	
 /* combo */
 .wui-combo input[type=text].has-dd {padding-right:27px;}
@@ -295,6 +300,9 @@
         font-weight:bold; padding:0.5em 41px 0.5em 0.5em; text-align:left; float:left; list-style: none; margin:0;
         border-right:1px solid #fff; text-shadow: 0 0 3px rgba(0,0,0,0.4); position: relative;
     }
+	.wui-gc:last-child {
+        border-right:0;
+    }
 	.wui-gc div:first-child {
 		bottom: 0.5em;
 		font-size: 0.9em;
@@ -309,7 +317,7 @@
 	
 	.has-vert-columns .wui-gh ul {height:150px;}
 	.has-vert-columns .wui-gc {height:150px;}
-	.wui-gc.vert-col {width:48px !important;}
+	.wui-gc.vert-col {width:50px !important;}
 	.wui-gc.vert-col div:first-child {
 		bottom: auto !important;
 		height: 48px;
