@@ -398,8 +398,9 @@
 						$.each(me.renderers,function(idx, r){
 							var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
 								val = itm.rec[r.dataItem];
-									
-							cell.children('div').html(r.renderer.call(this, cell, val, itm.rec, itm.el));
+							
+							
+							cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el));
 						});
 						return itm.el;
 					},

@@ -852,10 +852,10 @@ var Wui = Wui || {};
 							me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
 						}).dblclick(function(e){
 							me.itemSelect(itm,true);
-							me.el.trigger($.Event('wuidblclick'),[me, a.el, a.rec])
+							me.el.trigger($.Event('wuidblclick'),[me, itm.el, itm.rec])
 								 .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
 								 
-							return false // stops propagation & prevents default
+							return false; // stops propagation & prevents default
 						});
 						return me.modifyItem(itm);
 					},

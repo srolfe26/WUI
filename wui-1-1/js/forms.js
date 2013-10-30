@@ -573,7 +573,9 @@
 		});
 	    this.init();
 	};
-	Wui.Textarea.prototype = $.extend(new Wui.Text(), {});
+	Wui.Textarea.prototype = $.extend(new Wui.Text(), {
+		init:	function(){	Wui.Text.prototype.init.call(this); this.field.css({height:this.field.parent().parent().height});  }
+	});
 	
 	
 	/** Creates a WYSIWYG editor from a textfield.  
