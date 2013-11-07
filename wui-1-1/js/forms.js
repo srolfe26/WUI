@@ -145,7 +145,7 @@
 						var me = this;
 						if(me.items === undefined) me.items = [];
 						$.each(me.items, function(i,itm){ me.items[i] = me.normFrmItem(itm); });
-						Wui.O.prototype.place.apply(this,arguments);
+						return Wui.O.prototype.place.apply(this,arguments);
                     },
         
         /**
@@ -155,7 +155,7 @@
 		*/
 		push:		function(){
 						for(var i in arguments) arguments[i] = this.normFrmItem(arguments[i]);
-						Wui.O.prototype.push.apply(this,arguments);
+						return Wui.O.prototype.push.apply(this,arguments);
 					},
 		/**
 		@param {string} fieldname The name of the field to be removed
@@ -1803,7 +1803,7 @@
 														if(me.beforeSelectTitle)
 															me.fieldText(me.beforeSelectTitle);
 													}else{
-														me.upFailure(r);
+														me.upFailure(d);
 													}
 												}
                                             }catch(err){
@@ -1824,8 +1824,9 @@
                         $.extend(this.value,sv);
 			        },
 	    val:		function(sv,callback){
-					    Wui.FormField.prototype.val.apply(this,arguments);
+					    var retVal = Wui.FormField.prototype.val.apply(this,arguments);
 					    if(this[callback] && typeof this[callback] == 'function') this[callback]();
+                        return retVal;
 				    },
         valChange:  function(){
                         var me = this;

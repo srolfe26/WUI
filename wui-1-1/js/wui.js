@@ -787,6 +787,13 @@ var Wui = Wui || {};
 		/** Overrides the Wui.Data method that serves as an event hook. Calls the DataList's make() method. */
 		dataChanged:function(){ this.make(); },
 		
+		/** Clears the selection on the data list */
+		clearSelect:function(){
+						var me = this;
+						me.el.find('.wui-selected').removeClass('wui-selected');
+						me.selected = [];
+						me.el.trigger($.Event('wuichange'), [me, me.el, me.selected]);
+					},
 		
 		/**
 		@param	{object}	itm			Object containing an el (jQuery object), and a rec (data object)
@@ -1155,7 +1162,11 @@ var Wui = Wui || {};
 						},
 		
 		/** Changes the title on the pane. */
-		setTitle:   	function(t){ this.header.title.text(t); },
+		setTitle:   	function(t){ 
+							if(t)
+								this.header.title.text(t);
+							return t;
+						},
 		
 		/** Changes the title on the pane. */
 		setTitleAlign:	function(t){ 
@@ -1326,6 +1337,7 @@ var Wui = Wui || {};
 						});
 						
 						me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
+						me.layout();
 			        }
 	});
 	

@@ -421,7 +421,6 @@
 						},
 		refresh:		function(){
 							this.disable();
-							console.log(this.url);
 							if(this.url === null)	this.make();
 							else					this.getColumns();
 						},		

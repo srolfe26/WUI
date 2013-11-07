@@ -304,8 +304,8 @@
 				return '';
 			})
 			//get creation date & Flags
-			.replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver}); return ''; })
-			.replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate}); return ''; })
+			.replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver, dt:'', varname:''}); return ''; })
+			.replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate, dt:'', varname:''}); return ''; })
 			.replace(/\@deprecated/,function(mch){ key.append('<span class="wui-doc-deprecated">deprecated</span>'); return ''; })
 			.replace(/\@private/,function(mch){ key.append('<span class="wui-doc-private">private</span>'); return ''; })
 			.replace(/\@required/,function(mch){ key.append('<span class="wui-doc-required"></span>'); return ''; })

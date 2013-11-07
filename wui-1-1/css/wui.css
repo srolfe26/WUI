@@ -289,6 +289,7 @@
 .wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
 .wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text], .wui-form-err textarea {border-color:#c00; background-color:white; box-shadow: inset 0 0 5px rgba(255,0,0,0.5);}
 .wui-form-err .wui-btn.field-btn {border: 1px solid #c00; border-left:none;}
+.wui-form-err .wui-fe input.has-file[type="text"][disabled] {  background-color: #eee;  border: 1px solid #c00; }
 
 /**********************************************   grid styles   ************************************************/
 .wui-ghs {height:1px !important; overflow:hidden; margin:-1px 0 0;}
