@@ -14,7 +14,7 @@
 
 	<style type="text/css">
 		body {margin:0; padding:0;}
-		.wui-kitchen-sink > .wui-pane-wrap > .wui-pane-content > .wui-pane, .iframe-pane {float:left;}
+		.iframe-pane {position:absolute; right:0; top:0;}
 	</style>
 	
 	<script type="text/javascript">
@@ -68,30 +68,39 @@
 														{link:'docs/input.html', title:'input()'}
 						    						],
 						    		processData:	function(d){
-											    		return d.sort(function(a,b){
+											    		console.log('asdf');
+                                                        return d.sort(function(a,b){
 												    		return $.trim(a.title).toUpperCase().localeCompare($.trim(b.title).toUpperCase());
 											    		});
 										    		},
 				    				columns:		[{heading:'Feature', dataItem:'title'}],
 				    				borderStyle:	{borderWidth: '0 6px 0 0', borderColor:'#888'},
-				    				fit: 			1,
-				    				height:			'100%'
+				    				fit: 			1.15,
+                                    height: '100%'
 			    				}),
 			    				kSink.frame = new Wui.O({
-				    				cls:			'iframe-pane',
-				    				attr:			{name:'iframe_pane'},
-				    				el: 			$('<iframe>').css({border:'none', backgroundColor:'#fff'}),
-				    				fit: 			5,
-				    				height:			'100%'
+				    				cls:	'iframe-pane',
+				    				attr:	{name:'iframe_pane'},
+				    				el: 	$('<iframe>').css({border:'none', backgroundColor:'#fff'}),
+				    				fit: 	5,
+                                    height: '100%'
 			    				})
 			    			]
 
 			});
 			kSink.main.place();
 			
+            $(window).resize(function(){
+                if(kSink.main)	kSink.main.layout();
+            });
+            
 			kSink.selectorGrid.el.on('wuiselect',function(event,grid,el,rec){
-				if(!rec.target)	kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
-				else			window.location = rec.link;
+				if(!rec.target){
+                    kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
+				}else{
+                    window.location = rec.link;
+                    kSink.main.layout();
+                }
 			});
 			
 			// When the page loads, see if there is anything on the URL, else load the default

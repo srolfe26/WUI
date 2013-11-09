@@ -12,54 +12,76 @@
 	</style>
 
 	<script type="text/javascript" src="js/jquery-1-10-2-ui-1-10-3.js"></script>
-	<script type="text/javascript" src="js/wui2.js"></script>
+	<script type="text/javascript" src="js/wui.js"></script>
 	<script type="text/javascript" src="js/forms.js"></script>
-	<script type="text/javascript" src="js/grid_new.js"></script>
-	<script type="text/javascript" src="js/docs.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
 	
 	<script type="text/javascript">
 		$(document).ready(function(){
 			// Add a new grid on the body
 			
 			id = new Date();
-
-			a = new Wui.Grid({
-				height:	500,
-				width:950,
-				appendTo:$('body'),
-				url:	'docs/data.txt',
-				columns:[
-							{heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
-							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
-							{heading:'Description', dataItem:'description', fit:5},
-							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
-							//{heading:'', dataItem:'amount', dataType:'numeric', fit:1, renderer: function(cell,val,record,row){
-							//	var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
-							//}},
-						],
-				multiSelect:true,
-				afterMake: function(){ Wui.Grid.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
-			});
-			a.place();
-			
-			
-			/*b = new Wui.Grid({
-				height:	500,
-				width:800,
-				appendTo:$('body'),
-				url:	'docs/data.txt',
-				columns:[
-							{heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
-							{heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
-							{heading:'Description', dataItem:'description', fit:5},
-							{heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
-							{heading:'', dataItem:'amount', dataType:'numeric', fit:1, renderer: function(cell,val,record,row){
-								var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
-							}},
-						],
-				afterMake: function(){var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
-			});
-			b.place();*/
+            
+            sub_a = new Wui.Grid({
+                appendTo:$('body'),
+                data:			[
+                                    {link:'docs/about.html', title:'-- About --'},
+                                    {link:'docs/o.html', title:'WUI Object'},
+                                    {link:'docs/text.html', title:'Text Box'},
+                                    {link:'docs/textarea.html', title:'Text Area'},
+                                    {link:'docs/template.html', title:'Template Engine'},
+                                    {link:'docs/wysiwyg.html', title:'WYSIWYG'},
+                                    {link:'docs/radio.html', title:'Radio'},
+                                    {link:'docs/checkbox.html', title:'Checkbox'},
+                                    {link:'docs/state.html', title:'State Machine', target:'_blank'},
+                                    {link:'docs/data.html', title:'Data'},
+                                    {link:'docs/data-list.html', title:'Data List'},
+                                    {link:'docs/button.html', title:'Button'},
+                                    {link:'docs/combo.html', title:'Combo'},
+                                    {link:'docs/link.html', title:'Link Input'},
+                                    {link:'docs/datetime.html', title:'Date/Time Input'},
+                                    {link:'docs/file.html', title:'File'},
+                                    {link:'docs/fit.html', title:'WUI Fit'},
+                                    {link:'docs/pane.html', title:'Pane'},
+                                    {link:'docs/window.html', title:'Window'},
+                                    {link:'docs/forms.html', title:'Form'},
+                                    {link:'docs/grid.html', title:'Grid'},
+                                    {link:'docs/tabs.html', title:'Tabs'},
+                                    {link:'docs/is-numeric.html', title:'isNumeric()'},
+                                    {link:'docs/scrollbar-width.html', title:'scrollbarWidth()'},
+                                    {link:'docs/input.html', title:'input()'}
+                                ],
+                processData:	function(d){
+                                    console.log('asdf');
+                                    return d.sort(function(a,b){
+                                        return $.trim(a.title).toUpperCase().localeCompare($.trim(b.title).toUpperCase());
+                                    });
+                                },
+                columns:		[{heading:'Feature', dataItem:'title'}],
+                borderStyle:	{borderWidth: '0 6px 0 0', borderColor:'#888'},
+                width: 			300,
+                height: '90%'
+            });
+            sub_a.place();
+            
+            a = new Wui.Grid({
+                height:	500,
+                width:950,
+                appendTo:$('body'),
+                url:	'docs/data.txt',
+                columns:[
+                            {heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
+                            {heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
+                            {heading:'Description', dataItem:'description', fit:5},
+                            {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
+                            //{heading:'', dataItem:'amount', dataType:'numeric', fit:1, renderer: function(cell,val,record,row){
+                            //	var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
+                            //}},
+                        ],
+                multiSelect:true,
+                afterMake: function(){ Wui.Grid.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
+            });
+            a.place();
 		}); // end document.ready
 	</script>
 </head>

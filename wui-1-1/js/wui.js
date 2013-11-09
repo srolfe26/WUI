@@ -112,6 +112,26 @@ var Wui = Wui || {};
 				);
 		return Wui.isNumeric(topZ) ? topZ : 1;
 	};
+    
+    /** 
+	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+	@param  {object} response   A JOSN object which was returned from an XHR response.
+	@return An object containing the data removed from any wrapper, and the total number of records received {data:array, total:numeric}
+	
+	Unwraps the data from any container it may be in to allow it to be used by a containing object
+	*/
+	Wui.unwrapData = function(r){
+		var me          = this,
+            retObj      = {},
+            dc			= me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
+            tc			= me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
+            response	= (dc && r[dc]) ? r[dc] : r,
+            total 		= (tc && r[tc]) ? r[tc] : response.length;
+        
+        retObj.data = response;
+        retObj.total = total;
+		return retObj;
+	};
 	
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
@@ -322,10 +342,7 @@ var Wui = Wui || {};
 							}
 							
 							// hide an object based on its hidden value
-							if(m.hidden){
-								if(m.hide)	m.hide(0);
-								else		m.el.css('display','none');
-							}
+							if(m.hidden) m.el.css('display','none');
                         	
 							return m.el.addClass(m.cls);
                         }else{
@@ -333,7 +350,7 @@ var Wui = Wui || {};
                         }
                     },
 		/**
-		@param {function} fn A function that gets called for each item of the object this function is a member of
+		@param {function} fn A function that gets called for each item of the object.
 		
 		@return true
 		The passed in function gets called with two parameters the item, and the item's index.
@@ -493,7 +510,7 @@ var Wui = Wui || {};
 						
                         //remove specified elements
                         for(var i = idx; i < (idx + howMany); i++)
-                            if(me.items[i]) me.items[i].el.remove();
+                            if(me.items[i] && me.items[i].el) me.items[i].el.remove();
                         
                         //standard splice functionality on array and calcs
                         var retVal      = Array.prototype.splice.apply(me.items, arguments),
@@ -524,7 +541,10 @@ var Wui = Wui || {};
 			/** Array of data that will be stored in the object. Can be specified for the object or loaded remotely */
 			data:			[],
 			
-			/** Name of the data object. Allows the object to be identified in the listeners */
+			/** Name a key in the data that represents the unique identifier. */
+			identifier:     null,
+            
+            /** Name of the data object. Allows the object to be identified in the listeners */
 			name:			null,
 			
 			/** Object containing keys that will be passed remotely */
@@ -666,14 +686,10 @@ var Wui = Wui || {};
 		Calls setData() passing the response and total.
 		*/
 		success:		function(r){
-							var me = this,
-								dc			= me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
-								tc			= me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
-								response	= (dc && r[dc]) ? r[dc] : r,
-								total 		= (tc && r[tc]) ? r[tc] : response.length;
+							var me = this, unwrapped = Wui.unwrapData.call(me,r);
 							me.waiting = false;
 							me.onSuccess(r);
-							me.setData(response,total);
+							me.setData(unwrapped.data, unwrapped.total);
 						},
 		
 		/**
@@ -924,16 +940,20 @@ var Wui = Wui || {};
 		resetSelect:function(){
 						var me = this,
 							selList = me.selected;
+                        
+                        // Clear current selection list after making a copy of previously selected items
 						me.selected = [];
 						
 						$.each(selList,function(i,sel){
 							me.each(function(itm,i){
-								if(JSON.stringify(itm.rec) === JSON.stringify(sel.rec)){
+								var sameRec = (me.identifier) ? itm.rec[me.identifier] === sel.rec[me.identifier] : JSON.stringify(itm.rec) === JSON.stringify(sel.rec);
+                                
+                                if(sameRec){
 									if(me.multiSelect){
 										itm.el.addClass('wui-selected');
-										me.selected.push(itm);
+										me.selected.push(itm, true);
 									}else{
-										me.itemSelect(itm, true);
+										me.itemSelect(itm);
 									}
 								}
 							});

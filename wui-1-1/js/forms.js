@@ -14,6 +14,7 @@
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
+    @event  formupdate Fires when a field on the form changes. Passes (event, form, [field])
 	A WUI Form is a collection of Wui.FormField objects with methods to
 	both collectively and individually interact with those objects.
 	*/
@@ -167,7 +168,21 @@
 						this.each(function(itm,idx){ if(itm.name == fieldname) Wui.O.prototype.splice.call(me,idx,1); });
 	                    return true;
 					},
-		/**
+		
+        /** Changes the state of whether the form has changed. Fires the 'formupdate' event if true. Gets set to false when
+            the form is validated or when data is set on the form.
+        @param {boolean} changed True if the form changed, false to reset that value.
+        @param {object} changedItem The item that actually changed.
+        @return The value of the changed 
+        */
+        formChange: function(changed,changedItem){
+                        if(changed) this.el.trigger($.Event('formupdate'), [this, changedItem]);
+                        this.formChanged = changed;
+                        return this.formChanged;
+                    },
+        
+        
+        /**
 		@param {object} 	[data]			A collection of data to be set on the form
 		@param {boolean}	[fireEvents]	A boolean value that if set to false will suppress events. 
 		Sets form fields with names matching keys in passed in data. If data is not defined all
@@ -182,6 +197,7 @@
 									});
 								}
 						else	{	this.each(function(itm){ itm.val(null,fireEvents); }); }
+                        this.formChange(false);
 	                },
 		
 		/** Disable all form fields */
@@ -214,6 +230,7 @@
 		                me.each(function(itm){ 
 		                	if(itm.el && itm.el.toggleClass) { itm.el.toggleClass(me.errCls,!itm.validate()); }
 		                });
+                        this.formChange(false);
 		                return (me.errors.length == 0);
 	            	}
 	});
@@ -418,7 +435,7 @@
 		setChanged:	function(){
 						// Marks the parent form as 'changed'
 						if(this.parent && this.parent instanceof Wui.Form)
-							this.parent.formChanged = true;
+							this.parent.formChange(true, this);
 						
 						// Calls functionally defined valChange() - one will override another
 						this.valChange(this);
@@ -1767,7 +1784,7 @@
         				me.push(
 							me.changeBtn = new Wui.Button({
 								click:  function(){ 
-											Wui.Text.prototype.val.call(me,'');
+											me.fieldText('');
 											me.field.removeAttr('disabled'); 
 											me.changeClick(); 
 										},
@@ -1790,12 +1807,18 @@
                             onBlur:     function(){ me.upBtn.el.removeClass('selected'); },
                             onComplete: function upComplete(r){
                                             try{
-                                            	var d = $.parseJSON(r);
-												console.log(d);
-                                                me.field.removeClass('uploading empty'); //remove the css uploading state
+                                            	var d = $.parseJSON(r),
+                                                    unwrapped = Wui.unwrapData.call(me,d);
+                                                    
+                                                // Put the returned data on the console for the interest of developers
+												console.log(unwrapped);
                                                 
-												if(d.success == true && d.payload){
-													me.val(d.payload,'upSuccess');
+                                                //remove the css uploading state
+                                                me.field.removeClass('uploading empty');
+                                                
+                                                // If successful it will set the value of the field, else it whines and complains
+												if(d.success == true){
+													me.val(unwrapped.data,'upSuccess');
 												}else{
 													if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
 														Wui.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
@@ -1830,13 +1853,21 @@
 				    },
         valChange:  function(){
                         var me = this;
-        				me.field.addClass('has-file').removeAttr('disabled');
-                        me.upBtn.el.parents('div:first').hide();
-                        me.changeBtn.el.show();
+        				if(me.value){
+                            me.field.addClass('has-file').removeAttr('disabled');
+                            me.upBtn.el.parents('div:first').hide();
+                            me.changeBtn.el.show();
+                            
+                            //changed to a 'file-selected' view and display a nicely formatted file
+                            me.field.addClass('has-file ' + ((me.value.extension !== undefined) ? 'icon-' + me.value.extension.replace('.','') : '')).attr('disabled',true);
+                            me.fieldText(me.value[me.upTitleName]);
+                        }else{
+                            me.field.removeClass();
+                            me.upBtn.el.parents('div:first').show();
+                            me.changeBtn.el.hide();
+                            me.field.val('');
+                        }
                         
-                        //changed to a 'file-selected' view and display a nicely formatted file
-                        me.field.addClass('has-file ' + ((me.value.extension !== undefined) ? 'icon-' + me.value.extension.replace('.','') : '')).attr('disabled',true);
-                        me.fieldText(me.value[me.upTitleName]);
                     }
 	});
 

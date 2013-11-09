@@ -52,8 +52,8 @@
 .wui-overlay > .wui-window { position: relative; box-shadow: 0 0 24px black; }
 
 .ui-resizable-handle {position:absolute; height:4px;}
-.ui-resizable-e {right:-4px; top:0px; height:96%; width:4px; cursor:e-resize;}
-.ui-resizable-s {bottom:-4px; left:0px; height:4px; width:96%; cursor:s-resize;}
+.ui-resizable-e {right:-4px; top:0px; height:96%; width:7px; cursor:e-resize;}
+.ui-resizable-s {bottom:-4px; left:0px; height:7px; width:96%; cursor:s-resize;}
 .ui-resizable-se {right:-3%; bottom:-3%; width:4%; height:4%; cursor:se-resize;}
 
 /**********************************************   BUTTON - nested, disabled   **********************************************/

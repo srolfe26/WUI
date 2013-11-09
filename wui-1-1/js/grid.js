@@ -234,7 +234,81 @@
 		this.init();
 	};
 	Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
-		init:		function(){
+		/** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
+		afterMake:	function(){
+						this.sizeCols();
+						this.enable();
+					},
+                    
+        /** Overrides Wui.Pane.disable() This disable simply disables the grid, not the header and footer. 
+		Use the Wui.Pane.prototype.disable.call(this) to disable the header and footer. */
+		disable:		function(){
+							this.disabled = true;
+							// cover pane contents
+							this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+						},
+		
+        /** 
+		Recursive function for sorting on multiple columns @private
+		@param {number}	depth	Depth of the recursive call
+		@param {number}	a		First item to compare
+		@param {number}	b		Second item to compare
+		
+		@return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+		*/
+		doSort:			function(depth,a,b){
+							var me = this;
+							if(me.sorters.length > 0){
+								var col = me.sorters[depth],
+									compA = a.rec[col.dataItem],
+									compB = b.rec[col.dataItem];
+									
+								//get the direction of the second sort
+								var srtVal = (col.sortDir == 'asc') ? 1 : -1;
+								
+								// perform the comparison based on 
+								var compare = 0;
+								switch(col.dataType){
+									case 'date':
+										compA = new Date(compA);
+										compB = new Date(compB);
+										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
+										break;
+									case 'numeric':
+										compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
+										compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
+										compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
+										break;
+									default:
+										compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
+								}
+								
+								if(compare != 0 || me.sorters[depth + 1] === undefined)	return compare * srtVal;
+								else													return me.doSort(depth + 1,a,b);
+							}else{
+								return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
+							}
+						},
+                        
+		/** Verify that columns have been defined on the grid, or that they are available remotely */
+		getColumns: function(){
+						var me = this;
+						
+						if(me.colUrl && me.colUrl.length){
+							// Make remote call for columns
+							me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
+							me.colProxy.loadData();
+						}else if(me.columns.length){
+							// Check for locally defined columns
+							me.setColumns(me.columns);
+						}else{
+							//throw('There are no columns defined for this WUI Grid.');
+						}
+							
+					},
+		
+        /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
+        init:		function(){
 						var me = this;
 						
 						// Give the grid a load mask
@@ -257,67 +331,143 @@
 						// hide the header
 						if(me.hideHeader)	me.headingContainer.height(0);
 					},
-		
-		/** Overrides Wui.Pane.disable() This disable simply disables the grid, not the header and footer. 
-		Use the Wui.Pane.prototype.disable.call(this) to disable the header and footer. */
-		disable:		function(){
-							this.disabled = true;
-							// cover pane contents
-							this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+        
+        /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
+		layout:			function(){
+							Wui.O.prototype.layout.call(this);
+							this.posDataWin();
+							if(this.cols.length)
+								this.sizeCols();
 						},
+                        
+		/** Overrides DataList.loadData(), to add the load mask */   
+		loadData:	function(){
+						this.setMaskHTML('Loading <span class="wui-spinner"></span>');
+						if(!this.disabled)	this.disable();
+						Wui.Data.prototype.loadData.apply(this,arguments);
+					},			
 		
-		/** Verify that columns have been defined on the grid, or that they are available remotely */
-		getColumns: function(){
+        /** 
+		@param	{object}	col	An object containing the sort direction and DOM element of the heading
+		@param	{string}	dir	The direction of the sort
+		Manages the sorters for the grid by keeping them in an array. 
+		*/
+		mngSorters:		function(col,dir){
+							var me = this,
+								sortClasses = ['one','two','three','four','five'];
+							if(dir !== undefined){
+								col.sortDir = dir;
+								me.sorters.push(col);
+							}else{
+								if(col.sortDir){
+									if(col.sortDir == 'desc'){
+										delete col.sortDir;
+										col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+										
+										$.each(me.sorters,function(i,itm){
+											if(itm == col)	me.sorters.splice(i,1);
+										});
+									}else{
+										col.sortDir = 'desc';
+									}
+								}else{
+									// Can't sort on more than 5 columns
+									if(me.sorters.length > 5){
+										col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+										return false;
+									}
+									
+									col.sortDir = 'asc';
+									me.sorters.push(col);
+								}
+							}
+								
+							$.each(me.sorters,function(i,itm){
+								itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
+							});
+						},
+        
+        /** Overrides DataList.modifyItem(), to implement the renderers */        
+		modifyItem:	function(itm){
 						var me = this;
-						
-						if(me.colUrl && me.colUrl.length){
-							// Make remote call for columns
-							me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
-							me.colProxy.loadData();
-						}else if(me.columns.length){
-							// Check for locally defined columns
-							me.setColumns(me.columns);
-						}else{
-							//throw('There are no columns defined for this WUI Grid.');
-						}
+						// Perform renderers (if any)
+						$.each(me.renderers,function(idx, r){
+							var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
+								val = itm.rec[r.dataItem];
 							
+							
+							cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el));
+						});
+						return itm.el;
+					},
+        
+        /** Overrides DataList.onRender(), to have the grid wait for columns before loading data while still preserving the set autoLoad value. */   
+        onRender:	function(){
+						// Store the real value of autoLoad, but set it to false so that the grid waits for the columns
+						// before loading data.
+						var me = this, al = me.autoLoad;
+						me.autoLoad = false;
+						
+						//Wui.Pane.prototype.onRender.call(this);
+						Wui.DataList.prototype.onRender.call(this);
+						
+						// Start with getting the columns - Many methods waterfall from here
+						me.autoLoad = al;
+						this.getColumns();
 					},
 		
-		/** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
+		/** Positions the height and width of the data table's container @private */
+		posDataWin:		function(){
+							var hh = this.headingContainer.height() - 1;
+							this.tblContainer.css({height:this.container.height() - hh, top:hh});
+						},
+		
+		/** Overrides DataList.refresh() to add disabling the grid to add the load mask */
+		refresh:		function(){
+							this.disable();
+							if(this.url === null)	this.setData(this.data);
+							else					this.getColumns();
+						},	
+
+        /** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
 		render/reference columns. The append the column to the DOM */			
 		renderColumn:function(col,idx){
 						var me = this;
 						
-						me.cols.push(
-							$.extend(col,{
-								dataType:	col.dataType || me.defaultDataType,
-								fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
-								cls:		col.cls || '',
-								renderer:	(col.renderer) ?	(function(a){
-																	// Handles renderer if it exists
-																	if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
-																		a = new Function('return ' + a + '.apply(this,arguments)');
-																	if(typeof a === 'function')
-																		me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
-																})(col.renderer) : '',
-								index:		idx,
-								width:		col.width === undefined ? 0 : col.width,
-								el:			$('<li>')
-											.append($('<div>').text(col.heading))
-											.attr({unselectable:'on'})
-											.addClass('wui-gc ' + col.cls)
-											.resizable({
-												handles:	'e',
-												stop:	function(){me.sizeCols();},
-												resize: function(event,ui){
-															col.width = ui.size.width;
-															col.fit = 0;
-															Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * (me.total + 1) > me.tblContainer.height()));
-														},
-											})
-											.click(function(){ me.sortList(col); })
-							})
-						);
+                        $.extend(col,{
+                            dataType:	col.dataType || me.defaultDataType,
+                            fit:		(col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
+                            cls:		col.cls || '',
+                            renderer:	(col.renderer) ?	(function(a){
+                                                                // Handles renderer if it exists
+                                                                if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
+                                                                    a = new Function('return ' + a + '.apply(this,arguments)');
+                                                                if(typeof a === 'function')
+                                                                    me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
+                                                            })(col.renderer) : '',
+                            index:		idx,
+                            width:		col.width === undefined ? 0 : col.width,
+                            el:			$('<li>')
+                                        .append($('<div>').text(col.heading))
+                                        .attr({unselectable:'on'})
+                                        .addClass('wui-gc ' + col.cls)
+                                        .click(function(){ me.sortList(col); })
+                        });
+                        
+                        //grids with single columns shouldn't have a resizable option
+                        if(me.columns.length > 1){
+                            col.el.resizable({
+                                handles:	'e',
+                                stop:	function(){me.sizeCols();},
+                                resize: function(event,ui){
+                                            col.width = ui.size.width;
+                                            col.fit = 0;
+                                            Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                                        },
+                            });
+                        }
+                        
+						me.cols.push(col);
 						
 						// Append newly created el to the DOM
 						me.heading.append(col.el);
@@ -360,117 +510,22 @@
 						me.template += '</tr>';
 						
 						if(me.autoLoad){
-							if(me.url === null)	me.make();
+							if(me.url === null)	me.setData(me.data);
 							else				me.loadData();
 						}
 					},
-		loadData:	function(){
-						this.setMaskHTML('Loading <span class="wui-spinner"></span>');
-						if(!this.disabled)	this.disable();
-						Wui.DataList.prototype.loadData.apply(this,arguments);
-					},			
-		onRender:	function(){
-						// Store the real value of autoLoad, but set it to false so that the grid waits for the columns
-						// before loading data.
-						var me = this, al = me.autoLoad;
-						me.autoLoad = false;
-						
-						//Wui.Pane.prototype.onRender.call(this);
-						Wui.DataList.prototype.onRender.call(this);
-						
-						// Start with getting the columns - Many methods waterfall from here
-						me.autoLoad = al;
-						this.getColumns();
-					},
-		
-		
-		/** Overrides the Wui.O layout function and positions the data and sizes the columns. */
-		layout:			function(){
-							Wui.O.prototype.layout.call(this);
-							this.posDataWin();
-							if(this.cols.length)
-								this.sizeCols();
-						},
-						
-		modifyItem:	function(itm){
-						var me = this;
-						// Perform renderers (if any)
-						$.each(me.renderers,function(idx, r){
-							var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
-								val = itm.rec[r.dataItem];
-							
-							
-							cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el));
-						});
-						return itm.el;
-					},
-		
-		afterMake:	function(){
-						this.sizeCols();
-						this.enable();
-					},
-		
+                    
 		/** Size up the columns of the table to match the headings @private */
 		sizeCols:		function (){
 							var me = this;
-							Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * (me.total + 1) > me.tblContainer.height()));
+							Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
 							me.tbl.css({width:'1px'});
 							for(var i = 0; i < me.cols.length; i++){
-								me.tbl.find('td:eq(' +i+ ')').css({width:me.cols[i].el.outerWidth()}); // account for table borders
+								me.tbl.find('td:eq(' +i+ ')').css({width:me.cols[i].el.outerWidth() - ((i == 0 || i == me.cols.length - 1) ? 1 : 0)}); // account for table borders
 							}
 						},
-		refresh:		function(){
-							this.disable();
-							if(this.url === null)	this.make();
-							else					this.getColumns();
-						},		
-		/** Positions the height and width of the data table's container @private */
-		posDataWin:		function(){
-							var hh = this.headingContainer.height() - 1;
-							this.tblContainer.css({height:this.container.height() - hh, top:hh});
-						},
-		
-		/** 
-		@param	{object}	col	An object containing the sort direction and DOM element of the heading
-		@param	{string}	dir	The direction of the sort
-		Manages the sorters for the grid by keeping them in an array. 
-		*/
-		mngSorters:		function(col,dir){
-							var me = this,
-								sortClasses = ['one','two','three','four','five'];
-							if(dir !== undefined){
-								col.sortDir = dir;
-								me.sorters.push(col);
-							}else{
-								if(col.sortDir){
-									if(col.sortDir == 'desc'){
-										delete col.sortDir;
-										col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-										
-										$.each(me.sorters,function(i,itm){
-											if(itm == col)	me.sorters.splice(i,1);
-										});
-									}else{
-										col.sortDir = 'desc';
-									}
-								}else{
-									// Can't sort on more than 5 columns
-									if(me.sorters.length > 5){
-										col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-										return false;
-									}
-									
-									col.sortDir = 'asc';
-									me.sorters.push(col);
-								}
-							}
-								
-							$.each(me.sorters,function(i,itm){
-								itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
-							});
-						},
-						
-		/**
+                        
+        /**
 		@param	{object}	Column object associated with a particular column element
 		Sort the grid based on the values of one or more columns. If the grid is paging
 		then sort remotely.
@@ -494,48 +549,6 @@
 
 							me.sizeCols();
 							me.resetSelect();
-						},
-						
-		/** 
-		Recursive function for sorting on multiple columns @private
-		@param {number}	depth	Depth of the recursive call
-		@param {number}	a		First item to compare
-		@param {number}	b		Second item to compare
-		
-		@return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
-		*/
-		doSort:			function(depth,a,b){
-							var me = this;
-							if(me.sorters.length > 0){
-								var col = me.sorters[depth],
-									compA = a.rec[col.dataItem],
-									compB = b.rec[col.dataItem];
-									
-								//get the direction of the second sort
-								var srtVal = (col.sortDir == 'asc') ? 1 : -1;
-								
-								// perform the comparison based on 
-								var compare = 0;
-								switch(col.dataType){
-									case 'date':
-										compA = new Date(compA);
-										compB = new Date(compB);
-										compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
-										break;
-									case 'numeric':
-										compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
-										compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
-										compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
-										break;
-									default:
-										compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
-								}
-								
-								if(compare != 0 || me.sorters[depth + 1] === undefined)	return compare * srtVal;
-								else													return me.doSort(depth + 1,a,b);
-							}else{
-								return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
-							}
-						},
+						}
 	});
 }(jQuery));
