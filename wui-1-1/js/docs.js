@@ -428,7 +428,7 @@
 		}catch(e){
 			// If the test expression itself has problems, return passed = false and the javascript error
 			var passed	= false,
-				fnString= (typeof test == 'function') ? e + '\n\n' + test.toString() : '';
+				fnString= (typeof test == 'function') ? e + '. [' + e.fileName + ' Line: ' + e.lineNumber +  ']\n\n' + test.toString() : '';
 		};
 
 		var startTime	= new Date(),
