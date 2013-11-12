@@ -25,7 +25,7 @@
                 text:       'Click Here To Launch The Confirm Window',
                 appendTo:	$('#wui-doc-example'),
                 click:      function(){
-                                Wui.confirm('Click yes or no to see your answer regurgutated back to you.', 'Example', function(val){ alert(val); });
+                                Wui.confirm('Click yes or no to see your answer regurgutated back to you.', 'Example', function(val){ alert(val); },'<div>help</div>');
                             }
             });
             confirm.place();
@@ -51,6 +51,22 @@
                 // Item 0 is the no button
                 a.footer.items[0].click();
                 return retTest;
+            });
+            ts.test('Test msg is Displayed',function() {
+                var msg = 'msg';
+                a = Wui.confirm(msg,'Title',function(v) { });
+                console.log(a);
+                var ret = a.el.find('.wui-pane-content').text();
+                a.footer.items[0].click();
+                return ret==msg;
+                
+            });
+            ts.test('Test additional Wui object on window',function() {
+                var msg = 'msg';
+                var x = new Wui.Button({text:'hello'});
+                a = Wui.confirm(msg,'Title',function(v) { },x);
+                a.footer.items[0].click();
+                return (a.items[1]);
             });
 		}); // end document.ready		
 	</script>
