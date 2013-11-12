@@ -463,7 +463,7 @@
 			));	
 		};
 		
-		$('#wui-test-results tbody').prepend(tplt.make());
+		$('#wui-test-results tbody').append(tplt.make());
 		
 		// Print overall test results
 		if(Wui.testBtn){
