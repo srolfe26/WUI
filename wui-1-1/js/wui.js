@@ -1409,7 +1409,7 @@ var Wui = Wui || {};
     @param {string}			msg			A message for the user
 	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
 	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
-	@param {[string]}		content		HTML content to include after the message
+	@param {[string]}		content		An additional Wui object to place on window
     @return The Wui.Window object of the confirmation message.
 	@author     Stephen Nielsen
     */
