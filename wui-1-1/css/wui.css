@@ -404,7 +404,7 @@
 .wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-header {display:none;}
 
 /*   nested pane tabs  */
-.wui-pane .wui-pane .wui-btn.wui-tab.selected, .wui-pane .wui-pane .wui-pane .wui-pane .wui-btn.wui-tab.selected  {background-color:#ccc !important;}
+.wui-pane .wui-pane .wui-btn.wui-tab.selected, .wui-pane .wui-pane .wui-pane .wui-pane .wui-btn.wui-tab.selected  {background-color:#bbb !important;}
 .wui-pane .wui-btn.wui-tab.selected,
 .wui-pane .wui-pane .wui-pane .wui-btn.wui-tab.selected,
 .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-btn.wui-tab.selected {background-color:#fff !important;  color:#555 !important;}

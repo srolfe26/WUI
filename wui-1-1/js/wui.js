@@ -1387,19 +1387,20 @@ var Wui = Wui || {};
 	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
 	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
 	@param {[string]}		content		HTML content to include after the message
+    @return The Wui.Window object of the message window.
 	@author     Stephen Nielsen
     */
 	Wui.msg = function(msg, msgTitle, callback, content){
-	    var cntnt   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
-	        msg  = new Wui.Window({
-				title:      msgTitle || 'Message', 
-				isModal:    true,
-				items:      cntnt, 
-				width:      350, 
-				height:     200,
-				onWinClose: callback || function(){}
-			});
-			return true;
+	    var cntnt = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
+            msgWin  = new Wui.Window({
+                title:      msgTitle || 'Message', 
+                isModal:    true,
+                items:      cntnt, 
+                width:      350, 
+                height:     200,
+                onWinClose: callback || function(){}
+            });
+        return msgWin;
 	}
 	
 	/** Shows an message in a modal window with yes and no buttons. Answers are passed to callback().
@@ -1409,15 +1410,16 @@ var Wui = Wui || {};
 	@param {[string]}		msgTitle	Title for the window. Default is 'Message'
 	@param {[function]}		callback	Function to perform when the message window closes - returning false will prevent the window from closing.
 	@param {[string]}		content		HTML content to include after the message
+    @return The Wui.Window object of the confirmation message.
 	@author     Stephen Nielsen
     */
 	Wui.confirm = function(msg, msgTitle, callback, content){
 	    var itms   = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
-	        Msg  = new Wui.Window({
+	        msgWin  = new Wui.Window({
 				title:      msgTitle || 'Confirm',
 				bbar:		[
-								new Wui.Button({text:'No', click:function(){ Msg.doAnswer(false); }}),
-								new Wui.Button({text:'Yes', click:function(){ Msg.doAnswer(true); }})
+								new Wui.Button({text:'No', click:function(){ msgWin.doAnswer(false); }}),
+								new Wui.Button({text:'Yes', click:function(){ msgWin.doAnswer(true); }})
 							],
 				isModal:    true,
 				items:      itms, 
@@ -1425,11 +1427,11 @@ var Wui = Wui || {};
 				height:     200,
 				doAnswer:	function(ans){
 								if(callback && typeof callback == 'function')	callback(ans);
-								Msg.answerRun = true;
-								Msg.close();
+								msgWin.answerRun = true;
+								msgWin.close();
 							},
-				onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+				onWinClose: function(){ return ((msgWin.answerRun !== true) ? false : msgWin.answerRun); }
 			});
-	    return true;
+	    return msgWin;
 	}
 }(jQuery,this));

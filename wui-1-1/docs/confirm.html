@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Wui.confirm() - WUI 1.1</title>
+    
+	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+	
+	<script type="text/javascript" src="../js/jquery-1-8-3-ui-1-9-2.js"></script>
+	<script type="text/javascript" src="../js/wui.js"></script>
+	<script type="text/javascript" src="../js/forms.js"></script>
+	<script type="text/javascript" src="../js/grid.js"></script>
+	<script type="text/javascript" src="../js/docs.js"></script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			Wui.docCode('../js/wui.js','Wui.confirm','Wui.confirm()');
+		}); // end document.ready		
+	</script>
+	
+	<script type="text/javascript" class="wui-doc-code">
+		$(document).ready(function(){
+            var confirm = new Wui.Button({
+                text:       'Click Here To Launch The Confirm Window',
+                appendTo:	$('#wui-doc-example'),
+                click:      function(){
+                                Wui.confirm('Click yes or no to see your answer regurgutated back to you.', 'Example', function(val){ alert(val); });
+                            }
+            });
+            confirm.place();
+        }); // end document.ready		
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// TESTING
+			ts = new Wui.ts();
+
+			ts.test('Test confirmation window: Clicking \'Yes\' gives the callback a true value.', function(){
+                var retTest = false;
+                    a = Wui.confirm('This is the unit test.','Here is a message', function(v){ retTest = (v == true); });
+                // Item 1 is the yes button
+                a.footer.items[1].click();
+                return retTest;
+            });
+            
+            ts.test('Test confirmation window: Clicking \'No\' gives the callback a true value.', function(){
+                var retTest = false;
+                    a = Wui.confirm('This is the unit test.','Here is a message', function(v){ retTest = (v == false); });
+                // Item 0 is the no button
+                a.footer.items[0].click();
+                return retTest;
+            });
+		}); // end document.ready		
+	</script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

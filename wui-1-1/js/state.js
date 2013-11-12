@@ -108,6 +108,27 @@
 
 							return val;
 						},
+                        
+        /**
+		@param	{string}	    target	The view on which to set the parameter.
+		@param	{string}	    key		The name of the parameter to set.
+        @param	{string|number}	value	The value of the parameter
+		@return The value passed in, or undefined if setting the parameter failed.
+        Set a hash parameter within certain view.
+		*/
+		setParam:		function(target,key, value){
+							var state	= this.getState();
+								
+							for(var i in state){
+								if(state[i].view === target && state[i].params[key]){
+                                    state[i].params[key] = value;
+                                    this.setState(state);
+                                    return value;
+                                }	
+                            }
+                            
+							return undefined;
+						},
 		
 		/**
 		@param	{string}	oldView		Name of the view to change.
