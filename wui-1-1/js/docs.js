@@ -137,7 +137,7 @@
 										me.toHTML();
 										
 										// Console.log it for posterity
-										console.log(me);
+										//console.log(me);
 									}else{
 										// Resume operations on the parent
 										this.parent.resume();
@@ -429,6 +429,7 @@
 			// If the test expression itself has problems, return passed = false and the javascript error
 			var passed	= false,
 				fnString= (typeof test == 'function') ? e + '\n\n' + test.toString() : '';
+                console.log(e);
 		};
 
 		var startTime	= new Date(),

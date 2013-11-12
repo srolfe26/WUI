@@ -212,8 +212,91 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			// TESTING
+            b = new Wui.Form({
+                    items: [
+                                {ftype:'Wui.Text', name: 'test',label: 'test',labelPosition: 'left'},
+                                {
+                                    ftype:'Wui.Text', 
+                                    name: 'validate',
+                                    label: 'valid',
+                                    validate: function() {
+                                        //console.log(this);
+                                        if(this.val() > 3) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
+                            ]
+            });
+            b.place();
 			ts = new Wui.ts();
-			
+			ts.test('Test of setField', function() {
+                b.setField('test',1);
+                return b.getRawData().test == 1;
+            });
+            ts.test('Test of setData', function() {
+                b.setData({'test':2});
+                return b.getRawData().test == 2;
+            });
+            ts.test('Test of clearData', function() {
+                b.clearData();
+                return b.getRawData().test == null;
+            });
+            ts.test('Test of getData which will run validation', function() {
+                b.clearData();
+                b.setField('validate',4);
+                var x =b.getData();
+                if(x.test == null && x.validate==4)
+                    return true;
+                
+                return false;
+            });
+            ts.test('Test of getFrmItm', function() {
+                var x = b.getFrmItm('validate');
+                return x == b.items[1];
+            });
+            ts.test('Test of the disable',function() {
+                b.clearData();
+                b.disable();
+                var dis = b.el.find('div[name=validate]');
+                return dis[0].children[1].children[0].attributes[1].value == 'disabled' ;
+            });
+            ts.test('Test of the enable',function() {
+                b.enable();
+                var x = b.getFrmItm('test');
+                return !x.disabled;
+            });
+
+            ts.test('Test of setting Label position on field different than on form',function() {
+                var x = b.getFrmItm('test');
+                
+                return x.labelPosition == 'left';
+            });
+            ts.test('Test the each function',function() {
+                var x = false;
+                var c = 0;
+                b.each(function() {
+                    c++;
+                });
+                return b.items.length == c;
+            });
+            ts.test('Test the removal of a form field using remFrmItm()',function() {
+                b.remFrmItm('test');
+                return b.items.length == 1;
+            });
+            ts.test('Adding a field to the form using push()', function() {
+                b.push({ftype: 'Wui.Text',label:'test',labelPosition:'left',name: 'test'});
+                return b.items.length == 2;
+            });
+            ts.test('Test of validate()', function() {
+                b.setField('validate',2);
+                var v = b.validate();
+                return !v;
+            });
+
+            //b.remove();
 			//ts.test('Push a new WUI object on to the \'stage\'', function(){});
 		}); // end document.ready		
 	</script>
