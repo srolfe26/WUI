@@ -116,7 +116,8 @@ var Wui = Wui || {};
 	@param  {object} response   A JSON object which was returned from an XHR response.
 	@return An object containing the data removed from any wrapper, and the total number of records received {data:array, total:numeric}
 	
-	Unwraps the data from any container it may be in to allow it to be used by a containing object
+	Unwraps the data from any container it may be in to allow it to be used by a containing object. Wrapper values are defined in
+    Wui.Data.prototype.dataContainer and Wui.Data.prototype.totalContainer.
 	*/
 	Wui.unwrapData = function(r){
 		var me          = this,
