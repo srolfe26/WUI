@@ -219,9 +219,9 @@
                                     ftype:'Wui.Text', 
                                     name: 'validate',
                                     label: 'valid',
-                                    validate: function() {
+                                    validTest: function(v) {
                                         //console.log(this);
-                                        if(this.val() > 3) {
+                                        if(v > 3) {
                                             return true;
                                         } else {
                                             return false;
@@ -296,7 +296,7 @@
                 return !v;
             });
 
-            //b.remove();
+            b.remove();
 			//ts.test('Push a new WUI object on to the \'stage\'', function(){});
 		}); // end document.ready		
 	</script>
