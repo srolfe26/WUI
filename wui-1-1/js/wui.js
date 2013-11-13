@@ -1411,7 +1411,7 @@ var Wui = Wui || {};
 	}
 	
 	/** Shows an message in a modal window with yes and no buttons. Answers are passed to callback().
-	The window will not close until an aswer is selected.
+	The window will not close until an answer is selected.
 	
     @param {string}			msg			A message for the user
 	@param {[string]}		msgTitle	Title for the window. Default is 'Message'

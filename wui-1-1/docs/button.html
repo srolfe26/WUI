@@ -40,6 +40,14 @@
 
 			ts.test('Set Button Text', function(){ a.setText('Test 1 Was Successful'); return a.el.text() == 'Test 1 Was Successful'; });
 			
+            ts.test('Disable the button', function(){ a.disable(); return a.disabled == true; });
+            
+            ts.test('Enable the button', function(){ a.enable(); return a.disabled == false; });
+            
+            //ts.test('Click event hook', function() { a.click( console.log("this is weird") ); });
+            
+           
+            
 		}); // end document.ready		
 	</script>
 </head>
