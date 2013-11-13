@@ -47,39 +47,6 @@
                 return ret==msg;
             });
             
-            
-//			ts.test('Test Error Report window: Clicking \'Close\' gives the callback a false value.', function(){
-//                var retTest = false;
-//                    a = Wui.errRpt('This is the unit test.','Here is a message');
-//                    console.log(a);
-//                // Item 1 is the yes button
-//                a.footer.items[1].click();
-//                return retTest;
-//            });
-//            
-//            ts.test('Test confirmation window: Clicking \'No\' gives the callback a true value.', function(){
-//                var retTest = false;
-//                    a = Wui.confirm('This is the unit test.','Here is a message', function(v){ retTest = (v == false); });
-//                // Item 0 is the no button
-//                a.footer.items[0].click();
-//                return retTest;
-//            });
-//            ts.test('Test msg is Displayed',function() {
-//                var msg = 'msg';
-//                a = Wui.confirm(msg,'Title',function(v) { });
-//                console.log(a);
-//                var ret = a.el.find('.wui-pane-content').text();
-//                a.footer.items[0].click();
-//                return ret==msg;
-//                
-//            });
-//            ts.test('Test additional Wui object on window',function() {
-//                var msg = 'msg';
-//                var x = new Wui.Button({text:'hello'});
-//                a = Wui.confirm(msg,'Title',function(v) { },x);
-//                a.footer.items[0].click();
-//                return (a.items[1]);
-//            });
 		}); // end document.ready		
 	</script>
 </head>
