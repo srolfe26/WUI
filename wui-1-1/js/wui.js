@@ -1,4 +1,12 @@
-﻿/*
+﻿/*! Wui 1.1
+ * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ *
+ * @license MIT
+ * http://www.geekinaday.com/wui/wui-1-1/license.html
+ */
+ 
+
+/*
 * Avoid 'console' errors in browsers that lack a console by defining a variable named console.
 * For example, when using console.log() on a browser that does not have a console, execution of code
 * will continue because the console variable is defined. 

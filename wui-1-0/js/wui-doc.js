@@ -1,3 +1,11 @@
+/*! Wui 1.0
+ * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ *
+ * @license MIT
+ * http://www.geekinaday.com/wui/wui-1-1/license.html
+ */
+
+
 /**  This is a documentation engine that will traverse the objects loaded into memory on the current page. It utilizes JSDoc type comments typed at the beginning,
      *  but within the definition, of functions. It allows for the traversal of objects using the 'Explore' button, and shows the source code of functions with the
      *  'Source' button.

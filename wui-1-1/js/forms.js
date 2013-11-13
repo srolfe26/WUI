@@ -1,4 +1,11 @@
-﻿(function($) {
+﻿/*! Wui 1.1
+ * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ *
+ * @license MIT
+ * http://www.geekinaday.com/wui/wui-1-1/license.html
+ */
+
+(function($) {
 	$.fn.overrideNodeMethod = function(methodName, action) {
 	    var originalVal = $.fn[methodName];
 	    var thisNode = this;
@@ -1590,13 +1597,28 @@
                                 me.displayDate('');
                             }
                         },
+		/** 
+		@param {object}	t	A WUI object, namely this object
+		@return	The field of the object.
+		Sets additional listeners on the text field, namely to process the date when it changes */
 		setListenrs:    function(t){
                             return t.field.keyup(function(evnt){ t.processDate(); });
                         },
+		
+		/** 
+		@param {date}	minDt	A date that will become the lower bound for the field
+		@return	The newly set this.minDate.
+		Sets the lower bound for the field, updating the jQuery datepicker as well. */
 		setMinDate:     function(minDt){ 
                             this.minDate = this.translateDate(minDt.toString());
                             this.field.datepicker( "option", "minDate", new Date(me.minDate.valueOf() + me.minute));
+                            return this.minDate;
                         },
+		
+		/** 
+		@param {string}	ds	A string containing the description of a date and time
+		@return	A Date based on the interpretation of the date string.
+		Translates the date from the user's input to a javascript Date object */
 		translateDate:  function(ds){
                             var me			= this,
                             	now         = new Date(), 
@@ -1716,6 +1738,11 @@
 
                             return new Date(ds);
                         },
+		
+		/** 
+		@param {array}	wArray	An array of numbers
+		@return	The passed in array of numbers combined according to their order/magnitude
+		i.e. The array [1,100,50,5] -> 155, [5,1000,20,3] -> 5023  */
 		txt2Num:        function(wArray){
                             //split into an array and combine them according to magnitude
                             var pos = 0, theNum = 0;
@@ -1742,9 +1769,11 @@
                             if(lastNum != nextNum)  return (this.getM(lastNum) > 2) ? theNum *= lastNum : theNum += lastNum;
                             else                    return theNum;
                         },
+                        
         getVal:			function(){
 					        return this.value;
 				        },
+				        
 		setVal:			function(sv){
 					        if(sv !== null){
                                 if(typeof sv == 'string'){
@@ -1761,6 +1790,11 @@
 								this.value = null;
 							}
 				        },
+				        
+		/** 
+		@param {date}	dt	A date object
+		@return	A boolean
+		Determines whether the date object passed in is valid or not. */
 		validDate:       function(dt){
                             if(dt != null && dt.toString() == 'Invalid Date')   return false;
                             else if (dt == null)                                return false;
@@ -1769,15 +1803,37 @@
 	});
 	
 	
-	/***********************************   WUI File   ***********************************/
+	/**
+	Creates a form field for uploading files. By the nature of file uploads and their tight pairing to a backend server, this control must be extended itself to be used for uploading files.
+	
+	Wui.File utilizes the following plugin:	
+
+	One Click Upload - jQuery Plugin
+	Copyright (c) 2008 Michael Mitchell - http://www.michaelmitchell.co.nz
+	
+	Modified 2012 Stephen Nielsen
+	*/
 	Wui.File = function(args){ 
 		$.extend(this,{
+			/** */
 			beforSelect:function(){},
+			
+			/** */
 			fileTypeFilter: null,
+			
+			/** */
 			upFieldName:'fileupload',
+			
+			/** */
 			upParams:   {},
+			
+			/** */
 			upSuccess:  function(){},
+			
+			/** */
 			upTarget:   '',
+			
+			/** */
 			upTitleName:'title'
 		},args,{
 			field:	$('<input>').attr({type:'text'})
@@ -1785,12 +1841,15 @@
 		this.init();
 	};
 	Wui.File.prototype = $.extend(new Wui.Text(),{
+		/** */
 		changeClick:function(){
                          //swap buttons
                          this.changeBtn.el.fadeOut('fast');
                          this.upBtn.el.parents('div:first').fadeIn('slow'); 
                          this.field.removeClass().focus();
                      },
+		
+		/** */
 		onSelect:   function(fileControl){
                         this.beforSelect(fileControl, this);
                         
@@ -1805,6 +1864,8 @@
                         //upload file
                         fileControl.submit();
                     },
+		
+		/** */
 		init:       function(){
                         var me = this;
         				Wui.Text.prototype.init.call(me);
@@ -1866,20 +1927,27 @@
                             onSelect:   function() { me.onSelect(this); }
                         });
                     },
+		
+		/** */
 		upFailure:  function(e,e2){
                         console.log(e,e2);
 						Wui.Text.prototype.val.call(this,'Upload Failure');
                     },
+        /** */
         getVal:		function(){ return this.value || {}; },
+        /** */
         setVal:		function(sv){
 	        			this.value = this.value || {};
                         $.extend(this.value,sv);
 			        },
+		/** */
 	    val:		function(sv,callback){
 					    var retVal = Wui.FormField.prototype.val.apply(this,arguments);
 					    if(this[callback] && typeof this[callback] == 'function') this[callback]();
                         return retVal;
 				    },
+        
+        /** */
         valChange:  function(){
                         var me = this;
         				if(me.value){

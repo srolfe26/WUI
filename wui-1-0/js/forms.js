@@ -1,3 +1,10 @@
+/*! Wui 1.0
+ * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ *
+ * @license MIT
+ * http://www.geekinaday.com/wui/wui-1-1/license.html
+ */
+
 (function($) {
 	Wui.form = function(args){
 	    $.extend(this,{

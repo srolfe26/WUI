@@ -1,4 +1,11 @@
-﻿/******************   PANE STYLES   ********************/
+﻿/*! Wui 1.1
+ * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ *
+ * @license MIT
+ * http://www.geekinaday.com/wui/wui-1-1/license.html
+ */
+
+/******************   PANE STYLES   ********************/
 @keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-moz-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-webkit-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
