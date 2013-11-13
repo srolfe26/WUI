@@ -239,7 +239,8 @@
 	
 	/** 
 		Allows a note to be placed on a form. A HTML string will be converted into DOM elements
-		placed within a paragraph tag.
+		placed within a paragraph tag. The note can be included in the items on a form, but the form
+        will not attempt to validate like the other items.
 	*/
 	Wui.Note = function(args){ 
 		$.extend(this,{
@@ -257,7 +258,8 @@
 	
 	/** 
 		The label object will wrap around a Wui.FormField when the 'label' config is specified
-		on the field.
+		on the field. The labelPosition is usually supplied by the field the label will wrap, but
+        it has its own property, and can be instantiated by itself.
 	*/
 	Wui.Label = function(args){ 
 		$.extend(this,{
@@ -284,10 +286,12 @@
 		
 		/**
 		@param {string} newLabel String that will converted into DOM elements and placed in the label.
+        @return Returns the HTML content of the label
 		Changes the contents of the label.
 		*/
 		setLabel:	function(newLabel){
 						this.label.html(this.html = newLabel);
+                        return this.label.html();
 					}
     });
 	
@@ -1271,9 +1275,7 @@
 	 "ten months from now"
 	*/
 	Wui.Datetime = function(args){ 
-		$.extend(this,{
-			valChange:	function(val){}
-		},args,{
+		$.extend(this,args,{
 			field:		$('<input>').attr({type:'text'})
 		});
 		this.init();
@@ -1449,17 +1451,24 @@
         shortDays:      ["sun","mon","tue","wed","thu","fri","sat"],
         months:         ["january","february","march","april","may","june","july","august","september","october","november","december"],
         shortMonths:    ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"],
+        
         /** Array of feedback words or phrases to randomly display when a user's input is not understood by the control */
 		sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
+        
+        /** The date furthest in the past that this control will accept as valid */
         minDate:        null,
-		prevText:       null,
-		
+        
+		/**
+        @param {string} overrideText    Text that will absolutely be displayed instead of the formatted version of the field's value
+        @return The value passed in, or the calculated value of the datetime
+        Give feedback to the end user about the data they entered. 
+        */
         displayDate:    function(overrideText){
                             var me = this;
         					
                             // process current date value
-                            if(overrideText != undefined){ me.displayDiv.html(overrideText); return; }
-                            if(me.value == "" || me.value === null) { return; }
+                            if(overrideText != undefined){ me.displayDiv.html(overrideText); return overrideText; }
+                            if(me.value == "" || me.value === null) { return null; }
                             
                             //validation for min-date
                             if(!(me.minDate != null && me.value < me.minDate))	me.displayDiv.html(me.value.toString('ddd MM-dd-yyyy h:mm tt'));
@@ -1467,11 +1476,18 @@
                             
                             return  me.value.toString('MM/dd/yyyy h:mm tt');
                         },
-		 getM:          function(num){
+		 
+         /** 
+         @param {number}    num Any whole number
+         @return            The magnitude of the number
+         Gets the magnitude (as a factor of ten) of the number passed into getM. */
+         getM:          function(num){
                             var magnitude = 0;
                             while((num = num / 10) >= 1) magnitude++
                             return magnitude;
                         },
+                     
+        /** Runs when the object is created. Sets up DOM elements, and attaches the jQuery UI datepicker */
 		init:           function(){
                             var me = this;
         					Wui.Text.prototype.init.call(me);
@@ -1506,7 +1522,13 @@
                             });
                             me.el.find('.ui-datepicker-trigger').attr({tabindex:-1});
                         },
-		num2Dec:        function (words){
+		
+        /** 
+        @param {string}    words   Words describing a number. (i.e.: Four hundred and fifty-seven)
+        @return            A number
+        Converts numbers as words to a regular number. The words MUST use correct grammar (hyphens should be used between 20 and 99)
+        */
+        num2Dec:        function (words){
                             var numberRepl = {  a:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,
                                 thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,
                                 thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1e3,
@@ -1541,7 +1563,13 @@
                            
                             return finalNum;
                         },
-		processDate:    function(dtString){
+		
+        /** 
+        @param {string}    dtString   A string describing a date by any number of methods
+        @return            A number
+        Converts numbers as words to a regular number. The words MUST use correct grammar (hyphens should be used between 20 and 99)
+        */
+        processDate:    function(dtString){
                             var me = this,
                             	dateString = dtString || me.field.val();
                             

@@ -49,6 +49,24 @@
 			// TESTING
 			ts = new Wui.ts();
 			
+            ts.test("Template Engine is working", function(){
+                var data = [
+                    {val:1, title:'One'},
+                    {val:2, title:'Two'},
+                    {val:3, title:'Three'}
+                ];
+                b = new Wui.Template({ template: '<li>{title}</li>' });
+                
+                var tgt = $('<ul>').appendTo('body');
+                
+                for(var i in data){
+                    b.data = data[i];
+                    tgt.append(b.make());
+                }
+                
+                tgt.hide();
+                return tgt.children().length == 3;
+            });
 		}); // end document.ready		
 	</script>
 </head>
