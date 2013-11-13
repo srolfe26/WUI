@@ -1,15 +1,15 @@
 # WUI (Webteam User Interface) #
-[http://www.geekinaday/wui/wui-1-1/](http://www.geekinaday/wui/wui-1-1/)
+[http://www.geekinaday.com/wui/wui-1-1/](http://www.geekinaday.com/wui/wui-1-1/)
 
 Version: 1.1 (pre-release), Last updated: 11/12/13
 
 The WUI provides a tool set for creating rich internet applications quickly and easily. It is 100% jQuery based.
 
-Visit the [project page](http://www.geekinaday/wui/wui-1-1/) for more information and usage examples!
+Visit the [project page](http://www.geekinaday.com/wui/wui-1-1/) for more information and usage examples!
 
 
 ## Documentation ##
-[http://www.geekinaday/wui/wui-1-1/](http://www.geekinaday/wui/wui-1-1/)
+[http://www.geekinaday.com/wui/wui-1-1/](http://www.geekinaday.com/wui/wui-1-1/)
 
 
 ## Examples ##
@@ -29,5 +29,5 @@ Tested heavily with Firefox 18+, Moderately with IE 9+, and lightly with Chrome 
 ## License ##
 Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
 Licensed under the MIT license.  
-[http://www.geekinaday/wui/wui-1-1/license.html](http://www.geekinaday/wui/wui-1-1/license.html)
+[http://www.geekinaday.com/wui/wui-1-1/license.html](http://www.geekinaday.com/wui/wui-1-1/license.html)
 
