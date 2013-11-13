@@ -54,8 +54,6 @@ var Wui = Wui || {};
 	/**
 		@param {object} Object containing named keys
 		@return Array containing the key names of the passed in object in alphabetical order
-		
-		@example var keys = Wui.getKeys(stateArray[i].params);
 	*/
 	Wui.getKeys = function(obj){
 		var retArray = [];
@@ -99,9 +97,9 @@ var Wui = Wui || {};
 	/** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 	
-	@return A number representing the maximum z-index on the page
+	@return A number representing the maximum z-index on the page plus one.
 	
-	Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined
+	Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined.
 	*/
 	Wui.maxZ = function(){
 		var topZ =	Math.max.apply(null, 
@@ -115,10 +113,11 @@ var Wui = Wui || {};
     
     /** 
 	@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-	@param  {object} response   A JOSN object which was returned from an XHR response.
+	@param  {object} response   A JSON object which was returned from an XHR response.
 	@return An object containing the data removed from any wrapper, and the total number of records received {data:array, total:numeric}
 	
-	Unwraps the data from any container it may be in to allow it to be used by a containing object
+	Unwraps the data from any container it may be in to allow it to be used by a containing object. Wrapper values are defined in
+    Wui.Data.prototype.dataContainer and Wui.Data.prototype.totalContainer.
 	*/
 	Wui.unwrapData = function(r){
 		var me          = this,

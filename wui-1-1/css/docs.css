@@ -135,8 +135,18 @@ body.about-page {margin:0; padding:0;}
     line-height: 1;
     padding:0; margin:0;
 }
+
+.wui-doc-param {
+    font-size: 0.9em;
+    font-weight: bold;
+    min-width: 100px;
+    text-transform: uppercase;
+}
+.wui-doc-var-type {vertical-align:top; font-style:italic;}
+.wui-doc-var-name {font-weight:bold; color:#930;}
+
 .doc-info > table td.wui-doc-param, .doc-info > table td.wui-doc-var-type, .doc-info > table td.wui-doc-var-desc {display:none;}
-.wui-doc-var-name:after {content: ", "}
+.wui-test-results .wui-doc-var-name:after {content: ", "}
 
 .show-doc > td { padding: 1.5em 1em; background-color:#eee; }
     .wui-test-results .show-doc .doc-item-title {float:none; margin:0;}

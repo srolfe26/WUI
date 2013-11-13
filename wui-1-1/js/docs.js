@@ -428,8 +428,12 @@
 		}catch(e){
 			// If the test expression itself has problems, return passed = false and the javascript error
 			var passed	= false,
+<<<<<<< HEAD
 				fnString= (typeof test == 'function') ? e + '\n\n' + test.toString() : '';
                 console.log(e);
+=======
+				fnString= (typeof test == 'function') ? e + '. [' + e.fileName + ' Line: ' + e.lineNumber +  ']\n\n' + test.toString() : '';
+>>>>>>> 892530f0c0a4a37f6b151497aae2d4ae5b8f1b2a
 		};
 
 		var startTime	= new Date(),
@@ -464,7 +468,7 @@
 			));	
 		};
 		
-		$('#wui-test-results tbody').prepend(tplt.make());
+		$('#wui-test-results tbody').append(tplt.make());
 		
 		// Print overall test results
 		if(Wui.testBtn){
