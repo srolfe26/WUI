@@ -1,7 +1,7 @@
 # WUI (Webteam User Interface) #
 [http://geekinaday/wui/wui-1-1/](http://geekinaday/wui/wui-1-1/)
 
-Version: 1.1, Last updated: 11/12/13
+Version: 1.1 (pre-release), Last updated: 11/12/13
 
 The WUI provides a tool set for creating rich internet applications quickly and easily. It is 100% jQuery based.
 
