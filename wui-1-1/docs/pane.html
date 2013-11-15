@@ -25,6 +25,7 @@
 				height:		500,
 				appendTo:	$('#wui-doc-example'),
 				title:		'Pane 1',
+                x:          10,
 				items:		[
 								new Wui.Pane({
 									title:	'Pane 2',
@@ -60,6 +61,28 @@
 			ts = new Wui.ts();
 			
 			//ts.test('Push a new WUI object on to the \'stage\'', function(){});
+            
+            ts.test('Disable the pane', function(){ pane.disable(); return pane.disabled == true; });
+            
+            ts.test('Enable the pane', function(){ pane.enable(); return pane.disabled == false; });
+            
+            ts.test('Set the Mask HTML', function(){ 
+                pane.setMaskHTML("<h1>Hello World</h1>"); 
+                // console.log(pane.maskHTML);
+                return pane.maskHTML == "<h1>Hello World</h1>";
+            });
+            
+                
+            ts.test('Set pane title', function(){
+                pane.setTitle("Wir Sind Wir");
+                //console.log(pane);
+                pane.items[0].setTitle("Wir Sind Wir");
+                //console.log(pane.items[0].title);
+                return pane.title == "Wir Sind Wir";
+            });
+            
+            ts.test('Set the title alignment', function() { pane.setTitleAlign("center"); return pane.titleAlign == "center"; });
+                        
 		}); // end document.ready		
 	</script>
 </head>

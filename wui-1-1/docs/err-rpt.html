@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>WUI Button - WUI 1.1</title>
+    <title>Wui.errRpt() - WUI 1.1</title>
     
 	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
 	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
@@ -13,40 +13,39 @@
 	<script type="text/javascript" src="../js/grid.js"></script>
 	<script type="text/javascript" src="../js/docs.js"></script>
 	
-	<style type="text/css" class="wui-doc-code">
-		.wui-btn.test-page {height: 40px; line-height: 40px;}
-	</style>
-	
 	<script type="text/javascript">
 		$(document).ready(function(){
-			Wui.docCode('../js/wui.js','Wui.Button','Button');
+			Wui.docCode('../js/wui.js','Wui.errRpt','Wui.errRpt()');
 		}); // end document.ready		
 	</script>
 	
 	<script type="text/javascript" class="wui-doc-code">
 		$(document).ready(function(){
-			a = new Wui.Button({
-				text:	'Test Button',
-				cls:	'test-page',
-				appendTo:$('#wui-doc-example')
-			});
-			a.place();
-		});
+            var confirm = new Wui.Button({
+                text:       'Click Here To Launch The Error Report Window',
+                appendTo:	$('#wui-doc-example'),
+                click:      function(){
+                                Wui.confirm('Click yes or no to see your answer regurgutated back to you.', 'Example', function(val){ alert(val); },'<div>help</div>');
+                            }
+            });
+            confirm.place();
+        }); // end document.ready		
 	</script>
+	
 	<script type="text/javascript">
 		$(document).ready(function(){
 			// TESTING
 			ts = new Wui.ts();
 
-			ts.test('Set Button Text', function(){ a.setText('Test 1 Was Successful'); return a.el.text() == 'Test 1 Was Successful'; });
-			
-            ts.test('Disable the button', function(){ a.disable(); return a.disabled == true; });
             
-            ts.test('Enable the button', function(){ a.enable(); return a.disabled == false; });
-            
-            //ts.test('Click event hook', function() { a.click( console.log("this is weird") ); });
-            
-           
+            ts.test('Test msg is displayed',function() {
+                var msg = 'msg';
+                a = Wui.errRpt(msg, 'Title');
+                //console.log(a);
+                var ret = a.el.find('.wui-pane-content').text();
+                a.footer.items[0].click();
+                return ret==msg;
+            });
             
 		}); // end document.ready		
 	</script>
