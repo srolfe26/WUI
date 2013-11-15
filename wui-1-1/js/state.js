@@ -6,201 +6,201 @@
  */
 
 (function($, window) {
-	/**
-	WUI State Machine
-	
-	The WUI state machine allows for helping the browser to keep a history of the state of a javascript application by utilizing 
-	text in the URL after the hash ('#'). The WUI state machine follows this format:
-	
-	In the hash (as a string):				<view 1>?<param1>=<param1 value>&<param2>=<param2 value>/<view 2>?<param1>=<param2 value>
-	
-	...or without the placeholders:			adminView?pic=one&id=57/adminWindow?info=salary
-	
-	In the state machine (as an array):		[
-												{
-													view: 'adminView', 
-													params: { pic:one, id:57 }
-												},
-												{
-													view: 'adminWindow', 
-													params: { info:salary }
-												}
-											]
-											
-	The hashchange event is written by:
-	Copyright (c) 2010 "Cowboy" Ben Alman,
-	Dual licensed under the MIT and GPL licenses.
-	http://benalman.com/about/license/
-	*/
-	Wui.stateMachine = function(args){ $.extend(this, {
-		/** Placeholder for functions passed in using setChangeAction */
-		changeMethod:	function(){}
-	},args); };
-	Wui.stateMachine.prototype = {
-		/**
-		@param	{string|array}	state	A string or an array describing the state of the page
-		@return The state that was just set on the page.
-		Sets the state passed in to the window.location as a string. State arrays passed in are converted.
-		*/
-		setState:		function(state){
-							var url			= window.location.href.split('#'),
-								preHash		= url[0] + '#',
-								setState	= preHash
-								
-								// Objects passed in are parsed according to a strict format of 
-								// firstView?param1=1/anotherView?param1=1&param2=2 ...
-								if(state && typeof state === 'object'){
-									setState = preHash + this.stringify(state);
-								// If a string is passed in just pass it along
-								}else if(state && typeof state === 'string'){
-									setState = preHash + state;
-								}
-								
-							return window.location = setState;
-						},
-		
-		/**
-		@param	{array}	stateArray	An array containing objects that describe a WUI state
-		@return A WUI state string.
-		State arrays passed in are converted to a WUI state string suitable for being used as hash text.
-		*/
-		stringify:		function(stateArray){
-							var stateStr	= '';
-							
-							for(var i in stateArray){
-								// Get keys in alphabetical order so that comparing states works
-								var keys = Wui.getKeys(stateArray[i].params);
+    /**
+    WUI State Machine
+    
+    The WUI state machine allows for helping the browser to keep a history of the state of a javascript application by utilizing 
+    text in the URL after the hash ('#'). The WUI state machine follows this format:
+    
+    In the hash (as a string):                <view 1>?<param1>=<param1 value>&<param2>=<param2 value>/<view 2>?<param1>=<param2 value>
+    
+    ...or without the placeholders:            adminView?pic=one&id=57/adminWindow?info=salary
+    
+    In the state machine (as an array):        [
+                                                {
+                                                    view: 'adminView', 
+                                                    params: { pic:one, id:57 }
+                                                },
+                                                {
+                                                    view: 'adminWindow', 
+                                                    params: { info:salary }
+                                                }
+                                            ]
+                                            
+    The hashchange event is written by:
+    Copyright (c) 2010 "Cowboy" Ben Alman,
+    Dual licensed under the MIT and GPL licenses.
+    http://benalman.com/about/license/
+    */
+    Wui.stateMachine = function(args){ $.extend(this, {
+        /** Placeholder for functions passed in using setChangeAction */
+        changeMethod:    function(){}
+    },args); };
+    Wui.stateMachine.prototype = {
+        /**
+        @param    {string|array}    state    A string or an array describing the state of the page
+        @return The state that was just set on the page.
+        Sets the state passed in to the window.location as a string. State arrays passed in are converted.
+        */
+        setState:        function(state){
+                            var url            = window.location.href.split('#'),
+                                preHash        = url[0] + '#',
+                                setState    = preHash
+                                
+                                // Objects passed in are parsed according to a strict format of 
+                                // firstView?param1=1/anotherView?param1=1&param2=2 ...
+                                if(state && typeof state === 'object'){
+                                    setState = preHash + this.stringify(state);
+                                // If a string is passed in just pass it along
+                                }else if(state && typeof state === 'string'){
+                                    setState = preHash + state;
+                                }
+                                
+                            return window.location = setState;
+                        },
+        
+        /**
+        @param    {array}    stateArray    An array containing objects that describe a WUI state
+        @return A WUI state string.
+        State arrays passed in are converted to a WUI state string suitable for being used as hash text.
+        */
+        stringify:        function(stateArray){
+                            var stateStr    = '';
+                            
+                            for(var i in stateArray){
+                                // Get keys in alphabetical order so that comparing states works
+                                var keys = Wui.getKeys(stateArray[i].params);
 
-								// State the location
-								stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
-								
-								for(var j = 0; j < keys.length; j++)
-									stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
-							}
-							
-							return stateStr;
-						},
-		
-		/**
-		@return A WUI state machine formatted array.
-		Gets the hash text of the URL and converts it to a WUI state array.
-		*/
-		getState:		function(){
-							var state = [];
-							
-							window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
-								var itm = {};
-								viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
-									itm[key] = val;
-									return '';
-								});
-								state.push({view:viewarea, params:itm});
-							});
-							
-							return state;
-						},
-		
-		/**
-		@param	{string}	target	The view from which to retrieve the parameter.
-		@param	{string}	key		The name of the parameter to retrieve.
-		@return The value of a hash parameter or undefined.
-		Returns a parameter value for a specified target view and parameter key.
-		*/
-		getParam:		function(target,key){
-							var state	= this.getState(),
-								val		= undefined;
-								
-							for(var i in state)
-								if(state[i].view === target && state[i].params[key])	return state[i].params[key];
+                                // State the location
+                                stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
+                                
+                                for(var j = 0; j < keys.length; j++)
+                                    stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
+                            }
+                            
+                            return stateStr;
+                        },
+        
+        /**
+        @return A WUI state machine formatted array.
+        Gets the hash text of the URL and converts it to a WUI state array.
+        */
+        getState:        function(){
+                            var state = [];
+                            
+                            window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
+                                var itm = {};
+                                viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
+                                    itm[key] = val;
+                                    return '';
+                                });
+                                state.push({view:viewarea, params:itm});
+                            });
+                            
+                            return state;
+                        },
+        
+        /**
+        @param    {string}    target    The view from which to retrieve the parameter.
+        @param    {string}    key        The name of the parameter to retrieve.
+        @return The value of a hash parameter or undefined.
+        Returns a parameter value for a specified target view and parameter key.
+        */
+        getParam:        function(target,key){
+                            var state    = this.getState(),
+                                val        = undefined;
+                                
+                            for(var i in state)
+                                if(state[i].view === target && state[i].params[key])    return state[i].params[key];
 
-							return val;
-						},
+                            return val;
+                        },
                         
         /**
-		@param	{string}	    target	The view on which to set the parameter.
-		@param	{string}	    key		The name of the parameter to set.
-        @param	{string|number}	value	The value of the parameter
-		@return The value passed in, or undefined if setting the parameter failed.
+        @param    {string}        target    The view on which to set the parameter.
+        @param    {string}        key        The name of the parameter to set.
+        @param    {string|number}    value    The value of the parameter
+        @return The value passed in, or undefined if setting the parameter failed.
         Set a hash parameter within certain view.
-		*/
-		setParam:		function(target,key, value){
-							var state	= this.getState();
-								
-							for(var i in state){
-								if(state[i].view === target && state[i].params[key]){
+        */
+        setParam:        function(target,key, value){
+                            var state    = this.getState();
+                                
+                            for(var i in state){
+                                if(state[i].view === target && state[i].params[key]){
                                     state[i].params[key] = value;
                                     this.setState(state);
                                     return value;
-                                }	
+                                }    
                             }
                             
-							return undefined;
-						},
-		
-		/**
-		@param	{string}	oldView		Name of the view to change.
-		@param	{string}	newView		New name of the view.
-		Changes a view in place leaving the parameters
-		*/
-		changeView:		function(oldView,newView){
-							var state = this.getState();
-							for(var i in state)
-								if(state[i].view === oldView)
-									state[i].view = newView;
-							this.setState(state);
-						},
-						
-		/**
-		@param	{string}	viewName	Name of the view
-		@param	{object}	[params]	An object containing key value pairs
-		Sets a single view and associated parameters on the URL.
-		*/				
-		setView:		function(viewName,params){
-							var newState = [{view:viewName}];
-							if(params) newState[0].params = params;
-							this.setState(newState);
-						},
-		
-		/**
-		@return	An array of views on the hash.
-		Gets all of the available views of the URL
-		*/
-		getViews:		function(){
-							// Lists all of the views
-							var state = this.getState(),
-								retArr = [];
-								
-							for(var i in state)	retArr.push(state[i].view);
-							return retArr;
-						},
-						
-		/** Sets a blank hash */
-		clearState:		function(){ this.setState(); },
-		
-		/**
-		@param {function} fn Function to perform when the state of the URL changes.
-		Sets me.changeMentod 'hashchange' listener function on the window for when the URL changes and 
-		passes that function a WUI state array. If a changeMethod has already been defined, the new method
-		will contain calls to both the old changeMethod and the new one.
-		*/
-		addChangeMethod:function(fn){ 
-							var me = this,
-								state = me.getState(),
-								oldChange = me.changeMethod;
-								
-							me.changeMethod = function(args){
-								oldChange(args);
-								fn(args);
-							};
-								
-							$(window).off('hashchange').on('hashchange', function(){
-								me.changeMethod.call(me,state);
-							});
-						},
-						
-		/** Removes the 'hashchange' listener, and clears out me.changeMethod effectively turning off the state machine. */
-		turnOff:		function(){ me.changeMethod = function(){}; $(window).off('hashchange'); }
-	};
+                            return undefined;
+                        },
+        
+        /**
+        @param    {string}    oldView        Name of the view to change.
+        @param    {string}    newView        New name of the view.
+        Changes a view in place leaving the parameters
+        */
+        changeView:        function(oldView,newView){
+                            var state = this.getState();
+                            for(var i in state)
+                                if(state[i].view === oldView)
+                                    state[i].view = newView;
+                            this.setState(state);
+                        },
+                        
+        /**
+        @param    {string}    viewName    Name of the view
+        @param    {object}    [params]    An object containing key value pairs
+        Sets a single view and associated parameters on the URL.
+        */                
+        setView:        function(viewName,params){
+                            var newState = [{view:viewName}];
+                            if(params) newState[0].params = params;
+                            this.setState(newState);
+                        },
+        
+        /**
+        @return    An array of views on the hash.
+        Gets all of the available views of the URL
+        */
+        getViews:        function(){
+                            // Lists all of the views
+                            var state = this.getState(),
+                                retArr = [];
+                                
+                            for(var i in state)    retArr.push(state[i].view);
+                            return retArr;
+                        },
+                        
+        /** Sets a blank hash */
+        clearState:        function(){ this.setState(); },
+        
+        /**
+        @param {function} fn Function to perform when the state of the URL changes.
+        Sets me.changeMentod 'hashchange' listener function on the window for when the URL changes and 
+        passes that function a WUI state array. If a changeMethod has already been defined, the new method
+        will contain calls to both the old changeMethod and the new one.
+        */
+        addChangeMethod:function(fn){ 
+                            var me = this,
+                                state = me.getState(),
+                                oldChange = me.changeMethod;
+                                
+                            me.changeMethod = function(args){
+                                oldChange(args);
+                                fn(args);
+                            };
+                                
+                            $(window).off('hashchange').on('hashchange', function(){
+                                me.changeMethod.call(me,state);
+                            });
+                        },
+                        
+        /** Removes the 'hashchange' listener, and clears out me.changeMethod effectively turning off the state machine. */
+        turnOff:        function(){ me.changeMethod = function(){}; $(window).off('hashchange'); }
+    };
 }(jQuery, this));
 
 

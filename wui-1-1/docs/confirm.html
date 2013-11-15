@@ -55,7 +55,6 @@
             ts.test('Test msg is Displayed',function() {
                 var msg = 'msg';
                 a = Wui.confirm(msg,'Title',function(v) { });
-                console.log(a);
                 var ret = a.el.find('.wui-pane-content').text();
                 a.footer.items[0].click();
                 return ret==msg;
