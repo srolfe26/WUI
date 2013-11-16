@@ -602,7 +602,9 @@ Wui.Data.prototype = {
     The passed in function gets called with two parameters the item, and the item's index.
     */
     dataEach:        function(f){
-                        for(var i = this.data.length - 1; i >= 0; i--)    f(this.data[i],i);
+                        for(var i = 0; i < this.data.length; i++)
+                            if(f(this.data[i],i) === false)
+                                break;
                         return true;
                     },
     
