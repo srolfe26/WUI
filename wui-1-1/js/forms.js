@@ -2173,7 +2173,7 @@ jHtmlArea.fn = jHtmlArea.prototype = {
         $("ul li", this.toolbar).show().find("a.html").removeClass("highlighted");
     },
     toggleHTMLView: function () {
-        if(this.textarea.is(":hidden")) this.showHTMLView()
+        if(this.textarea.is(":hidden")) this.showHTMLView();
         else                            this.hideHTMLView();
     },
 
