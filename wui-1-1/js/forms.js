@@ -162,8 +162,8 @@ W.Form.prototype = $.extend(new W.O(),{
     Similar to the Wui.O.push() with the addition of running normFrmItem() on the item first.
     */
     push:        function(){
-                    var itms = [];
-                    $.each(arguments,function(i,arg){ itms.push(this.normFrmItem(arg)); });
+                    var me = this, itms = [];
+                    $.each(arguments,function(i,arg){ itms.push(me.normFrmItem(arg)); });
                     return W.O.prototype.push.apply(this,itms);
                 },
     /**
@@ -292,7 +292,7 @@ W.Label.prototype = $.extend(new W.O(),{
                                 me.label = $('<label>').addClass(me.cls).attr(me.attr ? me.attr : {})
                             );
                             me.setLabel(me.html);
-                            me.setLabelPosition(me.labelPosition);
+                            console.log(me.setLabelPosition(me.labelPosition),me.labelPosition);
                         },
     
     /**
@@ -314,7 +314,7 @@ W.Label.prototype = $.extend(new W.O(),{
                             var me = this;
 
                             position = position.toLowerCase();
-                            if($.inArray(position,['top', 'left', 'bottom', 'right'])){
+                            if($.inArray(position,['top', 'left', 'bottom', 'right']) >= 0){
                                 me.el.removeClass('lbl-' + me.labelPosition).addClass('lbl-' + position);
                                 if(me.field)    me.field.labelPosition = position;
                                 return (me.labelPosition = position);
