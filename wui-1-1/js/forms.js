@@ -23,7 +23,7 @@ $.fn.overrideNodeMethod = function(methodName, action) {
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
 @event  formupdate Fires when a field on the form changes. Passes (event, form, [field])
-A WUI Form is a collection of W.FormField objects with methods to
+A WUI Form is a collection of Wui.FormField objects with methods to
 both collectively and individually interact with those objects.
 */
 W.Form = function(args){
@@ -61,7 +61,7 @@ W.Form.prototype = $.extend(new W.O(),{
                 },
 
     /**
-    @param {function} fn A function that gets called for each item of the form with the exception of W.Note objects
+    @param {function} fn A function that gets called for each item of the form with the exception of Wui.Note objects
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
@@ -117,27 +117,29 @@ W.Form.prototype = $.extend(new W.O(),{
                 },
                 
     /**
-    @param    {object|W.FrmField}    itm    Object to be added to a form
+    @param    {object|Wui.FrmField}    itm    Object to be added to a form
     @return Object with form attributes applied.
-    Passed in items should either be W.FormField's which will have some of the form's attributes applied to them,
+    Passed in items should either be Wui.FormField's which will have some of the form's attributes applied to them,
     or they will be objects containing an 'ftype' which is a string specifying a constructor.  The
     object will then be constructed and have form attributes applied. */
     normFrmItem:function(itm){
-                    var me = this,
-                        extendItem = { labelPosition: me.labelPosition };
+                    var me = this;
+
                     // If a form is disabled, the field needs to be disabled too
-                    if(!(itm.disabled && itm.disabled === true)) $.extend(extendItem,{disabled:me.disabled});    
-                    
+                    if(!(itm.disabled && itm.disabled === true)) $.extend(itm,{disabled: me.disabled});
+
                     if(itm.ftype && !(itm instanceof W.FormField)){
+                        // If a field has its labelPosition defined then leave it alone, otherwise use the form's value.
+                        if(!(itm.labelPosition)) $.extend(itm,{labelPosition: me.labelPosition});
+                        
                         var ft = itm.ftype.split('.');
                         
-                        if(window[ft[0]] && window[ft[0]][ft[1]])    return new window[ft[0]][ft[1]]( $.extend(itm,extendItem) );
+                        if(window[ft[0]] && window[ft[0]][ft[1]])   return new window[ft[0]][ft[1]](itm);
                         else                                        throw('Object type ' +itm.ftype+ ' is not defined.');
                     }else if(itm instanceof W.FormField){
-                        // reset label position for fields that don't have it defined for themselves
-                        if(!itm.hasOwnProperty('labelPosition'))
-                            itm.el.removeClass('lbl-' + itm.labelPosition).addClass('lbl-' + extendItem.labelPosition);
-                        return $.extend(itm, extendItem);
+                        // If a field has its labelPosition defined then leave it alone, otherwise use what form's value.
+                        if(!itm.hasOwnProperty('labelPosition') && itm.lbl) itm.lbl.setLabelPosition(me.labelPosition);
+                        return itm;
                     }else{
                         return itm;
                     }
@@ -157,7 +159,7 @@ W.Form.prototype = $.extend(new W.O(),{
     /**
     @param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
     @return The new length of the array 
-    Similar to the W.O.push() with the addition of running normFrmItem() on the item first.
+    Similar to the Wui.O.push() with the addition of running normFrmItem() on the item first.
     */
     push:        function(){
                     var itms = [];
@@ -264,7 +266,7 @@ W.Note.prototype = $.extend(new W.O(),{
 
 
 /** 
-    The label object will wrap around a W.FormField when the 'label' config is specified
+    The label object will wrap around a Wui.FormField when the 'label' config is specified
     on the field. The labelPosition is usually supplied by the field the label will wrap, but
     it has its own property, and can be instantiated by itself.
 */
@@ -272,7 +274,7 @@ W.Label = function(args){
     $.extend(this,{
         /**
             String that will converted into DOM elements and placed in the label.
-            This is usually the value of the label config on a W.FormField.
+            This is usually the value of the label config on a Wui.FormField.
         */
         html:            '',
         
@@ -284,22 +286,41 @@ W.Label = function(args){
 };
 W.Label.prototype = $.extend(new W.O(),{
     /** Method that will run immediately when the object is constructed. */
-    init:       function(){
-                    var me = this;
-                    me.el = $('<div>')
-                            .addClass('wui-lbl' + ' lbl-' + me.labelPosition)
-                            .append( me.label = $('<label>').html(me.html).addClass(me.cls).attr(me.attr ? me.attr : {}) );
-                },
+    init:               function(){
+                            var me = this;
+                            me.el = $('<div>').addClass('wui-lbl').append( 
+                                me.label = $('<label>').addClass(me.cls).attr(me.attr ? me.attr : {})
+                            );
+                            me.setLabel(me.html);
+                            me.setLabelPosition(me.labelPosition);
+                        },
     
     /**
     @param {string} newLabel String that will converted into DOM elements and placed in the label.
     @return Returns the HTML content of the label
     Changes the contents of the label.
     */
-    setLabel:    function(newLabel){
-                    this.label.html(this.html = newLabel);
-                    return this.label.html();
-                }
+    setLabel:           function(newLabel){
+                            this.label.html(this.html = newLabel);
+                            return this.label.html();
+                        },
+
+    /**
+    @param {string} position The value for the new label position (top, left, bottom, right)
+    @return Returns the position that was set, of false if what was passed in wasn't valid.
+    Changes the position of the label.
+    */
+    setLabelPosition:   function(position){
+                            var me = this;
+
+                            position = position.toLowerCase();
+                            if($.inArray(position,['top', 'left', 'bottom', 'right'])){
+                                me.el.removeClass('lbl-' + me.labelPosition).addClass('lbl-' + position);
+                                if(me.field)    me.field.labelPosition = position;
+                                return (me.labelPosition = position);
+                            }
+                            return false;
+                        }
 });
 
 
@@ -347,7 +368,7 @@ W.FormField.prototype = $.extend(new W.O(),{
                     me.el = $('<div>').addClass('wui-fe');
                     
                     if(me.label && me.label.length > 0){
-                        me.lbl = new W.Label({html:me.label, cls:me.labelCls, labelPosition:me.labelPosition});
+                        me.lbl = new W.Label({html:me.label, cls:me.labelCls, field:me, labelPosition:me.labelPosition});
                         me.elAlias = me.el;
                         me.el = me.lbl.el.append(me.elAlias);
                     }
@@ -488,7 +509,7 @@ W.FormField.prototype = $.extend(new W.O(),{
 });
 
 
-/** A W.FormField that has no DOM element. Even more hidden than an HTML hidden input, the hidden field exists only in memory. */
+/** A Wui.FormField that has no DOM element. Even more hidden than an HTML hidden input, the hidden field exists only in memory. */
 W.Hidden = function(args){
     $.extend(this,{
         /** By default a hidden field produces no DOM element */
@@ -662,12 +683,12 @@ W.Wysiwyg.prototype = $.extend(new W.Textarea(),{
     /** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
     setBlankText:function(){},
     
-    /** In this instance lets the W.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
+    /** In this instance lets the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
     setListeners:function(t){
                     $(t.field).change(function(){ t.val(); });
                 },
                 
-    /** Overrides the W.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
+    /** Overrides the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
     valChange:    function(){ this.field.keyup(); }
 });
 
@@ -996,7 +1017,7 @@ W.Combo.prototype = $.extend(new W.Text(), new W.Data(), {
                         this.selectItm = itmTarget.addClass('selected');
                     },
     
-    /** Overrides the event hook in W.Data to set the parameters of the data object with the search value */
+    /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
     setParams:        function(){
                         if(this.searchFilter)
                             $.extend(this.params,{srch: this.searchFilter});
@@ -1035,7 +1056,7 @@ W.Combo.prototype = $.extend(new W.Text(), new W.Data(), {
                         this.rsltHover(this.dd.children(':eq(' +i+ ')'));
                     },
                     
-    /** Overrides the event hook in W.Data to trigger rendering of new data */
+    /** Overrides the event hook in Wui.Data to trigger rendering of new data */
     afterSet:       function(){ this.renderData(); },
     
     /** 
@@ -1255,7 +1276,7 @@ W.Link.prototype = $.extend(new W.FormField(),{
                     this.buildOutput();
                 },
     
-    /** Overrides the W.FormField function and provides added validation */
+    /** Overrides the Wui.FormField function and provides added validation */
     validTest:    function(){ if(this.required && !this.testLink()) return false; return true; }
 });
 
@@ -1799,7 +1820,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
 /**
 Creates a form field for uploading files. By the nature of file uploads and their tight pairing to a backend server, this control must be extended itself to be used for uploading files.
 
-W.File utilizes the following plugin:    
+Wui.File utilizes the following plugin:    
 
 One Click Upload - jQuery Plugin
 Copyright (c) 2008 Michael Mitchell - http://www.michaelmitchell.co.nz
@@ -1962,11 +1983,11 @@ W.File.prototype = $.extend(new W.Text(),{
 });
 
 /**
-@param {string}        msg            Label of the text input if no other inputs are defined.
-@param {funciton}    callback    Function will receive the value of the text input if no other inputs are defined, or it will get an object containing all form values.
-@param {string}        [msgTitle]    The title for the window, defaults to 'Input'.
-@param {array}        [inputs]    Array of W.FormFields to display on the window. When this array has only one item it merely replaces the default text field and is required. 
-@param {string}        [content]    HTML content to display above the form fields.
+@param {string}     msg         Label of the text input if no other inputs are defined.
+@param {funciton}   callback    Function will receive the value of the text input if no other inputs are defined, or it will get an object containing all form values.
+@param {string}     [msgTitle]  The title for the window, defaults to 'Input'.
+@param {array}      [inputs]    Array of Wui.FormFields to display on the window. When this array has only one item it merely replaces the default text field and is required. 
+@param {string}     [content]   HTML content to display above the form fields.
 
 Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
 */

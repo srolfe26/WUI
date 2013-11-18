@@ -368,7 +368,6 @@ Wui.O.prototype = {
                         }
                     }else{
                         for(i; i >= 0; i--){
-                            var dontBreak = f(this.items[i],i);
                             if(f(this.items[i],i) === false) break;
                         }
                     }
