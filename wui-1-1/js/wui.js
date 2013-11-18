@@ -55,7 +55,8 @@ $.ajaxSetup({
 */
 Wui.getKeys = function(obj){
     var retArray = [];
-    $.each(obj,function(key){ retArray.push(key); });
+    if(obj)
+        $.each(obj,function(key){ retArray.push(key); });
     return retArray.sort();
 };
 
@@ -878,7 +879,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                             var alreadySelected = $(this).hasClass('wui-selected');
                             $(this).toggleClass('wui-selected',!alreadySelected);
 
-                            if(alreadySelected)    $.each(me.selected, function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
+                            if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                             else                me.selected.push(itm);
                         }
                         me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
@@ -953,7 +954,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     // Clear current selection list after making a copy of previously selected items
                     me.selected = [];
                     
-                    $.each(selList,function(i,sel){
+                    $.each(selList || [],function(i,sel){
                         me.each(function(itm){
                             var sameRec = (me.identifier) ? itm.rec[me.identifier] === sel.rec[me.identifier] : JSON.stringify(itm.rec) === JSON.stringify(sel.rec);
                             
@@ -1352,7 +1353,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     var me = this,
                         totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
                     
-                    //size the window to according to arguments, or fit its contents as long as its snaller than the height of the window
+                    //size the window to according to arguments, or fit its contents as long as its smaller than the height of the window
                     if(arguments.length !== 0)me.windowEl.height(me.height = resizeHeight).width(me.width = resizeWidth);
                     else                      me.windowEl.height(((totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : totalHeight));
                     

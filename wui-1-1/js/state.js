@@ -13,20 +13,20 @@ WUI State Machine
 The WUI state machine allows for helping the browser to keep a history of the state of a javascript application by utilizing 
 text in the URL after the hash ('#'). The WUI state machine follows this format:
 
-In the hash (as a string):                <view 1>?<param1>=<param1 value>&<param2>=<param2 value>/<view 2>?<param1>=<param2 value>
+In the hash (as a string):          <view 1>?<param1>=<param1 value>&<param2>=<param2 value>/<view 2>?<param1>=<param2 value>
 
-...or without the placeholders:            adminView?pic=one&id=57/adminWindow?info=salary
+...or without the placeholders:     adminView?pic=one&id=57/adminWindow?info=salary
 
-In the state machine (as an array):        [
-                                            {
-                                                view: 'adminView', 
-                                                params: { pic:one, id:57 }
-                                            },
-                                            {
-                                                view: 'adminWindow', 
-                                                params: { info:salary }
-                                            }
-                                        ]
+In the state machine (as an array): [
+                                        {
+                                            view:   'adminView', 
+                                            params: { pic:one, id:57 }
+                                        },
+                                        {
+                                            view:   'adminWindow', 
+                                            params: { info:salary }
+                                        }
+                                    ]
                                         
 The hashchange event is written by:
 Copyright (c) 2010 "Cowboy" Ben Alman,
