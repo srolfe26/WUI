@@ -292,7 +292,7 @@ W.Label.prototype = $.extend(new W.O(),{
                                 me.label = $('<label>').addClass(me.cls).attr(me.attr ? me.attr : {})
                             );
                             me.setLabel(me.html);
-                            console.log(me.setLabelPosition(me.labelPosition),me.labelPosition);
+                            me.setLabelPosition(me.labelPosition);
                         },
     
     /**
