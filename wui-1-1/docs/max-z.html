@@ -24,8 +24,8 @@
             a = Wui.randNum(1,100);
             b = Wui.randNum(200,1000);
             $('#wui-doc-example').append(
-                $('<div>').text(a).attr({zIndex:a}),
-                $('<div>').text(b).attr({zIndex:b})
+                $('<div>').text(a).css({zIndex:a, position:'absolute'}),
+                c = $('<div>').text(b).css({zIndex:b, position:'absolute'})
             );
         }); // end document.ready		
 	</script>
@@ -34,8 +34,8 @@
 		$(document).ready(function(){
 			// TESTING
 			ts = new Wui.ts();
-
-			ts.test('Get the highest z-index on the page:', function(){ var max = Wui.maxZ(); console.log(max); return max == b;  });
+console.log(c);
+			ts.test('Get the highest z-index on the page:', function(){ var max = Wui.maxZ(); return max == (b + 1);  });
 		}); // end document.ready		
 	</script>
 </head>

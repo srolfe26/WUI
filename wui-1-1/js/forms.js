@@ -1517,7 +1517,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
                         W.Text.prototype.init.call(me);
                         me.append(
                             $('<div>').addClass('wui-date').append(
-                                me.setListenrs(me),
+                                me.setListeners(me),
                                 me.displayDiv = $("<div>").addClass('feedback').attr({tabindex:-1})
                             )
                         );
@@ -1530,6 +1530,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
                             minDate:        me.minDate,
                             constrainInput: false,
                             beforeShow:     function(txtElem, pickerObj){
+                                                $(pickerObj).css({zIndex:Wui.maxZ()});
                                                 if(me.validDate(me.value))  me.field.datepicker('setDate',me.value);
                                                 else                        me.val('');
                                             },
@@ -1619,7 +1620,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
     @param {object}    t    A WUI object, namely this object
     @return    The field of the object.
     Sets additional listeners on the text field, namely to process the date when it changes */
-    setListenrs:    function(t){
+    setListeners:   function(t){
                         return t.field.keyup(function(evnt){ t.processDate(); });
                     },
     

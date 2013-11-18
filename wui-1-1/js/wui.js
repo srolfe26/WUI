@@ -100,13 +100,13 @@ Wui.randNum = function(lower,upper) {
 Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined.
 */
 Wui.maxZ = function(){
-    var topZ =    Math.max.apply(null, 
-                $.map($('body > *, .wui-window'), function(e) {
-                    if ($(e).css('position') != 'static')
-                        return parseInt($(e).css('z-index')) || 0;
-                })
-            );
-    return $.isNumeric(topZ) ? topZ : 1;
+    var topZ =  Math.max.apply(null, 
+                    $.map($('body > *, [style*="z-index"]'), function(e) {
+                        if ($(e).css('position') != 'static')
+                            return parseInt($(e).css('z-index')) || 0;
+                    })
+                );
+    return ($.isNumeric(topZ) ? topZ : 0) + 1;
 };
 
 /** 
@@ -1205,7 +1205,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     /** Changes the title on the pane. */
     setTitle:       function(t){ 
                         if(t)
-                            this.header.title.text(t);
+                            this.header.title.text(this.title = t);
                         return t;
                     },
     

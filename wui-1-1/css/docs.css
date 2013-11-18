@@ -61,7 +61,7 @@ body.about-page {margin:0; padding:0;}
 		text-transform: none;
 		font-family:monospace; text-align:left; font-size:0.8em;
 	}
-	#wui-doc-example {margin:0.5em 0;}
+	#wui-doc-example {margin:0.5em 0; min-height: 1.5em;}
 
 #wui-doc-example > .wui-lbl > label { color: #FFF; }
 
