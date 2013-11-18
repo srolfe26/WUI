@@ -208,7 +208,7 @@
 .ui-state-disabled { opacity: 0.5; }
 
 /* files */
-.wui-file input[type=text] {padding-right:85px;}
+.wui-file input[type=text] {padding-right:65px;}
 .wui-file input[type=text].has-file { 
    padding-left:29px !important; padding-right: 48px !important; background-repeat:no-repeat; background-position: 7px 4px;
 }

@@ -17,6 +17,7 @@
 		.fit-test-container {background:#ddd; position:relative; margin:2em 1em; display:inline-block; overflow:auto;}
 		.fit-test-container > div {
 			display:block; width:100%; color:#fff; font-weight:bold; text-shadow:0 0 5px rgba(0,0,0,0.5); padding:1em;
+			text-align: left;
 			-moz-box-sizing:    border-box !important;
 		    -webkit-box-sizing: border-box !important;
 		    box-sizing:         border-box !important;
@@ -69,7 +70,8 @@
                 
                 j.place();
                 
-                return k.el.outerHeight() == Math.floor((500/6) * 2) && l.el.outerHeight() == Math.floor((500/6)) && m.el.outerHeight() == Math.floor((500/6) * 3);
+                var totHeight = j.el.height() - Wui.scrollbarWidth();
+                return k.el.outerHeight() == Math.floor((totHeight/6) * 2) && l.el.outerHeight() == Math.floor((totHeight/6)) && m.el.outerHeight() == Math.floor((totHeight/6) * 3);
             });
 		}); // end document.ready		
 	</script>

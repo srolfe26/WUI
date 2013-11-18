@@ -29,22 +29,20 @@ both collectively and individually interact with those objects.
 W.Form = function(args){
     $.extend(this,{
         /** Config to disable the entire form */ 
-        disabled:        false,
+        disabled:       false,
         
-        /**
-        Position of the label relative to the form fields that is generally applied unless
-        specifically defined on a particular field.
-        */
-        labelPosition:    'top'
+        /**  Position of the label relative to the form fields that is generally applied unless
+        specifically defined on a particular field. */
+        labelPosition:  'top'
     }, args, {
         /** Flag for whether data on the form has been changed - set by the individual fields */
         formChanged:    false,
         
         /** DOM element of the form */
-        el:                $('<div>'),
+        el:             $('<div>').addClass('wui-form'),
         
         /** @private Array to store one or more errors when a form is validated */
-        errors:           []
+        errors:         []
     });
     
     this.init();
@@ -112,9 +110,7 @@ W.Form.prototype = $.extend(new W.O(),{
                 },
                 
     /** Method that will run immediately when the object is constructed. */           
-    init:        function(){
-                    this.el.addClass('wui-form labels-' + this.labelPos);
-                },
+    init:        function(){},
                 
     /**
     @param    {object|Wui.FrmField}    itm    Object to be added to a form

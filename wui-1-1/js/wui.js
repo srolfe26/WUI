@@ -9,7 +9,8 @@
 /*
 * Avoid 'console' errors in browsers that lack a console by defining a variable named console.
 * For example, when using console.log() on a browser that does not have a console, execution of code
-* will continue because the console variable is defined. 
+* will continue because the console variable is defined.
+* Copyright (c) HTML5 Boilerplate - https://github.com/h5bp/html5-boilerplate/blob/master/LICENSE.md
 */
 (function() {
     var method;
@@ -62,7 +63,6 @@ Wui.getKeys = function(obj){
 
 /** 
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-
 @return Number specifying the scrollbar width for the current page in pixels
 */
 Wui.scrollbarWidth = function() {
@@ -140,40 +140,51 @@ Wui.unwrapData = function(r){
 This function will size items relative to each other via a 'fit' value, as well as percentages and fixed values.
 */
 Wui.fit = function(collection,dim,mindTheScrollbar){
-    var sbw = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0;
-    
-    dim = (dim && typeof dim === 'string') ? dim.toLowerCase() : 'height';
-  
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
-        var parent        = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
-            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
-            parentSize    = (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim]() - sbw,
-            fitCt        = 0,
-            fixedSize     = 0,
-            fitMux        = 0;
-        
+        var i           = 0,
+            dimArray    = ['height','width'],
+            parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
+            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent;
+
+        // Make sure dim is a lowercase string, or just leave it alone for now
+        dim = (dim && dim.toLowerCase) ? dim.toLowerCase() : dim;
+
+        // Make sure the value of dim is something this method will be able to utilize
+        dim = ($.inArray(dim,dimArray) >= 0) ? dim : dimArray[0];
+        var dimOpposite = dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
+
+        // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
+        for(i = 0; i < collection.length; i++)
+            if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
+                break;
+
+        var sbw         = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0
+            parentSize  = (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim]() - sbw,
+            fitCt       = 0,
+            fixedSize   = 0,
+            fitMux      = 0;
+
         // Tally all sizes we're dealing with
         $.each(collection,function(i,itm){
             if(itm.fit){
-                fitCt += itm.fit;         // Tally fit values
-                itm[dim] = -1;            /* Set to -1 so that CSSByParam will not act on it (just deleting it was
-                                        ineffective because this property can be inherited through the prototype chain)*/
+                fitCt += itm.fit;           // Tally fit values
+                itm[dim] = -1;              /* Set to -1 so that CSSByParam will not act on it (just deleting it was
+                                             * ineffective because this property can be inherited through the prototype chain)*/
             }else if(itm[dim]){
-                // Tally fixed size values & percentage based size values
-                // Doing this gives percentages precedence over fit
-                if($.isNumeric(itm[dim]))    { fixedSize += itm[dim]; }
+                // Tally fixed size values & percentage based size values. Doing this gives percentages precedence over fit.
+                if($.isNumeric(itm[dim]))   { fixedSize += itm[dim]; }
                 else                        {
                                               var itmDimension = Math.floor((parseFloat(itm[dim]) / 100) * parentSize);
                                               fixedSize += (itm[dim] = itmDimension);
                                             }
-                delete itm.fit;            // Ensure the item doesn't have a dimension and a fit specified
+                delete itm.fit;             // Ensure the item doesn't have a dimension and a fit specified
             }else{
-                fitCt += (itm.fit = 1); // Add a fit value to an item that doesn't have dimensions specified
+                fitCt += (itm.fit = 1);     // Add a fit value to an item that doesn't have dimensions specified
             }
         });
         
-        // If the grid becomes entirely fixed widths the fit won't work so the items will be set to fit widths
+        // If the grid becomes entirely fixed widths the fit won't work so the items will be set to fits
         if(fitCt === 0 && fixedSize != parentSize){
             fitCt = 1;
             
