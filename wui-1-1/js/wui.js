@@ -49,6 +49,12 @@ $.ajaxSetup({
             }
 });
 
+/** @return Returns a unique id */
+Wui.id = function(){
+    if(Wui.idCounter === undefined) Wui.idCounter = 0;
+    return 'wui-' + Wui.idCounter++;
+};
+
 
 /**
     @param {object} Object containing named keys
@@ -270,7 +276,9 @@ Wui.O.prototype = {
     */
     append:        function(obj){
                     var me = this, el = me.elAlias || me.el;
-                    el.append(obj);
+                    $.each(arguments,function(i,itm){
+                        el.append(itm);
+                    });
                 },
 
 

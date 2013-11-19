@@ -721,6 +721,7 @@ W.Radio.prototype = $.extend(new W.FormField(),{
                     
                     $.each(me.options,function(i,itm){
                         itm.name = me.name;
+                        // TODO: Use Wui.id here!!
                         itm.id = me.name + '-' + i;
                         ul.append(
                             tplEngine.make(tplEngine.data = itm)
@@ -1827,7 +1828,7 @@ Modified 2012 Stephen Nielsen
 W.File = function(args){ 
     $.extend(this,{
         /** */
-        beforSelect:function(){},
+        beforeSelect:function(){},
         
         /** */
         fileTypeFilter: null,
@@ -1836,13 +1837,13 @@ W.File = function(args){
         upFieldName:'fileupload',
         
         /** */
-        upParams:   {},
+        params:   {},
         
         /** */
         upSuccess:  function(){},
         
         /** */
-        upTarget:   '',
+        url:   '',
         
         /** */
         upTitleName:'title'
@@ -1861,85 +1862,125 @@ W.File.prototype = $.extend(new W.Text(),{
                  },
     
     /** */
-    onSelect:   function(fileControl){
-                    this.beforSelect(fileControl, this);
+    onSelect:   function(){
+                    var me = this;
+                    me.beforeSelect();
                     
                     //add title to parameters and parameters to the file upload
-                    var titleParam = {};
-                    this.beforeSelectTitle = titleParam[this.upTitleName] = this.field.val();
+                    me.params[me.upTitleName] = me.field.val();
                     
                     // for file filtering
-                    if(this.fileTypeFilter !== null) $.extend(titleParam,{file_type_filter:this.fileTypeFilter});
+                    if(me.fileTypeFilter !== null) me.params[file_type_filter] = me.fileTypeFilter;
                     
-                    fileControl.params($.extend(this.upParams, titleParam));
-                    //upload file
-                    fileControl.submit();
+                    me.submit();
                 },
     
     /** */
     init:       function(){
                     var me = this;
                     W.Text.prototype.init.call(me);
-                    me.wrapper = $('<div>').addClass('wui-file').append(me.field);
-                    me.append(me.wrapper);
+
+                    // Wrap the field in order to add absolutely positioned buttons
+                    me.append(me.wrapper = $('<div>').addClass('wui-file').append(me.field));
+                    me.elAlias = me.wrapper;
+
+                    var uniqueId = W.id();
+
                     me.push(
+                        // Add a form and an iframe to submit the file
+                        me.iframe = new W.O({el:$('<iframe>').css({display:'none'}).attr({id:uniqueId}) }),
+                        me.fileFrm = new W.O({
+                            el:$('<form>').attr({
+                                method:     'post',
+                                enctype:    'multipart/form-data',
+                                action:     me.url,
+                                target:     uniqueId
+                            })
+                        }),
+
+                        // Add a button to clear the current file and browse for a new one
                         me.changeBtn = new W.Button({
-                            click:  function(){ 
-                                        me.fieldText('');
-                                        me.field.removeAttr('disabled'); 
-                                        me.changeClick(); 
-                                    },
-                            text:   'X',
-                            tabIndex:-1,
-                            cls:    'file-change field-btn',
-                            parent:    me
+                            click:      function(){ 
+                                            me.fieldText('');
+                                            me.field.removeAttr('disabled'); 
+                                            me.changeClick(); 
+                                        },
+                            text:       'X',
+                            tabIndex:   -1,
+                            cls:        'file-change field-btn'
                         })
                     );
-                    
-                    me.upBtn = new W.Button({text:'Browse', cls:'field-btn', tabIndex:-1 });
-                    me.cssByParam(me.upBtn).appendTo(me.wrapper).upload({
-                        name:       this.upFieldName,
-                        action:     this.upTarget,
-                        autoSubmit: false,
-                        onSubmit:   function() { 
-                                        me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
-                                    },
-                        onFocus:    function(){ me.upBtn.el.addClass('selected'); },
-                        onBlur:     function(){ me.upBtn.el.removeClass('selected'); },
-                        onComplete: function upComplete(r){
-                                        try{
-                                            var d = $.parseJSON(r),
-                                                unwrapped = W.unwrapData.call(me,d);
-                                                
-                                            // Put the returned data on the console for the interest of developers
-                                            console.log(unwrapped);
-                                            
-                                            //remove the css uploading state
-                                            me.field.removeClass('uploading empty');
-                                            
-                                            // If successful it will set the value of the field, else it whines and complains
-                                            if(d.success === true){
-                                                me.val(unwrapped.data,'upSuccess');
-                                            }else{
-                                                if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
-                                                    W.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
-                                                    me.field.removeClass('has-file uploading').removeAttr('disabled');
-                                                    if(me.beforeSelectTitle)
-                                                        me.fieldText(me.beforeSelectTitle);
-                                                }else{
-                                                    me.upFailure(d);
-                                                }
-                                            }
-                                        }catch(err){
-                                            console.log(err,r);
-                                            me.upFailure(err,r);
-                                        }
-                                    },
-                        onSelect:   function() { me.onSelect(this); }
-                    });
+
+                    me.fileFrm.append(
+                        me.cssByParam(me.upBtn = new W.Button({text:'Browse', cls:'field-btn', tabIndex:-1 })),
+                        
+                        // The file field
+                        me.fileInput = $('<input>')
+                        .attr({name:me.upFieldName, type:'file'})
+                        .change(function(){ me.onSelect(); })
+                        .focus(function(){ me.upBtn.el.addClass('selected'); })
+                        .blur(function(){ me.upBtn.el.removeClass('selected'); })
+                    );
                 },
     
-    /** */
+    /** Submit the form */
+    submit:     function() {
+                    var me = this;
+
+                    me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
+                    
+                    /** add additional paramters before sending */
+                    $.each(me.params, function(key, value) {
+                        me.fileFrm.el.children("input[name=" +key+ "]").remove();
+                        me.fileFrm.append($('<input type="hidden" name="' +key+ '" value="' +value+ '" />'));
+                    });
+                    
+                    /** Submit the actual form */
+                    me.fileFrm.el.submit(); 
+                    
+                    /** Do something after we are finished uploading */
+                    me.iframe.el.unbind().load(function() {
+                        me.onComplete($(me.iframe.contentWindow.document.body).text()); //done :D
+                    });
+                },
+
+    /**
+    @param {object} unwrapped The Wui.unwrapData unwrapped results of the file upload.
+    This function is for developers to run whatever analysis they desire on the raw output of the file upload.
+    */
+    devHook:    function(){},
+
+    /** */            
+    onComplete: function(r){
+                    try{
+                        var me = this,
+                            d = $.parseJSON(r),
+                            unwrapped = W.unwrapData.call(me,d);
+                            
+                        // Put the returned data out there for develpers.
+                        me.devHook(unwrapped);
+                        
+                        //remove the css uploading state
+                        me.field.removeClass('uploading empty');
+                        
+                        // If successful it will set the value of the field, else it whines and complains
+                        if(d.success === true){
+                            me.val(unwrapped.data,'upSuccess');
+                        }else{
+                            if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
+                                W.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
+                                me.field.removeClass('has-file uploading').removeAttr('disabled');
+                                if(me.beforeSelectTitle)
+                                    me.fieldText(me.beforeSelectTitle);
+                            }else{
+                                me.upFailure(d);
+                            }
+                        }
+                    }catch(err){
+                        console.log(err,r);
+                        me.upFailure(err,r);
+                    }
+                },
     upFailure:  function(e,e2){
                     console.log(e,e2);
                     W.Text.prototype.val.call(this,'Upload Failure');
@@ -2359,165 +2400,6 @@ var priv = {
     isArray: function (v) {
         return v && typeof v === 'object' && typeof v.length === 'number' && typeof v.splice === 'function' && !(v.propertyIsEnumerable('length'));
     }
-};
-
-/*
- * One Click Upload - jQuery Plugin
- * Copyright (c) 2008 Michael Mitchell - http://www.michaelmitchell.co.nz
- *
- * Modified 2012 Stephen Nielsen
- */
- $.fn.upload = function(options) {
-    /** Merge the users options with our defaults */
-    options = $.extend({
-        name: 'file',
-        enctype: 'multipart/form-data',
-        action: '',
-        autoSubmit: true,
-        onSubmit: function() {},
-        onComplete: function() {},
-        onSelect: function() {},
-        onFocus: function() {},
-        onBlur: function() {},
-        params: {}
-    }, options);
-
-    return new $.ocupload(this, options);
-},
-
-$.ocupload = function(element, options) {
-    /** Fix scope problems */
-    var self = this;
-
-    /** A unique id so we can find our elements later */
-    var id = new Date().getTime().toString().substr(8);
-    
-    /** Upload Iframe */
-    var iframe = $('<iframe '+ 'id="iframe'+id+'" '+ 'name="iframe'+id+'"'+ '></iframe>').css({ display: 'none' });
-    
-    /** Form */
-    var form = $('<form '+ 'method="post" '+ 'enctype="'+options.enctype+'" '+ 'action="'+options.action+'" '+ 'target="iframe'+id+'"'+ '></form>').css({margin: 0, padding: 0});
-    
-    /** File Input */
-    var input = $('<input '+ 'name="'+options.name+'" '+ 'type="file" '+ '/>').css({
-        position: 'relative',
-        display: 'block',
-        opacity: 0
-    });
-    
-    /** Put everything together */
-    element.wrap('<div></div>'); //container
-        form.append(input);
-        element.after(form);
-        element.after(iframe);
-
-    /** Find the container and make it nice and snug */
-    var container = element.parent().addClass("wui-browse-btn");
-    
-    /** Watch for file selection */
-    input.change(function() {
-        /** Do something when a file is selected. */
-        self.onSelect(); 
-        
-        /** Submit the form automaticly after selecting the file */
-        if(self.autoSubmit) {
-            self.submit();
-        }
-    })
-    .focus(function(){self.onFocus();})
-    .blur(function(){self.onBlur();});
-    
-    /** Methods */
-    $.extend(this, {
-        autoSubmit: options.autoSubmit,
-        onSubmit: options.onSubmit,
-        onComplete: options.onComplete,
-        onSelect: options.onSelect,
-        onBlur: options.onBlur,
-        onFocus: options.onFocus,
-    
-        /** get filename */     
-        filename: function() {
-            return input.attr('value');
-        },
-        
-        /** get/set params */
-        params: function(params) {
-            if(params || false)  options.params = $.extend(options.params, params);
-            else                 return options.params;
-        },
-        
-        /** get/set name */
-        name: function(nam) {
-            if(nam || false)  input.attr("name", nam);
-            else              return input.attr("name");
-        },
-        
-        /** get/set action */
-        action: function(action) {
-            if(action || false)  form.attr("action", action);
-            else                 return form.attr("action");
-        },
-        
-        /** get/set enctype */
-        enctype: function(enctype) {
-            if(enctype || false)  form.attr("enctype", enctype);
-            else            return form.attr("enctype");
-        },
-        
-        /** set options */
-        set: function(obj, value) {
-            value = value ? value : false;
-                            
-            function option(action, value) {
-                switch (action) {
-                    default:
-                        throw new Error("[jQuery.ocupload.set] '" + value + "' is an invalid option.");
-                    case "name":        self.name(value);          break;
-                    case "action":      self.action(value);        break;
-                    case "enctype":     self.enctype(value);       break;
-                    case "params":      self.params(value);        break;
-                    case "autoSubmit":  self.autoSubmit = value;   break;
-                    case "onSubmit":    self.onSubmit = value;     break;
-                    case "onComplete":  self.onComplete = value;   break;
-                    case "onFocus":     self.onFocus = value;      break;
-                    case "onBlur":      self.onBlur = value;       break;
-                    case "onSelect":    self.onSelect = value;     break;
-                }
-            }
-
-            if(value){
-                option(obj, value);
-            }else{              
-                $.each(obj, function(key, value) {
-                    option(key, value);
-                });
-            }
-        },
-        
-        /** Submit the form */
-        submit: function() {
-            /** Do something before we upload */
-            this.onSubmit();
-            
-            /** add additional paramters before sending */
-            $.each(options.params, function(key, value) {
-                form.children("input[name=" +key+ "]").remove();
-                form.append($('<input type="hidden" name="' +key+ '" value="' +value+ '" />'));
-            });
-            
-            /** Submit the actual form */
-            form.submit(); 
-            
-            /** Do something after we are finished uploading */
-            iframe.unbind().load(function() {
-                /** Get a response from the server in plain text */
-                var myFrame = document.getElementById(iframe.attr('name'));
-                /** Do something on complete */
-                self.onComplete($(myFrame.contentWindow.document.body).text()); //done :D
-            });
-        }
-    });
 };
 
 })(jQuery,Wui);
