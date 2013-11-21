@@ -2,10 +2,10 @@
  * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * http://www.geekinaday.com/wui/wui-1-1/license.html
+ * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
 
-(function($, window, W) {
+(function($, window, Wui) {
 
 /**
 WUI State Machine
@@ -33,11 +33,11 @@ Copyright (c) 2010 "Cowboy" Ben Alman,
 Dual licensed under the MIT and GPL licenses.
 http://benalman.com/about/license/
 */
-W.stateMachine = function(args){ $.extend(this, {
+Wui.stateMachine = function(args){ $.extend(this, {
     /** Placeholder for functions passed in using setChangeAction */
     changeMethod:    function(){}
 },args); };
-W.stateMachine.prototype = {
+Wui.stateMachine.prototype = {
     /**
     @param    {string|array}    state    A string or an array describing the state of the page
     @return The state that was just set on the page.
@@ -70,7 +70,7 @@ W.stateMachine.prototype = {
                         
                         for(var i in stateArray){
                             // Get keys in alphabetical order so that comparing states works
-                            var keys = W.getKeys(stateArray[i].params);
+                            var keys = Wui.getKeys(stateArray[i].params);
 
                             // State the location
                             stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;

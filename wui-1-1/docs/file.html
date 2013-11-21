@@ -4,36 +4,71 @@
     <meta charset="utf-8">
     <title>File Upload - WUI 1.1</title>
     
-	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
-	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
-	
-	<script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
-	<script type="text/javascript" src="../js/wui.js"></script>
-	<script type="text/javascript" src="../js/forms.js"></script>
-	<script type="text/javascript" src="../js/grid.js"></script>
-	<script type="text/javascript" src="../js/docs.js"></script>
-	
-	<script type="text/javascript">
-		$(document).ready(function(){
-			//Wui.docCode('../js/forms.js','Wui.File','File Upload');
-		}); // end document.ready		
-	</script>
-	
-	<script type="text/javascript" class="wui-doc-code">
-		$(document).ready(function(){
-			// Add a text formItem onto the body
-			a = new Wui.File({ label:'File Upload', blankText:'A file title is optional', name:'file', attr:{name:'file'}, appendTo:$('body') });
-			a.place();
-		});
-	</script>
-	<script type="text/javascript">
-		$(document).ready(function(){	
-			// TESTING
-			ts = new Wui.ts();
-			
-			//ts.test("Today",function(){ var today = new Date(); a.val('today'); return a.val().toString('yyyy-MM-dd') == today.toString('yyyy-MM-dd'); });
-		}); // end document.ready		
-	</script>
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //Wui.docCode('../js/forms.js','Wui.File','File Upload');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            // Add a text formItem onto the body
+            a = new Wui.File({ 
+                label:'File Upload', 
+                blankText:'A file title is optional', 
+                name:'file', attr:{name:'file'}, 
+                required:       true,
+                upFieldName:    'doc_file',
+                setVal:            function(sv){
+                                    var me = this;
+                                    if(typeof sv == 'number'){
+                                        $.getJSON('data/files', {conf_file_id:sv}, function(d){
+                                            if(d.success == true){
+                                                me.value = Wui.unwrapData.call(me,d).data;
+                                                me.setChanged();
+                                            }else{
+                                                me.value = null;
+                                                me.fieldText('Could not find file.');
+                                            }
+                                        });
+                                    }else{
+                                        me.value = sv;
+                                    }
+                                },
+                params:         {xaction:'upload_file', conf_paper_id:0},
+                url:            'https://webdev1.usurf.usu.edu:9006/smallsat/conf-admin/data/papers',
+                upFailure:      function(r){ Wui.errRpt(r.errors[0].error,'Upload Error'); },
+                changeClick:    function(){
+                                    var me = this;
+                                    $.getJSON(me.upTarget, {xaction:'delete_file', conf_file_id:me.value.conf_file_id}, function(d){
+                                        if(d.success == true){
+                                            me.val(null);
+                                        }else{
+                                            Wui.errRpt(d.errors[0].error,'Deletion Error');
+                                        }
+                                    });
+                                }
+                    });
+                    a.place();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){    
+            // TESTING
+            ts = new Wui.ts();
+            
+            //ts.test("Today",function(){ var today = new Date(); a.val('today'); return a.val().toString('yyyy-MM-dd') == today.toString('yyyy-MM-dd'); });
+        }); // end document.ready        
+    </script>
 </head>
 <body class="wui-docs">
 

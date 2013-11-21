@@ -2,17 +2,17 @@
  * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * http://www.geekinaday.com/wui/wui-1-1/license.html
+ * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
 
-(function($,W) {
+(function($,Wui) {
 
 /** 
 @event        tabchange When a tab changes (tab pane, tab button, tab item)
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 Tab pane
 */
-W.Tabs = function(args){ 
+Wui.Tabs = function(args){ 
     $.extend(this,{
         /** An array of items that will be added to the footer */
         bbar:   [],
@@ -37,14 +37,14 @@ W.Tabs = function(args){
     },args); 
     this.init();
 };
-W.Tabs.prototype = $.extend(new W.Pane(),{
+Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     /** Method that will run immediately when the object is constructed. Lays out targets. */
     init:            function(){
                         if(this.title === null)    this.title = '';
-                        W.Pane.prototype.init.call(this);
+                        Wui.Pane.prototype.init.call(this);
                     },
     
-    /** Overrides W.place(). Creates a W.Button as a tab for each item. */
+    /** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
     place:          function(){
                         var me = this;
                         
@@ -62,7 +62,7 @@ W.Tabs.prototype = $.extend(new W.Pane(),{
                                 itm.el.addClass('wui-hide-heading');
                             }
                             
-                            me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new W.Button({
+                            me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
                                 text:    itm.title || 'Tab ' + (parseInt(idx) + 1),
                                 click:    function(){ 
                                             me.giveFocus(itm);
@@ -73,7 +73,7 @@ W.Tabs.prototype = $.extend(new W.Pane(),{
                             if(me.bbar.length !== 0) me.placeFooter();
                         });
                         
-                        return W.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
+                        return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
                     },
     
     /** 
@@ -139,7 +139,7 @@ vertical        - Makes the column text oriented vertical and the column height 
 dataType        - The type of data used in the column (used for sorting)
 dataItem        - The item in the record that correlates to this column
 dataTemplate    - Sort of a full on renderer, this allows you to format inserted data similar to
-                  what is available in W.Template
+                  what is available in Wui.Template
 width           - A pixel value for the width of the column
 fit             - A numeric indicator of the relative size of the column
 
@@ -157,10 +157,10 @@ appearing on the right side of the column heading.
 Columns can be resized by dragging the heading borders left and right. Columns can be sized to 
 extend beyond the width of the grid frame, but when sized smaller will pop back into position.
 
-While not using W.fit(), the same principles apply in the sizing of elements, although percentage
+While not using Wui.fit(), the same principles apply in the sizing of elements, although percentage
 values are not supported at this time.
 */
-W.Grid = function(args){
+Wui.Grid = function(args){
     $.extend(this,{
         /** Array of items that will be added to the footer. */
         bbar:           [],
@@ -194,20 +194,12 @@ W.Grid = function(args){
     },args); 
     this.init();
 };
-W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
+Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     /** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
     afterMake:    function(){
                     this.sizeCols();
-                    this.enable();
+                    this.removeMask();
                 },
-                
-    /** Overrides W.Pane.disable() This disable simply disables the grid, not the header and footer. 
-    Use the W.Pane.prototype.disable.call(this) to disable the header and footer. */
-    disable:        function(){
-                        this.disabled = true;
-                        // cover pane contents
-                        this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
-                    },
     
     /** 
     Recursive function for sorting on multiple columns @private
@@ -257,7 +249,7 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
                     
                     if(me.colUrl && me.colUrl.length){
                         // Make remote call for columns
-                        me.colProxy = new W.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
+                        me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
                         me.colProxy.loadData();
                     }else if(me.columns.length){
                         // Check for locally defined columns
@@ -268,17 +260,14 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
                         
                 },
     
-    /** Runs when the object is created, creates the DOM elements for the grid within the W.Pane that this object extends */
+    /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
     init:        function(){
                     var me = this;
                     
-                    // Give the grid a load mask
-                    me.disabled = true;
-                    
                     // Set up container
-                    W.Pane.prototype.init.call(me);
+                    Wui.Pane.prototype.init.call(me);
                     me.el.addClass('wui-grid');
-                    
+
                     // Add grid specific DOM elements and reset elAlias
                     me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
                     me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh').appendTo(me.elAlias);
@@ -293,9 +282,9 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
                     if(me.hideHeader)    me.headingContainer.height(0);
                 },
     
-    /** Overrides the W.O layout function and positions the data and sizes the columns. */
+    /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
     layout:            function(){
-                        W.O.prototype.layout.call(this);
+                        Wui.O.prototype.layout.call(this);
                         this.posDataWin();
                         if(this.cols.length)
                             this.sizeCols();
@@ -304,8 +293,8 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
     /** Overrides DataList.loadData(), to add the load mask */   
     loadData:    function(){
                     this.setMaskHTML('Loading <span class="wui-spinner"></span>');
-                    if(!this.disabled)    this.disable();
-                    W.Data.prototype.loadData.apply(this,arguments);
+                    this.addMask();
+                    Wui.Data.prototype.loadData.apply(this,arguments);
                 },            
     
     /** 
@@ -368,8 +357,8 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
                     var me = this, al = me.autoLoad;
                     me.autoLoad = false;
                     
-                    //W.Pane.prototype.onRender.call(this);
-                    W.DataList.prototype.onRender.call(this);
+                    //Wui.Pane.prototype.onRender.call(this);
+                    Wui.DataList.prototype.onRender.call(this);
                     
                     // Start with getting the columns - Many methods waterfall from here
                     me.autoLoad = al;
@@ -384,7 +373,6 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
     
     /** Overrides DataList.refresh() to add disabling the grid to add the load mask */
     refresh:        function(){
-                        this.disable();
                         if(this.url === null)    this.setData(this.data);
                         else                    this.getColumns();
                     },    
@@ -422,7 +410,7 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
                             resize: function(event,ui){
                                         col.width = ui.size.width;
                                         col.fit = 0;
-                                        W.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
                                     },
                         });
                     }
@@ -479,7 +467,7 @@ W.Grid.prototype = $.extend(new W.Pane(), new W.DataList(),{
     /** Size up the columns of the table to match the headings @private */
     sizeCols:        function (){
                         var me = this;
-                        W.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
                         me.tbl.css({width:'1px'});
                         for(var i = 0; i < me.cols.length; i++){
                             me.tbl.find('td:eq(' +i+ ')').css({width:me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0)}); // account for table borders

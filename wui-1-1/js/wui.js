@@ -2,7 +2,7 @@
  * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * http://www.geekinaday.com/wui/wui-1-1/license.html
+ * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
  
  
@@ -161,9 +161,10 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
         var dimOpposite = dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
 
         // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
-        for(i = 0; i < collection.length; i++)
-            if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
-                break;
+        if(mindTheScrollbar !== true)
+            for(i = 0; i < collection.length; i++)
+                if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
+                    break;
 
         var sbw         = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0
             parentSize  = (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim]() - sbw,
@@ -1025,7 +1026,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 Wui.Button = function(args){
     $.extend(this, {
         /** The button element. Can be overridden according to the needs of the design. */
-        el:            $('<div>').attr({unselectable:'on'}),
+        el:            $('<button>').attr({unselectable:'on'}),
         
         /** Whether the button is disabled. */
         disabled:    false,
@@ -1132,29 +1133,38 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     /** Disables the pane by masking it and disabling all buttons */
     disable:        function(){
                         this.disabled = true;
-                        // cover pane contents
-                        this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
-                        // disable header & footer objects
+                        this.addMask();
                         this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
                         this.header.each(function(itm){ if(itm.disable) itm.disable(); });
                     },
     
     /** Enables the pane by removing the mask and enabling all buttons */
     enable:            function(){
+                            var me = this;
+                            me.disabled = false;
+                            me.removeMask();
+                            me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
+                            me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+                    },
+    
+    /** Adds a mask over the content area of the pane */
+    addMask:        function(){
+                        //if(this.mask === undefined)
+                            this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+                    },
+
+    /** Removes the mask over the content area of the pane */
+    removeMask:     function(){
                         var me = this, mask = me.mask || me.el.find('.wui-mask');
-                        me.disabled = false;
                         
                         if(mask){
                             mask.fadeOut(500,function(){ 
-                                // remove mask and enable header and footer buttons (all of them)
-                                mask.remove();
                                 me.mask = undefined;
-                                me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
-                                me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+                                me.el.find('.wui-mask').remove();
                             });
                         }
                     },
-    
+
     /**
     @param    {string} html    New HTML content to be set on the disabled mask
     Sets the maskHTML property to the value of html passed in. If mask presently exists it will change the value on the current mask.
@@ -1447,6 +1457,7 @@ Wui.confirm = function(msg, msgTitle, callback, content){
         new Wui.Button({text:'No', click:function(){ cw.doAnswer(false); }}),
         new Wui.Button({text:'Yes', click:function(){ cw.doAnswer(true); }})
     );
+    cw.header.splice(0,1);
     return cw;
 };
 

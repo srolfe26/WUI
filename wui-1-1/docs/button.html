@@ -4,42 +4,42 @@
     <meta charset="utf-8">
     <title>WUI Button - WUI 1.1</title>
     
-	<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
-	<link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
-	
-	<script type="text/javascript" src="../js/jquery-1-8-3-ui-1-9-2.js"></script>
-	<script type="text/javascript" src="../js/wui.js"></script>
-	<script type="text/javascript" src="../js/forms.js"></script>
-	<script type="text/javascript" src="../js/grid.js"></script>
-	<script type="text/javascript" src="../js/docs.js"></script>
-	
-	<style type="text/css" class="wui-doc-code">
-		.wui-btn.test-page {height: 40px; line-height: 40px;}
-	</style>
-	
-	<script type="text/javascript">
-		$(document).ready(function(){
-			Wui.docCode('../js/wui.js','Wui.Button','Button');
-		}); // end document.ready		
-	</script>
-	
-	<script type="text/javascript" class="wui-doc-code">
-		$(document).ready(function(){
-			a = new Wui.Button({
-				text:	'Test Button',
-				cls:	'test-page',
-				appendTo:$('#wui-doc-example')
-			});
-			a.place();
-		});
-	</script>
-	<script type="text/javascript">
-		$(document).ready(function(){
-			// TESTING
-			ts = new Wui.ts();
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-8-3-ui-1-9-2.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <style type="text/css" class="wui-doc-code">
+        .wui-btn.test-page {height: 40px; line-height: 40px;}
+    </style>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../js/wui.js','Wui.Button','Button');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            a = new Wui.Button({
+                text:    'Test Button',
+                cls:    'test-page',
+                appendTo:$('#wui-doc-example')
+            });
+            a.place();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            ts = new Wui.ts();
 
-			ts.test('Set Button Text', function(){ a.setText('Test 1 Was Successful'); return a.el.text() == 'Test 1 Was Successful'; });
-			
+            ts.test('Set Button Text', function(){ a.setText('Test 1 Was Successful'); return a.el.text() == 'Test 1 Was Successful'; });
+            
             ts.test('Disable the button', function(){ a.disable(); return a.disabled == true; });
             
             ts.test('Enable the button', function(){ a.enable(); return a.disabled == false; });
@@ -48,8 +48,8 @@
             
            
             
-		}); // end document.ready		
-	</script>
+        }); // end document.ready        
+    </script>
 </head>
 <body class="wui-docs">
 </body>

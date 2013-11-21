@@ -2,29 +2,29 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-	<title>WUI Test</title>
+    <title>WUI Test</title>
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
 
-	<style>
-		.wui-pane {float:left; margin:1em;}
-	</style>
+    <style>
+        .wui-pane {float:left; margin:1em;}
+    </style>
 
-	<script type="text/javascript" src="js/jquery-1-10-2-ui-1-10-3.js"></script>
-	<script type="text/javascript" src="js/wui.js"></script>
-	<script type="text/javascript" src="js/forms.js"></script>
-	<script type="text/javascript" src="js/grid.js"></script>
-	
-	<script type="text/javascript">
-		$(document).ready(function(){
-			// Add a new grid on the body
-			
-			id = new Date();
+    <script type="text/javascript" src="js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="js/wui.js"></script>
+    <script type="text/javascript" src="js/forms.js"></script>
+    <script type="text/javascript" src="js/grid.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // Add a new grid on the body
+            
+            id = new Date();
             
             sub_a = new Wui.Grid({
-                appendTo:$('body'),
-                data:			[
+                appendTo:       $('body'),
+                data:           [
                                     {link:'docs/about.html', title:'-- About --'},
                                     {link:'docs/o.html', title:'WUI Object'},
                                     {link:'docs/text.html', title:'Text Box'},
@@ -51,39 +51,39 @@
                                     {link:'docs/scrollbar-width.html', title:'scrollbarWidth()'},
                                     {link:'docs/input.html', title:'input()'}
                                 ],
-                processData:	function(d){
+                processData:    function(d){
                                     console.log('asdf');
                                     return d.sort(function(a,b){
                                         return $.trim(a.title).toUpperCase().localeCompare($.trim(b.title).toUpperCase());
                                     });
                                 },
-                columns:		[{heading:'Feature', dataItem:'title'}],
-                borderStyle:	{borderWidth: '0 6px 0 0', borderColor:'#888'},
-                width: 			300,
-                height: '90%'
+                columns:        [{heading:'Feature', dataItem:'title'}],
+                borderStyle:    {borderWidth: '0 6px 0 0', borderColor:'#888'},
+                width:          300,
+                height:         '90%'
             });
             sub_a.place();
             
             a = new Wui.Grid({
-                height:	500,
+                height:    500,
                 width:950,
                 appendTo:$('body'),
-                url:	'docs/data.txt',
+                url:    'docs/data.txt',
                 columns:[
                             {heading:'Date', dataItem:'date', dataType:'date', fit:0.75},
                             {heading:'Check Number', dataItem:'check_number', dataType:'numeric', vertical:true},
                             {heading:'Description', dataItem:'description', fit:5},
                             {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:1},
                             //{heading:'', dataItem:'amount', dataType:'numeric', fit:1, renderer: function(cell,val,record,row){
-                            //	var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
+                            //    var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
                             //}},
                         ],
                 multiSelect:true,
                 afterMake: function(){ Wui.Grid.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
             });
             a.place();
-		}); // end document.ready
-	</script>
+        }); // end document.ready
+    </script>
 </head>
 <body></body>
 </html>

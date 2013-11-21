@@ -2,10 +2,10 @@
  * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * http://www.geekinaday.com/wui/wui-1-1/license.html
+ * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
 
-(function($,W) {
+(function($,Wui) {
 
 $.fn.overrideNodeMethod = function(methodName, action) {
     var originalVal = $.fn[methodName];
@@ -26,7 +26,7 @@ $.fn.overrideNodeMethod = function(methodName, action) {
 A WUI Form is a collection of Wui.FormField objects with methods to
 both collectively and individually interact with those objects.
 */
-W.Form = function(args){
+Wui.Form = function(args){
     $.extend(this,{
         /** Config to disable the entire form */ 
         disabled:       false,
@@ -47,7 +47,7 @@ W.Form = function(args){
     
     this.init();
 };
-W.Form.prototype = $.extend(new W.O(),{
+Wui.Form.prototype = $.extend(new Wui.O(),{
     /** Blanks out the values of all form fields. Value of fields will be null*/
     clearData:  function(){ this.setData(); },
 
@@ -55,7 +55,7 @@ W.Form.prototype = $.extend(new W.O(),{
     dispErrors:    function(){
                     var msg = '';
                     for(var e = 0; e < this.errors.length; e++) msg += this.errors[e] + '<br/>';
-                    W.errRpt(msg,'Form Errors');
+                    Wui.errRpt(msg,'Form Errors');
                 },
 
     /**
@@ -64,8 +64,8 @@ W.Form.prototype = $.extend(new W.O(),{
     The passed in function gets called with two parameters the item, and the item's index.
     */
     each:        function(f){
-                    return W.O.prototype.each.call(this,function(itm,i){
-                        if(!(itm instanceof W.Note)) return f(itm,i);
+                    return Wui.O.prototype.each.call(this,function(itm,i){
+                        if(!(itm instanceof Wui.Note)) return f(itm,i);
                     });
                 },
 
@@ -124,7 +124,7 @@ W.Form.prototype = $.extend(new W.O(),{
                     // If a form is disabled, the field needs to be disabled too
                     if(!(itm.disabled && itm.disabled === true)) $.extend(itm,{disabled: me.disabled});
 
-                    if(itm.ftype && !(itm instanceof W.FormField)){
+                    if(itm.ftype && !(itm instanceof Wui.FormField)){
                         // If a field has its labelPosition defined then leave it alone, otherwise use the form's value.
                         if(!(itm.labelPosition)) $.extend(itm,{labelPosition: me.labelPosition});
                         
@@ -132,7 +132,7 @@ W.Form.prototype = $.extend(new W.O(),{
                         
                         if(window[ft[0]] && window[ft[0]][ft[1]])   return new window[ft[0]][ft[1]](itm);
                         else                                        throw('Object type ' +itm.ftype+ ' is not defined.');
-                    }else if(itm instanceof W.FormField){
+                    }else if(itm instanceof Wui.FormField){
                         // If a field has its labelPosition defined then leave it alone, otherwise use what form's value.
                         if(!itm.hasOwnProperty('labelPosition') && itm.lbl) itm.lbl.setLabelPosition(me.labelPosition);
                         return itm;
@@ -144,12 +144,12 @@ W.Form.prototype = $.extend(new W.O(),{
     /**
     @param {function} [after]    A function to be called after an object has been placed
     @return The object that was placed 
-    Similar to the W.O.place() with the addition of constructing the forms items first. */
+    Similar to the Wui.O.place() with the addition of constructing the forms items first. */
     place:      function(){
                     var me = this;
                     if(me.items === undefined) me.items = [];
                     me.each(function(itm,i){ me.items[i] = me.normFrmItem(itm); });
-                    return W.O.prototype.place.apply(this,arguments);
+                    return Wui.O.prototype.place.apply(this,arguments);
                 },
     
     /**
@@ -160,7 +160,7 @@ W.Form.prototype = $.extend(new W.O(),{
     push:        function(){
                     var me = this, itms = [];
                     $.each(arguments,function(i,arg){ itms.push(me.normFrmItem(arg)); });
-                    return W.O.prototype.push.apply(this,itms);
+                    return Wui.O.prototype.push.apply(this,itms);
                 },
     /**
     @param {string} fieldname The name of the field to be removed
@@ -169,7 +169,7 @@ W.Form.prototype = $.extend(new W.O(),{
     */
     remFrmItm:    function(fieldname){
                     var me = this;
-                    this.each(function(itm,idx){ if(itm.name == fieldname) W.O.prototype.splice.call(me,idx,1); });
+                    this.each(function(itm,idx){ if(itm.name == fieldname) Wui.O.prototype.splice.call(me,idx,1); });
                     return true;
                 },
     
@@ -247,7 +247,7 @@ W.Form.prototype = $.extend(new W.O(),{
     placed within a paragraph tag. The note can be included in the items on a form, but the form
     will not attempt to validate like the other items.
 */
-W.Note = function(args){ 
+Wui.Note = function(args){ 
     $.extend(this,{
         /** The HTML to be placed in the note */
         html:'',
@@ -255,7 +255,7 @@ W.Note = function(args){
         align: null
     },args); this.init();
 };
-W.Note.prototype = $.extend(new W.O(),{
+Wui.Note.prototype = $.extend(new Wui.O(),{
     /** Method that will run immediately when the object is constructed. */
     init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note ' + (this.align) ? this.align : ''); }
 });
@@ -266,7 +266,7 @@ W.Note.prototype = $.extend(new W.O(),{
     on the field. The labelPosition is usually supplied by the field the label will wrap, but
     it has its own property, and can be instantiated by itself.
 */
-W.Label = function(args){ 
+Wui.Label = function(args){ 
     $.extend(this,{
         /**
             String that will converted into DOM elements and placed in the label.
@@ -280,7 +280,7 @@ W.Label = function(args){
     
     this.init(); 
 };
-W.Label.prototype = $.extend(new W.O(),{
+Wui.Label.prototype = $.extend(new Wui.O(),{
     /** Method that will run immediately when the object is constructed. */
     init:               function(){
                             var me = this;
@@ -326,7 +326,7 @@ W.Label.prototype = $.extend(new W.O(),{
     
     The base object that WUI form elements extend from
 */
-W.FormField = function(args){
+Wui.FormField = function(args){
     $.extend(this,{
         /** Whether or not the field will be disabled. A disabled field is still accessible to the form, just not to the user. */
         disabled:        false,
@@ -353,7 +353,7 @@ W.FormField = function(args){
         validTest:      null
     },args);
 };
-W.FormField.prototype = $.extend(new W.O(),{
+Wui.FormField.prototype = $.extend(new Wui.O(),{
     /**
         @return The el of the object
         Runs immediately when the object is constructed. Wraps the field in a label if a label has been defined.
@@ -364,7 +364,7 @@ W.FormField.prototype = $.extend(new W.O(),{
                     me.el = $('<div>').addClass('wui-fe');
                     
                     if(me.label && me.label.length > 0){
-                        me.lbl = new W.Label({html:me.label, cls:me.labelCls, field:me, labelPosition:me.labelPosition});
+                        me.lbl = new Wui.Label({html:me.label, cls:me.labelCls, field:me, labelPosition:me.labelPosition});
                         me.elAlias = me.el;
                         me.el = me.lbl.el.append(me.elAlias);
                     }
@@ -373,7 +373,7 @@ W.FormField.prototype = $.extend(new W.O(),{
                 
     /** Will disable the object if its disabled property is set to true and set a value on the field if one has been defined. */
     onRender:    function(){
-                    if(this.disabled)                    this.disable();
+                    if(this.disabled)                   this.disable();
                     if(this.hasOwnProperty('value'))    this.val(this.value,false);
                 },
     /** Disables the field so the user cannot interact with it. */
@@ -445,12 +445,14 @@ W.FormField.prototype = $.extend(new W.O(),{
                     if(!arguments.length){
                         return this.getVal();
                     }else{
+                        var oldVal = this.value;
+
                         // Set the actual value of the item
                         this.setVal.apply(this,arguments);
                         
                         // Call change listeners
                         if(arguments[1] !== false)
-                            this.setChanged();
+                            this.setChanged(oldVal);
                         
                         // Return the passed value(s)
                         return arguments;
@@ -461,9 +463,9 @@ W.FormField.prototype = $.extend(new W.O(),{
     Marks the parent form as changed if the field belongs to a form, calls the valChange event hooks and listeners
     if the field doesn't have an 'el' property, it will call 'hiddenchange'
     */
-    setChanged:    function(){
+    setChanged:    function(oldVal){
                     // Marks the parent form as 'changed'
-                    if(this.parent && this.parent instanceof W.Form)
+                    if(this.parent && this.parent instanceof Wui.Form)
                         this.parent.formChange(true, this);
                     
                     // Calls functionally defined valChange() - one will override another
@@ -471,10 +473,10 @@ W.FormField.prototype = $.extend(new W.O(),{
                     
                     // Calls listeners for valchange - in the case of hidden fields calls 'hiddenchange'
                     if(this.el){
-                        this.el.trigger($.Event('valchange'), [this, this.value]); 
+                        this.el.trigger($.Event('valchange'), [this, this.value, oldVal]); 
                     }else{
-                        if(this.parent && this.parent instanceof W.Form)
-                            this.parent.el.trigger($.Event('hiddenchange'), [this, this.value]);
+                        if(this.parent && this.parent instanceof Wui.Form)
+                            this.parent.el.trigger($.Event('hiddenchange'), [this, this.value, oldVal]);
                     }
                 },
     
@@ -506,18 +508,18 @@ W.FormField.prototype = $.extend(new W.O(),{
 
 
 /** A Wui.FormField that has no DOM element. Even more hidden than an HTML hidden input, the hidden field exists only in memory. */
-W.Hidden = function(args){
+Wui.Hidden = function(args){
     $.extend(this,{
         /** By default a hidden field produces no DOM element */
         el:null
     },args); 
     this.init();
 };
-W.Hidden.prototype = $.extend(new W.FormField(),{ init: function(){} });
+Wui.Hidden.prototype = $.extend(new Wui.FormField(),{ init: function(){} });
 
 
 /** WUI Text */
-W.Text = function(args){
+Wui.Text = function(args){
     $.extend(this,{
         /** The CSS class that denotes an empty field */
         blankCls:   'empty',
@@ -529,15 +531,15 @@ W.Text = function(args){
     }); 
     this.init();
 };
-W.Text.prototype = $.extend(new W.FormField(),{
+Wui.Text.prototype = $.extend(new Wui.FormField(),{
     /** Runs immediately when the object is created */
     init:            function(){
                         var me = this;
-                        W.FormField.prototype.init.call(me);
+                        Wui.FormField.prototype.init.call(me);
                         
                         if(me.blankText && me.blankText.length)    me.setBlankText(me.blankText);
                         
-                        me.append(W.Text.prototype.setListeners.call(me,me));
+                        me.append(Wui.Text.prototype.setListeners.call(me,me));
                     },
                     
     /** Sets the blank text on the field. If the HTML 5 placeholder isn't supported, mimic it by replacing the native jQuery val function */
@@ -590,7 +592,7 @@ W.Text.prototype = $.extend(new W.FormField(),{
                         .focusin(function(){ fieldState = me.field.val(); }) // Set fieldState (closure variable) to allow for comparison on blur
                         .blur(function(){ if(fieldState != me.field.val()) me.setChanged(); }); // Call val function so that valchange will be fired if needed
                         
-                        if(this.setListeners !== W.Text.prototype.setListeners) this.setListeners(this);
+                        if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
                         return t.field;
                     },
     /** 
@@ -609,7 +611,7 @@ W.Text.prototype = $.extend(new W.FormField(),{
 
 
 /** WUI Text Area */
-W.Textarea = function(args){
+Wui.Textarea = function(args){
     $.extend(this, args, { 
         /** The HTML element */
         field:    $('<textarea>'),
@@ -619,8 +621,8 @@ W.Textarea = function(args){
     });
     this.init();
 };
-W.Textarea.prototype = $.extend(new W.Text(), {
-    init:    function(){    W.Text.prototype.init.call(this); this.field.css({height:this.field.parent().parent().height});  }
+Wui.Textarea.prototype = $.extend(new Wui.Text(), {
+    init:    function(){    Wui.Text.prototype.init.call(this); this.field.css({height:this.field.parent().parent().height});  }
 });
 
 
@@ -635,7 +637,7 @@ jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
 @author Stephen Nielsen
 @author Chris Pietschmann
 */
-W.Wysiwyg = function(args){
+Wui.Wysiwyg = function(args){
     $.extend(this,{
         /** Whether or not to show the button that will give the user a view of the HTML generated by the WYSIWYG */
         showHTML:    false
@@ -647,7 +649,7 @@ W.Wysiwyg = function(args){
     });
     this.init();
 };
-W.Wysiwyg.prototype = $.extend(new W.Textarea(),{
+Wui.Wysiwyg.prototype = $.extend(new Wui.Textarea(),{
     /** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
     onRender:    function(){
                     var tb = [['bold','italic','underline','strikethrough'], 
@@ -673,7 +675,7 @@ W.Wysiwyg.prototype = $.extend(new W.Textarea(),{
                         resize:     function(evnt, ui){ iframe.height(ui.size.height - (ui.originalSize.height - this.iFrameOrigHeight)); },
                         handles:    'se'
                     });
-                    W.FormField.prototype.onRender.call(this);
+                    Wui.FormField.prototype.onRender.call(this);
                 },
     
     /** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
@@ -691,7 +693,7 @@ W.Wysiwyg.prototype = $.extend(new W.Textarea(),{
 
 /** Creates a radio group that will appear as normal, or as a button group where only one button at a time
 can    be depressed. MUST be named uniquely. */
-W.Radio = function(args){ 
+Wui.Radio = function(args){ 
     $.extend(this,{
         /** A true value converts the normal radio group to a button group */
         buttonStyle:false,
@@ -709,20 +711,19 @@ W.Radio = function(args){
     });
     this.init();
 };
-W.Radio.prototype = $.extend(new W.FormField(),{
+Wui.Radio.prototype = $.extend(new Wui.FormField(),{
     /** Runs immediately when the object is created. Adds listeners and styles */
     init:       function(){
-                    W.FormField.prototype.init.call(this);
+                    Wui.FormField.prototype.init.call(this);
                     this.el.addClass('wui-radio');
                     
                     var me = this,
-                        tplEngine = new W.Template({ template:this.template }),
+                        tplEngine = new Wui.Template({ template:this.template }),
                         ul = $('<ul>');
                     
                     $.each(me.options,function(i,itm){
                         itm.name = me.name;
-                        // TODO: Use Wui.id here!!
-                        itm.id = me.name + '-' + i;
+                        itm.id = Wui.id();
                         ul.append(
                             tplEngine.make(tplEngine.data = itm)
                             .children('label')
@@ -759,7 +760,7 @@ W.Radio.prototype = $.extend(new W.FormField(),{
                     me.el.find('input').each(function(){
                         $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
                     });
-                    W.FormField.prototype.onRender.call(me);
+                    Wui.FormField.prototype.onRender.call(me);
                 },
     getVal:        function(){ return this.value; },
     setVal:        function(sv){
@@ -772,7 +773,7 @@ W.Radio.prototype = $.extend(new W.FormField(),{
 /** 
 Creates a check-box group if options are specified, or as a button group where any/all of the buttons can be
 depressed at once.     If options aren't specified, a single boolean check-box will be created. */
-W.Checkbox = function(args){ 
+Wui.Checkbox = function(args){ 
     $.extend(this,{
         /** A default name that should be overridden */
         name:       'wui-checkbox',
@@ -781,7 +782,7 @@ W.Checkbox = function(args){
         template:    '<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
     },args);
 this.init(); };
-W.Checkbox.prototype = $.extend(new W.Radio(),{
+Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
     /** Collects the values of all the checked boxes in the group */
     calcVal:    function(){
                     var me = this, a = [];
@@ -800,7 +801,7 @@ W.Checkbox.prototype = $.extend(new W.Radio(),{
     init:       function(){
                     if(this.options.length === 0) this.options.push({val:1,title:''});
                     
-                    W.Radio.prototype.init.call(this);
+                    Wui.Radio.prototype.init.call(this);
                     this.el.removeClass('wui-radio').addClass('wui-checkbox');
                     
                     //steal label if button style
@@ -813,7 +814,7 @@ W.Checkbox.prototype = $.extend(new W.Radio(),{
     setVal:        function(sv){
                     var me = this;
                     
-                    if($.isArray(sv))                { me.value = sv; }
+                    if($.isArray(sv))               { me.value = sv; }
                     else if(sv === null)            { me.value = null; }    
                     else                            { me.value = [sv]; }
                     
@@ -825,9 +826,9 @@ W.Checkbox.prototype = $.extend(new W.Radio(),{
                         me.el.find('label').removeClass('checked');
                         
                         // set the ones passed in
-                        for(var i = 0; i < me.value.length; i++){
-                            me.el.find('input[value=' +me.value[i]+ ']').prop('checked',true).siblings('li').addClass('checked');
-                        }
+                        if(me.value && me.value.length)
+                            for(var i = 0; i < me.value.length; i++)
+                                me.el.find('input[value=' +me.value[i]+ ']').prop('checked',true).siblings('li').addClass('checked');
                     }
                 },
     /** The check-box will validate false if the value is 0 and the box is required.  */
@@ -843,7 +844,7 @@ $.expr[":"].contains = $.expr.createPseudo(function(arg) {
     };
 });
 /** The WUI Combobox can be set up in a number of different configurations that are really just variations of local and remote operations. See the configs. */
-W.Combo = function(args){ 
+Wui.Combo = function(args){ 
     $.extend(this, {
         /** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
         until a search value is entered. */
@@ -895,7 +896,7 @@ W.Combo = function(args){
 
     this.init(); 
 };
-W.Combo.prototype = $.extend(new W.Text(), new W.Data(), {
+Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     /** Fires when the enter key is pressed */
     enterKey:       function(){
                         if(this.selectItm !== null)   this.selectItm.click();
@@ -938,14 +939,14 @@ W.Combo.prototype = $.extend(new W.Text(), new W.Data(), {
                             ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
                         
                         //setup combobox variables
-                        me.tplEngine = new W.Template({template:me.template});
+                        me.tplEngine = new Wui.Template({template:me.template});
                         me.selectItm = null;
                         
                         //put field inside a wrapper and add drop-down switch
-                        W.Text.prototype.init.call(me);
+                        Wui.Text.prototype.init.call(me);
                         
                         me.wrapper = $('<div>').addClass('dd-wrapper');
-                        me.ddSwitch = new W.Button({
+                        me.ddSwitch = new Wui.Button({
                             click:        function(){
                                             if(!me.dd.is(':visible')){
                                                 me.field.focus();
@@ -1136,10 +1137,10 @@ W.Combo.prototype = $.extend(new W.Text(), new W.Data(), {
                                 top:    ofst.top + fld.outerHeight(),
                                 width:    width,
                                 display:'block',
-                                zIndex:    W.maxZ()
+                                zIndex:    Wui.maxZ()
                             });
                         }else{
-                            this.dd.css({ zIndex:W.maxZ() }).show();
+                            this.dd.css({ zIndex:Wui.maxZ() }).show();
                         }
                     },
     getVal:            function(){
@@ -1185,19 +1186,19 @@ W.Combo.prototype = $.extend(new W.Text(), new W.Data(), {
 The link object contains three fields, one for the actual URL, one for the text of the link (if different from the URL) and a combo for
 whether the link opens in a new window/tab or the same window.
 */
-W.Link = function(args){ 
+Wui.Link = function(args){ 
     $.extend(this,{
         invalidMsg: 'The value for \'' + ((this.label) ? this.label : (this.args && this.args.name) ? this.args.name : 'a link field') + '\' is not a properly formatted link.'
     },args);
     this.init();
 };
-W.Link.prototype = $.extend(new W.FormField(),{
+Wui.Link.prototype = $.extend(new Wui.FormField(),{
     /** Builds a preview of the link while it is being entered - gives feedback/validation to the user  @private */
     buildOutput:function(){
                      if(this.outputFld === undefined)    this.elAlias.append(this.outputFld = $('<div>').attr({tabindex:-1}).addClass('feedback'));
         
                     if(this.testLink()){
-                        var tp = new W.Template({data:this.value, template:'<span>Preview:</span> <a href="{uri}" target="{target}" class="{((target == "_blank") ? "uri-new-win" : "")}">{title}</a>'});
+                        var tp = new Wui.Template({data:this.value, template:'<span>Preview:</span> <a href="{uri}" target="{target}" class="{((target == "_blank") ? "uri-new-win" : "")}">{title}</a>'});
                         this.outputFld.html(tp.make());
                     }else{
                         this.outputFld.html('Your link is improperly formatted.');
@@ -1210,15 +1211,15 @@ W.Link.prototype = $.extend(new W.FormField(),{
                     var me = this;
                     
                     me.items = [
-                        me.urlField = new W.Text({cls:'wui-link-third wui-link-focus', blankText:'URL', linkData:'uri'}),
-                        me.titleField = new W.Text({cls:'wui-link-third', blankText:'Display Text', linkData:'title'}),
-                        me.targetField = new W.Combo({
+                        me.urlField = new Wui.Text({cls:'wui-link-third wui-link-focus', blankText:'URL', linkData:'uri'}),
+                        me.titleField = new Wui.Text({cls:'wui-link-third', blankText:'Display Text', linkData:'title'}),
+                        me.targetField = new Wui.Combo({
                             cls:'wui-link-third no-margin', valueItem: 'target', titleItem:'name', blankText:'Target', keepInline:true,
                             data:[{target:'_self', name:'Opens In Same Window'}, {target:'_blank', name:'Opens In New Window/Tab'}], linkData:'target'
                         })
                     ];
                     
-                    W.FormField.prototype.init.call(me);
+                    Wui.FormField.prototype.init.call(me);
                     me.value = { target:'_self', title:null, uri:null };
                     
                     me.el.append(me.elAlias = $('<div>').addClass('wui-hyperlink'));
@@ -1299,7 +1300,7 @@ W.Link.prototype = $.extend(new W.FormField(),{
  "10-9-2013 5:30 PM"
  "ten months from now"
 */
-W.Datetime = function(args){ 
+Wui.Datetime = function(args){ 
     $.extend(this,args,{
         field:        $('<input>').attr({type:'text'})
     });
@@ -1467,7 +1468,7 @@ $.extend(Date.prototype,{
 });
 /** End borrowing from date.js */
 
-W.Datetime.prototype = $.extend(new W.Text(),{
+Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     second:         1e3,
     minute:         6e4,
     hour:           36e5,
@@ -1515,7 +1516,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
     /** Runs when the object is created. Sets up DOM elements, and attaches the jQuery UI datepicker */
     init:           function(){
                         var me = this;
-                        W.Text.prototype.init.call(me);
+                        Wui.Text.prototype.init.call(me);
                         me.append(
                             $('<div>').addClass('wui-date').append(
                                 me.setListeners(me),
@@ -1605,7 +1606,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
                             
                             //Returns a message to the user that the program doesn't understand them
                             if(genDate.toString() == 'Invalid Date'){
-                                me.displayDate(me.sarcasmArray[W.randNum(0,(me.sarcasmArray.length -1))]);
+                                me.displayDate(me.sarcasmArray[Wui.randNum(0,(me.sarcasmArray.length -1))]);
                                 return;
                             }
                             
@@ -1782,9 +1783,7 @@ W.Datetime.prototype = $.extend(new W.Text(),{
                         else                    return theNum;
                     },
                     
-    getVal:            function(){
-                        return this.value;
-                    },
+    getVal:         function(){ return this.value; },
                     
     setVal:            function(sv){
                         if(sv !== null){
@@ -1816,43 +1815,36 @@ W.Datetime.prototype = $.extend(new W.Text(),{
 
 
 /**
+@author Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
 Creates a form field for uploading files. By the nature of file uploads and their tight pairing to a backend server, this control must be extended itself to be used for uploading files.
-
-Wui.File utilizes the following plugin:    
-
-One Click Upload - jQuery Plugin
-Copyright (c) 2008 Michael Mitchell - http://www.michaelmitchell.co.nz
-
-Modified 2012 Stephen Nielsen
 */
-W.File = function(args){ 
+Wui.File = function(args){ 
     $.extend(this,{
-        /** */
-        beforeSelect:function(){},
+        /** An event hook to perform any functionality before a file is uploaded @eventhook */
+        beforeSubmit:function(){},
         
-        /** */
+        /** A value to send to the server where it will filter/block file uploads according to file type */
         fileTypeFilter: null,
         
-        /** */
+        /** The name of the field that contains the file */
         upFieldName:'fileupload',
         
-        /** */
+        /** Additional parameters to send to the server besides the file*/
         params:   {},
         
-        /** */
+        /** Event hook to be performed when a file is successfully uploaded. @eventhook */
         upSuccess:  function(){},
         
-        /** */
+        /** The server-side page where the file will be uploaded. */
         url:   '',
         
-        /** */
+        /** The name of the parameter of the file title. */
         upTitleName:'title'
     },args,{
         field:    $('<input>').attr({type:'text'})
-    }); 
-    this.init();
+    });
 };
-W.File.prototype = $.extend(new W.Text(),{
+Wui.File.prototype = $.extend(new Wui.Text(),{
     /** */
     changeClick:function(){
                      //swap buttons
@@ -1862,44 +1854,20 @@ W.File.prototype = $.extend(new W.Text(),{
                  },
     
     /** */
-    onSelect:   function(){
-                    var me = this;
-                    me.beforeSelect();
-                    
-                    //add title to parameters and parameters to the file upload
-                    me.params[me.upTitleName] = me.field.val();
-                    
-                    // for file filtering
-                    if(me.fileTypeFilter !== null) me.params[file_type_filter] = me.fileTypeFilter;
-                    
-                    me.submit();
-                },
-    
-    /** */
     init:       function(){
                     var me = this;
-                    W.Text.prototype.init.call(me);
+                    Wui.Text.prototype.init.call(me);
 
                     // Wrap the field in order to add absolutely positioned buttons
                     me.append(me.wrapper = $('<div>').addClass('wui-file').append(me.field));
                     me.elAlias = me.wrapper;
 
-                    var uniqueId = W.id();
+                    var uniqueId = Wui.id();
 
+                    // Add form, iframe, and buttons
                     me.push(
-                        // Add a form and an iframe to submit the file
-                        me.iframe = new W.O({el:$('<iframe>').css({display:'none'}).attr({id:uniqueId}) }),
-                        me.fileFrm = new W.O({
-                            el:$('<form>').attr({
-                                method:     'post',
-                                enctype:    'multipart/form-data',
-                                action:     me.url,
-                                target:     uniqueId
-                            })
-                        }),
-
-                        // Add a button to clear the current file and browse for a new one
-                        me.changeBtn = new W.Button({
+                        me.iframe = new Wui.O({el:$('<iframe>').css({display:'none'}).attr({id:uniqueId, name:uniqueId}) }),
+                        me.changeBtn = new Wui.Button({
                             click:      function(){ 
                                             me.fieldText('');
                                             me.field.removeAttr('disabled'); 
@@ -1908,31 +1876,46 @@ W.File.prototype = $.extend(new W.Text(),{
                             text:       'X',
                             tabIndex:   -1,
                             cls:        'file-change field-btn'
+                        }),
+                        me.upBtn = new Wui.Button({text:'Browse', cls:'field-btn', tabIndex:-1 }),
+                        me.fileFrm = new Wui.O({
+                            el:$('<form>').attr({
+                                method:     'post',
+                                enctype:    'multipart/form-data',
+                                action:     me.url,
+                                target:     uniqueId
+                            })
                         })
                     );
 
                     me.fileFrm.append(
-                        me.cssByParam(me.upBtn = new W.Button({text:'Browse', cls:'field-btn', tabIndex:-1 })),
-                        
                         // The file field
                         me.fileInput = $('<input>')
                         .attr({name:me.upFieldName, type:'file'})
-                        .change(function(){ me.onSelect(); })
+                        .change(function(){ me.submit(); })
                         .focus(function(){ me.upBtn.el.addClass('selected'); })
                         .blur(function(){ me.upBtn.el.removeClass('selected'); })
                     );
                 },
-    
+
     /** Submit the form */
     submit:     function() {
                     var me = this;
 
+                    me.beforeSubmit();
+                    
+                    //add title to parameters and parameters to the file upload
+                    me.params[me.upTitleName] = me.field.val();
+                    
+                    // for file filtering
+                    if(me.fileTypeFilter !== null) me.params[file_type_filter] = me.fileTypeFilter;
+
                     me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
                     
                     /** add additional paramters before sending */
+                    me.fileFrm.el.children("input[type!='file']").remove();
                     $.each(me.params, function(key, value) {
-                        me.fileFrm.el.children("input[name=" +key+ "]").remove();
-                        me.fileFrm.append($('<input type="hidden" name="' +key+ '" value="' +value+ '" />'));
+                        me.fileFrm.append($('<input>').attr({type:'hidden', name:key, value:value}));
                     });
                     
                     /** Submit the actual form */
@@ -1940,7 +1923,7 @@ W.File.prototype = $.extend(new W.Text(),{
                     
                     /** Do something after we are finished uploading */
                     me.iframe.el.unbind().load(function() {
-                        me.onComplete($(me.iframe.contentWindow.document.body).text()); //done :D
+                        me.onComplete($('body',me.iframe.el.contents()).text()); //done :D
                     });
                 },
 
@@ -1955,7 +1938,7 @@ W.File.prototype = $.extend(new W.Text(),{
                     try{
                         var me = this,
                             d = $.parseJSON(r),
-                            unwrapped = W.unwrapData.call(me,d);
+                            unwrapped = Wui.unwrapData.call(me,d);
                             
                         // Put the returned data out there for develpers.
                         me.devHook(unwrapped);
@@ -1968,7 +1951,7 @@ W.File.prototype = $.extend(new W.Text(),{
                             me.val(unwrapped.data,'upSuccess');
                         }else{
                             if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
-                                W.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
+                                Wui.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
                                 me.field.removeClass('has-file uploading').removeAttr('disabled');
                                 if(me.beforeSelectTitle)
                                     me.fieldText(me.beforeSelectTitle);
@@ -1983,7 +1966,7 @@ W.File.prototype = $.extend(new W.Text(),{
                 },
     upFailure:  function(e,e2){
                     console.log(e,e2);
-                    W.Text.prototype.val.call(this,'Upload Failure');
+                    Wui.Text.prototype.val.call(this,'Upload Failure');
                 },
     /** */
     getVal:        function(){ return this.value || {}; },
@@ -1994,7 +1977,7 @@ W.File.prototype = $.extend(new W.Text(),{
                 },
     /** */
     val:        function(sv,callback){
-                    var retVal = W.FormField.prototype.val.apply(this,arguments);
+                    var retVal = Wui.FormField.prototype.val.apply(this,arguments);
                     if(this[callback] && typeof this[callback] == 'function') this[callback]();
                     return retVal;
                 },
@@ -2004,17 +1987,20 @@ W.File.prototype = $.extend(new W.Text(),{
                     var me = this;
                     if(me.value){
                         me.field.addClass('has-file').removeAttr('disabled');
-                        me.upBtn.el.parents('div:first').hide();
-                        me.changeBtn.el.show();
+                        me.upBtn.hide();
+                        me.fileFrm.hide();
+                        asdf = me.upBtn;
+                        me.changeBtn.show();
                         
                         //changed to a 'file-selected' view and display a nicely formatted file
                         me.field.addClass('has-file ' + ((me.value.extension !== undefined) ? 'icon-' + me.value.extension.replace('.','') : '')).attr('disabled',true);
                         me.fieldText(me.value[me.upTitleName]);
                     }else{
                         me.field.removeClass();
-                        me.upBtn.el.parents('div:first').show();
-                        me.changeBtn.el.hide();
-                        me.field.val('');
+                        me.upBtn.show();
+                        me.fileFrm.show();
+                        me.changeBtn.hide();
+                        me.field.val(null);
                     }
                     
                 }
@@ -2029,28 +2015,28 @@ W.File.prototype = $.extend(new W.Text(),{
 
 Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
 */
-W.input = function(msg, callback, msgTitle, inputs, content){
+Wui.input = function(msg, callback, msgTitle, inputs, content){
     // make sure the inputs will be acceptable on the form
     if(inputs){
         if(!inputs.length){
-            if(inputs instanceof W.FormField || inputs.ftype)
+            if(inputs instanceof Wui.FormField || inputs.ftype)
                 inputs = [inputs];
             else
-                inputs = [{ftype:'W.Text'}];
+                inputs = [{ftype:'Wui.Text'}];
         }
     }else{
-        inputs = [{ftype:'W.Text'}];
+        inputs = [{ftype:'Wui.Text'}];
     }
     if(inputs.length == 1)    $.extend(inputs[0],{label:msg, required:true, name:'inputField'});
-    if(content !== undefined) inputs.splice(0,0,{ftype:'W.Note', html: content});
+    if(content !== undefined) inputs.splice(0,0,{ftype:'Wui.Note', html: content});
     
     // create the form and the window
-    var inputFrm = new W.Form({ labelPosition:'left', items:inputs }),
-        Msg = new W.Window({
+    var inputFrm = new Wui.Form({ labelPosition:'left', items:inputs }),
+        Msg = new Wui.Window({
             title:      msgTitle || 'Input',
             bbar:        [ 
-                            new W.Button({text:'Cancel', click:function(){ Msg.answerRun = true; Msg.close(); }}),
-                            new W.Button({text:'Submit', click:function(){ Msg.getVal(); }})
+                            new Wui.Button({text:'Cancel', click:function(){ Msg.answerRun = true; Msg.close(); }}),
+                            new Wui.Button({text:'Submit', click:function(){ Msg.getVal(); }})
             ],
             isModal:    true,
             items:      [inputFrm],
@@ -2061,7 +2047,7 @@ W.input = function(msg, callback, msgTitle, inputs, content){
                             var formData = inputFrm.getData();
                             if(formData){
                                 if(callback && typeof callback == 'function'){
-                                    var len = W.getKeys(formData).length;
+                                    var len = Wui.getKeys(formData).length;
                                     if(len == 1 && formData.inputField) callback(formData.inputField);
                                     else                                callback(formData);
                                 }
@@ -2071,6 +2057,7 @@ W.input = function(msg, callback, msgTitle, inputs, content){
                         },
             onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
         });
+    Msg.header.splice(0,1);
     return inputFrm;
 };
 

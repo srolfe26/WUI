@@ -2,7 +2,7 @@
  * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * http://www.geekinaday.com/wui/wui-1-1/license.html
+ * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
 
 /******************   PANE STYLES   ********************/
@@ -23,32 +23,32 @@
 .wui-pane-bar { text-align:right; overflow:hidden; background:#777; color:#eee; }
 .wui-pane-header {top:0;}
 .wui-pane-footer {bottom:0;}
-	.wui-pane-bar, .wui-h-cntnt, .wui-pane-header h1 {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}
+    .wui-pane-bar, .wui-h-cntnt, .wui-pane-header h1 {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}
     .wui-pane-header h1, .wui-pane-header.left h1 {
-	    color: inherit !important;
-	    font-size: 1em;
-	    padding: 0 0.3em;
-	    left: 0;
-	    margin: 0 !important;
-	    text-align: left;
-	    text-shadow: 0 0 3px #333;
-	    text-transform: capitalize;
-	}
-	.wui-pane-header h1.center {text-align:center;}
-	.wui-pane-header h1.right {text-align: right;}
-	.wui-h-cntnt{position:absolute; top:0; left:0; height:40px; width:100%;}
-	
+        color: inherit !important;
+        font-size: 1em;
+        padding: 0 0.3em;
+        left: 0;
+        margin: 0 !important;
+        text-align: left;
+        text-shadow: 0 0 3px #333;
+        text-transform: capitalize;
+    }
+    .wui-pane-header h1.center {text-align:center;}
+    .wui-pane-header h1.right {text-align: right;}
+    .wui-h-cntnt{position:absolute; top:0; left:0; height:40px; width:100%;}
+    
 .wui-pane-wrap {height:100%; overflow:hidden;}
 .wui-pane-content {
-	height:100%; overflow:auto; position: relative;
+    height:100%; overflow:auto; position: relative;
 }
 .wui-pane, .grid-body tr:last-child, .wui-form{
-	animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
+    animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
     animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
     .wui-pane-content p { margin:0.5em 0 1em; font-size:0.8em;}
     .wui-pane p.err { padding:1em; font-weight:bold; color:#900;}
-	
+    
 /******************   MODAL WINDOW STYLES   ********************/
 .wui-overlay {position: fixed; top:0; left:0; width:100% !important; height:100% !important; background:rgba(100,100,100,0.7);}
 .wui-mask {position:absolute; top:0; left:0; background-color:#fff !important; width:100%; text-align:center; padding-top: 15%; color:#555; font-weight:bold; font-size:1.25em;}
@@ -64,9 +64,10 @@
 .ui-resizable-se {right:-3%; bottom:-3%; width:4%; height:4%; cursor:se-resize;}
 
 /**********************************************   BUTTON - nested, disabled   **********************************************/
+button::-moz-focus-inner { border: 0; }
 .wui-btn {
     display:inline-block; width:auto; padding:0 1em; text-align: center; font-size: 0.8em;
-	background-color:#ccc; outline:0; border:1px solid #777; color:#555; line-height:2; margin-left:1px;
+    background-color:#ccc; outline:0; border:1px solid #777; color:#555; line-height:2; margin-left:1px;
     -webkit-transition: all 0.1s linear; -moz-transition: all 0.1s linear; -o-transition: all 0.1s linear; transition: all 0.1s linear;
     cursor:pointer; -moz-user-select:none; -webkit-user-select:none;
 }
@@ -74,7 +75,7 @@
 .wui-btn:active { box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
 
 .wui-btn:focus  {
-	background-color: #fff;
+    background-color: #fff;
     border: 1px solid #fff;
     box-shadow: 0 0 1px 1px #555;
 }
@@ -131,18 +132,18 @@
 .wui-radio ul.button, .wui-checkbox ul.button {margin-top:0.5em; -moz-user-select:none; -webkit-user-select:none; text-align: left;}
 .button li {overflow:hidden; display:inline-block; line-height: 1;}
 .wui-fe ul.button label {display:inline-block; width:auto; margin:0; padding:0.25em 0.5em;}
-	.button li > input {display:none;}
-	.button li > input:checked + label { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
-	.button li:first-child label {border-top-left-radius:4px; border-bottom-left-radius:4px;}
-	.button li:last-child label {border-top-right-radius:4px; border-bottom-right-radius:4px;}
-	
-	.button li label:focus { background-color: #fff !important; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; }
-	.button li > input:checked + label:focus { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; background:rgba(0,0,0,0.5) !important; }
+    .button li > input {display:none;}
+    .button li > input:checked + label { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
+    .button li:first-child label {border-top-left-radius:4px; border-bottom-left-radius:4px;}
+    .button li:last-child label {border-top-right-radius:4px; border-bottom-right-radius:4px;}
+    
+    .button li label:focus { background-color: #fff !important; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; }
+    .button li > input:checked + label:focus { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; background:rgba(0,0,0,0.5) !important; }
 }
 
 .wui-checkbox.button.checked { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
 
-	
+    
 /* combo */
 .wui-combo input[type=text].has-dd {padding-right:27px;}
 .wui-combo-dd {
@@ -210,7 +211,7 @@
    padding-left:29px !important; padding-right: 48px !important; background-repeat:no-repeat; background-position: 7px 4px;
 }
 .wui-file input[type=text].has-file.uploading {background-image:url(../img/16x16-cc.gif);}
-.wui-file form {position:absolute; width:60px; top:0; right:0; overflow:hidden; height:28px;}
+.wui-file form {position:absolute; width:65px; top:0; right:0; overflow:hidden; height:28px;}
 .wui-file form > input {width: 65px; padding:0; border:0; opacity:0; height:100%;}
 .wui-file .wui-btn {width:65px;}
 .wui-btn.file-change.field-btn {width:26px; padding:0; display:none;}
@@ -303,54 +304,54 @@
         font-weight:bold; padding:0.5em 41px 0.5em 0.5em; text-align:left; float:left; list-style: none; margin:0;
         border-right:1px solid #fff; text-shadow: 0 0 3px rgba(0,0,0,0.4); position: relative;
     }
-	.wui-gc:last-child {
+    .wui-gc:last-child {
         border-right:0;
     }
-	.wui-gc div:first-child {
-		bottom: 0.5em;
-		font-size: 0.9em;
-		left: 0.5em;
-		overflow: hidden;
-		padding-right:41px;
-		max-width:	100%;
-		position: absolute;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	
-	.has-vert-columns .wui-gh ul {height:150px;}
-	.has-vert-columns .wui-gc {height:150px;}
-	.wui-gc.vert-col {width:50px !important;}
-	.wui-gc.vert-col div:first-child {
-		bottom: auto !important;
-		height: 48px;
-		left: auto !important;
-		line-height: 51px;
-		padding: 0 0.25em 0 30px;
-		position: relative;
-		transform: rotate(-90deg);
-		transform-origin: 44% 158% 0;
-		width: 150px; max-width:150px; min-width:150px;
-	}
-	.wui-gc.vert-col .ui-resizable-handle {display:none !important;}
-	
-	.wui-gc .ui-resizable-handle.ui-resizable-e {
-	    cursor: col-resize;
-	    height: 100%;
-	    position: absolute;
-	    right: 0;
-	    top: 0;
-	    width: 10px;
+    .wui-gc div:first-child {
+        bottom: 0.5em;
+        font-size: 0.9em;
+        left: 0.5em;
+        overflow: hidden;
+        padding-right:41px;
+        max-width:    100%;
+        position: absolute;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
-	
-	.wui-gc div.vert-col {
-		height: 30px;
-		line-height: 30px;
-		padding-left: 30px;
-		transform: rotate(-90deg);
-		transform-origin: 45% 249% 0;
-		width: 150px;
-	}
+    
+    .has-vert-columns .wui-gh ul {height:150px;}
+    .has-vert-columns .wui-gc {height:150px;}
+    .wui-gc.vert-col {width:50px !important;}
+    .wui-gc.vert-col div:first-child {
+        bottom: auto !important;
+        height: 48px;
+        left: auto !important;
+        line-height: 51px;
+        padding: 0 0.25em 0 30px;
+        position: relative;
+        transform: rotate(-90deg);
+        transform-origin: 44% 158% 0;
+        width: 150px; max-width:150px; min-width:150px;
+    }
+    .wui-gc.vert-col .ui-resizable-handle {display:none !important;}
+    
+    .wui-gc .ui-resizable-handle.ui-resizable-e {
+        cursor: col-resize;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 10px;
+    }
+    
+    .wui-gc div.vert-col {
+        height: 30px;
+        line-height: 30px;
+        padding-left: 30px;
+        transform: rotate(-90deg);
+        transform-origin: 45% 249% 0;
+        width: 150px;
+    }
     
 .grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
 
@@ -402,7 +403,7 @@
 .wui-tabs .wui-pane-bar .wui-tab.wui-btn.selected:hover {box-shadow: none;}
 
 .wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-wrap {padding-top:0 !important;}
-	.wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-wrap > .wui-pane-content {background-color:#fff !important;}
+    .wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-wrap > .wui-pane-content {background-color:#fff !important;}
 .wui-pane.wui-tab-panel.wui-hide-heading > .wui-pane-header {display:none;}
 
 /*   nested pane tabs  */
@@ -413,16 +414,16 @@
 
 /**********************************************   Nested Panes - Level 1,3,5  **********************************************/
 .wui-pane  .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane {float:left; border-color:#fff;}
-	.wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar,
-	.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-bar {color:#555; background:#fff; text-shadow:none; border: none;}
-		.wui-pane .wui-pane .wui-pane-header h1 { text-shadow:none;}
-		.wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
-		.wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
-		
+    .wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar,
+    .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-bar {color:#555; background:#fff; text-shadow:none; border: none;}
+        .wui-pane .wui-pane .wui-pane-header h1 { text-shadow:none;}
+        .wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
+        .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
+        
 /**********************************************   Nested Panes - Level 2,4  **********************************************/
 .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane {border-color:#bbb;}
-	.wui-pane .wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar {background:#bbb;}
-		.wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
+    .wui-pane .wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar {background:#bbb;}
+        .wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
 
 /**********************************************   Form Elements in TBar and BBar  **********************************************/
 .wui-pane-bar .wui-form {
@@ -436,8 +437,8 @@
     display: inline-block;
     margin: 9px 0 0 0.5em;
     top: -2px;
-	max-width:350px;
-	float: none;
+    max-width:350px;
+    float: none;
 }
 .wui-pane-bar .wui-fe input {border: 1px solid #777;}
 /* For labels */
@@ -446,15 +447,15 @@
 .wui-pane-bar .wui-lbl.lbl-right,
 .wui-pane-bar .wui-lbl.lbl-top,
 .wui-pane-bar .wui-lbl.lbl-left {position:relative; padding:0 0 0 150px; display: inline-block; height:auto; min-width:300px; margin-top:0; margin-bottom:0;}
-	.wui-pane-bar .wui-lbl.lbl-top > label,
-	.wui-pane-bar .wui-lbl.lbl-right > label,
-	.wui-pane-bar .wui-lbl.lbl-bottom > label,
-	.wui-pane-bar .wui-lbl.lbl-left > label {
-		color:inherit; display:block; font-weight:normal; font-size:0.8em; 
-		width:150px; position:absolute; left:0; top:0; 
-		padding:0 0.25em 0 0.5em; text-align:right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-	}
-	.wui-pane-bar .wui-lbl .wui-fe {width:100%;}
+    .wui-pane-bar .wui-lbl.lbl-top > label,
+    .wui-pane-bar .wui-lbl.lbl-right > label,
+    .wui-pane-bar .wui-lbl.lbl-bottom > label,
+    .wui-pane-bar .wui-lbl.lbl-left > label {
+        color:inherit; display:block; font-weight:normal; font-size:0.8em; 
+        width:150px; position:absolute; left:0; top:0; 
+        padding:0 0.25em 0 0.5em; text-align:right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .wui-pane-bar .wui-lbl .wui-fe {width:100%;}
 
 /* For Hyperlink */
 .wui-pane-bar .wui-fe.wui-link-third { top: 0; margin-left: 0; float:none; }
