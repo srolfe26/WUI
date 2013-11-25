@@ -201,8 +201,8 @@
                                                             }
                                             });
                                         list.place();
-                                        list.el.on('wuiselect',function(e,obj,row){ roWui.addClass('show-doc'); });
-                                        list.el.on('deselect',function(e,obj,row){ roWui.removeClass('show-doc'); });    
+                                        list.el.on('wuiselect',function(e,obj,row){ row.addClass('show-doc'); });
+                                        list.el.on('deselect',function(e,obj,row){ row.removeClass('show-doc'); });    
                                     }
                                 },
             toHTML:             function(){

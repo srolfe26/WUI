@@ -861,6 +861,9 @@ Wui.Combo = function(args){
         
         /** The DOM element for the field */
         field:        $('<input>').attr({type:'text'}),
+
+        /** Whether to filter results at all */
+        filterField:  true,
         
         /** Whether the drop-down DOM element will be kept in place or appended out to the body and absolutely
         positioned. Keeping the drop-down in line will make it susceptible to being clipped by containing elements.*/
@@ -970,7 +973,10 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         
                         if(me.dataName && me.dataName.length > 0){
                             $(window).on('datachanged',function(event,name,dataObj){
-                                if(name == me.dataName)    me.setData(dataObj.data);
+                                if(name == me.dataName){
+                                    me.setData(dataObj.data);
+                                    me.renderData();
+                                }
                             });
                         }else{
                             if(me.autoLoad)   me.loadData();
@@ -1026,16 +1032,18 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     Searches locally within the drop-down's data for the srchVal, otherwise if searchLocal is false,
     the data is searched remotely. */
     searchData:     function(srchVal){
-                        this.searchFilter = srchVal;
-                        
-                        if(this.searchLocal){
-                            this.showDD();
-                            this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
-                            this.dd.children(':contains(' +srchVal+ ')').show();
-                            this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
-                        }else{
-                            if(srchVal.length >= this.minKeys || srchVal.length === 0)
-                                this.loadData();
+                        if(this.filterField){
+                            this.searchFilter = srchVal;
+                            
+                            if(this.searchLocal){
+                                this.showDD();
+                                this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
+                                this.dd.children(':contains(' +srchVal+ ')').show();
+                                this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
+                            }else{
+                                if(srchVal.length >= this.minKeys || srchVal.length === 0)
+                                    this.loadData();
+                            }    
                         }
                     },
     
@@ -1127,17 +1135,17 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     based on the value of keepInline. */
     showDD:         function(){
                         if(!this.keepInline){
-                            var fld        = this.field,
+                            var fld     = this.field,
                                 ofst    = fld.offset(),
-                                ddWid    = parseInt(this.dd.css('width')),
-                                width    = (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
+                                ddWid   = parseInt(this.dd.css('width')),
+                                width   = (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
                             
                             this.dd.appendTo('body').css({
-                                left:    ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
-                                top:    ofst.top + fld.outerHeight(),
-                                width:    width,
-                                display:'block',
-                                zIndex:    Wui.maxZ()
+                                left:       ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
+                                top:        ofst.top + fld.outerHeight(),
+                                width:      width,
+                                display:    'block',
+                                zIndex:     Wui.maxZ()
                             });
                         }else{
                             this.dd.css({ zIndex:Wui.maxZ() }).show();

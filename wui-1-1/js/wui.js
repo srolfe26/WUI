@@ -958,7 +958,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     /** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
     onRender:    function(){
                     if(this.autoLoad){
-                        if(this.url === null)    this.make();
+                        if(this.url === null)   this.make();
                         else                    this.loadData();
                     }
                 },

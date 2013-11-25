@@ -93,10 +93,9 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                             itm.el.toggleClass('active', isActive);
                             if(isActive){
                                 me.currentTab = itm;
+                                if(!supressEvent) me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
                                 itm.layout();
                             }
-                            if(!supressEvent && isActive)
-                                me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
                         });
                     },
     
@@ -283,12 +282,11 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                 },
     
     /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
-    layout:            function(){
-                        Wui.O.prototype.layout.call(this);
-                        this.posDataWin();
-                        if(this.cols.length)
-                            this.sizeCols();
-                    },
+    layout:     function(){
+                    Wui.O.prototype.layout.call(this);
+                    this.posDataWin();
+                    if(this.cols.length) this.sizeCols();
+                },
                     
     /** Overrides DataList.loadData(), to add the load mask */   
     loadData:    function(){
@@ -406,12 +404,12 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     if(me.columns.length > 1){
                         col.el.resizable({
                             handles:    'e',
-                            stop:    function(){me.sizeCols();},
-                            resize: function(event,ui){
-                                        col.width = ui.size.width;
-                                        col.fit = 0;
-                                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
-                                    },
+                            start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
+                            stop:       function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
+                            resize:     function(event,ui){ 
+                                            col.width = ui.size.width; col.fit = 0;
+                                            Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                                        }
                         });
                     }
                     
@@ -466,12 +464,14 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                 
     /** Size up the columns of the table to match the headings @private */
     sizeCols:        function (){
-                        var me = this;
+                        var me = this, totalColWidth = 0;
                         Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
-                        me.tbl.css({width:'1px'});
                         for(var i = 0; i < me.cols.length; i++){
-                            me.tbl.find('td:eq(' +i+ ')').css({width:me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0)}); // account for table borders
+                            var colWidth = me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0);
+                            me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
+                            totalColWidth += colWidth;
                         }
+                        me.tbl.css({width:totalColWidth});
                     },
                     
     /**
@@ -495,8 +495,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                             row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
                         });
                         me.tbl.appendTo(me.tblContainer);
-
-                        me.sizeCols();
                         me.resetSelect();
                     }
 });
