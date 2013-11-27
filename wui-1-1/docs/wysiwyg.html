@@ -39,10 +39,10 @@
             ts.test("Test 'valchange' listener",function(){
                 ts.pause();
                 // Listener for a change to the text object
-                $('[name=wysiwyg]').on('valchange',function(event,itm,oldVal,newVal,passedVal){
+                $('[name=wysiwyg]').on('valchange',function(event,itm,newVal,oldVal){
                     ts.resume();
                     ts.test('Listener on \'valchange\' fired and passed correct values',function(){
-                        return ( newVal === passedVal && itm === a)
+                        return ( newVal === itm.value && itm === a);
                     });
                 });
                 a.val('Test Listener');

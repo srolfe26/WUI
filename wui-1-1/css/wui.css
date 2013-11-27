@@ -117,8 +117,8 @@ button::-moz-focus-inner { border:0; }
 
 /* textfield / textarea */
 .wui-fe input, .wui-fe textarea { color: #444; padding:4px; width:100%; border-radius:4px; font-size: 0.8em; }
-.wui-fe input, .wui-fe textarea, .wui-html iframe, .button li label { background-color:#ddd; border:1px solid #ccc; }
-.wui-fe input:focus, .wui-fe textarea:focus, .wui-html iframe:focus, .button li label:focus { background-color:#eee; border-color:#999; }
+.wui-fe input, .wui-fe textarea, .wui-editor, .button li label { background-color:#ddd; border:1px solid #ccc; }
+.wui-fe input:focus, .wui-fe textarea:focus, .wui-editor:focus, .button li label:focus { background-color:#eee; border-color:#999; }
 .wui-fe .empty { color:#777; }
 .wui-fe textarea { height:100%; width:100%; max-height:100%; max-width:100%; }
 
@@ -144,7 +144,7 @@ button::-moz-focus-inner { border:0; }
 .wui-btn.field-btn.dd-switch,
 .ui-datepicker-prev span, .ui-datepicker-next span,
 .ui-datepicker-trigger,
-.wui-html .tools a, 
+.wui-editor-tools a, 
 .wui-html .ui-resizable-se {background-image:url(../img/wui-icons.png);}
 
 /* combo */
@@ -228,50 +228,46 @@ button::-moz-focus-inner { border:0; }
 
 
 /****************************************   JHTMLArea WYSIWYG Styles   *****************************************/
-.wui-html, .wui-html * {
-    -o-box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
-}
-.wui-html {position:relative; display: inline-block; width:100%; overflow:hidden; min-height:70px; height:70px;}
-.wui-html iframe {
-    overflow:auto; width:100%; border-radius:4px; padding-bottom:28px;min-height:100%; height:100%;
-}
-.wui-html > div {height:100%;}
-.wui-html > .ui-resizable-se { right:4px; bottom:4px; width:12px; height:12px; background-repeat:no-repeat; background-position:-131px -32px; }
-.wui-html .tools {
-    min-width:100%; bottom:0; left:0; position:absolute; height:28px; border-top:1px dashed #fff; opacity:0;
+.wui-wysiwyg .wui-fe, .wui-wysiwyg.wui-fe {height: 100px; max-width: 100%; min-height:70px;}
+.wui-editor {border:0; width:100%; height:100%; min-height: 70px; border-radius: 3px; padding:0.25em 0.25em 28px 0.25em;}
+
+.wui-editor-tools {
+    position:absolute; bottom: 0; left: 0; width: 100%; height: 28px; border-top: 1px dashed #fff; padding: 1px 0.5em; opacity:0;
     -webkit-transition: all 0.5s linear; -moz-transition: all 0.5s linear; -o-transition: all 0.5s linear; transition: all 0.5s linear;
 }
-.wui-html:hover .tools, .wui-html:focus .tools {opacity:100;}
-.wui-html .tools ul { margin: 1px; padding: 1px; float: left; }
-.wui-html .tools ul li { list-style-type: none; float: left; border: none; padding: 3px; margin: 1px; }
-.wui-html .tools ul li:hover {background: rgba(255,255,255,0.4);}
-.wui-html .tools ul .separator {height: 16px; margin: 0 2px 0 3px; border-left: 1px solid #ccc;}
+.wui-wysiwyg:hover .wui-editor-tools {opacity:100;}
 
-.wui-html .tools a { display: block; width: 16px; height: 16px; background-repeat:no-repeat; border: none; cursor: pointer; padding: 0px; }
-.wui-html .tools a.highlighted { border: solid 1px #aaa; background-color: #bbb; padding: 0; }
+.wui-editor-tools a { 
+    display: block; width: 16px; height: 18px; background-repeat:no-repeat; border: none; cursor: pointer; padding: 0px; 
+    list-style-type: none; float: left; border: none; padding: 3px; margin: 4px; outline:none;
+}
+.wui-editor-tools a:hover {background-color: rgba(255,255,255,0.4);}
 
-.wui-html .tools a.bold { background-position: -46px 0; }
-.wui-html .tools a.italic { background-position: -62px 0; }
-.wui-html .tools a.underline { background-position: -79px 0; }
-.wui-html .tools a.strikethrough { background-position: -94px 0; }
-.wui-html .tools a.link { background-position: -110px 0; }
-.wui-html .tools a.unlink { background-position: -126px 0; }
-.wui-html .tools a.orderedlist { background-position: -128px -16px; }
-.wui-html .tools a.unorderedlist { background-position: -46px -16px; }
+.wui-editor-tools .highlighted { border: solid 1px #aaa; background-color: #bbb; padding: 0; }
+.wui-editor-tools a {}
+.wui-editor-tools .bold { background-position: -46px 0; }
+.wui-editor-tools .italic { background-position: -62px 0; }
+.wui-editor-tools .underline { background-position: -79px 0; }
+.wui-editor-tools .strikethrough { background-position: -94px 0; }
+.wui-editor-tools .link { background-position: -110px 0; }
+.wui-editor-tools .unlink { background-position: -126px 0; }
+.wui-editor-tools .unorderedlist { background-position: -128px -16px; }
+.wui-editor-tools .orderedlist { background-position: -46px -16px; }
 
-.wui-html .tools a.html { background-position: -192px 0; opacity:0.6; filter:alpha(opacity=60);}
-.wui-html .tools a.html.highlighted { opacity:1.0; filter:alpha(opacity=100);}
+.wui-editor-tools .html { background-position: -192px 0; opacity:0.6; filter:alpha(opacity=60);}
+.wui-editor-tools .html.highlighted { opacity:1.0; filter:alpha(opacity=100);}
 
-.wui-html .tools a.justifyleft { background-position: -62px -16px;}
-.wui-html .tools a.justifycenter { background-position: -77px -16px;}
-.wui-html .tools a.justifyright { background-position: -94px -16px;}
-.wui-html .tools a.html { background-position: -110px -16px;}
+.wui-editor-tools .justifyleft { background-position: -62px -16px;}
+.wui-editor-tools .justifycenter { background-position: -77px -16px;}
+.wui-editor-tools .justifyright { background-position: -94px -16px;}
+.wui-editor-tools .html { background-position: -110px -16px;}
+
+.wui-wysiwyg .wui-mask {padding:0; background:rgba(255,255,255,0.6);}
 
 
 /******************************************   disabled form styles   *******************************************/
 .wui-fe [disabled=disabled] { background-color:transparent; border-color:#ccc; color:#ccc; }
-.wui-disabled .ui-datepicker-trigger, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn, .wui-disabled .wui-html > div { display:none; }
-.wui-disabled .wui-html textarea {display:inline-block !important;}
+.wui-disabled .ui-datepicker-trigger, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn { display:none; }
 .wui-form-err.wui-disabled.wui-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
 .wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
 .wui-disabled .button label { background-color:transparent; border-style: dotted; color: #999; }

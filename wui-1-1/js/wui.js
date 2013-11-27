@@ -1147,10 +1147,14 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             return me.disabled = false;
                     },
     
-    /** Adds a mask over the content area of the pane */
-    addMask:        function(){
-                        //if(this.mask === undefined)
-                            return this.mask = $('<div>').addClass('wui-mask').html(this.maskHTML).appendTo(this.container.parent());
+    /** 
+    Adds a mask over the content area of the pane 
+    @param  {object}    target  A target to apply the mask, otherwise the pane's container will be masked.
+    @return The mask object
+    */
+    addMask:        function(target){
+                        target = (target) ? target : this.container.parent();
+                        return this.mask = $('<div>').addClass('wui-mask').html(this.maskHTML).appendTo(target);
                     },
 
     /** Removes the mask over the content area of the pane */
