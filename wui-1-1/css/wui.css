@@ -9,33 +9,28 @@
 @keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-moz-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-webkit-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
-@-ms-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 @-o-keyframes nodeInserted { from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); } }
 
-.wui-pane, .wui-pane *, .wui-form, .wui-form *, .wui-fe, .wui-fe *, .wui-input, .wui-input *, .ui-datepicker, .wui-combo-dd {
+.wui-pane, .wui-pane *, .wui-form, .wui-lbl, .wui-lbl *, .wui-fe, .wui-fe *, .ui-datepicker, .wui-combo-dd {
     font-family: Arial, Helvetica, Verdana, sans-serif; font-size:16px; text-decoration: none;
-    -moz-box-sizing:    border-box !important;
-    -webkit-box-sizing: border-box !important;
-    box-sizing:         border-box !important;
+    -moz-box-sizing:    border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing:         border-box;
 }
 
-.wui-pane { position: relative; border:0px solid #777; width:100%; background:#fff; overflow:hidden; text-align: left; }
+.wui-pane { position: relative; border-width:0; border-style:solid; border-color:#777; width:100%; background:#fff; overflow:hidden; text-align: left; }
 .wui-pane-bar { text-align:right; overflow:hidden; background:#777; color:#eee; }
 .wui-pane-header {top:0;}
 .wui-pane-footer {bottom:0;}
-    .wui-pane-bar, .wui-h-cntnt, .wui-pane-header h1 {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}
-    .wui-pane-header h1, .wui-pane-header.left h1 {
-        color: inherit !important;
-        font-size: 1em;
+    .wui-pane-bar, .wui-h-cntnt, .wui-h-title {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}
+    .wui-h-title {
         padding: 0 0.3em;
-        left: 0;
-        margin: 0 !important;
         text-align: left;
         text-shadow: 0 0 3px #333;
         text-transform: capitalize;
     }
-    .wui-pane-header h1.center {text-align:center;}
-    .wui-pane-header h1.right {text-align: right;}
+    .wui-h-title.center {text-align:center;}
+    .wui-h-title.right {text-align: right;}
     .wui-h-cntnt{position:absolute; top:0; left:0; height:40px; width:100%;}
     
 .wui-pane-wrap {height:100%; overflow:hidden;}
@@ -43,33 +38,37 @@
     height:100%; overflow:auto; position: relative;
 }
 .wui-pane, .grid-body tr:last-child, .wui-form{
-    animation-duration: 0.001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
+    animation-duration: 0.00001s; -o-animation-duration: 0.00001s; -ms-animation-duration: 0.00001s; -moz-animation-duration: 0.00001s; -webkit-animation-duration: 0.00001s;
     animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
     .wui-pane-content p { margin:0.5em 0 1em; font-size:0.8em;}
-    .wui-pane p.err { padding:1em; font-weight:bold; color:#900;}
+    .wui-err { padding:1em; font-weight:bold; color:#900;}
     
 /******************   MODAL WINDOW STYLES   ********************/
-.wui-overlay {position: fixed; top:0; left:0; width:100% !important; height:100% !important; background:rgba(100,100,100,0.7);}
-.wui-mask {position:absolute; top:0; left:0; background-color:#fff !important; width:100%; text-align:center; padding-top: 15%; color:#555; font-weight:bold; font-size:1.25em;}
-.wui-spinner { height:16px; width:16px; background:url(../img/16x16-cc.gif) center center; display: inline-block;}
+.wui-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(100,100,100,0.7);}
+.wui-mask {
+    position:absolute; top:0; left:0; background-color:#fff; width:100%; height:100%;
+    text-align:center; padding-top: 15%; color:#555; font-weight:bold; font-size:1.25em;
+
+}
+.wui-spinner { height:16px; width:16px; background-position:center center; display: inline-block;}
 .wui-window {margin:0 auto; box-shadow: 0 0 15px black; position:absolute;}
 .wui-pane.wui-window {width:auto;}
     .wui-window > .wui-pane-header {cursor:move;}
 .wui-overlay > .wui-window { position: relative; box-shadow: 0 0 24px black; }
 
 .ui-resizable-handle {position:absolute; height:4px;}
-.ui-resizable-e {right:-4px; top:0px; height:96%; width:7px; cursor:e-resize;}
-.ui-resizable-s {bottom:-4px; left:0px; height:7px; width:96%; cursor:s-resize;}
+.ui-resizable-e {right:-4px; top:0; height:96%; width:7px; cursor:e-resize;}
+.ui-resizable-s {bottom:-4px; left:0; height:7px; width:96%; cursor:s-resize;}
 .ui-resizable-se {right:-3%; bottom:-3%; width:4%; height:4%; cursor:se-resize;}
 
 /**********************************************   BUTTON - nested, disabled   **********************************************/
-button::-moz-focus-inner { border: 0; }
+button::-moz-focus-inner { border:0; }
 .wui-btn {
     display:inline-block; width:auto; padding:0 1em; text-align: center; font-size: 0.8em;
     background-color:#ccc; outline:0; border:1px solid #777; color:#555; line-height:2; margin-left:1px;
     -webkit-transition: all 0.1s linear; -moz-transition: all 0.1s linear; -o-transition: all 0.1s linear; transition: all 0.1s linear;
-    cursor:pointer; -moz-user-select:none; -webkit-user-select:none;
+    cursor:pointer; -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; user-select:none;
 }
 .wui-btn:active, .wui-btn:hover {background-color:#fff; color:#333; }
 .wui-btn:active { box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
@@ -86,7 +85,7 @@ button::-moz-focus-inner { border: 0; }
 .wui-btn.disabled:active, .wui-btn.disabled:hover {box-shadow: none; background-color:transparent;}
 
 /*********************   FIELD/BUTTON STYLES ***********************/
-.wui-btn.field-btn, .wui-fe input[type=text] {height:26px !important;}
+.wui-btn.field-btn, .wui-fe input[type=text] {height:26px;}
 .wui-btn.field-btn {line-height:26px; position: absolute; right:0; border-radius:0 4px 4px 0; top:0; border-color:#bbb;}
 .wui-btn.field-btn:hover, .wui-file-upload .wui-btn:hover, .wui-browse-btn:hover {background-color:#ccc; border-color:#bbb;}
 .wui-btn.field-btn:focus, .wui-file-upload .wui-btn:focus, .wui-browse-btn:focus {box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
@@ -94,8 +93,8 @@ button::-moz-focus-inner { border: 0; }
 /***********************************************   FORM   ***********************************************/
 .wui-form {padding:.5em; margin:0; clear:both; position:relative; text-align: left;}
 /* Enforce the meaning of these tags */
-.wui-form strong {font-weight:bold !important;}
-.wui-form em {font-style:italic !important;}
+.wui-form strong {font-weight:bold;}
+.wui-form em {font-style:italic;}
 
 /* labels */
 .wui-lbl{position:relative; padding-top:26px; margin:0.75em 0; height:auto;}
@@ -113,7 +112,6 @@ button::-moz-focus-inner { border: 0; }
 /* general form element */
 .wui-fe {position:relative; text-align:left;}
 
-.wui-note {}
 .wui-note.center {text-align:center;}
 .wui-note.right {text-align:right;}
 
@@ -129,7 +127,7 @@ button::-moz-focus-inner { border: 0; }
 .wui-radio ul, .wui-checkbox ul {list-style:none; display:block; margin:0; padding:0;}
 .wui-radio input, .wui-checkbox input, .wui-radio ul label, .wui-checkbox ul label {width:auto; display:inline-block; font-weight:normal; text-transform:none; margin:0; padding:0.2em 0.5em;}
 
-.wui-radio ul.button, .wui-checkbox ul.button {margin-top:0.5em; -moz-user-select:none; -webkit-user-select:none; text-align: left;}
+.wui-radio ul.button, .wui-checkbox ul.button {margin-top:0.5em; text-align: left; -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; user-select:none;}
 .button li {overflow:hidden; display:inline-block; line-height: 1;}
 .wui-fe ul.button label {display:inline-block; width:auto; margin:0; padding:0.25em 0.5em;}
     .button li > input {display:none;}
@@ -137,15 +135,20 @@ button::-moz-focus-inner { border: 0; }
     .button li:first-child label {border-top-left-radius:4px; border-bottom-left-radius:4px;}
     .button li:last-child label {border-top-right-radius:4px; border-bottom-right-radius:4px;}
     
-    .button li label:focus { background-color: #fff !important; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; }
-    .button li > input:checked + label:focus { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; background:rgba(0,0,0,0.5) !important; }
-}
+    .button li label:focus { background-color: #fff; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; }
+    .button li > input:checked + label:focus { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; background:rgba(0,0,0,0.5); }
 
 .wui-checkbox.button.checked { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
 
-    
+/* Use the sprite */
+.wui-btn.field-btn.dd-switch,
+.ui-datepicker-prev span, .ui-datepicker-next span,
+.ui-datepicker-trigger,
+.wui-html .tools a, 
+.wui-html .ui-resizable-se {background-image:url(../img/wui-icons.png);}
+
 /* combo */
-.wui-combo input[type=text].has-dd {padding-right:27px;}
+.wui-fe .has-dd {padding-right:27px;}
 .wui-combo-dd {
     background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
     max-height:150px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
@@ -154,7 +157,7 @@ button::-moz-focus-inner { border: 0; }
 .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
     .wui-combo-dd li.selected { background:#19f; color:#fff; }
 .dd-wrapper, .wui-file {position:relative;}
-.wui-btn.field-btn.dd-switch { padding:0; width:26px; background-image:url(../img/wui-icons.png); background-position: -12px -10px; margin: 0; }
+.wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
 
 /* hyperlink */
 .wui-link-third {
@@ -164,7 +167,6 @@ button::-moz-focus-inner { border: 0; }
 .wui-link-third.wui-fe input, .wui-link-third > div {min-width:100%;}
 .wui-link-third.no-margin {margin-right:0;}
 .wui-link-third.wui-link-focus {display:inline-block; width:60%;}
-    .wui-link-third label {display:none !important;}
     
 /* date picker / date range */
 .wui-date {position:relative;}
@@ -172,14 +174,14 @@ button::-moz-focus-inner { border: 0; }
 .feedback a {text-transform:none; color: #1AF; }
 .feedback a, .feedback span {font-size:1em;}
 
-.ui-datepicker { background-color:#fff; padding:0.25em; display:table; font-size:0.8em; box-shadow: 0 0 3px; display:none; }
+.ui-datepicker { background-color:#fff; padding:0.25em; font-size:0.8em; box-shadow: 0 0 3px; display:none; }
     .ui-datepicker-header{padding: 0.2em 0; position: relative; background-color:rgba(0,0,0,0.5); color: #fff;}
         .ui-datepicker-prev, .ui-datepicker-next {height: 1.75em; position: absolute; top: 2px; width: 1.7em;}
             .ui-datepicker-prev {left:2px;}
             .ui-datepicker-next {right:2px;}
             .ui-datepicker-prev span, .ui-datepicker-next span {
                 display: block; left: 50%; margin:-6px 0 0 -6px; position: absolute; width:12px; height:12px;
-                top: 50%; overflow:hidden; text-indent:-999px; background-image:url(../img/wui-icons.png);
+                top: 50%; overflow:hidden; text-indent:-999px;
             }
             .ui-datepicker-prev span {background-position:-162px 0;}
                 .ui-datepicker-prev:hover span {background-position:-162px -17px;}
@@ -192,31 +194,29 @@ button::-moz-focus-inner { border: 0; }
     .ui-datepicker-calendar{ border-collapse: collapse; font-size: 0.9em; margin: 0 0 0.4em; width: 100%; }
         .ui-datepicker-calendar th {color:#333; padding:0.2em 0;}
 
-.wui-fe input[type="text"].hasDatepicker {padding-right:2em;}
+.wui-fe .hasDatepicker {padding-right:2em;}
 .ui-datepicker-trigger {
-    background: url(../img/wui-icons.png) no-repeat -95px -32px; width:13px; height:12px; position:absolute; right:0.5em; top:7px; border:0;
+    background-repeat:no-repeat; background-position:-95px -32px; width:13px; height:12px; position:absolute; right:0.5em; top:7px; border:0;
 }
 
 .ui-datepicker td span, .ui-datepicker td a {
     display: block; text-align: right; text-decoration: none; font-size:1.5em; width:1.75em; padding:0.1em 0.25em 0.1em 0.1em; color: #333; font-weight: normal;
 }
 .ui-state-default { background: #ddd; }
-.ui-state-highlight { background:#fc0; /*#FCEFA1;*/ }
-.ui-datepicker td a.ui-state-active { background:#0cf; color:#fff; font-weight:bold; }
+.ui-state-highlight { background:#fc0; }
+.ui-state-active { background:#0cf; color:#fff; font-weight:bold; }
 .ui-state-disabled { opacity: 0.5; }
 
 /* files */
 .wui-file input[type=text] {padding-right:65px;}
-.wui-file input[type=text].has-file { 
-   padding-left:29px !important; padding-right: 48px !important; background-repeat:no-repeat; background-position: 7px 4px;
-}
-.wui-file input[type=text].has-file.uploading {background-image:url(../img/16x16-cc.gif);}
+.wui-file .has-file { padding:0.5em 30px; background-repeat:no-repeat; background-position: 7px 4px; }
+.wui-file .has-file.uploading, .wui-spinner {background-image:url(../img/16x16-cc.gif);}
 .wui-file form {position:absolute; width:65px; top:0; right:0; overflow:hidden; height:28px;}
 .wui-file form > input {width: 65px; padding:0; border:0; opacity:0; height:100%;}
 .wui-file .wui-btn {width:65px;}
 .wui-btn.file-change.field-btn {width:26px; padding:0; display:none;}
 
-.wui-fe input.has-file[type="text"][disabled] { color:#555; } 
+.wui-fe .has-file[disabled=disabled], .wui-fe [placeholder][disabled=disabled] { color:#555; } 
 .has-file { background-image:url(../img/page_white.png); color:#555; } 
 .icon-pdf { background-image:url(../img/page_white_acrobat.png); }
 .icon-png, .icon-jpeg, .icon-jpg, .icon-gif, .icon-bmp, .icon-ai, .icon-psd { background-image:url(../img/image.png); }
@@ -229,28 +229,25 @@ button::-moz-focus-inner { border: 0; }
 
 /****************************************   JHTMLArea WYSIWYG Styles   *****************************************/
 .wui-html, .wui-html * {
-    -o-box-sizing: border-box !important; -moz-box-sizing: border-box !important; -webkit-box-sizing: border-box !important; box-sizing: border-box !important;
+    -o-box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
-.wui-html {position:relative; display: inline-block; width:100%; overflow:hidden; min-height:70px !important; height:70px;}
+.wui-html {position:relative; display: inline-block; width:100%; overflow:hidden; min-height:70px; height:70px;}
 .wui-html iframe {
-    overflow:auto; width:100%; border-radius:4px; padding-bottom:28px;min-height:100% !important; height:100% !important;
+    overflow:auto; width:100%; border-radius:4px; padding-bottom:28px;min-height:100%; height:100%;
 }
 .wui-html > div {height:100%;}
-.wui-html > .ui-resizable-se {
-    right:4px; bottom:4px; width:12px; height:12px; background:#090;
-    background:url(../img/wui-icons.png) no-repeat -254px 0;z-index: auto !important;
-}
+.wui-html > .ui-resizable-se { right:4px; bottom:4px; width:12px; height:12px; background-repeat:no-repeat; background-position:-131px -32px; }
 .wui-html .tools {
     min-width:100%; bottom:0; left:0; position:absolute; height:28px; border-top:1px dashed #fff; opacity:0;
     -webkit-transition: all 0.5s linear; -moz-transition: all 0.5s linear; -o-transition: all 0.5s linear; transition: all 0.5s linear;
 }
-.wui-html:hover .tools, .wui-html:focus .tools {opacity:100 !important;}
-.wui-html .tools ul { margin: 1px !important; padding: 1px !important; float: left; }
+.wui-html:hover .tools, .wui-html:focus .tools {opacity:100;}
+.wui-html .tools ul { margin: 1px; padding: 1px; float: left; }
 .wui-html .tools ul li { list-style-type: none; float: left; border: none; padding: 3px; margin: 1px; }
 .wui-html .tools ul li:hover {background: rgba(255,255,255,0.4);}
-.wui-html .tools ul li.separator {height: 16px; margin: 0 2px 0 3px; border-left: 1px solid #ccc;}
+.wui-html .tools ul .separator {height: 16px; margin: 0 2px 0 3px; border-left: 1px solid #ccc;}
 
-.wui-html .tools a { display: block; width: 16px; height: 16px; background: url(../img/wui-icons.png) no-repeat; border: none; cursor: pointer; padding: 0px; }
+.wui-html .tools a { display: block; width: 16px; height: 16px; background-repeat:no-repeat; border: none; cursor: pointer; padding: 0px; }
 .wui-html .tools a.highlighted { border: solid 1px #aaa; background-color: #bbb; padding: 0; }
 
 .wui-html .tools a.bold { background-position: -46px 0; }
@@ -272,11 +269,10 @@ button::-moz-focus-inner { border: 0; }
 
 
 /******************************************   disabled form styles   *******************************************/
-.wui-fe input[type=text][disabled], .wui-fe textarea[disabled] { background-color:transparent; border:1px dotted #ccc; color:#ccc; }
-.wui-fe input[type=text][placeholder][disabled] {color:#555;}
+.wui-fe [disabled=disabled] { background-color:transparent; border-color:#ccc; color:#ccc; }
 .wui-disabled .ui-datepicker-trigger, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn, .wui-disabled .wui-html > div { display:none; }
 .wui-disabled .wui-html textarea {display:inline-block !important;}
-.wui-form-err.wui-disabled.wui-fe input[type=text][disabled], .wui-form-err.wui-disabled.wui-fe textarea[disabled] {border-color:#fff; color:#fdd;}
+.wui-form-err.wui-disabled.wui-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
 .wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
 .wui-disabled .button label { background-color:transparent; border-style: dotted; color: #999; }
 
@@ -415,8 +411,8 @@ button::-moz-focus-inner { border: 0; }
 /**********************************************   Nested Panes - Level 1,3,5  **********************************************/
 .wui-pane  .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane {float:left; border-color:#fff;}
     .wui-pane .wui-pane .wui-pane-bar, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar,
-    .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-bar {color:#555; background:#fff; text-shadow:none; border: none;}
-        .wui-pane .wui-pane .wui-pane-header h1 { text-shadow:none;}
+    .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-bar {color:#555; background:#fff; text-shadow:none; border: none;}
+        .wui-pane .wui-pane .wui-pane-header .wui-h-title {text-shadow:0 0 3px #fff;}
         .wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content,
         .wui-pane .wui-pane .wui-pane .wui-pane  .wui-pane .wui-pane .wui-pane-content {background-color:#ccc;}
         

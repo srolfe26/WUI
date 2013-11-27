@@ -1132,25 +1132,25 @@ Wui.Pane = function(args){
 Wui.Pane.prototype = $.extend(new Wui.O(),{
     /** Disables the pane by masking it and disabling all buttons */
     disable:        function(){
-                        this.disabled = true;
                         this.addMask();
                         this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
                         this.header.each(function(itm){ if(itm.disable) itm.disable(); });
+                        return this.disabled = true;
                     },
     
     /** Enables the pane by removing the mask and enabling all buttons */
     enable:            function(){
                             var me = this;
-                            me.disabled = false;
                             me.removeMask();
                             me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
                             me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+                            return me.disabled = false;
                     },
     
     /** Adds a mask over the content area of the pane */
     addMask:        function(){
                         //if(this.mask === undefined)
-                            this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+                            return this.mask = $('<div>').addClass('wui-mask').html(this.maskHTML).appendTo(this.container.parent());
                     },
 
     /** Removes the mask over the content area of the pane */
@@ -1183,9 +1183,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                                            )
                                        );
                         me.sureEl     = me.el;
-                        me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, parent:me, appendTo:me.el});
+                        me.header    = new Wui.O({el:$('<div><span class="wui-h-title"></span><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, parent:me, appendTo:me.el});
                                        me.header.elAlias = me.header.el.children('.wui-h-cntnt');
-                                       me.header.title = me.header.el.children('h1');
+                                       me.header.title = me.header.el.children('.wui-h-title');
                                        
                         me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, parent:me, appendTo:me.el});
                         me.elAlias     = me.container;
@@ -1431,7 +1431,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     var err = Wui.msg(errMsg,msgTitle,callback);
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
-    err.container.find('p').addClass('err');
+    err.container.find('p').addClass('wui-err');
     return err;
 };
 
