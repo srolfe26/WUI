@@ -63,11 +63,8 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                             }
                             
                             me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
-                                text:    itm.title || 'Tab ' + (parseInt(idx) + 1),
-                                click:    function(){ 
-                                            me.giveFocus(itm);
-                                            if(itm.layout && typeof itm.layout === 'function')    itm.layout();
-                                        },
+                                text:   itm.title || 'Tab ' + (parseInt(idx) + 1),
+                                click:  function(){ me.giveFocus(itm); },
                                 cls:    itm.tabCls
                             }));
                             if(me.bbar.length !== 0) me.placeFooter();
@@ -401,7 +398,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     });
                     
                     //grids with single columns shouldn't have a resizable option
-                    if(me.columns.length > 1){
+                    if(me.columns.length > 1 && !col.vertical){
                         col.el.resizable({
                             handles:    'e',
                             start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },

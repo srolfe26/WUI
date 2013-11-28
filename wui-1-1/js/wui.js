@@ -409,10 +409,11 @@ Wui.O.prototype = {
                     return this.showHide.apply(this,args);
                 },
     /**
+    @param {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
     but without the rendering of objects - useful to resize things that are already rendered.
     */
-    layout:        function(){
+    layout:        function(afterLayout){
                     var me = this;
                     
                     // run css styles
@@ -428,6 +429,9 @@ Wui.O.prototype = {
                         
                     // Perform layout for child elements
                     me.each(function(itm){ if(itm.layout) itm.layout(); });
+
+                    // Performs actions passed in as parameters
+                    if(afterLayout && typeof afterLayout === 'function')    afterLayout();
                 },
     /**
     @param {function} [after]    A function to be called after an object has been placed
@@ -1251,9 +1255,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
                         
                         function doLayout(){
-                            if(!me.parent) me.layout();
+                            if(!me.parent && !(me instanceof Wui.Window)) me.layout();
                         }
-                        
+
                         if(me.disabled){
                             // If the pane is disabled then it disables it
                             me.disable();
@@ -1336,7 +1340,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
                         me.modalEl = $('<div>').addClass('wui-overlay');
-                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ() + 1));
+                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
                     }
                     
                     // Add close buttons where appropriate
@@ -1351,9 +1355,9 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     .draggable({handle: me.header.el, start:bringToFront})
                     .addClass('wui-window')
                     .resizable({
-                        minWidth:    me.width,
-                        minHeight:    me.height,
-                        resize:        function(){ me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); }
+                        minWidth:   me.width,
+                        minHeight:  me.height,
+                        resize:     function(){ me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); }
                     })
                     .css('z-index',Wui.maxZ() + 1)
                     .click(bringToFront);
@@ -1375,6 +1379,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                         }
                     }
                 },
+
     /** 
     @param {[number]} resizeWidth Number of pixels for the window width
     @param {[number]} resizeHeight Number of pixels for the window height
@@ -1385,7 +1390,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     resize:        function(resizeWidth, resizeHeight){
                     var me = this,
                         totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
-                    
+
                     //size the window to according to arguments, or fit its contents as long as its smaller than the height of the window
                     if(arguments.length !== 0)me.windowEl.height(me.height = resizeHeight).width(me.width = resizeWidth);
                     else                      me.windowEl.height(((totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : totalHeight));
@@ -1393,12 +1398,14 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Center window
                     me.windowEl.css({
                         top:        Math.floor(($.viewportH() / 2) - (me.windowEl.height() / 2)) + 'px',
-                        left:        (!me.isModal) ? Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px' : '',
-                        position:    (!me.isModal) ? 'absolute' : ''
+                        left:       Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px'
                     });
                     
                     me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
-                    me.layout();
+                    
+                    me.layout(function(){
+                        if(me.isModal){ me.modalEl.css({width:'', height:''}); }
+                    });
                 }
 });
 
