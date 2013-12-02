@@ -33,7 +33,10 @@ Wui.Form = function(args){
         
         /**  Position of the label relative to the form fields that is generally applied unless
         specifically defined on a particular field. */
-        labelPosition:  'top'
+        labelPosition:  'top',
+
+        /** A size (in pixels) for the label in its given relative position to the field - defaults defined in CSS */
+        labelSize:      null
     }, args, {
         /** Flag for whether data on the form has been changed - set by the individual fields */
         formChanged:    false,
@@ -127,6 +130,8 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     if(itm.ftype && !(itm instanceof Wui.FormField)){
                         // If a field has its labelPosition defined then leave it alone, otherwise use the form's value.
                         if(!(itm.labelPosition)) $.extend(itm,{labelPosition: me.labelPosition});
+                        // If a field has its labelSize defined then leave it alone, otherwise use what form's value.
+                        if(!(itm.labelSize)) $.extend(itm,{labelSize: me.labelSize});
                         
                         var ft = itm.ftype.split('.');
                         
@@ -135,6 +140,10 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     }else if(itm instanceof Wui.FormField){
                         // If a field has its labelPosition defined then leave it alone, otherwise use what form's value.
                         if(!itm.hasOwnProperty('labelPosition') && itm.lbl) itm.lbl.setLabelPosition(me.labelPosition);
+
+                        // If a field has its labelSize defined then leave it alone, otherwise use what form's value.
+                        if(!itm.hasOwnProperty('labelSize') && itm.lbl) itm.lbl.setLabelSize(me.labelSize);
+
                         return itm;
                     }else{
                         return itm;
@@ -244,20 +253,18 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 
 /** 
     Allows a note to be placed on a form. A HTML string will be converted into DOM elements
-    placed within a paragraph tag. The note can be included in the items on a form, but the form
+    placed within a div tag. The note can be included in the items on a form, but the form
     will not attempt to validate like the other items.
 */
 Wui.Note = function(args){ 
     $.extend(this,{
         /** The HTML to be placed in the note */
-        html:'',
-        /** The text-align property of the note */
-        align: null
+        html:''
     },args); this.init();
 };
 Wui.Note.prototype = $.extend(new Wui.O(),{
     /** Method that will run immediately when the object is constructed. */
-    init:       function(){ this.el = $('<p>').html(this.html).addClass('wui-note ' + (this.align) ? this.align : ''); }
+    init:       function(){ this.el = $('<div>').html(this.html).addClass('wui-note'); }
 });
 
 
@@ -272,10 +279,13 @@ Wui.Label = function(args){
             String that will converted into DOM elements and placed in the label.
             This is usually the value of the label config on a Wui.FormField.
         */
-        html:            '',
+        html:           '',
         
         /** Default position of the label relative to the field (top,right,bottom,left). */
-        labelPosition:    'top'
+        labelPosition:  'top',
+
+        /** A size (in pixels) for the label in its given relative position to the field - defaults defined in CSS */
+        labelSize:      null
     },args);
     
     this.init(); 
@@ -287,8 +297,8 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             me.el = $('<div>').addClass('wui-lbl').append( 
                                 me.label = $('<label>').addClass(me.cls).attr(me.attr ? me.attr : {})
                             );
-                            me.setLabel(me.html);
-                            me.setLabelPosition(me.labelPosition);
+                            me.setLabel();
+                            me.setLabelPosition();
                         },
     
     /**
@@ -297,25 +307,69 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
     Changes the contents of the label.
     */
     setLabel:           function(newLabel){
+                            newLabel = newLabel || this.html;
                             this.label.html(this.html = newLabel);
                             return this.label.html();
                         },
 
     /**
+    @param {string} pos A string to verify the label position
+    Verify's that the label's position is either top, right, bottom or left.
+    @return the verified lowercase position string, or the label's current position if the passed in value isn't valid.
+    */
+    verifyPosition:     function(pos){
+                            if(pos && (pos = pos.toLowerCase()) && $.inArray(pos,['top', 'left', 'bottom', 'right']) >= 0)
+                                return pos;
+                            else
+                                return this.labelPosition;
+                        },
+
+    /**
+    @param {number} size An integer for the size (height or width depending on the label position) of the label
+    Changes the size of the label from the default values, or if size is undefined, resets the defaults.
+    */
+    setLabelSize:       function(size){
+                            var me = this;
+                            size = size || me.labelSize;
+
+                            // Clear out and reset the size of el padding
+                            this.el.css({
+                                paddingLeft:    undefined,
+                                paddingRight:   undefined,
+                                paddingTop:     undefined,
+                                paddingBottom:  undefined
+                            });
+                            // Clear out and reset the size of the label
+                            this.label.css({
+                                width:    undefined,
+                                height:   undefined
+                            });
+
+                            if($.isNumeric(size)){
+                                var dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width',
+                                    margin = (dimension == 'height') ? 0 : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) : parseInt(me.label.css('margin-left'));
+                                this.el.css('padding-' + me.labelPosition, size);
+                                this.label.css(dimension, size - margin);
+                                if(me.field)
+                                    me.field.labelSize = me.labelSize = size;
+                            }
+                        },
+
+    /**
     @param {string} position The value for the new label position (top, left, bottom, right)
-    @return Returns the position that was set, of false if what was passed in wasn't valid.
-    Changes the position of the label.
+    @return Returns the position that was set. Invalid passed in values will not change the current label position.
     */
     setLabelPosition:   function(position){
                             var me = this;
 
-                            position = position.toLowerCase();
-                            if($.inArray(position,['top', 'left', 'bottom', 'right']) >= 0){
-                                me.el.removeClass('lbl-' + me.labelPosition).addClass('lbl-' + position);
-                                if(me.field)    me.field.labelPosition = position;
-                                return (me.labelPosition = position);
-                            }
-                            return false;
+                            position = me.verifyPosition(position);
+                            me.el.removeClass('lbl-' + me.labelPosition).addClass('lbl-' + position);
+                            if(me.field)    me.field.labelPosition = position;
+                            
+                            me.labelPosition = position;
+                            me.setLabelSize();
+
+                            return me.labelPosition;
                         }
 });
 
@@ -338,10 +392,13 @@ Wui.FormField = function(args){
         label:          null,
         
         /** Defines the position of the label relative to the field, options are 'top', 'left', 'right' and 'bottom' */
-        labelPosition:    'top',
+        labelPosition:  'top',
         
         /** A special class to put on the label if desired */
         labelCls:        null,
+
+        /** A size (in pixels) for the label in its given relative position to the field - defaults defined in CSS */
+        labelSize:       null,
         
         /** Whether or not the field is required. May be pre-empted by other validation. See validate() method. */
         required:       false,
@@ -364,7 +421,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     me.el = $('<div>').addClass('wui-fe');
                     
                     if(me.label && me.label.length > 0){
-                        me.lbl = new Wui.Label({html:me.label, cls:me.labelCls, field:me, labelPosition:me.labelPosition});
+                        me.lbl = new Wui.Label({html:me.label, cls:me.labelCls, field:me, labelPosition:me.labelPosition, labelSize:me.labelSize});
                         me.elAlias = me.el;
                         me.el = me.lbl.el.append(me.elAlias);
                     }

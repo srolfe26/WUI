@@ -20,6 +20,7 @@
 
 .wui-pane { position: relative; border-width:0; border-style:solid; border-color:#777; width:100%; background:#fff; overflow:hidden; text-align: left; }
 .wui-pane-bar { text-align:right; overflow:hidden; background:#777; color:#eee; }
+    .wui-pbar-left {float:left;}
 .wui-pane-header {top:0;}
 .wui-pane-footer {bottom:0;}
     .wui-pane-bar, .wui-h-cntnt, .wui-h-title {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}
@@ -42,7 +43,7 @@
     animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
 
-.wui-pane-content p { margin:0.5em 0 1em; font-size:0.8em;}
+.wui-msg { margin:0.5em 0 1em; font-size:0.8em;}
 .wui-err { padding:1em; font-weight:bold; color:#900;}
     
 /******************   MODAL WINDOW STYLES   ********************/
@@ -86,7 +87,7 @@ button::-moz-focus-inner { border:0; }
 
 /*********************   FIELD/BUTTON STYLES ***********************/
 .wui-btn.field-btn, .wui-fe input[type=text] {height:26px;}
-.wui-btn.field-btn {line-height:26px; position: absolute; right:0; border-radius:0 4px 4px 0; top:0; border-color:#bbb;}
+.wui-btn.field-btn {line-height:26px; position: absolute; right:0; border-radius:0 4px 4px 0; top:0;}
 .wui-btn.field-btn:hover, .wui-file-upload .wui-btn:hover, .wui-browse-btn:hover {background-color:#ccc; border-color:#bbb;}
 .wui-btn.field-btn:focus, .wui-file-upload .wui-btn:focus, .wui-browse-btn:focus {box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
 
@@ -101,10 +102,10 @@ button::-moz-focus-inner { border:0; }
 .wui-lbl > label {display:block; color:#555; font-weight:bold; font-size:0.9em; position:absolute; left:0; top:0; line-height:26px;}
 
 .wui-lbl.lbl-left { padding:0 0 0 200px; }
-.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { width:200px; padding-right:0.5em; text-align:right; display:inline-table; vertical-align:top;}
+.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { margin-right:5px; width:195px; text-align:right; display:inline-table; vertical-align:top;}
 
 .wui-lbl.lbl-right { padding:0 200px 0 0; }
-.wui-lbl.lbl-right > label { width:200px; padding-left:0.5em; text-align:left; left:auto; right:0; }
+.wui-lbl.lbl-right > label { width:200px; margin-left:5px; text-align:left; left:auto; right:0; }
 
 .wui-lbl.lbl-bottom { padding:0 0 26px 0; }
 .wui-lbl.lbl-bottom > label { top:auto; bottom:0; }
@@ -117,7 +118,8 @@ button::-moz-focus-inner { border:0; }
 
 /* textfield / textarea */
 .wui-fe input, .wui-fe textarea, .wui-editor { color: #444; padding:4px; width:100%; border-radius:4px; font-size: 0.8em; }
-.wui-fe input, .wui-fe textarea, .wui-editor, .button li label { background-color:#ddd; border:1px solid #ccc; }
+.wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-btn.field-btn {border-color:#bbb;}
+.wui-fe input, .wui-fe textarea, .wui-editor, .button li label { background-color:#ddd; border-width:1px; border-style:solid; }
 .wui-fe input:focus, .wui-fe textarea:focus, .wui-editor:focus, .button li label:focus { background-color:#eee; border-color:#999; }
 .wui-fe .empty { color:#777; }
 .wui-fe textarea { height:100%; width:100%; max-height:100%; max-width:100%; }
@@ -409,7 +411,6 @@ button::-moz-focus-inner { border:0; }
 }
 .wui-pane-bar .wui-fe input {border: 1px solid #777;}
 /* For labels */
-.wui-pane-bar .wui-lbl,
 .wui-pane-bar .wui-lbl.lbl-bottom,
 .wui-pane-bar .wui-lbl.lbl-right,
 .wui-pane-bar .wui-lbl.lbl-top,
@@ -423,6 +424,7 @@ button::-moz-focus-inner { border:0; }
         padding:0 0.25em 0 0.5em; text-align:right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .wui-pane-bar .wui-lbl .wui-fe {width:100%;}
+.wui-pane-bar .wui-lbl.wui-pbar-left { margin-top: 0.45em; }
 
 /* For Hyperlink */
 .wui-pane-bar .wui-fe.wui-link-third { top: 0; margin-left: 0; float:none; }

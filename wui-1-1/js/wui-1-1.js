@@ -4,7 +4,8 @@
  * @license MIT
  * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
-
+ 
+ 
 /*
 * Avoid 'console' errors in browsers that lack a console by defining a variable named console.
 * For example, when using console.log() on a browser that does not have a console, execution of code
@@ -408,10 +409,11 @@ Wui.O.prototype = {
                     return this.showHide.apply(this,args);
                 },
     /**
+    @param {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
     but without the rendering of objects - useful to resize things that are already rendered.
     */
-    layout:        function(){
+    layout:        function(afterLayout){
                     var me = this;
                     
                     // run css styles
@@ -427,6 +429,9 @@ Wui.O.prototype = {
                         
                     // Perform layout for child elements
                     me.each(function(itm){ if(itm.layout) itm.layout(); });
+
+                    // Performs actions passed in as parameters
+                    if(afterLayout && typeof afterLayout === 'function')    afterLayout();
                 },
     /**
     @param {function} [after]    A function to be called after an object has been placed
@@ -957,7 +962,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     /** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
     onRender:    function(){
                     if(this.autoLoad){
-                        if(this.url === null)    this.make();
+                        if(this.url === null)   this.make();
                         else                    this.loadData();
                     }
                 },
@@ -1131,25 +1136,29 @@ Wui.Pane = function(args){
 Wui.Pane.prototype = $.extend(new Wui.O(),{
     /** Disables the pane by masking it and disabling all buttons */
     disable:        function(){
-                        this.disabled = true;
                         this.addMask();
                         this.footer.each(function(itm){ if(itm.disable) itm.disable(); });
                         this.header.each(function(itm){ if(itm.disable) itm.disable(); });
+                        return this.disabled = true;
                     },
     
     /** Enables the pane by removing the mask and enabling all buttons */
     enable:            function(){
                             var me = this;
-                            me.disabled = false;
                             me.removeMask();
                             me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
                             me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+                            return me.disabled = false;
                     },
     
-    /** Adds a mask over the content area of the pane */
-    addMask:        function(){
-                        //if(this.mask === undefined)
-                            this.mask = this.container.clone().html(this.maskHTML).addClass('wui-mask').appendTo(this.container.parent());
+    /** 
+    Adds a mask over the content area of the pane 
+    @param  {object}    target  A target to apply the mask, otherwise the pane's container will be masked.
+    @return The mask object
+    */
+    addMask:        function(target){
+                        target = (target) ? target : this.container.parent();
+                        return this.mask = $('<div>').addClass('wui-mask').html(this.maskHTML).appendTo(target);
                     },
 
     /** Removes the mask over the content area of the pane */
@@ -1158,8 +1167,8 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         
                         if(mask){
                             mask.fadeOut(500,function(){ 
-                                mask.remove();
                                 me.mask = undefined;
+                                me.el.find('.wui-mask').remove();
                             });
                         }
                     },
@@ -1182,9 +1191,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                                            )
                                        );
                         me.sureEl     = me.el;
-                        me.header    = new Wui.O({el:$('<div><h1></h1><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, parent:me, appendTo:me.el});
+                        me.header    = new Wui.O({el:$('<div><span class="wui-h-title"></span><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, parent:me, appendTo:me.el});
                                        me.header.elAlias = me.header.el.children('.wui-h-cntnt');
-                                       me.header.title = me.header.el.children('h1');
+                                       me.header.title = me.header.el.children('.wui-h-title');
                                        
                         me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, parent:me, appendTo:me.el});
                         me.elAlias     = me.container;
@@ -1246,9 +1255,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
                         
                         function doLayout(){
-                            if(!me.parent) me.layout();
+                            if(!me.parent && !(me instanceof Wui.Window)) me.layout();
                         }
-                        
+
                         if(me.disabled){
                             // If the pane is disabled then it disables it
                             me.disable();
@@ -1331,7 +1340,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
                         me.modalEl = $('<div>').addClass('wui-overlay');
-                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ() + 1));
+                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
                     }
                     
                     // Add close buttons where appropriate
@@ -1346,9 +1355,9 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     .draggable({handle: me.header.el, start:bringToFront})
                     .addClass('wui-window')
                     .resizable({
-                        minWidth:    me.width,
-                        minHeight:    me.height,
-                        resize:        function(){ me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); }
+                        minWidth:   me.width,
+                        minHeight:  me.height,
+                        resize:     function(){ me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); }
                     })
                     .css('z-index',Wui.maxZ() + 1)
                     .click(bringToFront);
@@ -1370,6 +1379,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                         }
                     }
                 },
+
     /** 
     @param {[number]} resizeWidth Number of pixels for the window width
     @param {[number]} resizeHeight Number of pixels for the window height
@@ -1380,7 +1390,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     resize:        function(resizeWidth, resizeHeight){
                     var me = this,
                         totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
-                    
+
                     //size the window to according to arguments, or fit its contents as long as its smaller than the height of the window
                     if(arguments.length !== 0)me.windowEl.height(me.height = resizeHeight).width(me.width = resizeWidth);
                     else                      me.windowEl.height(((totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : totalHeight));
@@ -1388,12 +1398,14 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Center window
                     me.windowEl.css({
                         top:        Math.floor(($.viewportH() / 2) - (me.windowEl.height() / 2)) + 'px',
-                        left:        (!me.isModal) ? Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px' : '',
-                        position:    (!me.isModal) ? 'absolute' : ''
+                        left:       Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px'
                     });
                     
                     me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
-                    me.layout();
+                    
+                    me.layout(function(){
+                        if(me.isModal){ me.modalEl.css({width:'', height:''}); }
+                    });
                 }
 });
 
@@ -1430,7 +1442,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     var err = Wui.msg(errMsg,msgTitle,callback);
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
-    err.container.find('p').addClass('err');
+    err.container.find('p').addClass('wui-err');
     return err;
 };
 
@@ -1462,511 +1474,499 @@ Wui.confirm = function(msg, msgTitle, callback, content){
 
 }(jQuery,this));
 
+(function($,Wui) {
 
-(function($, window, Wui) {
-
-/**
-WUI State Machine
-
-The WUI state machine allows for helping the browser to keep a history of the state of a javascript application by utilizing 
-text in the URL after the hash ('#'). The WUI state machine follows this format:
-
-In the hash (as a string):          <view 1>?<param1>=<param1 value>&<param2>=<param2 value>/<view 2>?<param1>=<param2 value>
-
-...or without the placeholders:     adminView?pic=one&id=57/adminWindow?info=salary
-
-In the state machine (as an array): [
-                                        {
-                                            view:   'adminView', 
-                                            params: { pic:one, id:57 }
-                                        },
-                                        {
-                                            view:   'adminWindow', 
-                                            params: { info:salary }
-                                        }
-                                    ]
-                                        
-The hashchange event is written by:
-Copyright (c) 2010 "Cowboy" Ben Alman,
-Dual licensed under the MIT and GPL licenses.
-http://benalman.com/about/license/
+/** 
+@event        tabchange When a tab changes (tab pane, tab button, tab item)
+@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+Tab pane
 */
-Wui.stateMachine = function(args){ $.extend(this, {
-    /** Placeholder for functions passed in using setChangeAction */
-    changeMethod:    function(){}
-},args); };
-Wui.stateMachine.prototype = {
-    /**
-    @param    {string|array}    state    A string or an array describing the state of the page
-    @return The state that was just set on the page.
-    Sets the state passed in to the window.location as a string. State arrays passed in are converted.
-    */
-    setState:        function(state){
-                        var url            = window.location.href.split('#'),
-                            preHash        = url[0] + '#',
-                            setState    = preHash;
+Wui.Tabs = function(args){ 
+    $.extend(this,{
+        /** An array of items that will be added to the footer */
+        bbar:   [],
+        
+        /** An array of items that will be added to the content */
+        items:    [],
+        
+        /** Tabs default to the right side of the pane unless this is true. */
+        tabsLeft:    false,
+        
+        /** A place holder for the currently selected tab. */
+        currentTab:    null,
+        
+        /** Whether to put the tabs on the header or the footer. */
+        tabsBottom:        false,
+        
+        /** Config to place on child items of WUI tabs to make their heading not show up */
+        tabsHideHeader: null,
+        
+        /** An array of items that will be added to the header */
+        tbar:    []
+    },args); 
+    this.init();
+};
+Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
+    /** Method that will run immediately when the object is constructed. Lays out targets. */
+    init:            function(){
+                        if(this.title === null)    this.title = '';
+                        Wui.Pane.prototype.init.call(this);
+                    },
+    
+    /** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
+    place:          function(){
+                        var me = this;
+                        
+                        me.el.addClass('wui-tabs');
+                        
+                        //adds the objects items if any
+                        if(me.items === undefined) me.items = [];
+                        $.each(me.items,function(idx,itm){
+                            itm.tabCls =    'wui-tab ' +
+                                            ((itm.tabCls) ? ' ' + itm.tabCls : '') +
+                                            ((me.tabsLeft) ? ' left' : '');
                             
-                            // Objects passed in are parsed according to a strict format of 
-                            // firstView?param1=1/anotherView?param1=1&param2=2 ...
-                            if(state && typeof state === 'object'){
-                                setState = preHash + this.stringify(state);
-                            // If a string is passed in just pass it along
-                            }else if(state && typeof state === 'string'){
-                                setState = preHash + state;
+                            if(itm.tabsHideHeader){
+                                itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
+                                itm.el.addClass('wui-hide-heading');
                             }
                             
-                        return window.location = setState;
-                    },
-    
-    /**
-    @param    {array}    stateArray    An array containing objects that describe a WUI state
-    @return A WUI state string.
-    State arrays passed in are converted to a WUI state string suitable for being used as hash text.
-    */
-    stringify:        function(stateArray){
-                        var stateStr    = '';
-                        
-                        for(var i in stateArray){
-                            // Get keys in alphabetical order so that comparing states works
-                            var keys = Wui.getKeys(stateArray[i].params);
-
-                            // State the location
-                            stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
-                            
-                            for(var j = 0; j < keys.length; j++)
-                                stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
-                        }
-                        
-                        return stateStr;
-                    },
-    
-    /**
-    @return A WUI state machine formatted array.
-    Gets the hash text of the URL and converts it to a WUI state array.
-    */
-    getState:        function(){
-                        var state = [];
-                        
-                        window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
-                            var itm = {};
-                            viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
-                                itm[key] = val;
-                                return '';
-                            });
-                            state.push({view:viewarea, params:itm});
+                            me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
+                                text:   itm.title || 'Tab ' + (parseInt(idx) + 1),
+                                click:  function(){ me.giveFocus(itm); },
+                                cls:    itm.tabCls
+                            }));
+                            if(me.bbar.length !== 0) me.placeFooter();
                         });
                         
-                        return state;
+                        return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
                     },
     
-    /**
-    @param    {string}    target    The view from which to retrieve the parameter.
-    @param    {string}    key        The name of the parameter to retrieve.
-    @return The value of a hash parameter or undefined.
-    Returns a parameter value for a specified target view and parameter key.
+    /** 
+    @param {object} itm A WUI Object that will be matched in the items array. 
+    @param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
+    
+    Sets the specified tab to active. Runs layout on the newly activated item.
     */
-    getParam:        function(target,key){
-                        var state    = this.getState(),
-                            val        = undefined;
-                            
-                        for(var i in state)
-                            if(state[i].view === target && state[i].params[key])    return state[i].params[key];
-
-                        return val;
-                    },
-                    
-    /**
-    @param    {string}        target    The view on which to set the parameter.
-    @param    {string}        key        The name of the parameter to set.
-    @param    {string|number}    value    The value of the parameter
-    @return The value passed in, or undefined if setting the parameter failed.
-    Set a hash parameter within certain view.
-    */
-    setParam:        function(target,key, value){
-                        var state    = this.getState();
-                            
-                        for(var i in state){
-                            if(state[i].view === target && state[i].params[key]){
-                                state[i].params[key] = value;
-                                this.setState(state);
-                                return value;
-                            }    
-                        }
+    giveFocus:        function(tab, supressEvent){
+                        var me = this;
+      
+                        supressEvent = (supressEvent !== undefined) ? supressEvent : false;
                         
-                        return undefined;
-                    },
-    
-    /**
-    @param    {string}    oldView        Name of the view to change.
-    @param    {string}    newView        New name of the view.
-    Changes a view in place leaving the parameters
-    */
-    changeView:        function(oldView,newView){
-                        var state = this.getState();
-                        for(var i in state)
-                            if(state[i].view === oldView)
-                                state[i].view = newView;
-                        this.setState(state);
-                    },
-                    
-    /**
-    @param    {string}    viewName    Name of the view
-    @param    {object}    [params]    An object containing key value pairs
-    Sets a single view and associated parameters on the URL.
-    */                
-    setView:        function(viewName,params){
-                        var newState = [{view:viewName}];
-                        if(params) newState[0].params = params;
-                        this.setState(newState);
-                    },
-    
-    /**
-    @return    An array of views on the hash.
-    Gets all of the available views of the URL
-    */
-    getViews:        function(){
-                        // Lists all of the views
-                        var state = this.getState(),
-                            retArr = [];
-                            
-                        for(var i = 0; i < state.length; i++)
-                            retArr.push(state[i].view);
-
-                        return retArr;
-                    },
-                    
-    /** Sets a blank hash */
-    clearState:        function(){ this.setState(); },
-    
-    /**
-    @param {function} fn Function to perform when the state of the URL changes.
-    Sets me.changeMentod 'hashchange' listener function on the window for when the URL changes and 
-    passes that function a WUI state array. If a changeMethod has already been defined, the new method
-    will contain calls to both the old changeMethod and the new one.
-    */
-    addChangeMethod:function(fn){ 
-                        var me = this,
-                            state = me.getState(),
-                            oldChange = me.changeMethod;
-                            
-                        me.changeMethod = function(args){
-                            oldChange(args);
-                            fn(args);
-                        };
-                            
-                        $(window).off('hashchange').on('hashchange', function(){
-                            me.changeMethod.call(me,state);
+                        $.each(me.items,function(idx,itm){
+                            var isActive = itm === tab;
+                            itm.tab.el.toggleClass('selected', isActive);
+                            itm.el.toggleClass('active', isActive);
+                            if(isActive){
+                                me.currentTab = itm;
+                                if(!supressEvent) me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
+                                itm.layout();
+                            }
                         });
                     },
-                    
-    /** Removes the 'hashchange' listener, and clears out me.changeMethod effectively turning off the state machine. */
-    turnOff:        function(){ this.changeMethod = function(){}; $(window).off('hashchange'); }
-};
-
-}(jQuery, this, Wui));
-
-
-/*!
- * jQuery hashchange event - v1.3 - 7/21/2010
- * http://benalman.com/projects/jquery-hashchange-plugin/
- * 
- * Copyright (c) 2010 "Cowboy" Ben Alman
- * Dual licensed under the MIT and GPL licenses.
- * http://benalman.com/about/license/
- */
-
-// Script: jQuery hashchange event
-//
-// *Version: 1.3, Last updated: 7/21/2010*
-// 
-// Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
-// GitHub       - http://github.com/cowboy/jquery-hashchange/
-// Source       - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.js
-// (Minified)   - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js (0.8kb gzipped)
-// 
-// About: License
-// 
-// Copyright (c) 2010 "Cowboy" Ben Alman,
-// Dual licensed under the MIT and GPL licenses.
-// http://benalman.com/about/license/
-// 
-// About: Examples
-// 
-// These working examples, complete with fully commented code, illustrate a few
-// ways in which this plugin can be used.
-// 
-// hashchange event - http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/
-// document.domain - http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/
-// 
-// About: Support and Testing
-// 
-// Information about what version or versions of jQuery this plugin has been
-// tested with, what browsers it has been tested in, and where the unit tests
-// reside (so you can test it yourself).
-// 
-// jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
-// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 5-6, Safari 3.2-5,
-//                   Opera 9.6-10.60, iPhone 3.1, Android 1.6-2.2, BlackBerry 4.6-5.
-// Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
-// 
-// About: Known issues
-// 
-// While this jQuery hashchange event implementation is quite stable and
-// robust, there are a few unfortunate browser bugs surrounding expected
-// hashchange event-based behaviors, independent of any JavaScript
-// window.onhashchange abstraction. See the following examples for more
-// information:
-// 
-// Chrome: Back Button - http://benalman.com/code/projects/jquery-hashchange/examples/bug-chrome-back-button/
-// Firefox: Remote XMLHttpRequest - http://benalman.com/code/projects/jquery-hashchange/examples/bug-firefox-remote-xhr/
-// WebKit: Back Button in an Iframe - http://benalman.com/code/projects/jquery-hashchange/examples/bug-webkit-hash-iframe/
-// Safari: Back Button from a different domain - http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/
-// 
-// Also note that should a browser natively support the window.onhashchange 
-// event, but not report that it does, the fallback polling loop will be used.
-// 
-// About: Release History
-// 
-// 1.3   - (7/21/2010) Reorganized IE6/7 Iframe code to make it more
-//         "removable" for mobile-only development. Added IE6/7 document.title
-//         support. Attempted to make Iframe as hidden as possible by using
-//         techniques from http://www.paciellogroup.com/blog/?p=604. Added 
-//         support for the "shortcut" format $(window).hashchange( fn ) and
-//         $(window).hashchange() like jQuery provides for built-in events.
-//         Renamed jQuery.hashchangeDelay to <jQuery.fn.hashchange.delay> and
-//         lowered its default value to 50. Added <jQuery.fn.hashchange.domain>
-//         and <jQuery.fn.hashchange.src> properties plus document-domain.html
-//         file to address access denied issues when setting document.domain in
-//         IE6/7.
-// 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
-//         from a page on another domain would cause an error in Safari 4. Also,
-//         IE6/7 Iframe is now inserted after the body (this actually works),
-//         which prevents the page from scrolling when the event is first bound.
-//         Event can also now be bound before DOM ready, but it won't be usable
-//         before then in IE6/7.
-// 1.1   - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug
-//         where browser version is incorrectly reported as 8.0, despite
-//         inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.
-// 1.0   - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special
-//         window.onhashchange functionality into a separate plugin for users
-//         who want just the basic event & back button support, without all the
-//         extra awesomeness that BBQ provides. This plugin will be included as
-//         part of jQuery BBQ, but also be available separately.
-
-(function($,window,undefined){
-
-'$:nomunge'; // Used by YUI compressor.
-
-// Reused string.
-var str_hashchange = 'hashchange',
-
-// Method / object references.
-doc = document,
-fake_onhashchange,
-special = $.event.special,
-
-// Does the browser support window.onhashchange? Note that IE8 running in
-// IE7 compatibility mode reports true for 'onhashchange' in window, even
-// though the event isn't supported, so also test document.documentMode.
-doc_mode = doc.documentMode,
-supports_onhashchange = 'on' + str_hashchange in window && ( doc_mode === undefined || doc_mode > 7 );
-
-// Get location.hash (or what you'd expect location.hash to be) sans any
-// leading #. Thanks for making this necessary, Firefox!
-function get_fragment( url ) {
-url = url || location.href;
-return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
-}
-
-// Method: jQuery.fn.hashchange
-// 
-// Bind a handler to the window.onhashchange event or trigger all bound
-// window.onhashchange event handlers. This behavior is consistent with
-// jQuery's built-in event handlers.
-// 
-// Usage:
-// 
-// > jQuery(window).hashchange( [ handler ] );
-// 
-// Arguments:
-// 
-//  handler - (Function) Optional handler to be bound to the hashchange
-//    event. This is a "shortcut" for the more verbose form:
-//    jQuery(window).bind( 'hashchange', handler ). If handler is omitted,
-//    all bound window.onhashchange event handlers will be triggered. This
-//    is a shortcut for the more verbose
-//    jQuery(window).trigger( 'hashchange' ). These forms are described in
-//    the <hashchange event> section.
-// 
-// Returns:
-// 
-//  (jQuery) The initial jQuery collection of elements.
-
-// Allow the "shortcut" format $(elem).hashchange( fn ) for binding and
-// $(elem).hashchange() for triggering, like jQuery does for built-in events.
-$.fn[ str_hashchange ] = function( fn ) {
-return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
-};
-
-// Property: jQuery.fn.hashchange.delay
-// 
-// The numeric interval (in milliseconds) at which the <hashchange event>
-// polling loop executes. Defaults to 50.
-
-// Property: jQuery.fn.hashchange.domain
-// 
-// If you're setting document.domain in your JavaScript, and you want hash
-// history to work in IE6/7, not only must this property be set, but you must
-// also set document.domain BEFORE jQuery is loaded into the page. This
-// property is only applicable if you are supporting IE6/7 (or IE8 operating
-// in "IE7 compatibility" mode).
-// 
-// In addition, the <jQuery.fn.hashchange.src> property must be set to the
-// path of the included "document-domain.html" file, which can be renamed or
-// modified if necessary (note that the document.domain specified must be the
-// same in both your main JavaScript as well as in this file).
-// 
-// Usage:
-// 
-// jQuery.fn.hashchange.domain = document.domain;
-
-// Property: jQuery.fn.hashchange.src
-// 
-// If, for some reason, you need to specify an Iframe src file (for example,
-// when setting document.domain as in <jQuery.fn.hashchange.domain>), you can
-// do so using this property. Note that when using this property, history
-// won't be recorded in IE6/7 until the Iframe src file loads. This property
-// is only applicable if you are supporting IE6/7 (or IE8 operating in "IE7
-// compatibility" mode).
-// 
-// Usage:
-// 
-// jQuery.fn.hashchange.src = 'path/to/file.html';
-
-$.fn[ str_hashchange ].delay = 50;
-/*
-$.fn[ str_hashchange ].domain = null;
-$.fn[ str_hashchange ].src = null;
-*/
-
-// Event: hashchange event
-// 
-// Fired when location.hash changes. In browsers that support it, the native
-// HTML5 window.onhashchange event is used, otherwise a polling loop is
-// initialized, running every <jQuery.fn.hashchange.delay> milliseconds to
-// see if the hash has changed. In IE6/7 (and IE8 operating in "IE7
-// compatibility" mode), a hidden Iframe is created to allow the back button
-// and hash-based history to work.
-// 
-// Usage as described in <jQuery.fn.hashchange>:
-// 
-// > // Bind an event handler.
-// > jQuery(window).hashchange( function(e) {
-// >   var hash = location.hash;
-// >   ...
-// > });
-// > 
-// > // Manually trigger the event handler.
-// > jQuery(window).hashchange();
-// 
-// A more verbose usage that allows for event namespacing:
-// 
-// > // Bind an event handler.
-// > jQuery(window).bind( 'hashchange', function(e) {
-// >   var hash = location.hash;
-// >   ...
-// > });
-// > 
-// > // Manually trigger the event handler.
-// > jQuery(window).trigger( 'hashchange' );
-// 
-// Additional Notes:
-// 
-// * The polling loop and Iframe are not created until at least one handler
-//   is actually bound to the 'hashchange' event.
-// * If you need the bound handler(s) to execute immediately, in cases where
-//   a location.hash exists on page load, via bookmark or page refresh for
-//   example, use jQuery(window).hashchange() or the more verbose 
-//   jQuery(window).trigger( 'hashchange' ).
-// * The event can be bound before DOM ready, but since it won't be usable
-//   before then in IE6/7 (due to the necessary Iframe), recommended usage is
-//   to bind it inside a DOM ready handler.
-
-// Override existing $.event.special.hashchange methods (allowing this plugin
-// to be defined after jQuery BBQ in BBQ's source code).
-special[ str_hashchange ] = $.extend( special[ str_hashchange ], {
-
-// Called only when the first 'hashchange' event is bound to window.
-setup: function() {
-  // If window.onhashchange is supported natively, there's nothing to do..
-  if ( supports_onhashchange ) { return false; }
-  
-  // Otherwise, we need to create our own. And we don't want to call this
-  // until the user binds to the event, just in case they never do, since it
-  // will create a polling loop and possibly even a hidden Iframe.
-  $( fake_onhashchange.start );
-},
-
-// Called only when the last 'hashchange' event is unbound from window.
-teardown: function() {
-  // If window.onhashchange is supported natively, there's nothing to do..
-  if ( supports_onhashchange ) { return false; }
-  
-  // Otherwise, we need to stop ours (if possible).
-  $( fake_onhashchange.stop );
-}
-
+    
+    /** 
+    @param {string} txt The text of the tab button
+    @param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
+    @return The tab that was selected or undefined if the text didn't match any tabs
+    
+    Gives focus to the tab with text that matches the value of txt. Strings with underscores
+    are converted to spaces (eg. 'conferences_detail' = 'conferences detail')
+    */
+    selectTabByText:function(txt, supressEvent){
+                        var me = this, retVal = undefined;
+                        $.each(me.items,function(idx,itm){
+                            if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
+                                me.giveFocus(itm, supressEvent);
+                                retVal = itm;
+                            }
+                        });
+                        return retVal;
+                    },
+    onRender:        function(){
+                        this.giveFocus(this.items[0]);
+                    }
 });
 
-// fake_onhashchange does all the work of triggering the window.onhashchange
-// event for browsers that don't natively support it, including creating a
-// polling loop to watch for hash changes and in IE 6/7 creating a hidden
-// Iframe to enable back and forward.
-fake_onhashchange = (function(){
-var self = {},
-  timeout_id,
-  
-  // Remember the initial hash so it doesn't get triggered immediately.
-  last_hash = get_fragment(),
-  
-  fn_retval = function(val){ return val; },
-  history_set = fn_retval,
-  history_get = fn_retval;
 
-// Start the polling loop.
-self.start = function() {
-  timeout_id || poll();
+/** 
+@event          select          When a record is clicked (grid, row el, record)
+@event          dblclickrecord  When a record is  double clicked clicked (grid, row el, record)
+@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+
+The grid pane provides table-like functionality for data sets. Grids can be populated remotely
+or have their data locally defined. Grids also support infinite scrolling by defining paging
+parameters. Columns for the grid are defined in an array and with the following options:
+
+heading         - The title of the column heading
+cls             - A special class to add to the column
+vertical        - Makes the column text oriented vertical and the column height at 150px
+dataType        - The type of data used in the column (used for sorting)
+dataItem        - The item in the record that correlates to this column
+dataTemplate    - Sort of a full on renderer, this allows you to format inserted data similar to
+                  what is available in Wui.Template
+width           - A pixel value for the width of the column
+fit             - A numeric indicator of the relative size of the column
+
+Custom renderers can be applied to columns.  These renderers are defined as function that can
+either be defined in the column definition, or defined elsewhere in scope and simply named by
+a string. The rendering function is defined passed the following parameters as below:
+
+renderer: function(grid, cell, value, record, row){}
+
+Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
+descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
+is possible with the a number indicating the precedence of the sort and an arrow for the direction of the sort 
+appearing on the right side of the column heading.
+
+Columns can be resized by dragging the heading borders left and right. Columns can be sized to 
+extend beyond the width of the grid frame, but when sized smaller will pop back into position.
+
+While not using Wui.fit(), the same principles apply in the sizing of elements, although percentage
+values are not supported at this time.
+*/
+Wui.Grid = function(args){
+    $.extend(this,{
+        /** Array of items that will be added to the footer. */
+        bbar:           [],
+        
+        /** Array of items that will make up the columns of the grid table. */
+        columns:         [],
+        
+        /** URL to get columns if its a dynamic grid */
+        colUrl:            null,
+        
+        /** Params to pass for columns on a dynamic grid */
+        colParams:        {},
+        
+        /** Array of data for the grid. */
+        data:            null,
+        
+        /** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
+        defaultDataType:'string',
+        
+        /** Whether multiple rows/records can be selected at once. */
+        multiSelect:    false,
+        
+        /** Whether or not to hide the column headers */
+        hideHeader:        false,
+        
+        /** An array of the currently selected records */
+        selected:        [],
+        
+        /** An array of items that will be added to the header */
+        tbar:           []
+    },args); 
+    this.init();
 };
-
-// Stop the polling loop.
-self.stop = function() {
-  timeout_id && clearTimeout( timeout_id );
-  timeout_id = undefined;
-};
-
-// This polling loop checks every $.fn.hashchange.delay milliseconds to see
-// if location.hash has changed, and triggers the 'hashchange' event on
-// window when necessary.
-function poll() {
-  var hash = get_fragment(),
-    history_hash = history_get( last_hash );
-  
-  if ( hash !== last_hash ) {
-    history_set( last_hash = hash, history_hash );
+Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
+    /** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
+    afterMake:    function(){
+                    this.sizeCols();
+                    this.removeMask();
+                },
     
-    $(window).trigger( str_hashchange );
+    /** 
+    Recursive function for sorting on multiple columns @private
+    @param {number}    depth    Depth of the recursive call
+    @param {number}    a        First item to compare
+    @param {number}    b        Second item to compare
     
-  } else if ( history_hash !== last_hash ) {
-    location.href = location.href.replace( /#.*/, '' ) + history_hash;
-  }
-  
-  timeout_id = setTimeout( poll, $.fn[ str_hashchange ].delay );
-}
+    @return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+    */
+    doSort:            function(depth,a,b){
+                        var me = this;
+                        if(me.sorters.length > 0){
+                            var col = me.sorters[depth],
+                                compA = a.rec[col.dataItem],
+                                compB = b.rec[col.dataItem];
+                                
+                            //get the direction of the second sort
+                            var srtVal = (col.sortDir == 'asc') ? 1 : -1;
+                            
+                            // perform the comparison based on 
+                            var compare = 0;
+                            switch(col.dataType){
+                                case 'date':
+                                    compA = new Date(compA);
+                                    compB = new Date(compB);
+                                    compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
+                                    break;
+                                case 'numeric':
+                                    compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
+                                    compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
+                                    compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
+                                    break;
+                                default:
+                                    compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
+                            }
+                            
+                            if(compare !== 0 || me.sorters[depth + 1] === undefined)    return compare * srtVal;
+                            else                                                    return me.doSort(depth + 1,a,b);
+                        }else{
+                            return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
+                        }
+                    },
+                    
+    /** Verify that columns have been defined on the grid, or that they are available remotely */
+    getColumns: function(){
+                    var me = this;
+                    
+                    if(me.colUrl && me.colUrl.length){
+                        // Make remote call for columns
+                        me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
+                        me.colProxy.loadData();
+                    }else if(me.columns.length){
+                        // Check for locally defined columns
+                        me.setColumns(me.columns);
+                    }else{
+                        //throw('There are no columns defined for this WUI Grid.');
+                    }
+                        
+                },
+    
+    /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
+    init:        function(){
+                    var me = this;
+                    
+                    // Set up container
+                    Wui.Pane.prototype.init.call(me);
+                    me.el.addClass('wui-grid');
 
-return self;
-})();
+                    // Add grid specific DOM elements and reset elAlias
+                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
+                    me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh').appendTo(me.elAlias);
+                    me.elAlias = me.tbl = me.tblContainer.children('table');
+                    me.heading = me.headingContainer.children('ul');
+                    
+                    // columns and sorting on multiple columns
+                    me.cols = [];
+                    me.sorters = [];
+                    
+                    // hide the header
+                    if(me.hideHeader)    me.headingContainer.height(0);
+                },
+    
+    /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
+    layout:     function(){
+                    Wui.O.prototype.layout.call(this);
+                    this.posDataWin();
+                    if(this.cols.length) this.sizeCols();
+                },
+                    
+    /** Overrides DataList.loadData(), to add the load mask */   
+    loadData:    function(){
+                    this.setMaskHTML('Loading <span class="wui-spinner"></span>');
+                    this.addMask();
+                    Wui.Data.prototype.loadData.apply(this,arguments);
+                },            
+    
+    /** 
+    @param    {object}    col    An object containing the sort direction and DOM element of the heading
+    @param    {string}    dir    The direction of the sort
+    Manages the sorters for the grid by keeping them in an array. 
+    */
+    mngSorters:        function(col,dir){
+                        var me = this,
+                            sortClasses = ['one','two','three','four','five'];
+                        if(dir !== undefined){
+                            col.sortDir = dir;
+                            me.sorters.push(col);
+                        }else{
+                            if(col.sortDir){
+                                if(col.sortDir == 'desc'){
+                                    delete col.sortDir;
+                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                    
+                                    $.each(me.sorters,function(i,itm){
+                                        if(itm == col)    me.sorters.splice(i,1);
+                                    });
+                                }else{
+                                    col.sortDir = 'desc';
+                                }
+                            }else{
+                                // Can't sort on more than 5 columns
+                                if(me.sorters.length > 5){
+                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                    return false;
+                                }
+                                
+                                col.sortDir = 'asc';
+                                me.sorters.push(col);
+                            }
+                        }
+                            
+                        $.each(me.sorters,function(i,itm){
+                            itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
+                        });
+                    },
+    
+    /** Overrides DataList.modifyItem(), to implement the renderers */        
+    modifyItem:    function(itm){
+                    var me = this;
+                    // Perform renderers (if any)
+                    $.each(me.renderers,function(idx, r){
+                        var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
+                            val = itm.rec[r.dataItem];
+                        
+                        cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el));
+                    });
+                    return itm.el;
+                },
+    
+    /** Overrides DataList.onRender(), to have the grid wait for columns before loading data while still preserving the set autoLoad value. */   
+    onRender:    function(){
+                    // Store the real value of autoLoad, but set it to false so that the grid waits for the columns
+                    // before loading data.
+                    var me = this, al = me.autoLoad;
+                    me.autoLoad = false;
+                    
+                    //Wui.Pane.prototype.onRender.call(this);
+                    Wui.DataList.prototype.onRender.call(this);
+                    
+                    // Start with getting the columns - Many methods waterfall from here
+                    me.autoLoad = al;
+                    this.getColumns();
+                },
+    
+    /** Positions the height and width of the data table's container @private */
+    posDataWin:        function(){
+                        var hh = this.headingContainer.height() - 1;
+                        this.tblContainer.css({height:this.container.height() - hh, top:hh});
+                    },
+    
+    /** Overrides DataList.refresh() to add disabling the grid to add the load mask */
+    refresh:        function(){
+                        if(this.url === null)    this.setData(this.data);
+                        else                    this.getColumns();
+                    },    
 
-})(jQuery,this);
+    /** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
+    render/reference columns. The append the column to the DOM */            
+    renderColumn:function(col,idx){
+                    var me = this;
+                    
+                    $.extend(col,{
+                        dataType:    col.dataType || me.defaultDataType,
+                        fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
+                        cls:        col.cls || '',
+                        renderer:    (col.renderer) ?    (function(a){
+                                                            // Handles renderer if it exists
+                                                            if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
+                                                                a = new Function('return ' + a + '.apply(this,arguments)');
+                                                            if(typeof a === 'function')
+                                                                me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
+                                                        })(col.renderer) : '',
+                        index:        idx,
+                        width:        col.width === undefined ? 0 : col.width,
+                        el:            $('<li>')
+                                    .append($('<div>').text(col.heading))
+                                    .attr({unselectable:'on'})
+                                    .addClass('wui-gc ' + col.cls)
+                                    .click(function(){ me.sortList(col); })
+                    });
+                    
+                    //grids with single columns shouldn't have a resizable option
+                    if(me.columns.length > 1 && !col.vertical){
+                        col.el.resizable({
+                            handles:    'e',
+                            start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
+                            stop:       function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
+                            resize:     function(event,ui){ 
+                                            col.width = ui.size.width; col.fit = 0;
+                                            Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                                        }
+                        });
+                    }
+                    
+                    me.cols.push(col);
+                    
+                    // Append newly created el to the DOM
+                    me.heading.append(col.el);
+                },
+    
+    /** Ensures that columns have all of the proper information */
+    setColumns: function(cols){
+                    var me = this;
+                    
+                    // clear column list
+                    me.columns = cols;
+                    me.heading.empty();
+                    me.cols = [];
+                    me.items = [];
+                    me.renderers = [];
+                    
+                    // clear template
+                    me.template = '<tr class="{((wuiIndex % 2 == 0) ? \'even\' : \'odd\')}">';
+                    
+                    // apply columns on grid
+                    $.each(cols,function(i,col){
+                        // Add to the template string based on column info
+                        var tpltItem = (col.dataTemplate) ? col.dataTemplate : ((col.dataItem) ? '{' +col.dataItem+ '}' : '');
+                        me.template += '<td><div>' +tpltItem+ '</div></td>';
+                        
+                        // Deal with vertical columns - forces them to be 48px wide
+                        if(col.vertical){
+                            me.el.addClass('has-vert-columns');
+                            if(col.cls)    col.cls += ' vert-col';
+                            else        col.cls = 'vert-col';
+                            
+                            col.width = 50;
+                            delete col.fit;
+                        }
+                        
+                        // Add column to cols array
+                        me.renderColumn(col,i);
+                    });
+                    
+                    // finish template
+                    me.template += '</tr>';
+                    
+                    if(me.autoLoad){
+                        if(me.url === null)    me.setData(me.data);
+                        else                me.loadData();
+                    }
+                },
+                
+    /** Size up the columns of the table to match the headings @private */
+    sizeCols:        function (){
+                        var me = this, totalColWidth = 0;
+                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                        for(var i = 0; i < me.cols.length; i++){
+                            var colWidth = me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0);
+                            me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
+                            totalColWidth += colWidth;
+                        }
+                        me.tbl.css({width:totalColWidth});
+                    },
+                    
+    /**
+    @param    {object}    Column object associated with a particular column element
+    Sort the grid based on the values of one or more columns. If the grid is paging
+    then sort remotely.
+    */
+    sortList:        function(col) {
+                        var me = this;
+                        
+                        me.mngSorters(col);
+                        
+                        // Sort the list
+                        var listitems = me.items;
+                        listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+
+                        me.tbl.detach();
+                        // Place items and reset alternate coloring
+                        $.each(listitems, function(idx, row) { 
+                            var isEven = idx % 2 === 0;
+                            row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
+                        });
+                        me.tbl.appendTo(me.tblContainer);
+                        me.resetSelect();
+                    }
+});
+
+}(jQuery,Wui));
+
 
 (function($,Wui) {
 
@@ -2590,67 +2590,142 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
 
 
 /** Creates a WYSIWYG editor from a textfield.  
-jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
-* Copyright (c) 2012 Chris Pietschmann
-* http://jhtmlarea.codeplex.com
-* Licensed under the Microsoft Reciprocal License (Ms-RL)
-* http://jhtmlarea.codeplex.com/license
-* 
-* Modified 2013 Stephen Nielsen
 @author Stephen Nielsen
-@author Chris Pietschmann
 */
 Wui.Wysiwyg = function(args){
     $.extend(this,{
+        css:        'body { color:#333; font:90%  Arial, Verdana, Helvetica, sans-serif; overflow:auto; margin:0; padding:0;}' +
+                    'a {color:#09c; text-decoration:none;} a:hover {color:#0c9; text-decoration:underline;}',
         /** Whether or not to show the button that will give the user a view of the HTML generated by the WYSIWYG */
-        showHTML:    false
+        showHTML:   false
     },args,{
-        /** The blankText property cannot be used on a WYSIWYG and attempts to set it will be overridden with the default value. */
-        blankText:null,
-        /** HTML element */
-        field:$('<textarea>')
+
     });
     this.init();
 };
-Wui.Wysiwyg.prototype = $.extend(new Wui.Textarea(),{
-    /** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
-    onRender:    function(){
-                    var tb = [['bold','italic','underline','strikethrough'], 
-                              ['link','unlink','unorderedlist','orderedlist'],
-                              ['justifyleft','justifycenter','justifyright']];
-                    if(this.showHTML) tb.push(['html']);
-        
-                    this.field.htmlarea({
-                        css:         'body { color:#333; font:90%  Arial, Verdana, Helvetica, sans-serif !important; overflow:hidden; }' +
-                                     'a {color:#09c; text-decoration:none;} a:hover {color:#0c9; text-decoration:underline;}',
-                        toolbar:    tb,
-                        loaded:        function(){}
-                    });
+Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
+    init:       function(){
+                    var me = this;
+                    Wui.FormField.prototype.init.call(me);
+
+                    me.el.addClass('wui-wysiwyg');
+                    me.append(
+                        me.iframe = $('<iframe>').addClass('wui-editor'),
+                        me.tools = $('<div>').addClass('wui-editor-tools')
+                    );
+
+                    (me.elAlias || me.el).resizable();
+
+                    me.tools.append(
+                        me.bold = $('<a>').addClass('bold').attr({tabIndex:-1, title:'Bold'}),
+                        me.italic = $('<a>').addClass('italic').attr({tabIndex:-1, title:'Italic'}),
+                        me.underline = $('<a>').addClass('underline').attr({tabIndex:-1, title:'Underline'}),
+                        me.strike = $('<a>').addClass('strikethrough').attr({tabIndex:-1, title:'Strike-through'}),
+                        me.link = $('<a>').addClass('link').attr({tabIndex:-1, title:'Link'}),
+                        me.unlink = $('<a>').addClass('unlink').attr({tabIndex:-1, title:'Un-Link'}),
+                        me.ul = $('<a>').addClass('unorderedlist').attr({tabIndex:-1, title:'Unorderd List'}),
+                        me.ol = $('<a>').addClass('orderedlist').attr({tabIndex:-1, title:'Ordered List'}),
+                        me.left = $('<a>').addClass('justifyleft').attr({tabIndex:-1, title:'Left Align'}),
+                        me.center = $('<a>').addClass('justifycenter').attr({tabIndex:-1, title:'Center Align'}),
+                        me.right = $('<a>').addClass('justifyright').attr({tabIndex:-1, title:'Right Align'})
+                    );
+
+                    if(me.showHTML)
+                        me.tools.append( $('<a>').addClass('html').attr({tabIndex:-1, title:'Toggle HTML View'}) );
+                },
+    disable:    function(){
+                    Wui.FormField.prototype.disable.call(this);
+                    Wui.Pane.prototype.addMask.call(this,(this.elAlias || this.el));
+                },
+    enable:     function(){
+                    Wui.FormField.prototype.enable.call(this);
+                    Wui.Pane.prototype.removeMask.call(this);
+                },
+    onRender:   function(){
+                    var me = this, 
+                        edit = me.editor = me.iframe[0].contentWindow.document;
                     
-                    var iframe = this.field.parent('.wui-html').height(this.height).find('iframe');
-                    this.field.attr({tabindex:'-1'});
-                    this.field.parent('.wui-html').resizable({
-                        animateEasing: 'linear',
-                        minWidth:   this.field.outerWidth(),
-                        maxWidth:    this.field.outerWidth(),
-                        minHeight:  this.field.parent('.wui-html').find('.tools').outerHeight() * 3,
-                        start:      function(evnt, ui){ this.iFrameOrigHeight = iframe.height(); },
-                        resize:     function(evnt, ui){ iframe.height(ui.size.height - (ui.originalSize.height - this.iFrameOrigHeight)); },
-                        handles:    'se'
+                    // Make the iframe editable and set up its style
+                    edit.designMode = 'on';
+                    edit.open();
+                    edit.close();
+                    if(me.css.length) $('head',edit).append($('<style>').attr({type:'text/css'}).text(me.css));
+
+                    // Perform standard for field stuff
+                    Wui.FormField.prototype.onRender.call(me);
+
+                    // Add menu buttons
+                    me.bold.click(function(){ me.exec("bold"); });
+                    me.italic.click(function(){ me.exec("italic"); });
+                    me.underline.click(function(){ me.exec("underline"); });
+                    me.strike.click(function(){ me.exec("strikethrough"); });
+                    me.link.click(function(){
+                        if (me.getRange().htmlText) me.exec("createLink", true);
+                        else                        me.exec("createLink", false, prompt("Link URL:", "http://"));
                     });
-                    Wui.FormField.prototype.onRender.call(this);
+                    me.unlink.click(function(){ me.exec("unlink", false, []); });
+                    me.ol.click(function(){ me.exec("insertunorderedlist"); });
+                    me.ul.click(function(){ me.exec("insertorderedlist"); });
+                    me.left.click(function(){ me.exec("justifyLeft"); });
+                    me.center.click(function(){ me.exec("justifyCenter"); });
+                    me.right.click(function(){ me.exec("justifyRight"); });
                 },
-    
-    /** In this instance loads the 'htmlarea' jQuery extension to make the textarea a WYSIWYG */
-    setBlankText:function(){},
-    
-    /** In this instance lets the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
-    setListeners:function(t){
-                    $(t.field).change(function(){ t.val(); });
+    exec:       function (a, b, c) {
+                    this.iframe[0].contentWindow.focus();
+                    this.editor.execCommand(a, b || false, c || null);
                 },
-                
-    /** Overrides the Wui.FormField function to allow for the textarea to pick up changes in the WYSIWYG */
-    valChange:    function(){ this.field.keyup(); }
+    getRange:   function () {
+                    var s = this.getSelection();
+                    if (!s) { return null; }
+                    return (s.getRangeAt) ? s.getRangeAt(0) : s.createRange();
+                },
+    getVal:     function () {
+                    // Strips out MS Word HTML Nonsense
+                    var retVal = $.trim(this.editor.body.innerHTML
+                            .replace(/MsoNormal/gi, "")
+                            .replace(/<\/?link[^>]*>/gi, "")
+                            .replace(/<\/?meta[^>]*>/gi, "")
+                            .replace(/<\/?xml[^>]*>/gi,"")
+                            .replace(/<\?xml[^>]*\/>/gi, "")
+                            .replace(/<!--(.*)-->/gi, "")
+                            .replace(/<!--(.*)>/gi, "")
+                            .replace(/<!(.*)-->/gi, "")
+                            .replace(/<w:[^>]*>(.*)<\/w:[^>]*>/gi, "")
+                            .replace(/<w:[^>]*\/>/gi, "")
+                            .replace(/<\/?w:[^>]*>/gi, "")
+                            .replace(/<m:[^>]*\/>/gi, "")
+                            .replace(/<m:[^>]>(.*)<\/m:[^>]*>/gi, "")
+                            .replace(/<o:[^>]*>([.|\s]*)<\/o:[^>]*>/gi, "")
+                            .replace(/<o:[^>]*>/gi, "")
+                            .replace(/<o:[^>]*\/>/gi, "")
+                            .replace(/<\/o:[^>]*>/gi, "")
+                            .replace(/<\/?m:[^>]*>/gi, "")
+                            .replace(/style=\"([^>]*)\"/gi, "")
+                            .replace(/style=\'([^>]*)\'/gi, "")
+                            .replace(/class=\"(.*)\"/gi, "")
+                            .replace(/class=\'(.*)\'/gi,"")
+                            .replace(/<p[^>]*>/gi, "<p>")
+                            .replace(/<\/p[^>]*>/gi, "</p>")
+                            .replace(/<span[^>]*>/gi, "")
+                            .replace(/<\/span[^>]*>/gi, "")
+                            .replace(/<st1:[^>]*>/gi, "")
+                            .replace(/<\/st1:[^>]*>/gi, "")
+                            .replace(/<font[^>]*>/gi, "")
+                            .replace(/<\/font[^>]*>/gi, "")
+                            .replace(/[\r\n]/g, " ")
+                            .replace(/<wordPasteong><\/wordPasteong>/gi, "")
+                            .replace(/<p><\/p>/gi, "").replace(/\/\*(.*)\*\//gi, "")
+                            .replace(/<!--/gi, "")
+                            .replace(/-->/gi, "")
+                            .replace(/<style[^>]*>[^<]*<\/style[^>]*>/gi, "")
+                            .replace(/<hr>/gi, ""));
+                    return this.value = (retVal.length === 0) ? null : retVal;
+                },
+    setVal:     function(sv){
+                    var me = this;
+                    me.value = sv;
+                    $(me.editor.body).html(sv);
+                }
 });
 
 
@@ -2824,6 +2899,9 @@ Wui.Combo = function(args){
         
         /** The DOM element for the field */
         field:        $('<input>').attr({type:'text'}),
+
+        /** Whether to filter results at all */
+        filterField:  true,
         
         /** Whether the drop-down DOM element will be kept in place or appended out to the body and absolutely
         positioned. Keeping the drop-down in line will make it susceptible to being clipped by containing elements.*/
@@ -2933,7 +3011,10 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         
                         if(me.dataName && me.dataName.length > 0){
                             $(window).on('datachanged',function(event,name,dataObj){
-                                if(name == me.dataName)    me.setData(dataObj.data);
+                                if(name == me.dataName){
+                                    me.setData(dataObj.data);
+                                    me.renderData();
+                                }
                             });
                         }else{
                             if(me.autoLoad)   me.loadData();
@@ -2989,16 +3070,18 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     Searches locally within the drop-down's data for the srchVal, otherwise if searchLocal is false,
     the data is searched remotely. */
     searchData:     function(srchVal){
-                        this.searchFilter = srchVal;
-                        
-                        if(this.searchLocal){
-                            this.showDD();
-                            this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
-                            this.dd.children(':contains(' +srchVal+ ')').show();
-                            this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
-                        }else{
-                            if(srchVal.length >= this.minKeys || srchVal.length === 0)
-                                this.loadData();
+                        if(this.filterField){
+                            this.searchFilter = srchVal;
+                            
+                            if(this.searchLocal){
+                                this.showDD();
+                                this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
+                                this.dd.children(':contains(' +srchVal+ ')').show();
+                                this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
+                            }else{
+                                if(srchVal.length >= this.minKeys || srchVal.length === 0)
+                                    this.loadData();
+                            }    
                         }
                     },
     
@@ -3090,17 +3173,17 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     based on the value of keepInline. */
     showDD:         function(){
                         if(!this.keepInline){
-                            var fld        = this.field,
+                            var fld     = this.field,
                                 ofst    = fld.offset(),
-                                ddWid    = parseInt(this.dd.css('width')),
-                                width    = (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
+                                ddWid   = parseInt(this.dd.css('width')),
+                                width   = (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
                             
                             this.dd.appendTo('body').css({
-                                left:    ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
-                                top:    ofst.top + fld.outerHeight(),
-                                width:    width,
-                                display:'block',
-                                zIndex:    Wui.maxZ()
+                                left:       ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
+                                top:        ofst.top + fld.outerHeight(),
+                                width:      width,
+                                display:    'block',
+                                zIndex:     Wui.maxZ()
                             });
                         }else{
                             this.dd.css({ zIndex:Wui.maxZ() }).show();
@@ -3264,9 +3347,7 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
  "ten months from now"
 */
 Wui.Datetime = function(args){ 
-    $.extend(this,args,{
-        field:        $('<input>').attr({type:'text'})
-    });
+    $.extend(this,args,{ field: $('<input>').attr({type:'text'}) });
     this.init();
 };
 
@@ -3483,34 +3564,52 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                         me.append(
                             $('<div>').addClass('wui-date').append(
                                 me.setListeners(me),
-                                me.displayDiv = $("<div>").addClass('feedback').attr({tabindex:-1})
+                                me.displayDiv = $("<div>").addClass('feedback').attr({tabindex:-1}),
+                                me.toggleCal = $('<button>').addClass('wui-cal-toggle').attr({tabIndex:-1})
                             )
                         );
-                            
-                        //add jQuery datepicker (calendar) to the field
-                        me.field.datepicker({
-                            autoSize:       true,
-                            buttonText:     '',
-                            showOn:         'button',
-                            minDate:        me.minDate,
-                            constrainInput: false,
-                            beforeShow:     function(txtElem, pickerObj){
-                                                $(pickerObj).css({zIndex:Wui.maxZ()});
-                                                if(me.validDate(me.value))  me.field.datepicker('setDate',me.value);
-                                                else                        me.val('');
-                                            },
-                            onSelect:       function(dateString, pickerObj){
-                                                if(me.value !== null){
-                                                    me.value.setDate(pickerObj.selectedDay);
-                                                    me.value.setMonth(pickerObj.selectedMonth);
-                                                    me.value.setYear(pickerObj.selectedYear);
-                                                }else{
-                                                    me.value = me.field.datepicker('getDate');
-                                                }
-                                                me.val(me.displayDate());
-                                            }
+                        
+                        me.toggleCal.click(function(){
+                            if(!me.calendar){
+                                // Add calendar to the body with listeners
+                                $('body').append(
+                                    me.calendar = me.makeCalendar(undefined,function(e){
+                                        var dt = $(this),
+                                            day = parseInt(dt.text()),
+                                            info = dt.parents('[wui-month]'),
+                                            month = parseInt(info.attr('wui-month')),
+                                            year = parseInt(info.attr('wui-year'));
+
+                                        me.value = (me.value != null) ? new Date(year,month,day,me.value.getHours(),me.value.getMinutes()) : new Date(year,month,day);
+                                        me.val(me.displayDate());
+                                        me.calendar.remove(); me.calendar = undefined;
+                                    }).click(function(){return false;})
+                                );
+
+                                // Clear the calendar when the user moves away from it
+                                $(document).one('click',function(){
+                                    $('.wui-cal').remove(); me.calendar = undefined;
+                                });
+
+                                // Position calendar to ensure it will be seen
+                                var fld     = me.field,
+                                    ofst    = fld.offset(),
+                                    cHeight = me.calendar.outerHeight(),
+                                    cWidth  = me.calendar.outerWidth(),
+                                    plBelow = (ofst.top + fld.outerHeight() + cHeight < $.viewportH()),
+                                    plRight = (ofst.left + fld.outerWidth() - cWidth > 0); 
+
+                                me.calendar.css({
+                                    left:       (plRight) ? ofst.left + fld.outerWidth() - cWidth : ofst.left,
+                                    top:        (plBelow) ? ofst.top + fld.outerHeight() : ofst.top - cHeight,
+                                    zIndex:     Wui.maxZ()
+                                });
+                            // Otherwise clear the calendar
+                            }else{ me.calendar.remove(); me.calendar = undefined; }
+
+                            // Prevent the click from propagating
+                            return false;
                         });
-                        me.el.find('.ui-datepicker-trigger').attr({tabindex:-1});
                     },
     
     /** 
@@ -3555,6 +3654,74 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                         return finalNum;
                     },
     
+    /**
+    @param {Date} dt  A date in which month to generate the calendar. If not specified this value will fall back to the value of the Wui.Datetime element, and if not defined it will fall back to the current date.
+    Makes an HTML calendar to use as a datepicker */
+    makeCalendar:   function(dt,onSelect){
+                        var me = this,
+                            today = new Date(),
+                            calDate = dt || (me.value || today),
+                            calendar = $('<div>').addClass('wui-cal');
+
+                        calendar.append(genHTML(calDate));
+                        return calendar;
+
+                        function genHTML(genDt){
+                            var day = 1, i = 0, j = 0,
+                                month = genDt.getMonth(),
+                                year = genDt.getFullYear(),
+                                selectDy = genDt.getDate(),
+                                firstDay = new Date(year, month, 1),
+                                startingDay = firstDay.getDay(),
+                                monthLength = genDt.getDaysInMonth(),
+                                monthName = me.months[month],
+                                html = '<table wui-month="' +month+ '" wui-year="' +year+ '">';
+                            
+                            // Generate Header
+                            html += '<tr><th colspan="7"><div class="wui-cal-header">' + monthName + "&nbsp;" + year + '</div></th></tr>';
+                            html += '<tr class="wui-cal-header-day">';
+                            for (i = 0; i <= 6; i++)
+                                html += '<td>' +me.shortDays[i].substring(0,2)+ '</td>';
+                            html += '</tr><tr>';
+
+                            // Generate Days
+                            // this loop is for is weeks (rows)
+                            for (i = 0; i < 9; i++) {
+                                // this loop is for weekdays (cells)
+                                for (j = 0; j <= 6; j++) { 
+                                    html += '<td>';
+                                    if (day <= monthLength && (i > 0 || j >= startingDay))
+                                        html += '<a class="wui-cal-day">' +(day++)+ '</a>';
+                                    html += '</td>';
+                                }
+                                // stop making rows if we've run out of days
+                                if (day > monthLength)  break;
+                                else                    html += '</tr><tr>';
+                            }
+                            html += '</tr></table>';
+
+                            var tbl = $(html),
+                                header = tbl.find('.wui-cal-header');
+
+                            // Set up listeners
+                            header.append('<a class="wui-cal-prev">','<a class="wui-cal-next">');
+                            header.children('a').click(function(){
+                                var dir = $(this).hasClass('wui-cal-prev') ? -1 : 1;
+                                calendar.html('');
+                                calendar.append(genHTML(new Date(year, month + dir, today.getDate())));
+                            });
+                            
+                            if(me.value && me.value.getMonth() == month && me.value.getFullYear() == year)
+                                tbl.find('a:contains(' +selectDy+ '):first').addClass('selected');
+                            
+                            if(today.getMonth() == month && today.getFullYear() == year)
+                                tbl.find('a:contains(' +today.getDate()+ '):first').addClass('highlight');
+
+                            tbl.find('td a').click(onSelect);
+                            return tbl;
+                        }
+                    },
+
     /** 
     @param {string}    dtString   A string describing a date by any number of methods
     @return            A number
@@ -4024,830 +4191,510 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
     return inputFrm;
 };
 
-
-/**
-* jHtmlArea 0.7.5 - WYSIWYG Html Editor jQuery Plugin
-* Copyright (c) 2012 Chris Pietschmann
-* http://jhtmlarea.codeplex.com
-* Licensed under the Microsoft Reciprocal License (Ms-RL)
-* http://jhtmlarea.codeplex.com/license
-* 
-* Modified 2013 Stephen Nielsen
-*/
-$.fn.htmlarea = function (opts) {
-    if (opts && typeof (opts) === "string") {
-        var args = [];
-        for (var i = 1; i < arguments.length; i++) { args.push(arguments[i]); }
-        var htmlarea = jHtmlArea(this[0]);
-        var f = htmlarea[opts];
-        if (f) { return f.apply(htmlarea, args); }
-    }
-    return this.each(function () { jHtmlArea(this, opts); });
-};
-var jHtmlArea = window.jHtmlArea = function (elem, options) {
-    if (elem.jquery) {
-        return jHtmlArea(elem[0]);
-    }
-    if (elem.jhtmlareaObject) {
-        return elem.jhtmlareaObject;
-    } else {
-        return new jHtmlArea.fn.init(elem, options);
-    }
-};
-jHtmlArea.fn = jHtmlArea.prototype = {
-
-    // The current version of jHtmlArea being used
-    jhtmlarea: "0.7.5",
-
-    init: function (elem, options) {
-        if (elem.nodeName.toLowerCase() === "textarea") {
-            var opts = $.extend({}, jHtmlArea.defaultOptions, options);
-            elem.jhtmlareaObject = this;
-
-            var textarea = this.textarea = $(elem);
-            var container = this.container = $("<div/>").addClass("wui-html").insertAfter(textarea);
-
-            var toolbar = this.toolbar = $("<div/>").addClass("tools").appendTo(container);
-            priv.initToolBar.call(this, opts);
-
-            var iframe = this.iframe = $("<iframe/>");
-            var htmlarea = this.htmlarea = $("<div/>").append(iframe);
-
-            container.append(htmlarea).append(textarea.hide());
-
-            priv.initEditor.call(this, opts);
-            priv.attachEditorEvents.call(this);
-
-            // Fix total height to match TextArea
-            iframe.height(iframe.height() - toolbar.height());
-            
-            toolbar.width(textarea.width() - 2);
-
-            if (opts.loaded) { opts.loaded.call(this); }
-        }
-    },
-    dispose: function () {
-        this.textarea.show().insertAfter(this.container);
-        this.container.remove();
-        this.textarea[0].jhtmlareaObject = null;
-    },
-    execCommand: function (a, b, c) {
-        this.iframe[0].contentWindow.focus();
-        this.editor.execCommand(a, b || false, c || null);
-        this.updateTextArea();
-    },
-    ec: function (a, b, c) {
-        this.execCommand(a, b, c);
-    },
-    queryCommandValue: function (a) {
-        this.iframe[0].contentWindow.focus();
-        return this.editor.queryCommandValue(a);
-    },
-    qc: function (a) {
-        return this.queryCommandValue(a);
-    },
-    getSelectedHTML: function () {
-        var r = this.getRange();
-        if(r.htmlText)    return r.htmlText;
-        else            return $('<p>').append($(r.cloneContents())).html();
-    },
-    getSelection: function () {
-        if (this.editor.selection)    return this.editor.selection;
-        else                        return this.iframe[0].contentDocument.defaultView.getSelection();
-    },
-    getRange: function () {
-        var s = this.getSelection();
-        if (!s) { return null; }
-        return (s.getRangeAt) ? s.getRangeAt(0) : s.createRange();
-    },
-    html: function (v) {
-        if (v) {
-            this.textarea.val(v);
-            this.updateHtmlArea();
-        } else {
-            return this.toHtmlString();
-        }
-    },
-    pasteHTML: function (html) {
-        this.iframe[0].contentWindow.focus();
-        var r = this.getRange();
-        if (r.pasteHTML) {
-            r.pasteHTML(html);
-        }else{
-            r.deleteContents();
-            r.insertNode($((html.indexOf("<") !== 0) ? $("<span/>").append(html) : html)[0]);
-        }
-        /* TODO: TEST THAT THIS PROC WORKS IN WEBKIT WITHOUT THIS CODE!!
-        else { // Safari
-            r.deleteContents();
-            r.insertNode($(this.iframe[0].contentWindow.document.createElement("span")).append($((html.indexOf("<") != 0) ? "<span>" + html + "</span>" : html))[0]);
-        }*/
-        r.collapse(false);
-        r.select();
-    },
-    bold: function () { this.ec("bold"); },
-    italic: function () { this.ec("italic"); },
-    underline: function () { this.ec("underline"); },
-    strikeThrough: function () { this.ec("strikethrough"); },
-    removeFormat: function () {
-        this.ec("removeFormat", false, []);
-        this.unlink();
-    },
-    link: function () {
-        if (this.getRange().htmlText)    this.ec("createLink", true);
-        else                            this.ec("createLink", false, prompt("Link URL:", "http://"));
-    },
-    unlink: function () { this.ec("unlink", false, []); },
-    unorderedList: function () { this.ec("insertunorderedlist"); },
-    orderedList: function () { this.ec("insertorderedlist"); },
-    justifyLeft: function () { this.ec("justifyLeft"); },
-    justifyCenter: function () { this.ec("justifyCenter"); },
-    justifyRight: function () { this.ec("justifyRight"); },
-    formatBlock: function (v) { this.ec("formatblock", false, v || null); },
-    showHTMLView: function () {
-        this.updateTextArea();
-        this.textarea.show();
-        this.htmlarea.hide();
-        $("ul li:not(li:has(a.html))", this.toolbar).hide();
-        $("ul:not(:has(:visible))", this.toolbar).hide();
-        $("ul li a.html", this.toolbar).addClass("highlighted");
-        this.container.css({height:'auto'});
-        this.textarea.css({paddingBottom:'28px'});
-    },
-    hideHTMLView: function () {
-        this.updateHtmlArea();
-        this.textarea.hide();
-        this.htmlarea.show();
-        $("ul", this.toolbar).show();
-        $("ul li", this.toolbar).show().find("a.html").removeClass("highlighted");
-    },
-    toggleHTMLView: function () {
-        if(this.textarea.is(":hidden")) this.showHTMLView();
-        else                            this.hideHTMLView();
-    },
-
-    toHtmlString: function () {
-        return $.trim(this.editor.body.innerHTML
-                .replace(/MsoNormal/gi, "")
-                .replace(/<\/?link[^>]*>/gi, "")
-                .replace(/<\/?meta[^>]*>/gi, "")
-                .replace(/<\/?xml[^>]*>/gi,"")
-                .replace(/<\?xml[^>]*\/>/gi, "")
-                .replace(/<!--(.*)-->/gi, "")
-                .replace(/<!--(.*)>/gi, "")
-                .replace(/<!(.*)-->/gi, "")
-                .replace(/<w:[^>]*>(.*)<\/w:[^>]*>/gi, "")
-                .replace(/<w:[^>]*\/>/gi, "")
-                .replace(/<\/?w:[^>]*>/gi, "")
-                .replace(/<m:[^>]*\/>/gi, "")
-                .replace(/<m:[^>]>(.*)<\/m:[^>]*>/gi, "")
-                .replace(/<o:[^>]*>([.|\s]*)<\/o:[^>]*>/gi, "")
-                .replace(/<o:[^>]*>/gi, "")
-                .replace(/<o:[^>]*\/>/gi, "")
-                .replace(/<\/o:[^>]*>/gi, "")
-                .replace(/<\/?m:[^>]*>/gi, "")
-                .replace(/style=\"([^>]*)\"/gi, "")
-                .replace(/style=\'([^>]*)\'/gi, "")
-                .replace(/class=\"(.*)\"/gi, "")
-                .replace(/class=\'(.*)\'/gi,"")
-                .replace(/<p[^>]*>/gi, "<p>")
-                .replace(/<\/p[^>]*>/gi, "</p>")
-                .replace(/<span[^>]*>/gi, "")
-                .replace(/<\/span[^>]*>/gi, "")
-                .replace(/<st1:[^>]*>/gi, "")
-                .replace(/<\/st1:[^>]*>/gi, "")
-                .replace(/<font[^>]*>/gi, "")
-                .replace(/<\/font[^>]*>/gi, "")
-                .replace(/[\r\n]/g, " ")
-                .replace(/<wordPasteong><\/wordPasteong>/gi, "")
-                .replace(/<p><\/p>/gi, "").replace(/\/\*(.*)\*\//gi, "")
-                .replace(/<!--/gi, "")
-                .replace(/-->/gi, "")
-                .replace(/<style[^>]*>[^<]*<\/style[^>]*>/gi, "")
-                .replace(/<hr>/gi, ""));
-    },
-    toString: function () {
-        return this.editor.body.innerText;
-    },
-
-    updateTextArea: function () {
-        this.textarea.val(this.toHtmlString());
-        this.textarea.change();
-    },
-    updateHtmlArea: function () {
-        this.editor.body.innerHTML = this.textarea.val();
-    }
-};
-jHtmlArea.fn.init.prototype = jHtmlArea.fn;
-
-jHtmlArea.defaultOptions = {
-    toolbar: [
-    ["bold", "italic", "underline", "link", "unlink", "strikethrough", "orderedlist", "unorderedlist"],
-    ["justifyleft", "justifycenter", "justifyright"]
-],
-    css: null,
-    toolbarText: {
-        bold : "Bold",
-        italic : "Italic",
-        underline : "Underline",
-        strikethrough : "Strike-Through",
-        justifyleft : "Left Justify",
-        justifycenter : "Center Justify",
-        justifyright : "Right Justify",
-        link : "Insert Link",
-        unlink : "Remove Link",
-        unorderedlist : "Insert Unordered List",
-        orderedlist : "Insert Ordered List",
-        html : "Show/Hide HTML Source View"
-    }
-};
-var priv = {
-    toolbarButtons: {
-        strikethrough : "strikeThrough",
-        unorderedlist : "unorderedList",
-        orderedlist : "orderedList",
-        justifyleft : "justifyLeft",
-        justifycenter : "justifyCenter",
-        justifyright : "justifyRight",
-        html : function(btn) {
-            this.toggleHTMLView();
-        }
-    },
-    initEditor: function (options) {
-        var edit = this.editor = this.iframe[0].contentWindow.document;
-        edit.designMode = 'on';
-        edit.open();
-        edit.write(this.textarea.val());
-        edit.close();
-        if (options.css)  $('head',edit).append($('<style>').attr({type:'text/css'}).text(options.css));
-    },
-    initToolBar: function (options) {
-        var that = this;
-
-        var menuItem = function (className, altText, action) {
-            return $("<li/>").append($('<a href="javascript:void(0);" tabindex="-1"/>').addClass(className).attr("title", altText).click(function () { action.call(that, $(this)); }));
-        };
-
-        function addButtons(arr) {
-            var ul = $("<ul/>").appendTo(that.toolbar);
-            for (var i = 0; i < arr.length; i++) {
-                var e = arr[i];
-                if ((typeof (e)).toLowerCase() === "string") {
-                    if (e === "|") {
-                        ul.append($('<li class="separator"/>'));
-                    } else {
-                        var f = (function (e) {
-                            // If button name exists in priv.toolbarButtons then call the "method" defined there, otherwise call the method with the same name
-                            var m = priv.toolbarButtons[e] || e;
-                            if ((typeof (m)).toLowerCase() === "function") {
-                                return function (btn) { m.call(this, btn); };
-                            } else {
-                                return function () { this[m](); this.editor.body.focus(); };
-                            }
-                        })(e.toLowerCase());
-                        var t = options.toolbarText[e.toLowerCase()];
-                        ul.append(menuItem(e.toLowerCase(), t || e, f));
-                    }
-                } else {
-                    ul.append(menuItem(e.css, e.text, e.action));
-                }
-            }
-        }
-        
-        if (options.toolbar.length !== 0 && priv.isArray(options.toolbar[0])) {
-            for (var i = 0; i < options.toolbar.length; i++) {
-                addButtons(options.toolbar[i]);
-            }
-        } else {
-            addButtons(options.toolbar);
-        }
-    },
-    attachEditorEvents: function () {
-        var t = this;
-        function showToolbar(e){ t.toolbar.css('opacity',100 * (e.type != 'blur' ? 1 : 0)); }
-        function fnHA(e) {
-            t.updateHtmlArea();
-            showToolbar(e);
-        }
-        function fnTA(e) {
-            t.updateTextArea();
-            showToolbar(e);
-        }
-        
-        this.textarea.click(fnHA).
-            keyup(fnHA).
-            keydown(fnHA).
-            mousedown(fnHA).
-            blur(fnHA);
-
-        $(this.editor).focus(fnTA).
-            click(fnTA).
-            keyup(fnTA).
-            keydown(fnTA).
-            mousedown(fnTA).
-            blur(fnTA);
-    },
-    isArray: function (v) {
-        return v && typeof v === 'object' && typeof v.length === 'number' && typeof v.splice === 'function' && !(v.propertyIsEnumerable('length'));
-    }
-};
-
 })(jQuery,Wui);
 
-(function($,Wui) {
 
-/** 
-@event        tabchange When a tab changes (tab pane, tab button, tab item)
-@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-Tab pane
-*/
-Wui.Tabs = function(args){ 
-    $.extend(this,{
-        /** An array of items that will be added to the footer */
-        bbar:   [],
-        
-        /** An array of items that will be added to the content */
-        items:    [],
-        
-        /** Tabs default to the right side of the pane unless this is true. */
-        tabsLeft:    false,
-        
-        /** A place holder for the currently selected tab. */
-        currentTab:    null,
-        
-        /** Whether to put the tabs on the header or the footer. */
-        tabsBottom:        false,
-        
-        /** Config to place on child items of WUI tabs to make their heading not show up */
-        tabsHideHeader: null,
-        
-        /** An array of items that will be added to the header */
-        tbar:    []
-    },args); 
-    this.init();
-};
-Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
-    /** Method that will run immediately when the object is constructed. Lays out targets. */
-    init:            function(){
-                        if(this.title === null)    this.title = '';
-                        Wui.Pane.prototype.init.call(this);
-                    },
-    
-    /** Overrides Wui.place(). Creates a Wui.Button as a tab for each item. */
-    place:          function(){
-                        var me = this;
-                        
-                        me.el.addClass('wui-tabs');
-                        
-                        //adds the objects items if any
-                        if(me.items === undefined) me.items = [];
-                        $.each(me.items,function(idx,itm){
-                            itm.tabCls =    'wui-tab ' +
-                                            ((itm.tabCls) ? ' ' + itm.tabCls : '') +
-                                            ((me.tabsLeft) ? ' left' : '');
-                            
-                            if(itm.tabsHideHeader){
-                                itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
-                                itm.el.addClass('wui-hide-heading');
-                            }
-                            
-                            me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
-                                text:    itm.title || 'Tab ' + (parseInt(idx) + 1),
-                                click:    function(){ 
-                                            me.giveFocus(itm);
-                                            if(itm.layout && typeof itm.layout === 'function')    itm.layout();
+(function($, window, Wui) {
+
+/**
+WUI State Machine
+
+The WUI state machine allows for helping the browser to keep a history of the state of a javascript application by utilizing 
+text in the URL after the hash ('#'). The WUI state machine follows this format:
+
+In the hash (as a string):          <view 1>?<param1>=<param1 value>&<param2>=<param2 value>/<view 2>?<param1>=<param2 value>
+
+...or without the placeholders:     adminView?pic=one&id=57/adminWindow?info=salary
+
+In the state machine (as an array): [
+                                        {
+                                            view:   'adminView', 
+                                            params: { pic:one, id:57 }
                                         },
-                                cls:    itm.tabCls
-                            }));
-                            if(me.bbar.length !== 0) me.placeFooter();
-                        });
-                        
-                        return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
-                    },
-    
-    /** 
-    @param {object} itm A WUI Object that will be matched in the items array. 
-    @param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
-    
-    Sets the specified tab to active. Runs layout on the newly activated item.
-    */
-    giveFocus:        function(tab, supressEvent){
-                        var me = this;
-      
-                        supressEvent = (supressEvent !== undefined) ? supressEvent : false;
-                        
-                        $.each(me.items,function(idx,itm){
-                            var isActive = itm === tab;
-                            itm.tab.el.toggleClass('selected', isActive);
-                            itm.el.toggleClass('active', isActive);
-                            if(isActive){
-                                me.currentTab = itm;
-                                itm.layout();
-                            }
-                            if(!supressEvent && isActive)
-                                me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
-                        });
-                    },
-    
-    /** 
-    @param {string} txt The text of the tab button
-    @param {[boolean]} supressEvent Determines whether to fire an event when the tab gets focus
-    @return The tab that was selected or undefined if the text didn't match any tabs
-    
-    Gives focus to the tab with text that matches the value of txt. Strings with underscores
-    are converted to spaces (eg. 'conferences_detail' = 'conferences detail')
-    */
-    selectTabByText:function(txt, supressEvent){
-                        var me = this, retVal = undefined;
-                        $.each(me.items,function(idx,itm){
-                            if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
-                                me.giveFocus(itm, supressEvent);
-                                retVal = itm;
-                            }
-                        });
-                        return retVal;
-                    },
-    onRender:        function(){
-                        this.giveFocus(this.items[0]);
-                    }
-});
-
-
-/** 
-@event          select          When a record is clicked (grid, row el, record)
-@event          dblclickrecord  When a record is  double clicked clicked (grid, row el, record)
-@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-
-The grid pane provides table-like functionality for data sets. Grids can be populated remotely
-or have their data locally defined. Grids also support infinite scrolling by defining paging
-parameters. Columns for the grid are defined in an array and with the following options:
-
-heading         - The title of the column heading
-cls             - A special class to add to the column
-vertical        - Makes the column text oriented vertical and the column height at 150px
-dataType        - The type of data used in the column (used for sorting)
-dataItem        - The item in the record that correlates to this column
-dataTemplate    - Sort of a full on renderer, this allows you to format inserted data similar to
-                  what is available in Wui.Template
-width           - A pixel value for the width of the column
-fit             - A numeric indicator of the relative size of the column
-
-Custom renderers can be applied to columns.  These renderers are defined as function that can
-either be defined in the column definition, or defined elsewhere in scope and simply named by
-a string. The rendering function is defined passed the following parameters as below:
-
-renderer: function(grid, cell, value, record, row){}
-
-Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
-descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
-is possible with the a number indicating the precedence of the sort and an arrow for the direction of the sort 
-appearing on the right side of the column heading.
-
-Columns can be resized by dragging the heading borders left and right. Columns can be sized to 
-extend beyond the width of the grid frame, but when sized smaller will pop back into position.
-
-While not using Wui.fit(), the same principles apply in the sizing of elements, although percentage
-values are not supported at this time.
+                                        {
+                                            view:   'adminWindow', 
+                                            params: { info:salary }
+                                        }
+                                    ]
+                                        
+The hashchange event is written by:
+Copyright (c) 2010 "Cowboy" Ben Alman,
+Dual licensed under the MIT and GPL licenses.
+http://benalman.com/about/license/
 */
-Wui.Grid = function(args){
-    $.extend(this,{
-        /** Array of items that will be added to the footer. */
-        bbar:           [],
-        
-        /** Array of items that will make up the columns of the grid table. */
-        columns:         [],
-        
-        /** URL to get columns if its a dynamic grid */
-        colUrl:            null,
-        
-        /** Params to pass for columns on a dynamic grid */
-        colParams:        {},
-        
-        /** Array of data for the grid. */
-        data:            null,
-        
-        /** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
-        defaultDataType:'string',
-        
-        /** Whether multiple rows/records can be selected at once. */
-        multiSelect:    false,
-        
-        /** Whether or not to hide the column headers */
-        hideHeader:        false,
-        
-        /** An array of the currently selected records */
-        selected:        [],
-        
-        /** An array of items that will be added to the header */
-        tbar:           []
-    },args); 
-    this.init();
-};
-Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
-    /** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
-    afterMake:    function(){
-                    this.sizeCols();
-                    this.removeMask();
-                },
-    
-    /** 
-    Recursive function for sorting on multiple columns @private
-    @param {number}    depth    Depth of the recursive call
-    @param {number}    a        First item to compare
-    @param {number}    b        Second item to compare
-    
-    @return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+Wui.stateMachine = function(args){ $.extend(this, {
+    /** Placeholder for functions passed in using setChangeAction */
+    changeMethod:    function(){}
+},args); };
+Wui.stateMachine.prototype = {
+    /**
+    @param    {string|array}    state    A string or an array describing the state of the page
+    @return The state that was just set on the page.
+    Sets the state passed in to the window.location as a string. State arrays passed in are converted.
     */
-    doSort:            function(depth,a,b){
-                        var me = this;
-                        if(me.sorters.length > 0){
-                            var col = me.sorters[depth],
-                                compA = a.rec[col.dataItem],
-                                compB = b.rec[col.dataItem];
-                                
-                            //get the direction of the second sort
-                            var srtVal = (col.sortDir == 'asc') ? 1 : -1;
+    setState:        function(state){
+                        var url            = window.location.href.split('#'),
+                            preHash        = url[0] + '#',
+                            setState    = preHash;
                             
-                            // perform the comparison based on 
-                            var compare = 0;
-                            switch(col.dataType){
-                                case 'date':
-                                    compA = new Date(compA);
-                                    compB = new Date(compB);
-                                    compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
-                                    break;
-                                case 'numeric':
-                                    compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
-                                    compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
-                                    compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
-                                    break;
-                                default:
-                                    compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
+                            // Objects passed in are parsed according to a strict format of 
+                            // firstView?param1=1/anotherView?param1=1&param2=2 ...
+                            if(state && typeof state === 'object'){
+                                setState = preHash + this.stringify(state);
+                            // If a string is passed in just pass it along
+                            }else if(state && typeof state === 'string'){
+                                setState = preHash + state;
                             }
                             
-                            if(compare !== 0 || me.sorters[depth + 1] === undefined)    return compare * srtVal;
-                            else                                                    return me.doSort(depth + 1,a,b);
-                        }else{
-                            return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
-                        }
+                        return window.location = setState;
                     },
-                    
-    /** Verify that columns have been defined on the grid, or that they are available remotely */
-    getColumns: function(){
-                    var me = this;
-                    
-                    if(me.colUrl && me.colUrl.length){
-                        // Make remote call for columns
-                        me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
-                        me.colProxy.loadData();
-                    }else if(me.columns.length){
-                        // Check for locally defined columns
-                        me.setColumns(me.columns);
-                    }else{
-                        //throw('There are no columns defined for this WUI Grid.');
-                    }
-                        
-                },
     
-    /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
-    init:        function(){
-                    var me = this;
-                    
-                    // Set up container
-                    Wui.Pane.prototype.init.call(me);
-                    me.el.addClass('wui-grid');
-
-                    // Add grid specific DOM elements and reset elAlias
-                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
-                    me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh').appendTo(me.elAlias);
-                    me.elAlias = me.tbl = me.tblContainer.children('table');
-                    me.heading = me.headingContainer.children('ul');
-                    
-                    // columns and sorting on multiple columns
-                    me.cols = [];
-                    me.sorters = [];
-                    
-                    // hide the header
-                    if(me.hideHeader)    me.headingContainer.height(0);
-                },
-    
-    /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
-    layout:            function(){
-                        Wui.O.prototype.layout.call(this);
-                        this.posDataWin();
-                        if(this.cols.length)
-                            this.sizeCols();
-                    },
-                    
-    /** Overrides DataList.loadData(), to add the load mask */   
-    loadData:    function(){
-                    this.setMaskHTML('Loading <span class="wui-spinner"></span>');
-                    this.addMask();
-                    Wui.Data.prototype.loadData.apply(this,arguments);
-                },            
-    
-    /** 
-    @param    {object}    col    An object containing the sort direction and DOM element of the heading
-    @param    {string}    dir    The direction of the sort
-    Manages the sorters for the grid by keeping them in an array. 
+    /**
+    @param    {array}    stateArray    An array containing objects that describe a WUI state
+    @return A WUI state string.
+    State arrays passed in are converted to a WUI state string suitable for being used as hash text.
     */
-    mngSorters:        function(col,dir){
-                        var me = this,
-                            sortClasses = ['one','two','three','four','five'];
-                        if(dir !== undefined){
-                            col.sortDir = dir;
-                            me.sorters.push(col);
-                        }else{
-                            if(col.sortDir){
-                                if(col.sortDir == 'desc'){
-                                    delete col.sortDir;
-                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-                                    
-                                    $.each(me.sorters,function(i,itm){
-                                        if(itm == col)    me.sorters.splice(i,1);
-                                    });
-                                }else{
-                                    col.sortDir = 'desc';
-                                }
-                            }else{
-                                // Can't sort on more than 5 columns
-                                if(me.sorters.length > 5){
-                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-                                    return false;
-                                }
-                                
-                                col.sortDir = 'asc';
-                                me.sorters.push(col);
-                            }
-                        }
-                            
-                        $.each(me.sorters,function(i,itm){
-                            itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
-                        });
-                    },
-    
-    /** Overrides DataList.modifyItem(), to implement the renderers */        
-    modifyItem:    function(itm){
-                    var me = this;
-                    // Perform renderers (if any)
-                    $.each(me.renderers,function(idx, r){
-                        var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
-                            val = itm.rec[r.dataItem];
+    stringify:        function(stateArray){
+                        var stateStr    = '';
                         
-                        cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el));
-                    });
-                    return itm.el;
-                },
-    
-    /** Overrides DataList.onRender(), to have the grid wait for columns before loading data while still preserving the set autoLoad value. */   
-    onRender:    function(){
-                    // Store the real value of autoLoad, but set it to false so that the grid waits for the columns
-                    // before loading data.
-                    var me = this, al = me.autoLoad;
-                    me.autoLoad = false;
-                    
-                    //Wui.Pane.prototype.onRender.call(this);
-                    Wui.DataList.prototype.onRender.call(this);
-                    
-                    // Start with getting the columns - Many methods waterfall from here
-                    me.autoLoad = al;
-                    this.getColumns();
-                },
-    
-    /** Positions the height and width of the data table's container @private */
-    posDataWin:        function(){
-                        var hh = this.headingContainer.height() - 1;
-                        this.tblContainer.css({height:this.container.height() - hh, top:hh});
-                    },
-    
-    /** Overrides DataList.refresh() to add disabling the grid to add the load mask */
-    refresh:        function(){
-                        if(this.url === null)    this.setData(this.data);
-                        else                    this.getColumns();
-                    },    
+                        for(var i in stateArray){
+                            // Get keys in alphabetical order so that comparing states works
+                            var keys = Wui.getKeys(stateArray[i].params);
 
-    /** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
-    render/reference columns. The append the column to the DOM */            
-    renderColumn:function(col,idx){
-                    var me = this;
-                    
-                    $.extend(col,{
-                        dataType:    col.dataType || me.defaultDataType,
-                        fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
-                        cls:        col.cls || '',
-                        renderer:    (col.renderer) ?    (function(a){
-                                                            // Handles renderer if it exists
-                                                            if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
-                                                                a = new Function('return ' + a + '.apply(this,arguments)');
-                                                            if(typeof a === 'function')
-                                                                me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
-                                                        })(col.renderer) : '',
-                        index:        idx,
-                        width:        col.width === undefined ? 0 : col.width,
-                        el:            $('<li>')
-                                    .append($('<div>').text(col.heading))
-                                    .attr({unselectable:'on'})
-                                    .addClass('wui-gc ' + col.cls)
-                                    .click(function(){ me.sortList(col); })
-                    });
-                    
-                    //grids with single columns shouldn't have a resizable option
-                    if(me.columns.length > 1){
-                        col.el.resizable({
-                            handles:    'e',
-                            stop:    function(){me.sizeCols();},
-                            resize: function(event,ui){
-                                        col.width = ui.size.width;
-                                        col.fit = 0;
-                                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
-                                    },
-                        });
-                    }
-                    
-                    me.cols.push(col);
-                    
-                    // Append newly created el to the DOM
-                    me.heading.append(col.el);
-                },
-    
-    /** Ensures that columns have all of the proper information */
-    setColumns: function(cols){
-                    var me = this;
-                    
-                    // clear column list
-                    me.columns = cols;
-                    me.heading.empty();
-                    me.cols = [];
-                    me.items = [];
-                    me.renderers = [];
-                    
-                    // clear template
-                    me.template = '<tr class="{((wuiIndex % 2 == 0) ? \'even\' : \'odd\')}">';
-                    
-                    // apply columns on grid
-                    $.each(cols,function(i,col){
-                        // Add to the template string based on column info
-                        var tpltItem = (col.dataTemplate) ? col.dataTemplate : ((col.dataItem) ? '{' +col.dataItem+ '}' : '');
-                        me.template += '<td><div>' +tpltItem+ '</div></td>';
-                        
-                        // Deal with vertical columns - forces them to be 48px wide
-                        if(col.vertical){
-                            me.el.addClass('has-vert-columns');
-                            if(col.cls)    col.cls += ' vert-col';
-                            else        col.cls = 'vert-col';
+                            // State the location
+                            stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
                             
-                            col.width = 50;
-                            delete col.fit;
+                            for(var j = 0; j < keys.length; j++)
+                                stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
                         }
                         
-                        // Add column to cols array
-                        me.renderColumn(col,i);
-                    });
-                    
-                    // finish template
-                    me.template += '</tr>';
-                    
-                    if(me.autoLoad){
-                        if(me.url === null)    me.setData(me.data);
-                        else                me.loadData();
-                    }
-                },
-                
-    /** Size up the columns of the table to match the headings @private */
-    sizeCols:        function (){
-                        var me = this;
-                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
-                        me.tbl.css({width:'1px'});
-                        for(var i = 0; i < me.cols.length; i++){
-                            me.tbl.find('td:eq(' +i+ ')').css({width:me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0)}); // account for table borders
-                        }
+                        return stateStr;
+                    },
+    
+    /**
+    @return A WUI state machine formatted array.
+    Gets the hash text of the URL and converts it to a WUI state array.
+    */
+    getState:        function(){
+                        var state = [];
+                        
+                        window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
+                            var itm = {};
+                            viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
+                                itm[key] = val;
+                                return '';
+                            });
+                            state.push({view:viewarea, params:itm});
+                        });
+                        
+                        return state;
+                    },
+    
+    /**
+    @param    {string}    target    The view from which to retrieve the parameter.
+    @param    {string}    key        The name of the parameter to retrieve.
+    @return The value of a hash parameter or undefined.
+    Returns a parameter value for a specified target view and parameter key.
+    */
+    getParam:        function(target,key){
+                        var state    = this.getState(),
+                            val        = undefined;
+                            
+                        for(var i in state)
+                            if(state[i].view === target && state[i].params[key])    return state[i].params[key];
+
+                        return val;
                     },
                     
     /**
-    @param    {object}    Column object associated with a particular column element
-    Sort the grid based on the values of one or more columns. If the grid is paging
-    then sort remotely.
+    @param    {string}        target    The view on which to set the parameter.
+    @param    {string}        key        The name of the parameter to set.
+    @param    {string|number}    value    The value of the parameter
+    @return The value passed in, or undefined if setting the parameter failed.
+    Set a hash parameter within certain view.
     */
-    sortList:        function(col) {
-                        var me = this;
+    setParam:        function(target,key, value){
+                        var state    = this.getState();
+                            
+                        for(var i in state){
+                            if(state[i].view === target && state[i].params[key]){
+                                state[i].params[key] = value;
+                                this.setState(state);
+                                return value;
+                            }    
+                        }
                         
-                        me.mngSorters(col);
-                        
-                        // Sort the list
-                        var listitems = me.items;
-                        listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+                        return undefined;
+                    },
+    
+    /**
+    @param    {string}    oldView        Name of the view to change.
+    @param    {string}    newView        New name of the view.
+    Changes a view in place leaving the parameters
+    */
+    changeView:        function(oldView,newView){
+                        var state = this.getState();
+                        for(var i in state)
+                            if(state[i].view === oldView)
+                                state[i].view = newView;
+                        this.setState(state);
+                    },
+                    
+    /**
+    @param    {string}    viewName    Name of the view
+    @param    {object}    [params]    An object containing key value pairs
+    Sets a single view and associated parameters on the URL.
+    */                
+    setView:        function(viewName,params){
+                        var newState = [{view:viewName}];
+                        if(params) newState[0].params = params;
+                        this.setState(newState);
+                    },
+    
+    /**
+    @return    An array of views on the hash.
+    Gets all of the available views of the URL
+    */
+    getViews:        function(){
+                        // Lists all of the views
+                        var state = this.getState(),
+                            retArr = [];
+                            
+                        for(var i = 0; i < state.length; i++)
+                            retArr.push(state[i].view);
 
-                        me.tbl.detach();
-                        // Place items and reset alternate coloring
-                        $.each(listitems, function(idx, row) { 
-                            var isEven = idx % 2 === 0;
-                            row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
+                        return retArr;
+                    },
+                    
+    /** Sets a blank hash */
+    clearState:        function(){ this.setState(); },
+    
+    /**
+    @param {function} fn Function to perform when the state of the URL changes.
+    Sets me.changeMentod 'hashchange' listener function on the window for when the URL changes and 
+    passes that function a WUI state array. If a changeMethod has already been defined, the new method
+    will contain calls to both the old changeMethod and the new one.
+    */
+    addChangeMethod:function(fn){ 
+                        var me = this,
+                            state = me.getState(),
+                            oldChange = me.changeMethod;
+                            
+                        me.changeMethod = function(args){
+                            oldChange(args);
+                            fn(args);
+                        };
+                            
+                        $(window).off('hashchange').on('hashchange', function(){
+                            me.changeMethod.call(me,state);
                         });
-                        me.tbl.appendTo(me.tblContainer);
+                    },
+                    
+    /** Removes the 'hashchange' listener, and clears out me.changeMethod effectively turning off the state machine. */
+    turnOff:        function(){ this.changeMethod = function(){}; $(window).off('hashchange'); }
+};
 
-                        me.sizeCols();
-                        me.resetSelect();
-                    }
+}(jQuery, this, Wui));
+
+
+/*!
+ * jQuery hashchange event - v1.3 - 7/21/2010
+ * http://benalman.com/projects/jquery-hashchange-plugin/
+ * 
+ * Copyright (c) 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ */
+
+// Script: jQuery hashchange event
+//
+// *Version: 1.3, Last updated: 7/21/2010*
+// 
+// Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
+// GitHub       - http://github.com/cowboy/jquery-hashchange/
+// Source       - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.js
+// (Minified)   - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js (0.8kb gzipped)
+// 
+// About: License
+// 
+// Copyright (c) 2010 "Cowboy" Ben Alman,
+// Dual licensed under the MIT and GPL licenses.
+// http://benalman.com/about/license/
+// 
+// About: Examples
+// 
+// These working examples, complete with fully commented code, illustrate a few
+// ways in which this plugin can be used.
+// 
+// hashchange event - http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/
+// document.domain - http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/
+// 
+// About: Support and Testing
+// 
+// Information about what version or versions of jQuery this plugin has been
+// tested with, what browsers it has been tested in, and where the unit tests
+// reside (so you can test it yourself).
+// 
+// jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
+// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 5-6, Safari 3.2-5,
+//                   Opera 9.6-10.60, iPhone 3.1, Android 1.6-2.2, BlackBerry 4.6-5.
+// Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
+// 
+// About: Known issues
+// 
+// While this jQuery hashchange event implementation is quite stable and
+// robust, there are a few unfortunate browser bugs surrounding expected
+// hashchange event-based behaviors, independent of any JavaScript
+// window.onhashchange abstraction. See the following examples for more
+// information:
+// 
+// Chrome: Back Button - http://benalman.com/code/projects/jquery-hashchange/examples/bug-chrome-back-button/
+// Firefox: Remote XMLHttpRequest - http://benalman.com/code/projects/jquery-hashchange/examples/bug-firefox-remote-xhr/
+// WebKit: Back Button in an Iframe - http://benalman.com/code/projects/jquery-hashchange/examples/bug-webkit-hash-iframe/
+// Safari: Back Button from a different domain - http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/
+// 
+// Also note that should a browser natively support the window.onhashchange 
+// event, but not report that it does, the fallback polling loop will be used.
+// 
+// About: Release History
+// 
+// 1.3   - (7/21/2010) Reorganized IE6/7 Iframe code to make it more
+//         "removable" for mobile-only development. Added IE6/7 document.title
+//         support. Attempted to make Iframe as hidden as possible by using
+//         techniques from http://www.paciellogroup.com/blog/?p=604. Added 
+//         support for the "shortcut" format $(window).hashchange( fn ) and
+//         $(window).hashchange() like jQuery provides for built-in events.
+//         Renamed jQuery.hashchangeDelay to <jQuery.fn.hashchange.delay> and
+//         lowered its default value to 50. Added <jQuery.fn.hashchange.domain>
+//         and <jQuery.fn.hashchange.src> properties plus document-domain.html
+//         file to address access denied issues when setting document.domain in
+//         IE6/7.
+// 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
+//         from a page on another domain would cause an error in Safari 4. Also,
+//         IE6/7 Iframe is now inserted after the body (this actually works),
+//         which prevents the page from scrolling when the event is first bound.
+//         Event can also now be bound before DOM ready, but it won't be usable
+//         before then in IE6/7.
+// 1.1   - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug
+//         where browser version is incorrectly reported as 8.0, despite
+//         inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.
+// 1.0   - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special
+//         window.onhashchange functionality into a separate plugin for users
+//         who want just the basic event & back button support, without all the
+//         extra awesomeness that BBQ provides. This plugin will be included as
+//         part of jQuery BBQ, but also be available separately.
+
+(function($,window,undefined){
+
+'$:nomunge'; // Used by YUI compressor.
+
+// Reused string.
+var str_hashchange = 'hashchange',
+
+// Method / object references.
+doc = document,
+fake_onhashchange,
+special = $.event.special,
+
+// Does the browser support window.onhashchange? Note that IE8 running in
+// IE7 compatibility mode reports true for 'onhashchange' in window, even
+// though the event isn't supported, so also test document.documentMode.
+doc_mode = doc.documentMode,
+supports_onhashchange = 'on' + str_hashchange in window && ( doc_mode === undefined || doc_mode > 7 );
+
+// Get location.hash (or what you'd expect location.hash to be) sans any
+// leading #. Thanks for making this necessary, Firefox!
+function get_fragment( url ) {
+url = url || location.href;
+return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
+}
+
+// Method: jQuery.fn.hashchange
+// 
+// Bind a handler to the window.onhashchange event or trigger all bound
+// window.onhashchange event handlers. This behavior is consistent with
+// jQuery's built-in event handlers.
+// 
+// Usage:
+// 
+// > jQuery(window).hashchange( [ handler ] );
+// 
+// Arguments:
+// 
+//  handler - (Function) Optional handler to be bound to the hashchange
+//    event. This is a "shortcut" for the more verbose form:
+//    jQuery(window).bind( 'hashchange', handler ). If handler is omitted,
+//    all bound window.onhashchange event handlers will be triggered. This
+//    is a shortcut for the more verbose
+//    jQuery(window).trigger( 'hashchange' ). These forms are described in
+//    the <hashchange event> section.
+// 
+// Returns:
+// 
+//  (jQuery) The initial jQuery collection of elements.
+
+// Allow the "shortcut" format $(elem).hashchange( fn ) for binding and
+// $(elem).hashchange() for triggering, like jQuery does for built-in events.
+$.fn[ str_hashchange ] = function( fn ) {
+return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
+};
+
+// Property: jQuery.fn.hashchange.delay
+// 
+// The numeric interval (in milliseconds) at which the <hashchange event>
+// polling loop executes. Defaults to 50.
+
+// Property: jQuery.fn.hashchange.domain
+// 
+// If you're setting document.domain in your JavaScript, and you want hash
+// history to work in IE6/7, not only must this property be set, but you must
+// also set document.domain BEFORE jQuery is loaded into the page. This
+// property is only applicable if you are supporting IE6/7 (or IE8 operating
+// in "IE7 compatibility" mode).
+// 
+// In addition, the <jQuery.fn.hashchange.src> property must be set to the
+// path of the included "document-domain.html" file, which can be renamed or
+// modified if necessary (note that the document.domain specified must be the
+// same in both your main JavaScript as well as in this file).
+// 
+// Usage:
+// 
+// jQuery.fn.hashchange.domain = document.domain;
+
+// Property: jQuery.fn.hashchange.src
+// 
+// If, for some reason, you need to specify an Iframe src file (for example,
+// when setting document.domain as in <jQuery.fn.hashchange.domain>), you can
+// do so using this property. Note that when using this property, history
+// won't be recorded in IE6/7 until the Iframe src file loads. This property
+// is only applicable if you are supporting IE6/7 (or IE8 operating in "IE7
+// compatibility" mode).
+// 
+// Usage:
+// 
+// jQuery.fn.hashchange.src = 'path/to/file.html';
+
+$.fn[ str_hashchange ].delay = 50;
+/*
+$.fn[ str_hashchange ].domain = null;
+$.fn[ str_hashchange ].src = null;
+*/
+
+// Event: hashchange event
+// 
+// Fired when location.hash changes. In browsers that support it, the native
+// HTML5 window.onhashchange event is used, otherwise a polling loop is
+// initialized, running every <jQuery.fn.hashchange.delay> milliseconds to
+// see if the hash has changed. In IE6/7 (and IE8 operating in "IE7
+// compatibility" mode), a hidden Iframe is created to allow the back button
+// and hash-based history to work.
+// 
+// Usage as described in <jQuery.fn.hashchange>:
+// 
+// > // Bind an event handler.
+// > jQuery(window).hashchange( function(e) {
+// >   var hash = location.hash;
+// >   ...
+// > });
+// > 
+// > // Manually trigger the event handler.
+// > jQuery(window).hashchange();
+// 
+// A more verbose usage that allows for event namespacing:
+// 
+// > // Bind an event handler.
+// > jQuery(window).bind( 'hashchange', function(e) {
+// >   var hash = location.hash;
+// >   ...
+// > });
+// > 
+// > // Manually trigger the event handler.
+// > jQuery(window).trigger( 'hashchange' );
+// 
+// Additional Notes:
+// 
+// * The polling loop and Iframe are not created until at least one handler
+//   is actually bound to the 'hashchange' event.
+// * If you need the bound handler(s) to execute immediately, in cases where
+//   a location.hash exists on page load, via bookmark or page refresh for
+//   example, use jQuery(window).hashchange() or the more verbose 
+//   jQuery(window).trigger( 'hashchange' ).
+// * The event can be bound before DOM ready, but since it won't be usable
+//   before then in IE6/7 (due to the necessary Iframe), recommended usage is
+//   to bind it inside a DOM ready handler.
+
+// Override existing $.event.special.hashchange methods (allowing this plugin
+// to be defined after jQuery BBQ in BBQ's source code).
+special[ str_hashchange ] = $.extend( special[ str_hashchange ], {
+
+// Called only when the first 'hashchange' event is bound to window.
+setup: function() {
+  // If window.onhashchange is supported natively, there's nothing to do..
+  if ( supports_onhashchange ) { return false; }
+  
+  // Otherwise, we need to create our own. And we don't want to call this
+  // until the user binds to the event, just in case they never do, since it
+  // will create a polling loop and possibly even a hidden Iframe.
+  $( fake_onhashchange.start );
+},
+
+// Called only when the last 'hashchange' event is unbound from window.
+teardown: function() {
+  // If window.onhashchange is supported natively, there's nothing to do..
+  if ( supports_onhashchange ) { return false; }
+  
+  // Otherwise, we need to stop ours (if possible).
+  $( fake_onhashchange.stop );
+}
+
 });
 
-}(jQuery,Wui));
+// fake_onhashchange does all the work of triggering the window.onhashchange
+// event for browsers that don't natively support it, including creating a
+// polling loop to watch for hash changes and in IE 6/7 creating a hidden
+// Iframe to enable back and forward.
+fake_onhashchange = (function(){
+var self = {},
+  timeout_id,
+  
+  // Remember the initial hash so it doesn't get triggered immediately.
+  last_hash = get_fragment(),
+  
+  fn_retval = function(val){ return val; },
+  history_set = fn_retval,
+  history_get = fn_retval;
+
+// Start the polling loop.
+self.start = function() {
+  timeout_id || poll();
+};
+
+// Stop the polling loop.
+self.stop = function() {
+  timeout_id && clearTimeout( timeout_id );
+  timeout_id = undefined;
+};
+
+// This polling loop checks every $.fn.hashchange.delay milliseconds to see
+// if location.hash has changed, and triggers the 'hashchange' event on
+// window when necessary.
+function poll() {
+  var hash = get_fragment(),
+    history_hash = history_get( last_hash );
+  
+  if ( hash !== last_hash ) {
+    history_set( last_hash = hash, history_hash );
+    
+    $(window).trigger( str_hashchange );
+    
+  } else if ( history_hash !== last_hash ) {
+    location.href = location.href.replace( /#.*/, '' ) + history_hash;
+  }
+  
+  timeout_id = setTimeout( poll, $.fn[ str_hashchange ].delay );
+}
+
+return self;
+})();
+
+})(jQuery,this);

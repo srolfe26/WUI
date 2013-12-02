@@ -1419,7 +1419,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 @author     Stephen Nielsen
 */
 Wui.msg = function(msg, msgTitle, callback, content){
-    var cntnt = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
+    var cntnt = (content !== undefined) ? [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) }), content] : [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) })],
         msgWin  = new Wui.Window({
             title:      msgTitle || 'Message', 
             isModal:    true,
@@ -1442,7 +1442,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     var err = Wui.msg(errMsg,msgTitle,callback);
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
-    err.container.find('p').addClass('wui-err');
+    err.container.find('.wui-msg').addClass('wui-err');
     return err;
 };
 
