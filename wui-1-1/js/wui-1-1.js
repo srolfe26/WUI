@@ -106,8 +106,10 @@ Wui.randNum = function(lower,upper) {
 Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined.
 */
 Wui.maxZ = function(){
-    var topZ =  Math.max.apply(null, 
-                    $.map($('body > *, [style*="z-index"]'), function(e) {
+    var bodyElems = $('body *'),
+        useElems = bodyElems.length < 2500 ? bodyElems : $('body > *, [style*="z-index"]')
+        topZ =  Math.max.apply(null, 
+                    $.map(useElems, function(e) {
                         if ($(e).css('position') != 'static')
                             return parseInt($(e).css('z-index')) || 0;
                     })
@@ -1359,7 +1361,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                         minHeight:  me.height,
                         resize:     function(){ me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); }
                     })
-                    .css('z-index',Wui.maxZ() + 1)
+                    .css('z-index',Wui.maxZ())
                     .click(bringToFront);
                     
                     me.place();
@@ -1374,8 +1376,9 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     me.windowEl.trigger($.Event('open'),[me]);
                     
                     function bringToFront(e){
-                        if(parseInt((me.el.css('z-index')) || 1) <= Wui.maxZ()){
-                            me.el.css('z-index',Wui.maxZ() + 1);
+                        var maxZ = Wui.maxZ();
+                        if(parseInt((me.el.css('z-index')) || 1) <= maxZ){
+                            me.el.css('z-index', maxZ);
                         }
                     }
                 },
@@ -1419,7 +1422,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 @author     Stephen Nielsen
 */
 Wui.msg = function(msg, msgTitle, callback, content){
-    var cntnt = (content !== undefined) ? [new Wui.O({el: $('<p>').html(msg) }), content] : [new Wui.O({el: $('<p>').html(msg) })],
+    var cntnt = (content !== undefined) ? [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) }), content] : [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) })],
         msgWin  = new Wui.Window({
             title:      msgTitle || 'Message', 
             isModal:    true,
@@ -1442,7 +1445,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     var err = Wui.msg(errMsg,msgTitle,callback);
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
-    err.container.find('p').addClass('wui-err');
+    err.container.find('.wui-msg').addClass('wui-err');
     return err;
 };
 
