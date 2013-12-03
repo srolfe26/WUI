@@ -1187,54 +1187,99 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     /** Method that will run immediately when the object is constructed. */
     init:            function(wuiPane){
                         var me = wuiPane || this;
-                        me.el         = $('<div>').addClass('wui-pane').append(
-                                           $('<div>').addClass('wui-pane-wrap').append(
-                                               me.container = $('<div>').addClass('wui-pane-content')
-                                           )
-                                       );
-                        me.sureEl     = me.el;
-                        me.header    = new Wui.O({el:$('<div><span class="wui-h-title"></span><div class="wui-h-cntnt"></div></div>'), cls:'wui-pane-header wui-pane-bar', items:me.tbar, parent:me, appendTo:me.el});
-                                       me.header.elAlias = me.header.el.children('.wui-h-cntnt');
-                                       me.header.title = me.header.el.children('.wui-h-title');
-                                       
-                        me.footer    = new Wui.O({el:$('<div>'), cls:'wui-pane-footer wui-pane-bar', items:me.bbar, parent:me, appendTo:me.el});
-                        me.elAlias     = me.container;
-                        
+                        me.el       = $('<div>').addClass('wui-pane').append(
+                                        $('<div>').addClass('wui-pane-wrap').append(
+                                            me.container = $('<div>').addClass('wui-pane-content')
+                                        )
+                                    );
+                        me.sureEl   = me.el;
+
                         // Set  border if applicable
                         if(me.border) me.el.css(me.borderStyle);
-                        
-                        // Add header and footer to the pane if theres something to put in them
-                        if(me.tbar.length !== 0 || me.title !== null){
-                            me.placeHeader();
-                            
-                            // Set the title on the pane
-                            me.setTitle(me.title);
-                        }
-                        if(me.bbar.length !== 0) me.placeFooter();
+
+                        // Set up header and footer
+                        me.header   = new Wui.O({
+                                        el:         $('<div><span></span><div class="wui-h-cntnt"></div></div>'), 
+                                        cls:        'wui-pane-header wui-pane-bar',
+                                        items:      me.tbar,
+                                        parent:     me,
+                                        appendTo:   me.el,
+                                        splice:     function(){ Wui.O.prototype.splice.apply(this,arguments); me.configBar('header'); },
+                                        push:       function(){ Wui.O.prototype.push.apply(this,arguments); me.configBar('header'); }
+                                    });
+                        me.header.elAlias = me.header.el.children('.wui-h-cntnt');
+                        me.header.title = me.header.el.children('span:first');
+                                       
+                        me.footer   = new Wui.O({
+                                        el:         $('<div>'),
+                                        cls:        'wui-pane-footer wui-pane-bar',
+                                        items:      me.bbar,
+                                        parent:     me,
+                                        appendTo:   me.el,
+                                        splice:     function(){ Wui.O.prototype.splice.apply(this,arguments); me.configBar('footer'); },
+                                        push:       function(){ Wui.O.prototype.push.apply(this,arguments); me.configBar('footer'); }
+                                    });
+
+                        // Set up the content area of the pane
+                        me.elAlias  = me.container;
+
+                        me.configBar('header');
+                        me.configBar('footer');
                     },
 
-    /** Places the footer on the pane and adjusts the content as necessary. */
-    placeFooter:    function(){
-                        this.sureEl.css({borderBottomWidth:0});
-                        this.sureEl.children('.wui-pane-wrap').css({paddingBottom:'40px'});
-                        this.footer.place();
-                        this.footer.callRender();
+    /**
+    @param {barName} bar     Either the header or footer bar on the pane ['header','footer']
+    Shows/hides the header or footer depending on whether that item has child items.
+     */
+    configBar:      function(barName){
+                        var me = this, bar = me[barName], isHeader = (barName == 'header'),
+                            cssProp = (isHeader) ? 'Top' : 'Bottom',
+                            hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
+                            pad = hasItems ? 40 : 0,
+                            border = hasItems ? 0 : undefined;
+
+                        me.sureEl.css('border' +cssProp+ 'Width', border);
+                        me.sureEl.children('.wui-pane-wrap').css('padding' +cssProp, pad);
+                        if(hasItems){
+                            bar.place();
+                            bar.callRender();
+                            if(isHeader){
+                                me.setTitle(me.title);
+                                this.setTitleAlign();
+                            } 
+                        }else{
+                            bar.el.detach();
+                        }
+                    },
+
+    /** Adds/Removes the footer on the pane and adjusts the content as necessary.
+    configFooter:   function(){
+                        var me = this, footer = me.footer,
+                            hasItems = footer.items.length > 0,
+                            padBottom = hasItems ? 40 : 0,
+                            borderBottom = hasItems ? 0 : undefined;
+
+                        me.sureEl.css({borderBottomWidth:borderBottom});
+                        me.sureEl.children('.wui-pane-wrap').css({paddingBottom:padBottom});
+                        if(hasItems){ footer.place(); footer.callRender(); }
+                        else{ footer.el.detach(); }
                     },
     
-    /** Places the header on the pane and adjusts the content as necessary. */
+    /** Places the header on the pane and adjusts the content as necessary.
     placeHeader:    function(){
                         this.sureEl.css({borderTopWidth:0});
                         this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
                         this.setTitleAlign();
                         this.header.place();
                         this.header.callRender();
-                    },
+                    }, */
     
     /** Changes the title on the pane. */
     setTitle:       function(t){ 
-                        if(t)
-                            this.header.title.text(this.title = t);
-                        return t;
+                        this.title = t;
+                        t = (t && typeof t === 'string') ? t : ''
+                        this.header.title.text(t);
+                        return this.title;
                     },
     
     /** Changes the title on the pane. */
@@ -1242,7 +1287,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         var me = this;
                         
                         me.titleAlign = t || me.titleAlign;
-                        me.header.title.addClass(me.titleAlign);
+                        me.header.title.removeClass().addClass('wui-h-title ' + me.titleAlign);
                         
                         var itemsAlignment = me.titleAlign === 'right' ? 'left' : 'right'; 
                         me.header.elAlias.css('text-align',itemsAlignment);
