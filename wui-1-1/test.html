@@ -27,6 +27,7 @@
         .wui-inline-dd {right:0; top:98%; width:100%;}
         .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
             .wui-combo-dd li.wui-selected { background:#19f; color:#fff; }
+            .wui-combo-dd li.wui-combo-hover { background:#aef; }
         .dd-wrapper, .wui-file {position:relative;}
         .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
     </style>
@@ -39,7 +40,10 @@
                     ddCls:      '',
                     field:      $('<input>').attr({type:'text'}),
                     titleItem:  null,
-                    autoLoad:   true
+                    autoLoad:   true,
+                    filterField:true,
+                    minKeys:    2,
+                    searchLocal:true
                 },args); 
 
                 // Create template when one hasn't been defined
@@ -52,42 +56,68 @@
             Wui.Combo2.prototype = $.extend(new Wui.DataList(), new Wui.Text(), {
                 /** Fires when the enter key is pressed */
                 enterKey:   function(){
-                                // if(this.selectItm !== null)   this.selectItm.click();
+                                if(this.selectItm !== undefined)   this.selectItm.click();
                             },
                                 
                 /** Fires when the down arrow is pressed */
                 keyDown:    function(){
-                                /*if(!this.dd.is(':visible')){
-                                    this.selectCurr();
-                                    this.showDD();
-                                    this.field.select();
+                                if(!this.dd.is(':visible')){
+                                    this.toggleDD('open');
                                 }else{
-                                    var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
+                                    var si = (this.selectItm === undefined) ? 0 : this.dd.children('.wui-combo-hover ~ :visible:first').index(),
                                         idx = (si > 0) ? si : 0;
-                                    this.rsltHover(this.dd.children(':eq(' + idx + ')'));
-                                }*/
+                                    this.resultHover(this.dd.children(':eq(' + idx + ')'));
+                                }
                             },
                                 
                 /** Fires when the down up is pressed */
                 keyUp:      function(){
-                                /*if(this.selectItm !== null){
+                                if(this.selectItm !== undefined){
                                     var idx = this.selectItm.prevAll(':visible:first').index();
                                     
                                     if(idx < 0){
                                         this.field.focus().select();
-                                        this.dd.children().removeClass('selected');
-                                        this.selectItm = null;
+                                        this.dd.children().removeClass('wui-combo-hover');
+                                        this.selectItm = undefined;
                                     }else{
-                                        this.rsltHover(this.dd.children(':eq(' + idx + ')'));
+                                        this.resultHover(this.dd.children(':eq(' + idx + ')'));
                                     } 
-                                }*/
+                                }
+                            },
+                resultHover:function(itmTarget){
+                                this.dd.children().removeClass('wui-combo-hover');
+                                return this.selectItm = $(itmTarget).addClass('wui-combo-hover');
                             },
                 getVal:     function(){ return this.value; },
-                setVal:     function(sv){ this.selectBy(this.identity,sv); },
+                setVal:     function(sv){ 
+                                var me = this;
+                                
+                                if(sv === null){
+                                    me.clearSelect();
+                                }else if(typeof sv == 'object'){
+                                    // Select the item - if it doesn't exist then add it to the data set and select it
+                                    if(!me.selectBy(me.identity,sv[me.identity])){
+                                        me.data.push(sv);
+                                        me.make();
+                                        me.selectBy(me.identity,sv[me.identity]);
+                                    }
+                                }else{
+                                    this.selectBy(this.identity,sv);
+                                }
+                            },
+                clearSelect:function(){
+                                var me = this;
+                                me.dd.find('.wui-selected').removeClass('wui-selected');
+                                Wui.DataList.prototype.clearSelect.apply(me,arguments);
+                                me.value = null;
+                                me.fieldText('');
+                            },
                 itemSelect: function(){
-                                this.dd.find('.wui-selected').removeClass('wui-selected');
-                                Wui.DataList.prototype.itemSelect.apply(this,arguments);
-                                this.value = this.selected[0].rec;
+                                var me = this;
+                                me.dd.find('.wui-selected').removeClass('wui-selected');
+                                var retVal = me.value = Wui.DataList.prototype.itemSelect.apply(me,arguments).rec;
+                                me.fieldText(me.value[me.titleItem]);
+                                return retVal;
                             },
                 init:       function(){
                                 var me = this;
@@ -140,21 +170,23 @@
                                         $(document).one('click',function(){ hideDD(); });
                                         $('body').append(me.dd.width(width).show());
                                         Wui.positionItem(me.field,me.dd);
+                                        me.field.select();
                                     }   
                                 }
                             },
                 searchData: function(srchVal){
-                                if(this.filterField){
-                                    this.searchFilter = srchVal;
+                                var me = this;
+                                if(me.filterField){
+                                    me.searchFilter = srchVal;
                                     
-                                    if(this.searchLocal){
-                                        this.showDD();
-                                        this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
-                                        this.dd.children(':contains(' +srchVal+ ')').show();
-                                        this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
+                                    if(me.searchLocal){
+                                        me.toggleDD('open');
+                                        me.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
+                                        me.dd.children(':contains(' +srchVal+ ')').show();
+                                        me.rsltHover(me.dd.children(':contains("' +srchVal+ '"):first'));
                                     }else{
-                                        if(srchVal.length >= this.minKeys || srchVal.length === 0)
-                                            this.loadData();
+                                        if(srchVal.length >= me.minKeys || srchVal.length === 0)
+                                            me.loadData();
                                     }    
                                 }
                             },
@@ -162,20 +194,17 @@
                                 return t.field
                                         .click(function(){ t.toggleDD('open'); return false; })
                                         .keyup(function(evnt){
-                                            var currVal = t.field.val();
                                             switch(evnt.keyCode){
                                                 case 40:    /*Do Nothing*/  break;
                                                 case 38:    /*Do Nothing*/  break;
                                                 case 13:    /*Do Nothing*/  break;
                                                 case 9:     /*Do Nothing*/  break;
-                                                default:    t.searchData(currVal);
+                                                default:    t.searchData(t.field.val());
                                             }
                                         })
                                         .keydown(function(evnt){
-                                            var currVal = t.field.val();
-                                            
                                             //clear the value if the user blanks out the field
-                                            if(currVal.length === 0) t.value = null;
+                                            if(t.field.val().length === 0) t.value = null;
                                             
                                             if(t.data.length > 0){
                                                 switch(evnt.keyCode){
@@ -186,7 +215,7 @@
                                                 }
                                                 
                                                 //scroll the list to the currently selected item
-                                                
+                                                t.scrollToCurrent();
                                             }
                                         });
                             }

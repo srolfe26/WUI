@@ -975,7 +975,6 @@ $.expr[":"].contains = $.expr.createPseudo(function(arg) {
         return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
     };
 });
-/** The WUI Combobox can be set up in a number of different configurations that are really just variations of local and remote operations. See the configs. */
 Wui.Combo = function(args){ 
     $.extend(this, {
         /** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
@@ -1026,8 +1025,9 @@ Wui.Combo = function(args){
     }); 
     
     // Create template when one hasn't been defined
-    if(    this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && !this.hasOwnProperty('template') && this.valueItem.length &&
-         this.valueItem.length > 0 && this.titleItem.length && this.titleItem.length > 0) this.template = '<li>{' +this.titleItem+ '}</li>';
+    if(!this.hasOwnProperty('template') && this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && this.valueItem && this.titleItem) 
+        this.template = '<li>{' +this.titleItem+ '}</li>';
+    if(!this.template) throw new Error('Wui.js - valueItem and titleItem, or template, are required configs for a Combo.');
 
     this.init(); 
 };
@@ -1114,6 +1114,9 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             if(me.autoLoad)   me.loadData();
                             else              me.renderData();
                         }
+
+                        // For locally defined data
+                        me.total = me.data.length;
                     },
     
     /** Populates the drop-down with data/search results or shows empty text  */
@@ -1320,7 +1323,6 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         });
                     }
 });
-
 
 /**
 The link object contains three fields, one for the actual URL, one for the text of the link (if different from the URL) and a combo for

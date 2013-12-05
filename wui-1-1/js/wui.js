@@ -1033,7 +1033,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     selectBy:        function(key,val){
                         var me = this, retVal = undefined;
                         me.each(function(itm){
-                            if(itm.rec[key] && itm.rec[key] == val)
+                            if(itm.rec[key] !== undefined && itm.rec[key] == val)
                                 return retVal = me.itemSelect(itm);
                         });
                         me.scrollToCurrent();
