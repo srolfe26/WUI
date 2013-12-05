@@ -16,9 +16,193 @@
     <script type="text/javascript" src="js/forms.js"></script>
     <script type="text/javascript" src="js/grid.js"></script>
     
+    <style>
+        /* combo */
+        .wui-combo {position: relative;}
+        .wui-fe .has-dd {padding-right:27px;}
+        .wui-combo-dd {
+            background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
+            max-height:150px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
+        }
+        .wui-inline-dd {right:0; top:98%; width:100%;}
+        .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
+            .wui-combo-dd li.wui-selected { background:#19f; color:#fff; }
+        .dd-wrapper, .wui-file {position:relative;}
+        .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
+    </style>
+
     <script type="text/javascript">
         $(document).ready(function(){
-            // Add a new grid on the body
+            
+            Wui.Combo2 = function(args){ 
+                $.extend(this, {
+                    ddCls:      '',
+                    field:      $('<input>').attr({type:'text'}),
+                    titleItem:  null,
+                    autoLoad:   true
+                },args); 
+
+                // Create template when one hasn't been defined
+                if(!this.hasOwnProperty('template') && this.hasOwnProperty('identity') && this.hasOwnProperty('titleItem') && this.identity.length && this.identity.length) 
+                    this.template = '<li>{' +this.titleItem+ '}</li>';
+                
+                if(!this.template) throw new Error('Wui.js - Identity & titleItem, or template, are required configs for a Combo.');
+                this.init(); 
+            };
+            Wui.Combo2.prototype = $.extend(new Wui.DataList(), new Wui.Text(), {
+                /** Fires when the enter key is pressed */
+                enterKey:   function(){
+                                // if(this.selectItm !== null)   this.selectItm.click();
+                            },
+                                
+                /** Fires when the down arrow is pressed */
+                keyDown:    function(){
+                                /*if(!this.dd.is(':visible')){
+                                    this.selectCurr();
+                                    this.showDD();
+                                    this.field.select();
+                                }else{
+                                    var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
+                                        idx = (si > 0) ? si : 0;
+                                    this.rsltHover(this.dd.children(':eq(' + idx + ')'));
+                                }*/
+                            },
+                                
+                /** Fires when the down up is pressed */
+                keyUp:      function(){
+                                /*if(this.selectItm !== null){
+                                    var idx = this.selectItm.prevAll(':visible:first').index();
+                                    
+                                    if(idx < 0){
+                                        this.field.focus().select();
+                                        this.dd.children().removeClass('selected');
+                                        this.selectItm = null;
+                                    }else{
+                                        this.rsltHover(this.dd.children(':eq(' + idx + ')'));
+                                    } 
+                                }*/
+                            },
+                getVal:     function(){ return this.value; },
+                setVal:     function(sv){ this.selectBy(this.identity,sv); },
+                itemSelect: function(){
+                                this.dd.find('.wui-selected').removeClass('wui-selected');
+                                Wui.DataList.prototype.itemSelect.apply(this,arguments);
+                                this.value = this.selected[0].rec;
+                            },
+                init:       function(){
+                                var me = this;
+                                Wui.Text.prototype.init.call(me);
+
+                                // Place field elements
+                                me.append(
+                                    me.wrapper = $('<div>').addClass('wui-combo').append(
+                                        me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls),
+                                        me.field
+                                    )
+                                );
+                                // Create Dropdown Button
+                                me.ddSwitch = new Wui.Button({
+                                    click:      function(){ me.toggleDD(); },
+                                    text:       '',
+                                    tabIndex:   -1,
+                                    appendTo:   me.wrapper,
+                                    cls:        'field-btn dd-switch'
+                                });
+                                me.ddSwitch.place();
+                            },
+                make:       function(){
+                                var me = this, tempAlias = me.elAlias;
+                                me.elAlias = me.dd;
+                                Wui.DataList.prototype.make.apply(me,arguments);
+                                me.elAlias = tempAlias;
+                            },
+                onRender:   function(){
+                                Wui.Text.prototype.onRender.apply(this,arguments);
+                                Wui.DataList.prototype.onRender.apply(this,arguments);
+                            },
+                toggleDD:   function(force){
+                                var me = this, isVis = me.dd.is(':visible');
+
+                                if(force !== undefined){
+                                    if(force == 'open') showDD();
+                                    else                hideDD();
+                                }else{
+                                    if(isVis)           hideDD();
+                                    else                showDD();
+                                }
+
+                                function hideDD(){ me.dd.hide(); }
+                                function showDD(){
+                                    if(!isVis){
+                                        var ddWid   = parseInt(me.dd.css('width')),
+                                            width   = (ddWid && ddWid > me.field.width()) ? ddWid : me.field.width(); 
+                                        // Clear the drop down when it loses focus
+                                        $(document).one('click',function(){ hideDD(); });
+                                        $('body').append(me.dd.width(width).show());
+                                        Wui.positionItem(me.field,me.dd);
+                                    }   
+                                }
+                            },
+                searchData: function(srchVal){
+                                if(this.filterField){
+                                    this.searchFilter = srchVal;
+                                    
+                                    if(this.searchLocal){
+                                        this.showDD();
+                                        this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
+                                        this.dd.children(':contains(' +srchVal+ ')').show();
+                                        this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
+                                    }else{
+                                        if(srchVal.length >= this.minKeys || srchVal.length === 0)
+                                            this.loadData();
+                                    }    
+                                }
+                            },
+                setListeners:function(t){
+                                return t.field
+                                        .click(function(){ t.toggleDD('open'); return false; })
+                                        .keyup(function(evnt){
+                                            var currVal = t.field.val();
+                                            switch(evnt.keyCode){
+                                                case 40:    /*Do Nothing*/  break;
+                                                case 38:    /*Do Nothing*/  break;
+                                                case 13:    /*Do Nothing*/  break;
+                                                case 9:     /*Do Nothing*/  break;
+                                                default:    t.searchData(currVal);
+                                            }
+                                        })
+                                        .keydown(function(evnt){
+                                            var currVal = t.field.val();
+                                            
+                                            //clear the value if the user blanks out the field
+                                            if(currVal.length === 0) t.value = null;
+                                            
+                                            if(t.data.length > 0){
+                                                switch(evnt.keyCode){
+                                                    case 40:    t.keyDown();   break;
+                                                    case 38:    t.keyUp();     break;
+                                                    case 13:
+                                                    case 9:     t.enterKey();  break;
+                                                }
+                                                
+                                                //scroll the list to the currently selected item
+                                                
+                                            }
+                                        });
+                            }
+            });
+
+            a = new Wui.Combo2({label:'Foo', identity:'id', titleItem:'name', data:[
+                {id:'1', name:'Tony'},
+                {id:'2', name:'Dan'},
+                {id:'3', name:'Keith'},
+                {id:'4', name:'Julie'},
+                {id:'5', name:'Josh'},
+                {id:'6', name:'Catherine'}
+            ]});
+            a.place();
+
+            /* Add a new grid on the body
             
             id = new Date();
             
@@ -81,7 +265,7 @@
                 multiSelect:true,
                 afterMake: function(){ Wui.Grid.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
             });
-            a.place();
+            a.place();*/
         }); // end document.ready
     </script>
 </head>

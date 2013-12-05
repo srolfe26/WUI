@@ -139,6 +139,26 @@ Wui.unwrapData = function(r){
 };
 
 /** 
+@param {object} parent The element to which the child will be relatively positioned.
+@param {object} child The element to be positioned.
+Absolutely positions a child element such that it will be within the window and at the max z-index.
+*/
+Wui.positionItem = function(parent,child){
+    // Position calendar to ensure it will be seen
+    var ofst    = parent.offset(),
+        cHeight = child.outerHeight(),
+        cWidth  = child.outerWidth(),
+        plBelow = (ofst.top + parent.outerHeight() + cHeight < $.viewportH()),
+        plRight = (ofst.left + parent.outerWidth() - cWidth > 0); 
+
+    child.css({
+        left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
+        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - cHeight,
+        zIndex:     Wui.maxZ()
+    });
+};
+
+/** 
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
 @param {array}        collection            A collection of items that will be fit within a container.
@@ -574,52 +594,52 @@ The object for handling data whether remote or local
 Wui.Data = function(args){
     $.extend(this,{
         /** Array of data that will be stored in the object. Can be specified for the object or loaded remotely */
-        data:            [],
+        data:           [],
         
-        /** Name a key in the data that represents the unique identifier. */
-        identifier:     null,
+        /** Name a key in the data that represents the identity field. */
+        identity:       null,
         
         /** Name of the data object. Allows the object to be identified in the listeners */
-        name:            null,
+        name:           null,
         
         /** Object containing keys that will be passed remotely */
-        params:            {},
+        params:         {},
         
         /** URL of the remote resource from which to obtain data. A null URL will assume a local data definition. */
-        url:              null,
+        url:            null,
         
         /** Whether the object is waiting for a remote response */
-        waiting:         false,
+        waiting:        false,
         
         /** Special configuration of the ajax method. Defaults are:
         
             data:       me.params,
-            dataType:    'json',
+            dataType:   'json',
             success:    function(r){ me.success.call(me,r); },
-            error:        function(e){ me.success.call(me,e); },
+            error:      function(e){ me.success.call(me,e); },
         */
-        ajaxConfig:        {},
+        ajaxConfig:     {},
         
         /** The total number of records contained in the data object */
-        total:            0
+        total:          0
     },args);
 };
 Wui.Data.prototype = {
     /** An object in the remote response actually containing the data.
     Best set modifying the prototype eg. Wui.Data.prototype.dataContainer = 'payload'; */
-    dataContainer:    null,
+    dataContainer:      null,
     /** An object in the remote response specifying the total number of records. Setting this
     feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
-    totalContainer:    null,
+    totalContainer:     null,
     
     /** When the object is waiting, default amount of time in milliseconds before trying to perform loadData() again */
-    ajaxWait:        10,
+    ajaxWait:           10,
     
     /** 
     @param {array}    newData    Array of the new data
     Event hook for when data is changed.
     */
-    dataChanged:    function(){},
+    dataChanged:        function(){},
     
     /**
     @param {function} fn A function that gets called for each item in the object's data array
@@ -796,7 +816,7 @@ Wui.Template.prototype = {
                         })
                     );
                 }
-                throw new Error('Template engine missing data and/or template.');
+                throw new Error('Wui.js - Template engine missing data and/or template.');
             }
 };
 
@@ -813,25 +833,25 @@ Wui.Template.prototype = {
 Wui.DataList = function(args){
     $.extend(this, {
         /** @eventhook Called after the data's DOM elements are made */
-        afterMake:    function(){},
+        afterMake:      function(){},
         
         /** Determines whether templates are made immediately when the DataList is rendered */
-        autoLoad:    true,
+        autoLoad:       true,
         
         /** DOM element where all of the data templates will be appended. */
-        el:            $('<div>'),
+        el:             $('<div>'),
         
         /** Maximum number of data elements to display, even if data set is larger. */
-        displayMax: -1,
+        displayMax:     -1,
         
         /** Method that will run immediately when the object is constructed. */
-        init:        function(){},
+        init:           function(){},
         
         /** Whether multiple rows/records can be selected at once. */
         multiSelect:    false,
         
         /** An array of the currently selected records */
-        selected:        []
+        selected:       []
     }, args);
     this.init();
 };
@@ -891,10 +911,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     
                     itm.el.click(function(e){
                         // Determine the # of selected items before the change
-                        var selectedCount = me.selected.length;
-                        
                         if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
-                            if(selectedCount > 0 && me.selected[0] === itm){
+                            if(me.selected.length > 0 && me.selected[0] === itm){
                                 //deselect item
                                 me.itemDeselect(itm);
                             }else{
@@ -982,7 +1000,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     
                     $.each(selList || [],function(i,sel){
                         me.each(function(itm){
-                            var sameRec = (me.identifier) ? itm.rec[me.identifier] === sel.rec[me.identifier] : JSON.stringify(itm.rec) === JSON.stringify(sel.rec);
+                            var sameRec = (me.identity) ? itm.rec[me.identity] === sel.rec[me.identity] : JSON.stringify(itm.rec) === JSON.stringify(sel.rec);
                             
                             if(sameRec){
                                 if(me.multiSelect){

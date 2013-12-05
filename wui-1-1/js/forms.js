@@ -637,7 +637,7 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
                     },
                     
     /** 
-    @param  {W Object}    The object to have listeners applied to the field
+    @param  {Wui Object}  t  The object to have listeners applied to the field
     Puts listeners on the field, mostly to handle blankText in the event that HTML 5 placeholder isn't supported 
     Also calls the setListeners() of any extending object automagically.
     */
@@ -1198,7 +1198,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     afterSet:       function(){ this.renderData(); },
     
     /** 
-    @param {W Object} t W Object to add listeners to
+    @param {Wui Object} t Wui Object to add listeners to
     Sets additional listeners on the field that give it combo-box like interactions */
     setListeners:    function(t){
                         t.field
@@ -1686,18 +1686,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                                 });
 
                                 // Position calendar to ensure it will be seen
-                                var fld     = me.field,
-                                    ofst    = fld.offset(),
-                                    cHeight = me.calendar.outerHeight(),
-                                    cWidth  = me.calendar.outerWidth(),
-                                    plBelow = (ofst.top + fld.outerHeight() + cHeight < $.viewportH()),
-                                    plRight = (ofst.left + fld.outerWidth() - cWidth > 0); 
-
-                                me.calendar.css({
-                                    left:       (plRight) ? ofst.left + fld.outerWidth() - cWidth : ofst.left,
-                                    top:        (plBelow) ? ofst.top + fld.outerHeight() : ofst.top - cHeight,
-                                    zIndex:     Wui.maxZ()
-                                });
+                                Wui.positionItem(me.field,me.calendar);
                             // Otherwise clear the calendar
                             }else{ me.calendar.remove(); me.calendar = undefined; }
 
