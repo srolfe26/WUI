@@ -1,5 +1,5 @@
 /** The WUI Combobox can be set up in a number of different configurations that are really just variations of local and remote operations. See the configs. */
-Wui.Combo = function(args){ 
+Wui.Combo2 = function(args){ 
     $.extend(this, {
         ddCls:      '',
         
@@ -17,13 +17,13 @@ Wui.Combo = function(args){
     },args); 
 
     // Create template when one hasn't been defined
-    if(!this.hasOwnProperty('template') && this.hasOwnProperty('identity') && this.hasOwnProperty('titleItem') && this.identity.length && this.identity.length) 
+    if(!this.hasOwnProperty('template') && this.hasOwnProperty('identity') && this.hasOwnProperty('identity') && this.identity && this.titleItem) 
         this.template = '<li>{' +this.titleItem+ '}</li>';
-    
-    if(!this.template) throw new Error('Wui.js - Identity & titleItem, or template, are required configs for a Combo.');
+    if(!this.template) throw new Error('Wui.js - identity and titleItem, or template, are required configs for a Combo.');
+
     this.init(); 
 };
-Wui.Combo.prototype = $.extend(new Wui.DataList(), new Wui.Text(), {
+Wui.Combo2.prototype = $.extend(new Wui.DataList(), new Wui.Text(), {
     /** Fires when the enter key is pressed */
     enterKey:   function(){
                     if(this.selectItm !== undefined)   this.selectItm.click();
@@ -117,6 +117,9 @@ Wui.Combo.prototype = $.extend(new Wui.DataList(), new Wui.Text(), {
                                 me.setData(dataObj.data);
                         });
                     }
+
+                    // For locally defined data
+                    me.total = me.data.length;
                 },
     make:       function(){
                     var me = this, tempAlias = me.elAlias;

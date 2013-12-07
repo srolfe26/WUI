@@ -146,7 +146,7 @@ button::-moz-focus-inner { border:0; }
 .wui-btn.field-btn.dd-switch,
 .wui-cal-prev, .wui-cal-next, .wui-cal-toggle,
 .wui-editor-tools a, 
-.wui-wysiwyg .ui-resizable-se {background-image:url(../img/wui-icons.png);}
+.wui-wysiwyg .ui-resizable-se {background-image:url(../img/wui-icons.png) !important; background-color:transparent !important; }
 
 /* combo */
 .wui-fe .has-dd {padding-right:27px;}
