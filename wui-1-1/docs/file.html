@@ -20,45 +20,22 @@
     </script>
     
     <script type="text/javascript" class="wui-doc-code">
+        // Wui.File must be extended to operate - usually server specific stuff will be added here.
+        var File = function(args){
+            $.extend(this, new Wui.File(),{ },args);
+            this.init();
+        };
+
         $(document).ready(function(){
             // Add a text formItem onto the body
-            a = new Wui.File({ 
-                label:'File Upload', 
-                blankText:'A file title is optional', 
-                name:'file', attr:{name:'file'}, 
-                required:       true,
-                upFieldName:    'doc_file',
-                setVal:            function(sv){
-                                    var me = this;
-                                    if(typeof sv == 'number'){
-                                        $.getJSON('data/files', {conf_file_id:sv}, function(d){
-                                            if(d.success == true){
-                                                me.value = Wui.unwrapData.call(me,d).data;
-                                                me.setChanged();
-                                            }else{
-                                                me.value = null;
-                                                me.fieldText('Could not find file.');
-                                            }
-                                        });
-                                    }else{
-                                        me.value = sv;
-                                    }
-                                },
-                params:         {xaction:'upload_file', conf_paper_id:0},
-                url:            'https://webdev1.usurf.usu.edu:9006/smallsat/conf-admin/data/papers',
-                upFailure:      function(r){ Wui.errRpt(r.errors[0].error,'Upload Error'); },
-                changeClick:    function(){
-                                    var me = this;
-                                    $.getJSON(me.upTarget, {xaction:'delete_file', conf_file_id:me.value.conf_file_id}, function(d){
-                                        if(d.success == true){
-                                            me.val(null);
-                                        }else{
-                                            Wui.errRpt(d.errors[0].error,'Deletion Error');
-                                        }
-                                    });
-                                }
-                    });
-                    a.place();
+            a = new File({ 
+                label:          'Upload File',
+                blankText:      'Adding a file title is optional and won\'t work in this demo',
+                labelPosition:  'left',
+                url:            'dummy-file-response.html',
+                required:       false
+            });
+            a.place();
         });
     </script>
     <script type="text/javascript">

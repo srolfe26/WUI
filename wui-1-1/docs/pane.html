@@ -15,7 +15,7 @@
     
     <script type="text/javascript">
         $(document).ready(function(){
-            Wui.docCode('../js/wui.js','Wui.Pane','WUI Pane');
+            Wui.docCode('../js/wui.js','Wui.Pane','Pane');
         }); // end document.ready        
     </script>
     
@@ -74,11 +74,9 @@
             
                 
             ts.test('Set pane title', function(){
-                pane.setTitle("Wir Sind Wir");
-                //console.log(pane);
-                pane.items[0].setTitle("Wir Sind Wir");
-                //console.log(pane.items[0].title);
-                return pane.title == "Wir Sind Wir";
+                var testStr = "Title Changed in Unit Test";
+                pane.setTitle(testStr);
+                return pane.title == testStr;
             });
             
             ts.test('Set the title alignment', function() { pane.setTitleAlign("center"); return pane.titleAlign == "center"; });

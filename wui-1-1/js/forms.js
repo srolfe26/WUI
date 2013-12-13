@@ -2227,6 +2227,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
 @param {string}     [msgTitle]  The title for the window, defaults to 'Input'.
 @param {array}      [inputs]    Array of Wui.FormFields to display on the window. When this array has only one item it merely replaces the default text field and is required. 
 @param {string}     [content]   HTML content to display above the form fields.
+@return The Wui.Form that was created by the input. Use the returned value .parent to get the window.
 
 Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
 */

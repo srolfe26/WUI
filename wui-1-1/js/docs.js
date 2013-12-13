@@ -491,26 +491,27 @@
     Wui.ts = function(){
         var me = this;
         $.extend(me,{
-            count:    0,
-            paused: false,
-            queue:    [],
-            test:    function(desc,fn,supressFunction){
-                        me.queue.push(function(){ me.count++; Wui.assert(desc, fn, me.count, supressFunction); });
-                        me.runTest();
-                    },
-            pause:    function(){ me.paused = true; },
-            resume:    function(){
-                        me.paused = false;
-                        setTimeout(me.runTest,1);
-                    },
-            runTest:function(){
-                        if (!me.paused && me.queue.length) {
-                            me.queue.shift()();
-                            if (!me.paused) me.resume();
+            count:      0,
+            paused:     false,
+            queue:      [],
+            test:       function(desc,fn,supressFunction){
+                            me.queue.push(function(){ me.count++; Wui.assert(desc, fn, me.count, supressFunction); });
+                            me.runTest();
+                        },
+            pause:      function(){ me.paused = true; },
+            resume:     function(){
+                            me.paused = false;
+                            setTimeout(me.runTest,1);
+                        },
+            runTest:    function(){
+                            if (!me.paused && me.queue.length) {
+                                me.queue.shift()();
+                                if (!me.paused) me.resume();
+                            }
                         }
-                    }
         });
     };
+    
     
     Wui.splay = function(o){
         var objData = [];
