@@ -334,15 +334,17 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
 
                             // Clear out and reset the size of el padding
                             this.el.css({
-                                paddingLeft:    undefined,
-                                paddingRight:   undefined,
-                                paddingTop:     undefined,
-                                paddingBottom:  undefined
+                                paddingLeft:    '',
+                                paddingRight:   '',
+                                paddingTop:     '',
+                                paddingBottom:  ''
                             });
                             // Clear out and reset the size of the label
                             this.label.css({
-                                width:    undefined,
-                                height:   undefined
+                                width:          '',
+                                height:         '',
+                                marginLeft:     '',
+                                marginRight:    ''
                             });
 
                             if($.isNumeric(size)){
@@ -669,17 +671,30 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
 
 /** WUI Text Area */
 Wui.Textarea = function(args){
-    $.extend(this, args, { 
+    $.extend(this, { 
         /** The HTML element */
         field:    $('<textarea>'),
         
         /** Determines the height of the field */
         height:    100
-    });
+    }, args);
     this.init();
 };
 Wui.Textarea.prototype = $.extend(new Wui.Text(), {
-    init:    function(){    Wui.Text.prototype.init.call(this); this.field.css({height:this.field.parent().parent().height});  }
+    init:       function(){
+                    var me = this;
+                    Wui.Text.prototype.init.call(me); 
+                    me.lbl.setLabelSize = function(){
+                        Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
+                        me.field.css('height',(me.height - me.lbl.label.outerHeight()));
+                    } 
+                },
+
+    /** Overrides Wui.O.cssByParam to include resizing the textarea within the object */
+    cssByParam: function(){
+                    Wui.O.prototype.cssByParam.apply(this,arguments);
+                    this.field.css('height',(this.height - this.lbl.label.outerHeight()));
+                }
 });
 
 
@@ -880,7 +895,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     }
                     
                     // Append to DOM
-                    me.el.append(ul);
+                    me.append(ul);
                 },
     
     /** What to do when an individual element changes */
@@ -1624,6 +1639,15 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     /** The date furthest in the past that this control will accept as valid */
     minDate:        null,
     
+    /** String specifying the format that will be displayed to the user. */
+    dispFormat:     'ddd MM-dd-yyyy h:mm tt',
+
+    /** String for format of the date returned from the datepicker. */
+    dtFormat:       'MM-dd-yyyy h:mm tt',
+
+    /** When true, locks the datetime control to only deal in dates without times. If the user specifies custom values for dispFormat and dtFormat this setting has no effect. */
+    dateOnly:       false,
+
     /**
     @param {string} overrideText    Text that will absolutely be displayed instead of the formatted version of the field's value
     @return The value passed in, or the calculated value of the datetime
@@ -1637,10 +1661,10 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                         if(me.value === "" || me.value === null) { return null; }
                         
                         //validation for min-date
-                        if(!(me.minDate !== null && me.value < me.minDate)) me.displayDiv.html(me.value.toString('ddd MM-dd-yyyy h:mm tt'));
-                        else                                                me.displayDiv.html(me.value.toString('Less than minimum required date of MM-dd-yyyy'));
+                        if(!(me.minDate !== null && me.value < me.minDate)) me.displayDiv.html(me.value.toString(me.dispFormat));
+                        else                                                me.displayDiv.html(me.value.toString('Less than minimum required date of ' + dtFormat));
                         
-                        return  me.value.toString('MM/dd/yyyy h:mm tt');
+                        return  me.value.toString(me.dtFormat);
                     },
      
      /** 
@@ -1657,6 +1681,14 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     init:           function(){
                         var me = this;
                         Wui.Text.prototype.init.call(me);
+
+                        // Limit field to dates only if specified
+                        if(me.dateOnly){
+                            if(!me.hasOwnProperty('dispFormat')) me.dispFormat = 'ddd MM-dd-yyyy';
+                            if(!me.hasOwnProperty('dtFormat')) me.dtFormat = 'MM-dd-yyyy';
+                        }
+
+                        // Add datepicker
                         me.append(
                             $('<div>').addClass('wui-date').append(
                                 me.setListeners(me),
@@ -1711,8 +1743,8 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
             
                         //replace the written words with numbers
                         words = words.toString().replace(/ and /g,' ').replace(/-/g,' ');
-                        $.each(numberRepl,function(i,itm){
-                            words = words.replace(new RegExp('(^|[ ]|-)' + itm + '(-|[ ]|$)','g'),' ' + numberRepl[itm] + ' ');
+                        $.each(numberRepl,function(i){
+                            words = words.replace(new RegExp('(^|[ ]|-)' + i + '(-|[ ]|$)','g'),' ' + numberRepl[i] + ' ');
                         });
                         
                         var wArray = $.trim(words).split(/[ ]+/),
@@ -1869,7 +1901,8 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                             var n       = me.num2Dec(intvF[1]),
                                 directn = {from:1, after:1, before:-1, 'previous to':-1},
                                 dir     = directn[intvF[4]],
-                                dt      = me.translateDate(intvF[5]);  
+                                dt      = me.translateDate(intvF[5]); 
+
                             return dt['add' + intvF[3].charAt(0).toUpperCase() + intvF[3].slice(1) + 's'](n * dir);
                         }
                        
@@ -1973,15 +2006,15 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     i.e. The array [1,100,50,5] -> 155, [5,1000,20,3] -> 5023  */
     txt2Num:        function(wArray){
                         //split into an array and combine them according to magnitude
-                        var pos = 0, theNum = 0, nextNum = 0, lastNum = 0;
+                        var pos = 0, theNum = 0, currNum = 0, nextNum = 0, lastNum = 0, smallerThanNext = false;
                        
                         if(wArray.length == 1){
                             return wArray[0];
                         }else{
                             while(wArray[pos + 1] !== undefined){
-                                var currNum = parseInt(wArray[pos]),
-                                    smallerThanNext = this.getM(currNum) <= this.getM(nextNum);
+                                currNum = parseInt(wArray[pos]);
                                 nextNum = parseInt(wArray[pos + 1]);
+                                smallerThanNext = this.getM(currNum) <= this.getM(nextNum);
                                 lastNum = parseInt(wArray[wArray.length - 1]);
 
                                 if(pos === 0){
@@ -2060,21 +2093,22 @@ Wui.File = function(args){
     });
 };
 Wui.File.prototype = $.extend(new Wui.Text(),{
-    /** */
+    /** Fires when the 'X' button is clicked to change the currently selected file to something else. */
     changeClick:function(){
                      //swap buttons
-                     this.changeBtn.el.fadeOut('fast');
-                     this.upBtn.el.parents('div:first').fadeIn('slow'); 
+                     this.changeBtn.hide();
+                     this.upBtn.show();
+                     me.fileFrm.show();
                      this.field.removeClass().focus();
-                 },
+                },
     
-    /** */
+    /** Set up the file upload control. */
     init:       function(){
                     var me = this;
                     Wui.Text.prototype.init.call(me);
 
                     // Wrap the field in order to add absolutely positioned buttons
-                    me.append(me.wrapper = $('<div>').addClass('wui-file').append(me.field));
+                    me.append(me.wrapper = $('<div>').addClass('wui-file').append(me.field.off('blur')));
                     me.elAlias = me.wrapper;
 
                     var uniqueId = Wui.id();
@@ -2127,16 +2161,16 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
 
                     me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
                     
-                    /** add additional paramters before sending */
+                    // add additional paramters before sending
                     me.fileFrm.el.children("input[type!='file']").remove();
                     $.each(me.params, function(key, value) {
                         me.fileFrm.append($('<input>').attr({type:'hidden', name:key, value:value}));
                     });
                     
-                    /** Submit the actual form */
+                    // Submit the actual form
                     me.fileFrm.el.submit(); 
                     
-                    /** Do something after we are finished uploading */
+                    // Do something after we are finished uploading
                     me.iframe.el.unbind().load(function() {
                         me.onComplete($('body',me.iframe.el.contents()).text()); //done :D
                     });
@@ -2145,10 +2179,11 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
     /**
     @param {object} unwrapped The Wui.unwrapData unwrapped results of the file upload.
     This function is for developers to run whatever analysis they desire on the raw output of the file upload.
+    @eventhook
     */
     devHook:    function(){},
 
-    /** */            
+    /** Fires when the file upload completes and handles errors if any. */            
     onComplete: function(r){
                     try{
                         var me = this,
@@ -2179,25 +2214,31 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                         me.upFailure(err,r);
                     }
                 },
+
+    /** @eventhook Signals the user that there was an upload failure. Can be overridden, but doesn't have to be.*/
     upFailure:  function(e,e2){
                     console.log(e,e2);
-                    Wui.Text.prototype.val.call(this,'Upload Failure');
+                    me.fieldText('Upload Failure');
                 },
-    /** */
+    
+    /** @return The value of the field, or an empty object is returned. */
     getVal:        function(){ return this.value || {}; },
-    /** */
+    
+    /** Overrides Wui.FormField.setVal() to work with the file field. @return The value passed in. */
     setVal:        function(sv){
                     this.value = this.value || {};
                     $.extend(this.value,sv);
+                    return sv;
                 },
-    /** */
+    
+    /**  Adds callback functionality to Wui.FormField.val() */
     val:        function(sv,callback){
                     var retVal = Wui.FormField.prototype.val.apply(this,arguments);
                     if(this[callback] && typeof this[callback] == 'function') this[callback]();
                     return retVal;
                 },
     
-    /** */
+    /** Overrides Wui.FormField.valChange, performs similar fuctionality, but adds specific code for showing/hiding buttons. */
     valChange:  function(){
                     var me = this;
                     if(me.value){

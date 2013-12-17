@@ -22,7 +22,7 @@
     <script type="text/javascript" class="wui-doc-code">
         $(document).ready(function(){
             // Add a text formItem onto the body
-            a = new Wui.Datetime({ label:'Enter a date &amp; time', blankText:'Type a date in any format you wish.', name:'datetime', attr:{name:'datetime'}, appendTo:$('#wui-doc-example') });
+            a = new Wui.Datetime({ dateOnly:true, label:'Enter a date &amp; time', blankText:'Type a date in any format you wish.', name:'datetime', attr:{name:'datetime'}, appendTo:$('#wui-doc-example') });
             a.place();
         });
     </script>

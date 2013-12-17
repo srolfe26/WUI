@@ -102,13 +102,13 @@ button::-moz-focus-inner { border:0; }
 .wui-lbl > label {display:block; color:#555; font-weight:bold; font-size:0.9em; position:absolute; left:0; top:0; line-height:26px;}
 
 .wui-lbl.lbl-left { padding:0 0 0 200px; }
-.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { margin-right:5px; width:195px; text-align:right; display:inline-table; vertical-align:top;}
+.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { margin-right:5px; width:195px; text-align:right;}
 
 .wui-lbl.lbl-right { padding:0 200px 0 0; }
-.wui-lbl.lbl-right > label { width:200px; margin-left:5px; text-align:left; left:auto; right:0; }
+.wui-lbl.lbl-right > label { width:200px; padding-left:5px; margin-right:0; text-align:left; left:auto; right:0; }
 
 .wui-lbl.lbl-bottom { padding:0 0 26px 0; }
-.wui-lbl.lbl-bottom > label { top:auto; bottom:0; }
+.wui-lbl.lbl-bottom > label { top:auto; bottom:0;}
 
 /* general form element */
 .wui-fe {position:relative; text-align:left;}
@@ -178,7 +178,7 @@ button::-moz-focus-inner { border:0; }
 
 .wui-cal {position:absolute; background-color: #fff; padding:0.25em; font-size: 14px; box-shadow: 0 3px 5px rgba(0,0,0,0.7); text-transform: capitalize;}
 .wui-cal > table {  border-collapse: collapse; }
-.wui-cal-header {padding: 0.2em 0; position: relative;}
+.wui-cal-header {padding: 0.2em 0; position: relative; text-align: center;}
     .wui-cal-prev, .wui-cal-next {width:12px; height: 12px; position: absolute; cursor: pointer;}
         a.wui-cal-prev {left:2px; background-position:-162px 0;}
         a.wui-cal-next {right:2px;background-position:-146px 0;}
@@ -253,6 +253,7 @@ button::-moz-focus-inner { border:0; }
 
 /******************************************   disabled form styles   *******************************************/
 .wui-fe [disabled=disabled] { background-color:transparent; border-color:#ccc; color:#ccc; }
+.wui-fe .has-file[disabled=disabled] {background-color: #fff;}
 .wui-disabled .wui-cal-toggle, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn { display:none; }
 .wui-form-err.wui-disabled.wui-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
 .wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }

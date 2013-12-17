@@ -15,7 +15,7 @@
     
     <script type="text/javascript">
         $(document).ready(function(){
-            //Wui.docCode('../js/forms.js','Wui.File','File Upload');
+            Wui.docCode('../js/forms.js','Wui.File','File Upload');
         }); // end document.ready        
     </script>
     
@@ -33,7 +33,8 @@
                 blankText:      'Adding a file title is optional and won\'t work in this demo',
                 labelPosition:  'left',
                 url:            'dummy-file-response.html',
-                required:       false
+                required:       false,
+                appendTo:       $('#wui-doc-example')
             });
             a.place();
         });
@@ -43,6 +44,8 @@
             // TESTING
             ts = new Wui.ts();
             
+            a.el.on('change',function(){console.log(arguments);});
+
             //ts.test("Today",function(){ var today = new Date(); a.val('today'); return a.val().toString('yyyy-MM-dd') == today.toString('yyyy-MM-dd'); });
         }); // end document.ready        
     </script>
