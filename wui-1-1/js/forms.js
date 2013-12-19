@@ -1458,7 +1458,15 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
  "ten months from now"
 */
 Wui.Datetime = function(args){ 
-    $.extend(this,args,{ field: $('<input>').attr({type:'text'}) });
+    $.extend(this,args,{ 
+        field: $('<input>').attr({type:'text'}),
+
+        /** The date furthest in the past that this control will accept as valid. */
+        minDate:        null,
+
+        /** The date furthest in the future that this control will accept as valid. */
+        maxDate:        null
+    });
     this.init();
 };
 
@@ -1636,9 +1644,6 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     /** Array of feedback words or phrases to randomly display when a user's input is not understood by the control */
     sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
     
-    /** The date furthest in the past that this control will accept as valid */
-    minDate:        null,
-    
     /** String specifying the format that will be displayed to the user. */
     dispFormat:     'ddd MM-dd-yyyy h:mm tt',
 
@@ -1660,9 +1665,10 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                         if(overrideText !== undefined){ me.displayDiv.html(overrideText); return overrideText; }
                         if(me.value === "" || me.value === null) { return null; }
                         
-                        //validation for min-date
-                        if(!(me.minDate !== null && me.value < me.minDate)) me.displayDiv.html(me.value.toString(me.dispFormat));
-                        else                                                me.displayDiv.html(me.value.toString('Less than minimum required date of ' + dtFormat));
+                        //validation for min and max
+                        if(me.minDate && me.value < me.minDate)         me.displayDiv.html(me.minDate.toString(me.dtFormat) + ' is before the min date.');
+                        else if (me.maxDate && me.value > me.maxDate)   me.displayDiv.html(me.maxDate.toString(me.dtFormat) + ' is past the max date.');
+                        else                                            me.displayDiv.html(me.value.toString(me.dispFormat));
                         
                         return  me.value.toString(me.dtFormat);
                     },
@@ -1807,8 +1813,12 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                                 // this loop is for weekdays (cells)
                                 for (j = 0; j <= 6; j++) { 
                                     html += '<td>';
-                                    if (day <= monthLength && (i > 0 || j >= startingDay))
-                                        html += '<a class="wui-cal-day">' +(day++)+ '</a>';
+                                    if (day <= monthLength && (i > 0 || j >= startingDay)){
+                                        var dayDt = new Date(year,month,day),
+                                            disableCls = ((me.minDate && dayDt < me.minDate) || me.maxDate && dayDt > me.maxDate) ? ' wui-cal-disabled' : '';
+                                        
+                                        html += '<a class="wui-cal-day' +disableCls+ '">' +(day++)+ '</a>';
+                                    }
                                     html += '</td>';
                                 }
                                 // stop making rows if we've run out of days
@@ -1834,7 +1844,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                             if(today.getMonth() == month && today.getFullYear() == year)
                                 tbl.find('a:contains(' +today.getDate()+ '):first').addClass('highlight');
 
-                            tbl.find('td a').click(onSelect);
+                            tbl.find('td a:not(.wui-cal-disabled)').click(onSelect);
                             return tbl;
                         }
                     },
@@ -2147,6 +2157,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                     );
                 },
 
+
     /** Submit the form */
     submit:     function() {
                     var me = this;
@@ -2218,7 +2229,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
     /** @eventhook Signals the user that there was an upload failure. Can be overridden, but doesn't have to be.*/
     upFailure:  function(e,e2){
                     console.log(e,e2);
-                    me.fieldText('Upload Failure');
+                    this.fieldText('Upload Failure');
                 },
     
     /** @return The value of the field, or an empty object is returned. */
@@ -2245,7 +2256,6 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                         me.field.addClass('has-file').removeAttr('disabled');
                         me.upBtn.hide();
                         me.fileFrm.hide();
-                        asdf = me.upBtn;
                         me.changeBtn.show();
                         
                         //changed to a 'file-selected' view and display a nicely formatted file
@@ -2292,7 +2302,7 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
         Msg = new Wui.Window({
             title:      msgTitle || 'Input',
             bbar:        [ 
-                            new Wui.Button({text:'Cancel', click:function(){ Msg.answerRun = true; Msg.close(); }}),
+                            new Wui.Button({text:'Cancel', click:function(){ Msg.closeOkay = true; Msg.close(); }}),
                             new Wui.Button({text:'Submit', click:function(){ Msg.getVal(); }})
             ],
             isModal:    true,
@@ -2304,15 +2314,16 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
                             var formData = inputFrm.getData();
                             if(formData){
                                 if(callback && typeof callback == 'function'){
-                                    var len = Wui.getKeys(formData).length;
-                                    if(len == 1 && formData.inputField) callback(formData.inputField);
-                                    else                                callback(formData);
+                                    var len = Wui.getKeys(formData).length,
+                                        cbkResult = callback((len == 1 && formData.inputField) ? formData.inputField : formData);
+                                    Msg.closeOkay = (callback === undefined) ? true : cbkResult;
+                                }else{
+                                    Msg.closeOkay = true;
                                 }
-                                Msg.answerRun = true;
                                 Msg.close();
                             }
                         },
-            onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+            onWinClose: function(){ return ((Msg.closeOkay !== true) ? false : Msg.closeOkay); }
         });
     Msg.header.splice(0,1);
     return inputFrm;

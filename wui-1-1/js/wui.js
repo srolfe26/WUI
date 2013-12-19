@@ -1337,7 +1337,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         var me = this, bar = me[barName], isHeader = (barName == 'header'),
                             cssProp = (isHeader) ? 'Top' : 'Bottom',
                             hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
-                            pad = hasItems ? 40 : 0,
+                            pad = hasItems ? bar.el.css('height') : 0,
                             border = hasItems ? 0 : undefined;
 
                         me.sureEl.css('border' +cssProp+ 'Width', border);
@@ -1353,28 +1353,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             bar.el.detach();
                         }
                     },
-
-    /** Adds/Removes the footer on the pane and adjusts the content as necessary.
-    configFooter:   function(){
-                        var me = this, footer = me.footer,
-                            hasItems = footer.items.length > 0,
-                            padBottom = hasItems ? 40 : 0,
-                            borderBottom = hasItems ? 0 : undefined;
-
-                        me.sureEl.css({borderBottomWidth:borderBottom});
-                        me.sureEl.children('.wui-pane-wrap').css({paddingBottom:padBottom});
-                        if(hasItems){ footer.place(); footer.callRender(); }
-                        else{ footer.el.detach(); }
-                    },
-    
-    /** Places the header on the pane and adjusts the content as necessary.
-    placeHeader:    function(){
-                        this.sureEl.css({borderTopWidth:0});
-                        this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
-                        this.setTitleAlign();
-                        this.header.place();
-                        this.header.callRender();
-                    }, */
     
     /** Changes the title on the pane. */
     setTitle:       function(t){ 
@@ -1414,6 +1392,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             // Set focus to the bottom right most button in the pane
                             this.footer.items[this.footer.items.length - 1].el.focus();
                         }
+
+                        me.footer.splice(0,0);
+                        me.header.splice(0,0);
                     }
 });
 
@@ -1513,9 +1494,6 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     
                     me.place();
                     
-                    // Resize the window and center
-                    me.resize();
-                    
                     // Make the overlay the el so that when the window is closed it gets taken with it
                     if(me.isModal)    me.el = me.modalEl;
                     
@@ -1539,23 +1517,28 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     */
     resize:        function(resizeWidth, resizeHeight){
                     var me = this,
-                        totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
-
-                    //size the window to according to arguments, or fit its contents as long as its smaller than the height of the window
-                    if(arguments.length !== 0)me.windowEl.height(me.height = resizeHeight).width(me.width = resizeWidth);
-                    else                      me.windowEl.height(((totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : totalHeight));
+                        totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2),
+                        useHeight = (arguments.length) ? resizeHeight : (totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : (totalHeight > me.height) ? totalHeight : me.height;
                     
-                    // Center window
+                    // Size and center the window according to arguments passed and sizing relative to the viewport.
                     me.windowEl.css({
-                        top:        Math.floor(($.viewportH() / 2) - (me.windowEl.height() / 2)) + 'px',
+                        height:     useHeight,
+                        width:      (arguments.length) ? resizeWidth : undefined,
+                        top:        Math.floor(($.viewportH() / 2) - (useHeight / 2)) + 'px',
                         left:       Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px'
                     });
                     
                     me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
-                    
-                    me.layout(function(){
-                        if(me.isModal){ me.modalEl.css({width:'', height:''}); }
-                    });
+                },
+
+    cssByParam: function(){
+                    Wui.O.prototype.cssByParam.apply(this,arguments);
+
+                    // Remove CSS that accidentally gets applied to the modal cover
+                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }
+
+                    // Resize the window and center
+                    this.resize();
                 }
 });
 
