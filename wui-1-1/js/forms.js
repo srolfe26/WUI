@@ -983,13 +983,12 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
 });
 
 
+/** Creates a Combo box.  The Wui combo box can be presented in three general flavors depending on what configs are set:
 
-// Make jQuery contains case insensitive
-$.expr[":"].contains = $.expr.createPseudo(function(arg) {
-    return function( elem ) {
-        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
-    };
-});
+1. Local Combo Box: Configs - data set in the object definition
+2. Remote Search: Configs, url, [params], searchLocal = false
+3. Pre-Loaded Remotely: Configs - url, [params], autoLoad = true
+*/
 Wui.Combo = function(args){ 
     $.extend(this, {
         /** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
@@ -1056,7 +1055,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     keyDown:        function(){
                         if(!this.dd.is(':visible')){
                             this.selectCurr();
-                            this.showDD();
+                            this.toggleDD('open');
                             this.field.select();
                         }else{
                             var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
@@ -1079,51 +1078,39 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             } 
                         }
                     },
-                    
-    /** Hides the drop-down menu */
-    hideDD:         function(){this.dd.hide();},
     
     /** Method that runs when the object is initiated */
     init:           function(){
-                        var me = this,
-                            ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
-                        
+                        var me = this;
+                        Wui.Text.prototype.init.call(me);
+
                         //setup combobox variables
                         me.tplEngine = new Wui.Template({template:me.template});
                         me.selectItm = null;
-                        
-                        //put field inside a wrapper and add drop-down switch
-                        Wui.Text.prototype.init.call(me);
-                        
-                        me.wrapper = $('<div>').addClass('dd-wrapper');
+
+                        // Place field elements
+                        me.append(
+                            me.wrapper = $('<div>').addClass('wui-combo').append(
+                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls),
+                                me.field
+                            )
+                        );
+
+                        // Create Dropdown Button
                         me.ddSwitch = new Wui.Button({
-                            click:        function(){
-                                            if(!me.dd.is(':visible')){
-                                                me.field.focus();
-                                                me.selectCurr();
-                                                me.showDD();
-                                            }else{
-                                                me.hideDD();
-                                            }
-                                        },
-                            text:        '',
-                            tabIndex:    -1,
-                            appendTo:    me.wrapper,
-                            cls:         'field-btn dd-switch'
+                            click:      function(){ me.toggleDD(); },
+                            text:       '',
+                            tabIndex:   -1,
+                            appendTo:   me.wrapper,
+                            cls:        'field-btn dd-switch'
                         });
-                            
-                        me.append(me.wrapper.append(
-                            me.dd = $('<ul>').addClass('wui-combo-dd ' + ddAddCls + ' ' + me.ddCls),
-                            me.field.addClass('has-dd')
-                        ));
                         me.ddSwitch.place();
-                        
+
+                        // Get the combo to look at another data store
                         if(me.dataName && me.dataName.length > 0){
                             $(window).on('datachanged',function(event,name,dataObj){
-                                if(name == me.dataName){
+                                if(name == me.dataName)
                                     me.setData(dataObj.data);
-                                    me.renderData();
-                                }
                             });
                         }else{
                             if(me.autoLoad)   me.loadData();
@@ -1133,13 +1120,40 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         // For locally defined data
                         me.total = me.data.length;
                     },
+
+    /**
+    @param  {string}    force   [open|close] Will force the toggle to open or close the drop down. 
+    Open or closes the drop down based on whether it is visible, positioning it on the screen relative to the combo field.
+    */
+    toggleDD:   function(force){
+                    var me = this, isVis = me.dd.is(':visible');
+
+                    if(force !== undefined){
+                        if(force == 'open') showDD();
+                        else                hideDD();
+                    }else{
+                        if(isVis)           hideDD();
+                        else                showDD();
+                    }
+
+                    function hideDD(){ me.dd.hide(); }
+                    function showDD(){
+                        if(!isVis){
+                            var width   = (me.field.width() < 100) ? 100 : me.field.width(); 
+                            // Clear the drop down when it loses focus
+                            $(document).one('click',function(){ hideDD(); });
+                            $('body').append(me.dd.width(width).show());
+                            Wui.positionItem(me.field,me.dd);
+                        }   
+                    }
+                },
     
     /** Populates the drop-down with data/search results or shows empty text  */
     renderData:     function(){
-                        var me = this,
-                            holder = $('<ul>');
-                        me.dd.html('');
-                        if(me.total){ 
+                        var me = this, holder = $('<ul>');
+                        
+                        me.dd.empty();
+                        if(me.data.length){ 
                             me.dataEach(function(d,i){
                                 me.tplEngine.data = d;
                                 holder.append(
@@ -1158,7 +1172,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     
     /** Hides the drop-down and sets the current selection as the combo's value */
     rsltClick:      function(){
-                        this.hideDD();
+                        this.toggleDD();
                         this.val(this.data[this.selectItm.index()]);
                     },
                     
@@ -1173,8 +1187,12 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     
     /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
     setParams:        function(){
-                        if(this.searchFilter)
-                            $.extend(this.params,{srch: this.searchFilter});
+                        return (this.searchFilter)  ? $.extend(this.params,{srch: this.searchFilter}) : false;
+                    },
+
+    /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
+    onSuccess:      function(){
+                        return (this.searchFilter) ? this.toggleDD('open') : false;
                     },
 
     /** 
@@ -1186,13 +1204,20 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             this.searchFilter = srchVal;
                             
                             if(this.searchLocal){
-                                this.showDD();
-                                this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
-                                this.dd.children(':contains(' +srchVal+ ')').show();
+                                this.toggleDD('open');
+                                this.dd.children().each(function(i,itm){
+                                    itm = $(itm);
+                                    var itmTxt = itm.text();
+
+                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                                    else                                                            clearHilight(itm).hide();
+
+                                    function hilightText(obj){ return clearHilight(obj).html( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
+                                });
                                 this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
                             }else{
-                                if(srchVal.length >= this.minKeys || srchVal.length === 0)
-                                    this.loadData();
+                                if(srchVal.length >= this.minKeys || srchVal.length === 0){ this.loadData(); }
                             }    
                         }
                     },
@@ -1225,8 +1250,8 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         })
                         .blur(function(e){
                             if(t.field.isBlurring !== false){
-                                t.hideDD();
-                                
+                                t.toggleDD();
+                                    
                                 // If the combo has a non-value item in the search field
                                 // select the seleted item or clear the value
                                 var titlePresent = false;
@@ -1243,24 +1268,20 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             }
                          })
                         .click(function(){
-                            t.showDD();
-                            t.field.select();
+                            t.toggleDD('open');
                         })
                         .keyup(function(evnt){
-                            var currVal = t.field.val();
                             switch(evnt.keyCode){
                                 case 40:    /*Do Nothing*/  break;
                                 case 38:    /*Do Nothing*/  break;
                                 case 13:    /*Do Nothing*/  break;
                                 case 9:     /*Do Nothing*/  break;
-                                default:    t.searchData(currVal);
+                                default:    t.searchData(t.field.val());
                             }
                         })
                         .keydown(function(evnt){
-                            var currVal = t.field.val();
-                            
                             //clear the value if the user blanks out the field
-                            if(currVal.length === 0) t.value = null;
+                            if(t.field.val().length === 0) t.value = null;
                             
                             if(t.data.length > 0){
                                 switch(evnt.keyCode){
@@ -1279,27 +1300,6 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             }
                         });
                         return t.field;
-                    },
-    
-    /** Shows the drop-down menu by either simply making it appear, or by positioning it absolutely to appear to drop-down from the combo's text field
-    based on the value of keepInline. */
-    showDD:         function(){
-                        if(!this.keepInline){
-                            var fld     = this.field,
-                                ofst    = fld.offset(),
-                                ddWid   = parseInt(this.dd.css('width')),
-                                width   = (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
-                            
-                            this.dd.appendTo('body').css({
-                                left:       ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
-                                top:        ofst.top + fld.outerHeight(),
-                                width:      width,
-                                display:    'block',
-                                zIndex:     Wui.maxZ()
-                            });
-                        }else{
-                            this.dd.css({ zIndex:Wui.maxZ() }).show();
-                        }
                     },
     getVal:            function(){
                         var me = this;
@@ -1663,7 +1663,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                         
                         // process current date value
                         if(overrideText !== undefined){ me.displayDiv.html(overrideText); return overrideText; }
-                        if(me.value === "" || me.value === null) { return null; }
+                        if(me.value === "" || (!me.value)) { return null; }
                         
                         //validation for min and max
                         if(me.minDate && me.value < me.minDate)         me.displayDiv.html(me.minDate.toString(me.dtFormat) + ' is before the min date.');
@@ -2168,7 +2168,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                     me.params[me.upTitleName] = me.field.val();
                     
                     // for file filtering
-                    if(me.fileTypeFilter !== null) me.params[file_type_filter] = me.fileTypeFilter;
+                    if(me.fileTypeFilter !== null) me.params['file_type_filter'] = me.fileTypeFilter;
 
                     me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
                     
@@ -2214,8 +2214,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                             if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
                                 Wui.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
                                 me.field.removeClass('has-file uploading').removeAttr('disabled');
-                                if(me.beforeSelectTitle)
-                                    me.fieldText(me.beforeSelectTitle);
+                                me.fieldText('');
                             }else{
                                 me.upFailure(d);
                             }

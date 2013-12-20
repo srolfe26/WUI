@@ -150,6 +150,7 @@ button::-moz-focus-inner { border:0; }
 
 /* combo */
 .wui-fe .has-dd {padding-right:27px;}
+.wui-highlight { text-shadow: 0 0 1px #000, 0 0 3px #000; color:#fff; font-weight: bold;}
 .wui-combo-dd {
     background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
     max-height:150px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
@@ -195,7 +196,7 @@ button::-moz-focus-inner { border:0; }
 
 /* files */
 .wui-file input[type=text] {padding-right:65px;}
-.wui-file .has-file { padding:0.5em 30px; background-repeat:no-repeat; background-position: 7px 4px; }
+.wui-file .has-file { padding:0 30px; background-repeat:no-repeat; background-position: 7px 4px; }
 .wui-file .has-file.uploading, .wui-spinner {background-image:url(../img/16x16-cc.gif);}
 .wui-file form {position:absolute; width:65px; top:0; right:0; overflow:hidden; height:28px;}
 .wui-file form > input {width: 65px; padding:0; border:0; opacity:0; height:100%;}
