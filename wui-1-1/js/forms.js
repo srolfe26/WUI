@@ -62,13 +62,14 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                 },
 
     /**
-    @param {function} fn A function that gets called for each item of the form with the exception of Wui.Note objects
+    @param {function}   f           A function that gets called for each item of the form with the exception of Wui.Note objects.
+    @param {boolean}    [blockNote] If defined and true, Wui.Note objects will be not be processed.
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    each:        function(f){
+    each:        function(f, blockNote){
                     return Wui.O.prototype.each.call(this,function(itm,i){
-                        if(!(itm instanceof Wui.Note)) return f(itm,i);
+                        if(!(itm instanceof Wui.Note && blockNote)) return f(itm,i);
                     });
                 },
 
@@ -108,7 +109,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     Gets the values of form fields without performing validation */
     getRawData: function(){
                     var ret = {};
-                    this.each(function(itm){ ret[itm.name] = itm.val(); });
+                    this.each(function(itm){ ret[itm.name] = itm.val(); }, true);
                     return ret;
                 },
                 
@@ -208,17 +209,17 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                                 this.each(function(itm){ 
                                     if(data[itm.name]) 
                                         itm.val(data[itm.name],fireEvents);
-                                });
+                                }, true);
                             }
-                    else    {    this.each(function(itm){ itm.val(null,fireEvents); }); }
+                    else    {    this.each(function(itm){ itm.val(null,fireEvents); }, true); }
                     this.formChange(false);
                 },
     
     /** Disable all form fields */
-    disable:    function(){ return this.each(function(itm){ itm.disable(); }); },
+    disable:    function(){ return this.each(function(itm){ itm.disable(); }, true); },
     
     /** Enable all form fields */
-    enable:        function(){ return this.each(function(itm){ itm.enable(); }); },
+    enable:        function(){ return this.each(function(itm){ itm.enable(); }, true); },
     
     /**
     @param {string} fieldname The name of the field to set a value on
@@ -227,7 +228,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     This method will fail unless the items of the form are initialized W formField objects
     */
     setField:   function(fieldname, v){
-                    this.each(function(itm){ if(itm.name == fieldname) itm.val(v); });
+                    this.each(function(itm){ if(itm.name == fieldname) itm.val(v); }, true);
                 },
     
     /**
@@ -244,7 +245,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     me.errors = [];
                     me.each(function(itm){ 
                         if(itm.el && itm.el.toggleClass) { itm.el.toggleClass(me.errCls,!itm.validate()); }
-                    });
+                    }, true);
                     this.formChange(false);
                     return (me.errors.length === 0);
                 }
@@ -259,8 +260,9 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 Wui.Note = function(args){ 
     $.extend(this,{
         /** The HTML to be placed in the note */
-        html:''
-    },args); this.init();
+        html:   ''
+    },args);
+    this.init();
 };
 Wui.Note.prototype = $.extend(new Wui.O(),{
     /** Method that will run immediately when the object is constructed. */
@@ -333,14 +335,14 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             size = size || me.labelSize;
 
                             // Clear out and reset the size of el padding
-                            this.el.css({
+                            me.el.css({
                                 paddingLeft:    '',
                                 paddingRight:   '',
                                 paddingTop:     '',
                                 paddingBottom:  ''
                             });
                             // Clear out and reset the size of the label
-                            this.label.css({
+                            me.label.css({
                                 width:          '',
                                 height:         '',
                                 marginLeft:     '',
@@ -348,12 +350,22 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             });
 
                             if($.isNumeric(size)){
-                                var dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width',
-                                    margin = (dimension == 'height') ? 0 : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) : parseInt(me.label.css('margin-left'));
-                                this.el.css('padding-' + me.labelPosition, size);
-                                this.label.css(dimension, size - margin);
+                                var margin = (dimension == 'height') ? 0 : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) : parseInt(me.label.css('margin-left')),
+                                    dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
+                                me.el.css('padding-' + me.labelPosition, size);
+                                me.label.css(dimension, size - margin);
                                 if(me.field)
                                     me.field.labelSize = me.labelSize = size;
+                            }
+
+                            me.adjustField();
+                        },
+
+    /** Adjusts the size of the field in case the size of the label overflows */
+    adjustField:        function(){
+                            var me = this, dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
+                            if(me.field && dimension == 'width' && me.label.outerHeight() > me.field.el.height()){
+                                me.field.el.css('min-height', me.label.outerHeight());
                             }
                         },
 
@@ -435,6 +447,10 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     if(this.disabled)                   this.disable();
                     if(this.hasOwnProperty('value'))    this.val(this.value,false);
                 },
+
+    /** Runs after the element has been placed on the DOM */
+    afterRender:function(){ if(this.lbl)  this.lbl.adjustField(); },
+
     /** Disables the field so the user cannot interact with it. */
     disable:    function(){
                     this.disabled = true;
