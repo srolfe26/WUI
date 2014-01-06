@@ -1214,9 +1214,6 @@ Wui.Pane = function(args){
         /** Whether or not the pane has a border */
         border:        true,
         
-        /** Configuration for the pane border - follows the jQuery CSS convention */
-        borderStyle:{borderWidth:6},
-        
         /** An array of items that will be added to the header */
         tbar:       [],
         
@@ -1238,6 +1235,9 @@ Wui.Pane = function(args){
     this.init();
 };
 Wui.Pane.prototype = $.extend(new Wui.O(),{
+    /** Configuration for the pane border - follows the jQuery CSS convention */
+    borderStyle:    { borderWidth: 6 },
+
     /** Disables the pane by masking it and disabling all buttons */
     disable:        function(){
                         this.addMask();
@@ -1352,6 +1352,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         }else{
                             bar.el.detach();
                         }
+
+                        // Set  border if applicable
+                        if(me.border && me.hasOwnProperty('borderStyle')) me.el.css(me.borderStyle);
                     },
     
     /** Changes the title on the pane. */

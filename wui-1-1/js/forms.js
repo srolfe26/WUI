@@ -332,7 +332,7 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
     */
     setLabelSize:       function(size){
                             var me = this;
-                            size = size || me.labelSize;
+                            size = $.isNumeric(size) ? size : me.labelSize;
 
                             // Clear out and reset the size of el padding
                             me.el.css({
@@ -700,16 +700,18 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
     init:       function(){
                     var me = this;
                     Wui.Text.prototype.init.call(me); 
-                    me.lbl.setLabelSize = function(){
-                        Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
-                        me.field.css('height',(me.height - me.lbl.label.outerHeight()));
-                    } 
+                    if(me.lbl){
+                        me.lbl.setLabelSize = function(){
+                            Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
+                            me.field.css('height',(me.height - me.lbl.label.outerHeight()));
+                        }  
+                    }
                 },
 
     /** Overrides Wui.O.cssByParam to include resizing the textarea within the object */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
-                    this.field.css('height',(this.height - this.lbl.label.outerHeight()));
+                    this.field.css('height',(this.height - (this.lbl ? this.lbl.label.outerHeight() : 0)));
                 }
 });
 
@@ -962,15 +964,19 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
 
     /** Runs immediately when the object is created. Adds listeners and styles */
     init:       function(){
-                    if(this.options.length === 0) this.options.push({val:1,title:''});
+                    var me = this;
+                    if(me.options.length === 0) me.options.push({val:1,title:''});
                     
-                    Wui.Radio.prototype.init.call(this);
-                    this.el.removeClass('wui-radio').addClass('wui-checkbox');
+                    Wui.Radio.prototype.init.call(me);
+                    me.el.removeClass('wui-radio').addClass('wui-checkbox');
                     
-                    //steal label if button style
-                    if(this.options.length == 1){
-                        this.el.find('li label').text(this.el.children('label').text());
-                        this.el.children('label').text('');
+                    //steal label if there is only one option
+                    if(me.options.length == 1){
+                        if(!(me.label && me.label.length))
+                            throw('Wui Forms - A Checkbox field ' + (me.name ? '(\'' + me.name + '\')' : '') + ' requires a label if it doesn\'t have options defined.');
+                        me.el.find('li label').html(me.label);
+                        me.lbl.label.html('');
+                        me.lbl.setLabelSize(5);
                     }
                 },
     getVal:        function(){ return this.calcVal(); },

@@ -58,7 +58,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                                             ((me.tabsLeft) ? ' left' : '');
                             
                             if(itm.tabsHideHeader){
-                                itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
+                                //itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
                                 itm.el.addClass('wui-hide-heading');
                             }
                             
@@ -67,7 +67,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                                 click:  function(){ me.giveFocus(itm); },
                                 cls:    itm.tabCls
                             }));
-                            if(me.bbar.length !== 0) me.placeFooter();
+                            //if(me.bbar.length !== 0) me.placeFooter();
                         });
                         
                         return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')

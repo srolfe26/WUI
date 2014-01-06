@@ -58,19 +58,20 @@
                             fitDimension:    'width',
                             tbar: [
                                     new Wui.Button({text:'Test Button'}),
-                                    new Wui.Text({}),
+                                    new Wui.Checkbox({
+                                        label:          'Plain Checkbox',
+                                        labelPosition:  'left',
+                                        name:           'plain_ckeck'
+                                    }),
                                     new Wui.Combo({data:[{person_id:1, person:'Kayli'},{person_id:2, person:'Steve'}], valueItem:'person_id', titleItem:'person'}),
-                                    new Wui.Link({}),
-                                    new Wui.Datetime({}),
-                                    new Wui.Radio({
-                                        label:            'Should I stay or should I go?',
-                                        name:            '82s6',
+                                    new Wui.Link(),
+                                    new Wui.Datetime(),
+                                    new Wui.Checkbox({
+                                        label:          'Check Button',
+                                        labelPosition:  'left',
+                                        name:           '82s6',
                                         buttonStyle:    true,
-                                        required:        true,
-                                        options:        [
-                                                             {val:0, title:'Stay = trouble.'},
-                                                             {val:1, title:'Go = double trouble.'}
-                                                        ], required:true
+                                        required:       true
                                     })
                             ],
                             items: [
@@ -109,7 +110,7 @@
                                                                             }
                                                                             return r;                            
                                                                         },
-                                                            url:         'data.json', required:true
+                                                            url:         'data.txt', required:true
                                                         })
                                                     ]
                                         }),
