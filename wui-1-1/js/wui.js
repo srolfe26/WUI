@@ -1415,10 +1415,7 @@ Wui.Window = function(args){
         bbar:       [],
         
         /** Whether or not the pane has a border */
-        border:        false,
-        
-        /** Set the height of the window */
-        height:        400,
+        border:     false,
         
         /** Determines whether objects behind the window are accessible */
         isModal:    false,
@@ -1427,31 +1424,28 @@ Wui.Window = function(args){
         @param {WUI Window} win    The window being closed.
         @eventhook Called just before the window closes. If this function returns false, the window will not be closed. 
         */
-        onWinClose:    function(){},
+        onWinClose: function(){},
         
         /** 
         @param {WUI Window} win    The window being opened.
         @eventhook Called when the window opens. 
         */
-        onWinOpen:    function(){},
+        onWinOpen:  function(){},
         
         /** An array of items that will be added to the header */
         tbar:       [], 
         
         /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
-        title:        'Window',
+        title:      'Window',
         
         /** Change what comes by default in the pane */
-        maskHTML:    'Loading <span class="wui-spinner"></span>',
-        
-        /** Set the width of the window */
-        width:        600
+        maskHTML:   'Loading <span class="wui-spinner"></span>',
     },args);  
     this.init(); 
 };
 Wui.Window.prototype = $.extend(new Wui.Pane(),{
     /** Closes the window unless onWinClose() event hook returns false. */
-    close:        function(){ 
+    close:      function(){ 
                     var me = this;
                     if(me.onWinClose(me) !== false){
                         me.windowEl.trigger($.Event('close'),[me]);
@@ -1520,9 +1514,13 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     */
     resize:        function(resizeWidth, resizeHeight){
                     var me = this,
-                        totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2),
-                        useHeight = (arguments.length) ? resizeHeight : (totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : (totalHeight > me.height) ? totalHeight : me.height;
-                    
+                        totalHeight = me.container[0].scrollHeight,
+                        headHeight = (me.header && $.isNumeric(me.header.el.outerHeight())) ? me.header.el.outerHeight() : 0,
+                        footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
+                        headersHeight = headHeight + footHeight,
+                        useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
+                                        (totalHeight > me.height && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : me.height;
+
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
                     me.windowEl.css({
                         height:     useHeight,
@@ -1542,7 +1540,13 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 
                     // Resize the window and center
                     this.resize();
-                }
+                },
+
+    /** Set the height of the window */
+    height:     400,
+    
+    /** Set the width of the window */
+    width:      600
 });
 
 

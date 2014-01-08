@@ -1113,7 +1113,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         // Place field elements
                         me.append(
                             me.wrapper = $('<div>').addClass('wui-combo').append(
-                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls),
+                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).hide(),
                                 me.field
                             )
                         );
