@@ -183,7 +183,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
         var dimOpposite = dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
 
         // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
-        if(mindTheScrollbar !== true)
+        if(mindTheScrollbar !== true && parentEl.css('overflow') != 'hidden')
             for(i = 0; i < collection.length; i++)
                 if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
                     break;
@@ -226,12 +226,14 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
         // Get the fit multiplier
         fitMux = (fitCt !== 0) ? (parentSize - fixedSize) / fitCt : 0;
         
-        // Size 'fit' items
+        // Size 'fit' items and others which aren't WUI Objects
         $.each(collection,function(i,itm){
             var css = {};
             if(itm.fit){
                 css[dim] = Math.floor(fitMux * itm.fit);
                 $(itm.el).css(css);
+            }else if(itm.cssByParam === undefined){
+                $(itm.el).css(dim,itm[dim]);
             }
         });
     }else{
@@ -319,21 +321,9 @@ Wui.O.prototype = {
     callRender:    function(){
                     var me = this;
                     
-                    // Add styles if they didn't get added
-                    me.cssByParam(me);
-                    
-                    // Perform render for this
-                    if(me.onRender)  me.onRender();
-                    
-                    // Perform Wui.fit on items that need it
-                    var needFit = false;
-                    
-                    me.each(function(itm){ 
-                        if(itm.fit){ needFit = true; return false; }
-                    });
-                    
-                    if(me.fitDimension || needFit)
-                        Wui.fit(me.items, (me.fitDimension || undefined));
+                    me.cssByParam(me);                  // Add styles if they didn't get added
+                    if(me.onRender)  me.onRender();     // Perform render for this
+                    me.layoutKids();                    // Handles fit and layout for child elements
                         
                     // Perform rendering for child elements
                     me.each(function(itm){ if(itm.callRender) itm.callRender(); });
@@ -424,37 +414,42 @@ Wui.O.prototype = {
     @return The el or elAlias of the object being hidden
     Hides an object with the options of an animated fadeout and callback function
     */
-    hide:        function(){ 
+    hide:       function(){ 
                     var args = ['fadeOut'];
                     $.each(arguments,function(i,arg){ args.push(arg); });
                     this.hidden = true;
                     return this.showHide.apply(this,args);
                 },
+
     /**
     @param {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
     but without the rendering of objects - useful to resize things that are already rendered.
     */
-    layout:        function(afterLayout){
-                    var me = this;
-                    
-                    // run css styles
-                    me.cssByParam(me);
-                    
-                    // Perform Wui.fit on items that need it
-                    var needFit = false;
-                    me.each(function(itm){ if(itm.fit){ needFit = true; return false; } });
-                        
-                            
-                    if(me.fitDimension || needFit)
-                        Wui.fit(me.items, (me.fitDimension || undefined));
-                        
-                    // Perform layout for child elements
-                    me.each(function(itm){ if(itm.layout) itm.layout(); });
+    layout:     function(afterLayout){
+                    this.cssByParam(this);  // run css styles
+                    this.layoutKids();      // run fit and layout on children
 
                     // Performs actions passed in as parameters
                     if(afterLayout && typeof afterLayout === 'function')    afterLayout();
                 },
+
+    /** A function to run layout on just the objects children without calling cssByParam. */
+    layoutKids: function(){
+        var me = this, needFit = false;
+
+        // Perform Wui.fit on items that need it
+        me.each(function(itm){ if(itm.fit){ 
+            needFit = true; return false;
+        }});
+            
+        if(me.fitDimension || needFit)
+            Wui.fit(me.items, (me.fitDimension || undefined));
+            
+        // Perform layout for child elements
+        me.each(function(itm){ if(itm.layout) itm.layout(); });
+    },
+
     /**
     @param {function} [after]    A function to be called after an object has been placed
     @return The object that was placed 
@@ -883,11 +878,13 @@ Wui.Template.prototype = {
                         .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
                         // accounts for complex expressions
                         .replace(/\{\((.*?)\)\}/g,function(m,fn){
-                            var keys = Wui.getKeys(me.data),
-                                vals = [];
+                            var keys = Wui.getKeys(me.data), vals = [], i = 0;
                             
+                            // Removes any key values that may start with a number and ruin the engine
+                            for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
+
                             // fill arrays of keys and their values and make sure they are in the same order
-                            for(var i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
+                            for(i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
                             
                             // add the passed in conditional as the body of the function created below
                             keys.push("return " + fn);
@@ -906,9 +903,10 @@ Wui.Template.prototype = {
 
 
 /** WUI Data List
- @event        wuiselect        A data template is selected ( DataList, el, record )
- @event        wuichange        The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
- @event        wuideselect        A selected item is clicked again, and thus deselected ( DataList, el, record )
+@event        wuiselect         A data template is selected ( DataList, el, record )
+@event        wuichange         The selected item info along with the previous selected record if it exists ( DataList, el, record, selection array )
+@event        wuideselect       A selected item is clicked again, and thus deselected ( DataList, el, record )
+@event        wuidblclick       When an item is double clicked ( DataList, el, record )
  
  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
  @creation   2013-10-25
@@ -991,9 +989,31 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Adds the click listeners to the item and calls modifyItem to add greater flexibility
     */
     createItem:    function(itm){
-                    var me = this;
+                    var me = this,
+                        clicks = 0,
+                        timer = null;
                     
-                    itm.el.click(function(e){
+                    itm.el.on("click", function(e){
+                        var retVal = null;
+                        
+                        clicks++;  //count clicks
+                        if(clicks === 1) {
+                            timer = setTimeout(function() {
+                                retVal = singleClick(e);
+                                clicks = 0;             //after action performed, reset counter
+                            }, 350);
+                        } else {
+                            clearTimeout(timer);    //prevent single-click action
+                            retVal = doubleClick(e);
+                            clicks = 0;             //after action performed, reset counter
+                        }
+                        return retVal;
+                    })
+                    .on("dblclick", function(e){
+                        e.preventDefault();  //cancel system double-click event
+                    });
+
+                    function singleClick(e){
                         // Determine the # of selected items before the change
                         if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
                             if(me.selected.length > 0 && me.selected[0] === itm){
@@ -1011,13 +1031,16 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                             else                me.selected.push(itm);
                         }
                         me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
-                    }).dblclick(function(e){
+                    }
+
+                    function doubleClick(e){
                         me.itemSelect(itm,true);
                         me.el.trigger($.Event('wuidblclick'),[me, itm.el, itm.rec])
                              .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                              
                         return false; // stops propagation & prevents default
-                    });
+                    }
+
                     return me.modifyItem(itm);
                 },
     
@@ -1338,9 +1361,11 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             cssProp = (isHeader) ? 'Top' : 'Bottom',
                             hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
                             pad = hasItems ? bar.el.css('height') : 0,
-                            border = hasItems ? 0 : undefined;
+                            border = (hasItems) ? 0 : undefined;
 
+                        if(me.parent && me.parent instanceof Wui.Tabs) border = 6;
                         me.sureEl.css('border' +cssProp+ 'Width', border);
+                        
                         me.sureEl.children('.wui-pane-wrap').css('padding' +cssProp, pad);
                         if(hasItems){
                             bar.place();
@@ -1496,7 +1521,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     
                     this.onWinOpen(me);
                     me.windowEl.trigger($.Event('open'),[me]);
-                    
+                    this.resize();
+
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
                         if(parseInt((me.el.css('z-index')) || 1) <= maxZ){
@@ -1515,11 +1541,12 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     resize:        function(resizeWidth, resizeHeight){
                     var me = this,
                         totalHeight = me.container[0].scrollHeight,
+                        containerHeight = me.container.height(),
                         headHeight = (me.header && $.isNumeric(me.header.el.outerHeight())) ? me.header.el.outerHeight() : 0,
                         footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
                         headersHeight = headHeight + footHeight,
                         useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
-                                        (totalHeight > me.height && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : me.height;
+                                        (containerHeight < totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : me.height;
 
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
                     me.windowEl.css({
@@ -1530,20 +1557,20 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     });
                     
                     me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
+                    me.layoutKids();
+
+                    return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
                 },
 
+    /** Overrides Wui.O cssByParam and removes styles on modal windows */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
-
-                    // Remove CSS that accidentally gets applied to the modal cover
-                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }
-
-                    // Resize the window and center
-                    this.resize();
+                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }    // Remove CSS that accidentally gets applied to the modal cover
+                    this.resize();                                                  // Resize the window and center
                 },
 
     /** Set the height of the window */
-    height:     400,
+    height:     200,
     
     /** Set the width of the window */
     width:      600

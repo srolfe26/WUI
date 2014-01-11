@@ -121,8 +121,6 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
 
 
 /** 
-@event          select          When a record is clicked (grid, row el, record)
-@event          dblclickrecord  When a record is  double clicked clicked (grid, row el, record)
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
 The grid pane provides table-like functionality for data sets. Grids can be populated remotely
@@ -162,16 +160,20 @@ Wui.Grid = function(args){
         bbar:           [],
         
         /** Array of items that will make up the columns of the grid table. */
-        columns:         [],
+        columns:        [],
         
         /** URL to get columns if its a dynamic grid */
-        colUrl:            null,
+        colUrl:         null,
         
         /** Params to pass for columns on a dynamic grid */
-        colParams:        {},
+        colParams:      {},
+
+        /** Configs to pass to the Wui.Data object that handles the retrival of the columns
+        The columns are set in the 'afterSet' method of the data flow - See Wui.Data */
+        colDataParams:  {},
         
         /** Array of data for the grid. */
-        data:            null,
+        data:           null,
         
         /** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
         defaultDataType:'string',
@@ -180,10 +182,10 @@ Wui.Grid = function(args){
         multiSelect:    false,
         
         /** Whether or not to hide the column headers */
-        hideHeader:        false,
+        hideHeader:     false,
         
         /** An array of the currently selected records */
-        selected:        [],
+        selected:       [],
         
         /** An array of items that will be added to the header */
         tbar:           []
@@ -245,7 +247,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     
                     if(me.colUrl && me.colUrl.length){
                         // Make remote call for columns
-                        me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
+                        me.colProxy = new Wui.Data($.extend({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); }}, me.colDataParams));
                         me.colProxy.loadData();
                     }else if(me.columns.length){
                         // Check for locally defined columns

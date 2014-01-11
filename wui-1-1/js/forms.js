@@ -692,7 +692,7 @@ Wui.Textarea = function(args){
         field:    $('<textarea>'),
         
         /** Determines the height of the field */
-        height:    100
+        height:    80
     }, args);
     this.init();
 };
@@ -700,18 +700,21 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
     init:       function(){
                     var me = this;
                     Wui.Text.prototype.init.call(me); 
-                    if(me.lbl){
+                    /*if(me.lbl){
                         me.lbl.setLabelSize = function(){
                             Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
-                            me.field.css('height',(me.height - me.lbl.label.outerHeight()));
+                            if($.inArray(me.lbl.labelPosition,['top','bottom']) >= 0)
+                                me.field.css('height',(me.height - me.lbl.label.outerHeight()));
                         }  
-                    }
+                    }*/
                 },
 
     /** Overrides Wui.O.cssByParam to include resizing the textarea within the object */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
-                    this.field.css('height',(this.height - (this.lbl ? this.lbl.label.outerHeight() : 0)));
+                    var lblVert = (this.lbl && $.inArray(this.lbl.labelPosition,['top','bottom']) >= 0) ? this.lbl.label.outerHeight() : 0;
+                    this.field.css('height',(this.height - lblVert));
+                        
                 }
 });
 
@@ -976,7 +979,7 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
                             throw('Wui Forms - A Checkbox field ' + (me.name ? '(\'' + me.name + '\')' : '') + ' requires a label if it doesn\'t have options defined.');
                         me.el.find('li label').html(me.label);
                         me.lbl.label.html('');
-                        me.lbl.setLabelSize(5);
+                        me.el.css({paddingTop:0, paddingBottom:0});
                     }
                 },
     getVal:        function(){ return this.calcVal(); },
@@ -2329,8 +2332,7 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
             isModal:    true,
             items:      [inputFrm],
             cls:        'wui-input-window',
-            width:      600, 
-            height:     250,
+            width:      600,
             getVal:        function(){
                             var formData = inputFrm.getData();
                             if(formData){
