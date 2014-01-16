@@ -284,10 +284,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     Wui.O.prototype.layout.apply(this,arguments);
                     this.posDataWin();
                     if(this.cols.length) this.sizeCols();
-                    
-                    // Necessary to define in javascript because webkit won't use the style
-                    // until the width of the table has been defined.
-                    this.tbl.css({tableLayout:'fixed'});
                 },
                     
     /** Overrides DataList.loadData(), to add the load mask */   
@@ -473,7 +469,9 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                         me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
                         totalColWidth += colWidth;
                     }
-                    me.tbl.css({width:totalColWidth});
+                    // Necessary to define in javascript because webkit won't use the style
+                    // until the width of the table has been defined.
+                    me.tbl.css({width:totalColWidth, tableLayout:'fixed'});
                 },
                     
     /**

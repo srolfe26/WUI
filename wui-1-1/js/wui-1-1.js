@@ -1008,16 +1008,17 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     
                     itm.el.on("click", function(e){
                         var retVal = null;
+                        var row = this;
                         
                         clicks++;  //count clicks
                         if(clicks === 1) {
                             timer = setTimeout(function() {
-                                retVal = singleClick(e);
+                                retVal = singleClick(e,row);
                                 clicks = 0;             //after action performed, reset counter
                             }, 350);
                         } else {
                             clearTimeout(timer);    //prevent single-click action
-                            retVal = doubleClick(e);
+                            retVal = doubleClick(e,row);
                             clicks = 0;             //after action performed, reset counter
                         }
                         return retVal;
@@ -1026,19 +1027,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                         e.preventDefault();  //cancel system double-click event
                     });
 
-                    function singleClick(e){
+                    function singleClick(e,row){
                         // Determine the # of selected items before the change
                         if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
-                            if(me.selected.length > 0 && me.selected[0] === itm){
-                                //deselect item
-                                me.itemDeselect(itm);
-                            }else{
-                                //change selection
-                                me.itemSelect(itm);
-                            }
+                            if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
+                            else                                                    me.itemSelect(itm);     //change selection
                         }else{
-                            var alreadySelected = $(this).hasClass('wui-selected');
-                            $(this).toggleClass('wui-selected',!alreadySelected);
+                            var alreadySelected = $(row).hasClass('wui-selected');
+                            $(row).toggleClass('wui-selected',!alreadySelected);
 
                             if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                             else                me.selected.push(itm);
@@ -1943,7 +1939,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     
     /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
     layout:     function(){
-                    Wui.O.prototype.layout.call(this);
+                    Wui.O.prototype.layout.apply(this,arguments);
                     this.posDataWin();
                     if(this.cols.length) this.sizeCols();
                 },
@@ -2091,7 +2087,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     me.renderers = [];
                     
                     // clear template
-                    me.template = '<tr class="{((wuiIndex % 2 == 0) ? \'even\' : \'odd\')}">';
+                    me.template = '<tr>';
                     
                     // apply columns on grid
                     $.each(cols,function(i,col){
@@ -2131,7 +2127,9 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                         me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
                         totalColWidth += colWidth;
                     }
-                    me.tbl.css({width:totalColWidth});
+                    // Necessary to define in javascript because webkit won't use the style
+                    // until the width of the table has been defined.
+                    me.tbl.css({width:totalColWidth, tableLayout:'fixed'});
                 },
                     
     /**
@@ -2150,10 +2148,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
 
                     me.tbl.detach();
                     // Place items and reset alternate coloring
-                    $.each(listitems, function(idx, row) { 
-                        var isEven = idx % 2 === 0;
-                        row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
-                    });
+                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
                     me.tbl.appendTo(me.tblContainer);
                     me.sizeCols();
                     me.resetSelect();
