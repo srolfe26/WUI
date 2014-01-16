@@ -15,7 +15,7 @@ jQuery.extend(verge);
 
 
 /*! Wui 1.1
- * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
  * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
@@ -88,16 +88,16 @@ Wui.getKeys = function(obj){
 @return Number specifying the scrollbar width for the current page in pixels
 */
 Wui.scrollbarWidth = function() {
-  var parent, child, width;
+    var parent, child, width;
 
-  if(width===undefined) {
-    parent = $('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo('body');
-    child=parent.children();
-    width=child.innerWidth()-child.height(99).innerWidth();
-    parent.remove();
-  }
+    if(width===undefined) {
+        parent = $('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo('body');
+        child=parent.children();
+        width=child.innerWidth()-child.height(99).innerWidth();
+        parent.remove();
+    }
 
- return width;
+    return width;
 };
 
 /** 
@@ -143,15 +143,12 @@ Wui.Data.prototype.dataContainer and Wui.Data.prototype.totalContainer.
 */
 Wui.unwrapData = function(r){
     var me          = this,
-        retObj      = {},
-        dc            = me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
-        tc            = me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
+        dc          = me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
+        tc          = me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
         response    = (dc && r[dc]) ? r[dc] : r,
-        total         = (tc && r[tc]) ? r[tc] : response.length;
+        total       = (tc && r[tc]) ? r[tc] : response.length;
     
-    retObj.data = response;
-    retObj.total = total;
-    return retObj;
+    return {data:response, total:total};
 };
 
 /** 
@@ -199,7 +196,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
         var dimOpposite = dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
 
         // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
-        if(mindTheScrollbar !== true)
+        if(mindTheScrollbar !== true && parentEl.css('overflow') != 'hidden')
             for(i = 0; i < collection.length; i++)
                 if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
                     break;
@@ -242,12 +239,14 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
         // Get the fit multiplier
         fitMux = (fitCt !== 0) ? (parentSize - fixedSize) / fitCt : 0;
         
-        // Size 'fit' items
+        // Size 'fit' items and others which aren't WUI Objects
         $.each(collection,function(i,itm){
             var css = {};
             if(itm.fit){
                 css[dim] = Math.floor(fitMux * itm.fit);
                 $(itm.el).css(css);
+            }else if(itm.cssByParam === undefined){
+                $(itm.el).css(dim,itm[dim]);
             }
         });
     }else{
@@ -283,7 +282,7 @@ Wui.O.prototype = {
     If the object has a 'appendTo' or 'prependTo' config, that action will be used, otherwise the
     passed in action is used if defined, otherwise uses 'append'.
     */
-    addToDOM:    function(obj, tgt, act){
+    addToDOM:   function(obj, tgt, act){
                     // Take the target and action from the passed object first if defined, then default to passed arguments, 
                     // then to a default of $('body') and 'append'
                     var target     = (obj.appendTo !== undefined) ? obj.appendTo :
@@ -313,7 +312,7 @@ Wui.O.prototype = {
     @param {object}    item    A jQuery object to be added
     Appends item to the WUI Object's 'elAlias' or 'el', whichever is defined.
     */
-    append:        function(obj){
+    append:     function(obj){
                     var me = this, el = me.elAlias || me.el;
                     $.each(arguments,function(i,itm){
                         el.append(itm);
@@ -322,7 +321,7 @@ Wui.O.prototype = {
 
 
     /** Removes only the DOM items from the WUI Object's 'elAlias' or 'el', whichever is defined. */
-    clear:        function(){
+    clear:      function(){
                     var me = this, el = me.elAlias || me.el;
                     el.children().remove();
                 },
@@ -332,24 +331,12 @@ Wui.O.prototype = {
     object is using a 'fit' layout and performs layout on the item, calls its children's callRender(), 
     and finally calls its own afterRender() if it exists.
     */
-    callRender:    function(){
+    callRender: function(){
                     var me = this;
                     
-                    // Add styles if they didn't get added
-                    me.cssByParam(me);
-                    
-                    // Perform render for this
-                    if(me.onRender)  me.onRender();
-                    
-                    // Perform Wui.fit on items that need it
-                    var needFit = false;
-                    
-                    me.each(function(itm){ 
-                        if(itm.fit){ needFit = true; return false; }
-                    });
-                    
-                    if(me.fitDimension || needFit)
-                        Wui.fit(me.items, (me.fitDimension || undefined));
+                    me.cssByParam(me);                  // Add styles if they didn't get added
+                    if(me.onRender)  me.onRender();     // Perform render for this
+                    me.layoutKids();                    // Handles fit and layout for child elements
                         
                     // Perform rendering for child elements
                     me.each(function(itm){ if(itm.callRender) itm.callRender(); });
@@ -364,7 +351,7 @@ Wui.O.prototype = {
     
     Tests whether the passed in value is valid, then uses the jQuery .attr method to apply an attribute to the el of the WUI object.
     */
-    applyAttr:    function(name,val){
+    applyAttr:  function(name,val){
                     var validVal = (val !== undefined && (typeof val === 'string' || typeof val === 'number'));
                     if(validVal) $(this.el).attr(name,val);
                     return validVal;
@@ -417,7 +404,7 @@ Wui.O.prototype = {
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    each:        function(f,ascending){
+    each:       function(f,ascending){
                     ascending = (ascending === undefined) ? true : ascending;
                     var i = (ascending) ? 0 : this.items.length;
                     
@@ -440,37 +427,42 @@ Wui.O.prototype = {
     @return The el or elAlias of the object being hidden
     Hides an object with the options of an animated fadeout and callback function
     */
-    hide:        function(){ 
+    hide:       function(){ 
                     var args = ['fadeOut'];
                     $.each(arguments,function(i,arg){ args.push(arg); });
                     this.hidden = true;
                     return this.showHide.apply(this,args);
                 },
+
     /**
     @param {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
     but without the rendering of objects - useful to resize things that are already rendered.
     */
-    layout:        function(afterLayout){
-                    var me = this;
-                    
-                    // run css styles
-                    me.cssByParam(me);
-                    
+    layout:     function(afterLayout){
+                    this.cssByParam(this);  // run css styles
+                    this.layoutKids();      // run fit and layout on children
+
+                    // Performs actions passed in as parameters
+                    if(afterLayout && typeof afterLayout === 'function')    afterLayout();
+                },
+
+    /** A function to run layout on just the objects children without calling cssByParam. */
+    layoutKids: function(){
+                    var me = this, needFit = false;
+
                     // Perform Wui.fit on items that need it
-                    var needFit = false;
-                    me.each(function(itm){ if(itm.fit){ needFit = true; return false; } });
+                    me.each(function(itm){ if(itm.fit){ 
+                        needFit = true; return false;
+                    }});
                         
-                            
                     if(me.fitDimension || needFit)
                         Wui.fit(me.items, (me.fitDimension || undefined));
                         
                     // Perform layout for child elements
                     me.each(function(itm){ if(itm.layout) itm.layout(); });
-
-                    // Performs actions passed in as parameters
-                    if(afterLayout && typeof afterLayout === 'function')    afterLayout();
                 },
+
     /**
     @param {function} [after]    A function to be called after an object has been placed
     @return The object that was placed 
@@ -542,7 +534,7 @@ Wui.O.prototype = {
     @return The el or elAlias of the object being shown
     Shows an object with the options of an animated fadein and callback function
     */
-    show:        function(){ 
+    show:       function(){ 
                     var args = ['fadeIn'];
                     $.each(arguments,function(i,arg){ args.push(arg); });
                     this.hidden = false;
@@ -556,7 +548,7 @@ Wui.O.prototype = {
     This is an internal function used by show() and hide(). Fn is required, but speed and callback
     are optional and their order is interchangeable.
     */
-    showHide:    function(fn,speed,callback){
+    showHide:   function(fn,speed,callback){
                      speed = (typeof speed == 'number') ? speed : 1;
                      if(typeof arguments[1] == 'function') callback = arguments[0];
                      return this.el[fn](speed, callback);
@@ -727,19 +719,19 @@ Wui.Data = function(args){
 Wui.Data.prototype = {
     /** An object in the remote response actually containing the data.
     Best set modifying the prototype eg. Wui.Data.prototype.dataContainer = 'payload'; */
-    dataContainer:      null,
+    dataContainer:  null,
     /** An object in the remote response specifying the total number of records. Setting this
     feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
-    totalContainer:     null,
+    totalContainer: null,
     
     /** When the object is waiting, default amount of time in milliseconds before trying to perform loadData() again */
-    ajaxWait:           10,
+    ajaxWait:       10,
     
     /** 
     @param {array}    newData    Array of the new data
-    Event hook for when data is changed.
+    @eventhook Used for when data is changed.
     */
-    dataChanged:        function(){},
+    dataChanged:    function(){},
     
     /**
     @param {function} fn A function that gets called for each item in the object's data array
@@ -747,7 +739,7 @@ Wui.Data.prototype = {
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    dataEach:        function(f){
+    dataEach:       function(f){
                         for(var i = 0; i < this.data.length; i++)
                             if(f(this.data[i],i) === false)
                                 break;
@@ -769,7 +761,7 @@ Wui.Data.prototype = {
     
     Upon failure will fire onFailure()
     */
-    loadData:        function(){
+    loadData:       function(){
                         var me = this,
                             config = $.extend({
                                 data:       me.params,
@@ -791,11 +783,12 @@ Wui.Data.prototype = {
                     },
     /**
     @param {object} params    Params to be set
+    @eventhook Can be used as is or overridden to run when parameters change.
     Can be used as is to set parameters before an AJAX load, or it can also be used as an event hook and overridden.
     This method is called from loadData with its arguments passed on, so arguments passed to load data will be sent here. 
     See loadData().
     */
-    setParams:        function(params){
+    setParams:      function(params){
                         if(params && typeof params === 'object')
                             $.extend(this.params,params);
                     },
@@ -822,20 +815,20 @@ Wui.Data.prototype = {
                         me.afterSet(me.data);
                     },
     
-    /** Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
-    beforeLoad:        function(){},
+    /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    beforeLoad:     function(){},
     
     /**
     @param    {array}    data    The value of the data cofig of the current object
-    Event hook that fires after data is set. Meant to be overridden. See loadData().
+    @eventhook  Fires after data is set. Meant to be overridden. See loadData().
     */
-    afterSet:        function(){},
+    afterSet:       function(){},
     
     /**
     @param {array} d Data to be set on the ojbect
-    Event hook that fires after the remote call but before data is set on the object. Meant to be overridden. See loadData().
+    @eventhook  Fires after the remote call but before data is set on the object. Meant to be overridden. See loadData().
     */
-    beforeSet:        function(){},
+    beforeSet:      function(){},
     
     /**
     @param {object or array} r Response from the server in JSON format
@@ -849,15 +842,13 @@ Wui.Data.prototype = {
                         me.setData(unwrapped.data, unwrapped.total);
                     },
     
-    /**
-    Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
-    */
-    onSuccess:        function(){},
+    /** @eventhook AllowS for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    onSuccess:      function(){},
     
-    /**
-    Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
-    */
-    onFailure:        function(){},
+    /** @eventhook Allows for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    onFailure:      function(){},
+    
+    /** Runs when loadData() fails. Clears the waiting flag and called the event hook onFailure. */
     failure:        function(e){
                         this.waiting = false;
                         this.onFailure(e);
@@ -876,55 +867,58 @@ Wui.Data.prototype = {
 Wui.Template = function(args){ $.extend(this,args); };
 Wui.Template.prototype = {
     /** The HTML template that the data will fit into. Null value will cause an error to be thrown. Specification required. */
-    template:    null,
+    template:   null,
     
     /** A single record to be applied to the template. Null value will cause an error to be thrown. Specification required.  */
-    data:        null,
+    data:       null,
     
     /**
     @param {number} [index] An optional number to make an index available to the record
     @return A jQuery object containing the template paired with its data
     Creates the template 
     */
-    make:    function(index){
-                var me = this;
-                if(me.data && me.template){
-                    var tplCopy = me.template;
-                    
-                    if($.isNumeric(index))    $.extend(me.data,{wuiIndex:index});
-                    
-                    return $(
-                        tplCopy
-                        // replaces straight values
-                        .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
-                        // accounts for complex expressions
-                        .replace(/\{\((.*?)\)\}/g,function(m,fn){
-                            var keys = Wui.getKeys(me.data),
-                                vals = [];
-                            
-                            // fill arrays of keys and their values and make sure they are in the same order
-                            for(var i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
-                            
-                            // add the passed in conditional as the body of the function created below
-                            keys.push("return " + fn);
-                            
-                            // create function that will perform the conditional statement
-                            var newFn = Function.apply(null,keys);
-                            
-                            // call the function with the keys as variables in scope
-                            return newFn.apply(null,vals);
-                        })
-                    );
+    make:       function(index){
+                    var me = this;
+                    if(me.data && me.template){
+                        var tplCopy = me.template;
+                        
+                        if($.isNumeric(index))    $.extend(me.data,{wuiIndex:index});
+                        
+                        return $(
+                            tplCopy
+                            // replaces straight values
+                            .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
+                            // accounts for complex expressions
+                            .replace(/\{\((.*?)\)\}/g,function(m,fn){
+                                var keys = Wui.getKeys(me.data), vals = [], i = 0;
+                                
+                                // Removes any key values that may start with a number and ruin the engine
+                                for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
+
+                                // fill arrays of keys and their values and make sure they are in the same order
+                                for(i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
+                                
+                                // add the passed in conditional as the body of the function created below
+                                keys.push("return " + fn);
+                                
+                                // create function that will perform the conditional statement
+                                var newFn = Function.apply(null,keys);
+                                
+                                // call the function with the keys as variables in scope
+                                return newFn.apply(null,vals);
+                            })
+                        );
+                    }
+                    throw new Error('Wui.js - Template engine missing data and/or template.');
                 }
-                throw new Error('Wui.js - Template engine missing data and/or template.');
-            }
 };
 
 
 /** WUI Data List
- @event        wuiselect        A data template is selected ( DataList, el, record )
- @event        wuichange        The selected item info along with the previous selected record if it exists ( DataList, el, record, old el, old record )
- @event        wuideselect        A selected item is clicked again, and thus deselected ( DataList, el, record )
+@event        wuiselect         A data template is selected ( DataList, el, record )
+@event        wuichange         The selected item info along with the previous selected record if it exists ( DataList, el, record, selection array )
+@event        wuideselect       A selected item is clicked again, and thus deselected ( DataList, el, record )
+@event        wuidblclick       When an item is double clicked ( DataList, el, record )
  
  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
  @creation   2013-10-25
@@ -973,16 +967,17 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return The item passed in will be returned.
     Performs mutations and fires listeners when an item is selected @private
     */
-    itemSelect:function(itm, silent){
+    itemSelect: function(itm, silent){
                     var me = this;
                         
                     me.el.find('.wui-selected').removeClass('wui-selected');
                     itm.el.addClass('wui-selected');
                     me.selected = [itm];
                     
-                    if(!me.multiSelect && !silent)
+                    if(!me.multiSelect && !silent){
                         me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
-                    
+                        me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                    }
                     return itm;
                 },
 
@@ -997,7 +992,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
                     me.el.trigger($.Event('deselect'),[me, itm.el, itm.rec]);
-                    
+                    me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     return itm;
                 },
     
@@ -1006,10 +1001,32 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return The item passed in with listeners added
     Adds the click listeners to the item and calls modifyItem to add greater flexibility
     */
-    createItem:    function(itm){
-                    var me = this;
+    createItem: function(itm){
+                    var me = this,
+                        clicks = 0,
+                        timer = null;
                     
-                    itm.el.click(function(e){
+                    itm.el.on("click", function(e){
+                        var retVal = null;
+                        
+                        clicks++;  //count clicks
+                        if(clicks === 1) {
+                            timer = setTimeout(function() {
+                                retVal = singleClick(e);
+                                clicks = 0;             //after action performed, reset counter
+                            }, 350);
+                        } else {
+                            clearTimeout(timer);    //prevent single-click action
+                            retVal = doubleClick(e);
+                            clicks = 0;             //after action performed, reset counter
+                        }
+                        return retVal;
+                    })
+                    .on("dblclick", function(e){
+                        e.preventDefault();  //cancel system double-click event
+                    });
+
+                    function singleClick(e){
                         // Determine the # of selected items before the change
                         if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
                             if(me.selected.length > 0 && me.selected[0] === itm){
@@ -1025,15 +1042,19 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                             if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                             else                me.selected.push(itm);
+
+                            me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                         }
-                        me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
-                    }).dblclick(function(e){
+                    }
+
+                    function doubleClick(e){
                         me.itemSelect(itm,true);
                         me.el.trigger($.Event('wuidblclick'),[me, itm.el, itm.rec])
                              .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                              
                         return false; // stops propagation & prevents default
-                    });
+                    }
+
                     return me.modifyItem(itm);
                 },
     
@@ -1042,10 +1063,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return The DOM element
     Performs any desired modification on an object - this method is meant to be overridden.
     */
-    modifyItem:    function(itm){ return itm.el; },
+    modifyItem: function(itm){ return itm.el; },
     
     /** Creates the templates based on current data. Then appends them to the el with listeners */
-    make:        function(){
+    make:       function(){
                     var me = this,
                         holdingData = me.data || [],
                         holder = $('<div>');
@@ -1080,7 +1101,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                 },
                 
     /** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
-    onRender:    function(){
+    onRender:   function(){
                     if(this.autoLoad){
                         if(this.url === null)   this.make();
                         else                    this.loadData();
@@ -1130,15 +1151,15 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @param    {string|number} val The value to look for
     @return An object containing the dataList, row, and record, or undefined if there was no matching row.
     Selects an item according to the key value pair to be found in a record. */
-    selectBy:        function(key,val){
-                        var me = this, retVal = undefined;
-                        me.each(function(itm){
-                            if(itm.rec[key] !== undefined && itm.rec[key] == val)
-                                return retVal = me.itemSelect(itm);
-                        });
-                        me.scrollToCurrent();
-                        return retVal;
-                    }
+    selectBy:   function(key,val){
+                    var me = this, retVal = undefined;
+                    me.each(function(itm){
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
+                            return retVal = me.itemSelect(itm);
+                    });
+                    me.scrollToCurrent();
+                    return retVal;
+                }
 });
 
 
@@ -1150,16 +1171,16 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 Wui.Button = function(args){
     $.extend(this, {
         /** The button element. Can be overridden according to the needs of the design. */
-        el:            $('<button>').attr({unselectable:'on'}),
+        el:         $('<button>').attr({unselectable:'on'}),
         
         /** Whether the button is disabled. */
-        disabled:    false,
+        disabled:   false,
         
         /** Tool tip text for the button. */
         toolTip:    null,
         
         /** Tab index will make the button focusable by the browser. Changing this value will result in it receiving a higher precedence than what it would receive in that natural flow of the page. */
-        tabIndex:    0,
+        tabIndex:   0,
         
         /** Text to appear on the button. Can be HTML if a more complex button design is desired. */
         text:       'Button'
@@ -1168,7 +1189,7 @@ Wui.Button = function(args){
     this.init();
 };
 Wui.Button.prototype = $.extend(new Wui.O(),{
-    /** Event hook for the button click. */
+    /** @eventhook Event hook for the button click. */
     click:      function(){},
     
     /** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
@@ -1204,14 +1225,16 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     .attr('disabled',true)
                     .removeAttr('tabindex');
                 },
+
     /** Enables the button */
-    enable:        function(){
+    enable:     function(){
                     this.disabled = false;
                     this.el
                     .toggleClass('disabled',this.disabled)
                     .removeAttr('disabled')
                     .attr({tabindex:this.tabIndex});
                 },
+
     /** Sets the button text. Can be HTML. */
     setText:    function(txt){ return this.el.html(txt); },
 });
@@ -1228,32 +1251,32 @@ Wui.Pane = function(args){
         bbar:       [],
         
         /** Whether or not the pane has a border */
-        border:        true,
-        
-        /** Configuration for the pane border - follows the jQuery CSS convention */
-        borderStyle:{borderWidth:6},
+        border:     true,
         
         /** An array of items that will be added to the header */
         tbar:       [],
         
         /** Whether or not the pane is disabled on load */
-        disabled:    false,
+        disabled:   false,
         
         /** Alignment of the heading title (left,center,right) */
-        titleAlign:    'left',
+        titleAlign: 'left',
                 
         /** Default height */
-        height:        '100%',
+        height:     '100%',
     
         /** HTML to show in the mask when the pane is disabled */
-        maskHTML:    'Empty',
+        maskHTML:   'Empty',
         
         /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
-        title:        null
+        title:      null
     },args); 
     this.init();
 };
 Wui.Pane.prototype = $.extend(new Wui.O(),{
+    /** Configuration for the pane border - follows the jQuery CSS convention */
+    borderStyle:    { borderWidth: 6 },
+
     /** Disables the pane by masking it and disabling all buttons */
     disable:        function(){
                         this.addMask();
@@ -1263,7 +1286,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                     },
     
     /** Enables the pane by removing the mask and enabling all buttons */
-    enable:            function(){
+    enable:         function(){
                             var me = this;
                             me.removeMask();
                             me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
@@ -1303,7 +1326,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                     },
     
     /** Method that will run immediately when the object is constructed. */
-    init:            function(wuiPane){
+    init:           function(wuiPane){
                         var me = wuiPane || this;
                         me.el       = $('<div>').addClass('wui-pane').append(
                                         $('<div>').addClass('wui-pane-wrap').append(
@@ -1353,10 +1376,12 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         var me = this, bar = me[barName], isHeader = (barName == 'header'),
                             cssProp = (isHeader) ? 'Top' : 'Bottom',
                             hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
-                            pad = hasItems ? 40 : 0,
-                            border = hasItems ? 0 : undefined;
+                            pad = hasItems ? bar.el.css('height') : 0,
+                            border = (hasItems) ? 0 : undefined;
 
+                        if(me.parent && me.parent instanceof Wui.Tabs) border = 6;
                         me.sureEl.css('border' +cssProp+ 'Width', border);
+                        
                         me.sureEl.children('.wui-pane-wrap').css('padding' +cssProp, pad);
                         if(hasItems){
                             bar.place();
@@ -1368,29 +1393,10 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         }else{
                             bar.el.detach();
                         }
-                    },
 
-    /** Adds/Removes the footer on the pane and adjusts the content as necessary.
-    configFooter:   function(){
-                        var me = this, footer = me.footer,
-                            hasItems = footer.items.length > 0,
-                            padBottom = hasItems ? 40 : 0,
-                            borderBottom = hasItems ? 0 : undefined;
-
-                        me.sureEl.css({borderBottomWidth:borderBottom});
-                        me.sureEl.children('.wui-pane-wrap').css({paddingBottom:padBottom});
-                        if(hasItems){ footer.place(); footer.callRender(); }
-                        else{ footer.el.detach(); }
+                        // Set  border if applicable
+                        if(me.border && me.hasOwnProperty('borderStyle')) me.el.css(me.borderStyle);
                     },
-    
-    /** Places the header on the pane and adjusts the content as necessary.
-    placeHeader:    function(){
-                        this.sureEl.css({borderTopWidth:0});
-                        this.sureEl.children('.wui-pane-wrap').css({paddingTop:'40px'});
-                        this.setTitleAlign();
-                        this.header.place();
-                        this.header.callRender();
-                    }, */
     
     /** Changes the title on the pane. */
     setTitle:       function(t){ 
@@ -1401,7 +1407,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                     },
     
     /** Changes the title on the pane. */
-    setTitleAlign:    function(t){ 
+    setTitleAlign:  function(t){ 
                         var me = this;
                         
                         me.titleAlign = t || me.titleAlign;
@@ -1430,6 +1436,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             // Set focus to the bottom right most button in the pane
                             this.footer.items[this.footer.items.length - 1].el.focus();
                         }
+
+                        me.footer.splice(0,0);
+                        me.header.splice(0,0);
                     }
 });
 
@@ -1447,10 +1456,7 @@ Wui.Window = function(args){
         bbar:       [],
         
         /** Whether or not the pane has a border */
-        border:        false,
-        
-        /** Set the height of the window */
-        height:        400,
+        border:     false,
         
         /** Determines whether objects behind the window are accessible */
         isModal:    false,
@@ -1459,31 +1465,28 @@ Wui.Window = function(args){
         @param {WUI Window} win    The window being closed.
         @eventhook Called just before the window closes. If this function returns false, the window will not be closed. 
         */
-        onWinClose:    function(){},
+        onWinClose: function(){},
         
         /** 
         @param {WUI Window} win    The window being opened.
         @eventhook Called when the window opens. 
         */
-        onWinOpen:    function(){},
+        onWinOpen:  function(){},
         
         /** An array of items that will be added to the header */
         tbar:       [], 
         
         /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
-        title:        'Window',
+        title:      'Window',
         
         /** Change what comes by default in the pane */
-        maskHTML:    'Loading <span class="wui-spinner"></span>',
-        
-        /** Set the width of the window */
-        width:        600
+        maskHTML:   'Loading <span class="wui-spinner"></span>',
     },args);  
     this.init(); 
 };
 Wui.Window.prototype = $.extend(new Wui.Pane(),{
     /** Closes the window unless onWinClose() event hook returns false. */
-    close:        function(){ 
+    close:      function(){ 
                     var me = this;
                     if(me.onWinClose(me) !== false){
                         me.windowEl.trigger($.Event('close'),[me]);
@@ -1529,15 +1532,13 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     
                     me.place();
                     
-                    // Resize the window and center
-                    me.resize();
-                    
                     // Make the overlay the el so that when the window is closed it gets taken with it
                     if(me.isModal)    me.el = me.modalEl;
                     
                     this.onWinOpen(me);
                     me.windowEl.trigger($.Event('open'),[me]);
-                    
+                    this.resize();
+
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
                         if(parseInt((me.el.css('z-index')) || 1) <= maxZ){
@@ -1553,26 +1554,42 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     If width and height aren't specified, the window is sized vertically to try to fit its contents 
     without getting larger than the browser viewport.
     */
-    resize:        function(resizeWidth, resizeHeight){
+    resize:     function(resizeWidth, resizeHeight){
                     var me = this,
-                        totalHeight = me.container[0].scrollHeight + (me.header.el.outerHeight() * 2);
+                        totalHeight = me.container[0].scrollHeight,
+                        containerHeight = me.container.height(),
+                        headHeight = (me.header && $.isNumeric(me.header.el.outerHeight())) ? me.header.el.outerHeight() : 0,
+                        footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
+                        headersHeight = headHeight + footHeight,
+                        useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
+                                        (containerHeight < totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : me.height;
 
-                    //size the window to according to arguments, or fit its contents as long as its smaller than the height of the window
-                    if(arguments.length !== 0)me.windowEl.height(me.height = resizeHeight).width(me.width = resizeWidth);
-                    else                      me.windowEl.height(((totalHeight >= $.viewportH()) ? ($.viewportH() - 10) : totalHeight));
-                    
-                    // Center window
+                    // Size and center the window according to arguments passed and sizing relative to the viewport.
                     me.windowEl.css({
-                        top:        Math.floor(($.viewportH() / 2) - (me.windowEl.height() / 2)) + 'px',
+                        height:     useHeight,
+                        width:      (arguments.length) ? resizeWidth : undefined,
+                        top:        Math.floor(($.viewportH() / 2) - (useHeight / 2)) + 'px',
                         left:       Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px'
                     });
                     
                     me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
-                    
-                    me.layout(function(){
-                        if(me.isModal){ me.modalEl.css({width:'', height:''}); }
-                    });
-                }
+                    me.layoutKids();
+
+                    return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
+                },
+
+    /** Overrides Wui.O cssByParam and removes styles on modal windows */
+    cssByParam: function(){
+                    Wui.O.prototype.cssByParam.apply(this,arguments);
+                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }    // Remove CSS that accidentally gets applied to the modal cover
+                    this.resize();                                                  // Resize the window and center
+                },
+
+    /** Set the height of the window */
+    height:     200,
+    
+    /** Set the width of the window */
+    width:      600
 });
 
 
@@ -1590,10 +1607,10 @@ Wui.msg = function(msg, msgTitle, callback, content){
             title:      msgTitle || 'Message', 
             isModal:    true,
             items:      cntnt, 
-            width:      350, 
-            height:     200,
+            width:      350,
             onWinClose: callback || function(){}
         });
+    msgWin.resize();
     return msgWin;
 };
 
@@ -1609,6 +1626,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
     err.container.find('.wui-msg').addClass('wui-err');
+    err.resize();
     return err;
 };
 
@@ -1635,14 +1653,15 @@ Wui.confirm = function(msg, msgTitle, callback, content){
         new Wui.Button({text:'Yes', click:function(){ cw.doAnswer(true); }})
     );
     cw.header.splice(0,1);
+    cw.resize();
     return cw;
 };
 
 }(jQuery,this));
 
 
-/*! W 1.1
- * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+/*! Wui 1.1
+ * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
  * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
@@ -1658,19 +1677,19 @@ Tab pane
 Wui.Tabs = function(args){ 
     $.extend(this,{
         /** An array of items that will be added to the footer */
-        bbar:   [],
+        bbar:           [],
         
         /** An array of items that will be added to the content */
-        items:    [],
+        items:          [],
         
         /** Tabs default to the right side of the pane unless this is true. */
-        tabsLeft:    false,
+        tabsLeft:       false,
         
         /** A place holder for the currently selected tab. */
-        currentTab:    null,
+        currentTab:     null,
         
         /** Whether to put the tabs on the header or the footer. */
-        tabsBottom:        false,
+        tabsBottom:     false,
         
         /** Config to place on child items of WUI tabs to make their heading not show up */
         tabsHideHeader: null,
@@ -1682,7 +1701,7 @@ Wui.Tabs = function(args){
 };
 Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     /** Method that will run immediately when the object is constructed. Lays out targets. */
-    init:            function(){
+    init:           function(){
                         if(this.title === null)    this.title = '';
                         Wui.Pane.prototype.init.call(this);
                     },
@@ -1701,7 +1720,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                                             ((me.tabsLeft) ? ' left' : '');
                             
                             if(itm.tabsHideHeader){
-                                itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
+                                //itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
                                 itm.el.addClass('wui-hide-heading');
                             }
                             
@@ -1710,7 +1729,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                                 click:  function(){ me.giveFocus(itm); },
                                 cls:    itm.tabCls
                             }));
-                            if(me.bbar.length !== 0) me.placeFooter();
+                            //if(me.bbar.length !== 0) me.placeFooter();
                         });
                         
                         return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
@@ -1722,7 +1741,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     
     Sets the specified tab to active. Runs layout on the newly activated item.
     */
-    giveFocus:        function(tab, supressEvent){
+    giveFocus:      function(tab, supressEvent){
                         var me = this;
       
                         supressEvent = (supressEvent !== undefined) ? supressEvent : false;
@@ -1757,15 +1776,13 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                         });
                         return retVal;
                     },
-    onRender:        function(){
+    onRender:       function(){
                         this.giveFocus(this.items[0]);
                     }
 });
 
 
 /** 
-@event          select          When a record is clicked (grid, row el, record)
-@event          dblclickrecord  When a record is  double clicked clicked (grid, row el, record)
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
 The grid pane provides table-like functionality for data sets. Grids can be populated remotely
@@ -1805,16 +1822,20 @@ Wui.Grid = function(args){
         bbar:           [],
         
         /** Array of items that will make up the columns of the grid table. */
-        columns:         [],
+        columns:        [],
         
         /** URL to get columns if its a dynamic grid */
-        colUrl:            null,
+        colUrl:         null,
         
         /** Params to pass for columns on a dynamic grid */
-        colParams:        {},
+        colParams:      {},
+
+        /** Configs to pass to the Wui.Data object that handles the retrival of the columns
+        The columns are set in the 'afterSet' method of the data flow - See Wui.Data */
+        colDataParams:  {},
         
         /** Array of data for the grid. */
-        data:            null,
+        data:           null,
         
         /** Data type the grid assumes a column will be. Matters for sorting. Other values are 'numeric' and 'date' */
         defaultDataType:'string',
@@ -1823,10 +1844,10 @@ Wui.Grid = function(args){
         multiSelect:    false,
         
         /** Whether or not to hide the column headers */
-        hideHeader:        false,
+        hideHeader:     false,
         
         /** An array of the currently selected records */
-        selected:        [],
+        selected:       [],
         
         /** An array of items that will be added to the header */
         tbar:           []
@@ -1835,7 +1856,7 @@ Wui.Grid = function(args){
 };
 Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     /** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
-    afterMake:    function(){
+    afterMake:  function(){
                     this.sizeCols();
                     this.removeMask();
                 },
@@ -1848,39 +1869,39 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     
     @return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
     */
-    doSort:            function(depth,a,b){
-                        var me = this;
-                        if(me.sorters.length > 0){
-                            var col = me.sorters[depth],
-                                compA = a.rec[col.dataItem],
-                                compB = b.rec[col.dataItem];
-                                
-                            //get the direction of the second sort
-                            var srtVal = (col.sortDir == 'asc') ? 1 : -1;
+    doSort:     function(depth,a,b){
+                    var me = this;
+                    if(me.sorters.length > 0){
+                        var col = me.sorters[depth],
+                            compA = a.rec[col.dataItem],
+                            compB = b.rec[col.dataItem];
                             
-                            // perform the comparison based on 
-                            var compare = 0;
-                            switch(col.dataType){
-                                case 'date':
-                                    compA = new Date(compA);
-                                    compB = new Date(compB);
-                                    compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
-                                    break;
-                                case 'numeric':
-                                    compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
-                                    compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
-                                    compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
-                                    break;
-                                default:
-                                    compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
-                            }
-                            
-                            if(compare !== 0 || me.sorters[depth + 1] === undefined)    return compare * srtVal;
-                            else                                                    return me.doSort(depth + 1,a,b);
-                        }else{
-                            return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
+                        //get the direction of the second sort
+                        var srtVal = (col.sortDir == 'asc') ? 1 : -1;
+                        
+                        // perform the comparison based on 
+                        var compare = 0;
+                        switch(col.dataType){
+                            case 'date':
+                                compA = new Date(compA);
+                                compB = new Date(compB);
+                                compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
+                                break;
+                            case 'numeric':
+                                compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
+                                compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
+                                compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
+                                break;
+                            default:
+                                compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
                         }
-                    },
+                        
+                        if(compare !== 0 || me.sorters[depth + 1] === undefined)    return compare * srtVal;
+                        else                                                    return me.doSort(depth + 1,a,b);
+                    }else{
+                        return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
+                    }
+                },
                     
     /** Verify that columns have been defined on the grid, or that they are available remotely */
     getColumns: function(){
@@ -1888,19 +1909,18 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     
                     if(me.colUrl && me.colUrl.length){
                         // Make remote call for columns
-                        me.colProxy = new Wui.Data({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); } });
+                        me.colProxy = new Wui.Data($.extend({url:me.colUrl, params:me.colParams, afterSet:function(r){ me.setColumns(r); }}, me.colDataParams));
                         me.colProxy.loadData();
                     }else if(me.columns.length){
                         // Check for locally defined columns
                         me.setColumns(me.columns);
                     }else{
                         //throw('There are no columns defined for this WUI Grid.');
-                    }
-                        
+                    }    
                 },
     
     /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
-    init:        function(){
+    init:       function(){
                     var me = this;
                     
                     // Set up container
@@ -1929,7 +1949,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                 },
                     
     /** Overrides DataList.loadData(), to add the load mask */   
-    loadData:    function(){
+    loadData:   function(){
                     this.setMaskHTML('Loading <span class="wui-spinner"></span>');
                     this.addMask();
                     Wui.Data.prototype.loadData.apply(this,arguments);
@@ -1940,43 +1960,43 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     @param    {string}    dir    The direction of the sort
     Manages the sorters for the grid by keeping them in an array. 
     */
-    mngSorters:        function(col,dir){
-                        var me = this,
-                            sortClasses = ['one','two','three','four','five'];
-                        if(dir !== undefined){
-                            col.sortDir = dir;
-                            me.sorters.push(col);
-                        }else{
-                            if(col.sortDir){
-                                if(col.sortDir == 'desc'){
-                                    delete col.sortDir;
-                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-                                    
-                                    $.each(me.sorters,function(i,itm){
-                                        if(itm == col)    me.sorters.splice(i,1);
-                                    });
-                                }else{
-                                    col.sortDir = 'desc';
-                                }
-                            }else{
-                                // Can't sort on more than 5 columns
-                                if(me.sorters.length > 5){
-                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-                                    return false;
-                                }
+    mngSorters: function(col,dir){
+                    var me = this,
+                        sortClasses = ['one','two','three','four','five'];
+                    if(dir !== undefined){
+                        col.sortDir = dir;
+                        me.sorters.push(col);
+                    }else{
+                        if(col.sortDir){
+                            if(col.sortDir == 'desc'){
+                                delete col.sortDir;
+                                col.el.removeClass().addClass('wui-gc').addClass(col.cls);
                                 
-                                col.sortDir = 'asc';
-                                me.sorters.push(col);
+                                $.each(me.sorters,function(i,itm){
+                                    if(itm == col)    me.sorters.splice(i,1);
+                                });
+                            }else{
+                                col.sortDir = 'desc';
                             }
-                        }
+                        }else{
+                            // Can't sort on more than 5 columns
+                            if(me.sorters.length > 5){
+                                col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                return false;
+                            }
                             
-                        $.each(me.sorters,function(i,itm){
-                            itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
-                        });
-                    },
+                            col.sortDir = 'asc';
+                            me.sorters.push(col);
+                        }
+                    }
+                        
+                    $.each(me.sorters,function(i,itm){
+                        itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
+                    });
+                },
     
     /** Overrides DataList.modifyItem(), to implement the renderers */        
-    modifyItem:    function(itm){
+    modifyItem: function(itm){
                     var me = this;
                     // Perform renderers (if any)
                     $.each(me.renderers,function(idx, r){
@@ -1989,7 +2009,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                 },
     
     /** Overrides DataList.onRender(), to have the grid wait for columns before loading data while still preserving the set autoLoad value. */   
-    onRender:    function(){
+    onRender:   function(){
                     // Store the real value of autoLoad, but set it to false so that the grid waits for the columns
                     // before loading data.
                     var me = this, al = me.autoLoad;
@@ -2004,16 +2024,16 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                 },
     
     /** Positions the height and width of the data table's container @private */
-    posDataWin:        function(){
-                        var hh = this.headingContainer.height() - 1;
-                        this.tblContainer.css({height:this.container.height() - hh, top:hh});
-                    },
+    posDataWin: function(){
+                    var hh = this.headingContainer.height() - 1;
+                    this.tblContainer.css({height:this.container.height() - hh, top:hh});
+                },
     
     /** Overrides DataList.refresh() to add disabling the grid to add the load mask */
-    refresh:        function(){
-                        if(this.url === null)    this.setData(this.data);
-                        else                    this.getColumns();
-                    },    
+    refresh:    function(){
+                    if(this.url === null)   this.setData(this.data);
+                    else                    this.getColumns();
+                },    
 
     /** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
     render/reference columns. The append the column to the DOM */            
@@ -2021,19 +2041,19 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     var me = this;
                     
                     $.extend(col,{
-                        dataType:    col.dataType || me.defaultDataType,
+                        dataType:   col.dataType || me.defaultDataType,
                         fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
                         cls:        col.cls || '',
-                        renderer:    (col.renderer) ?    (function(a){
+                        renderer:   (col.renderer) ?    (function(a){
                                                             // Handles renderer if it exists
                                                             if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
                                                                 a = new Function('return ' + a + '.apply(this,arguments)');
                                                             if(typeof a === 'function')
                                                                 me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
                                                         })(col.renderer) : '',
-                        index:        idx,
-                        width:        col.width === undefined ? 0 : col.width,
-                        el:            $('<li>')
+                        index:      idx,
+                        width:      col.width === undefined ? 0 : col.width,
+                        el:         $('<li>')
                                     .append($('<div>').text(col.heading))
                                     .attr({unselectable:'on'})
                                     .addClass('wui-gc ' + col.cls)
@@ -2097,46 +2117,47 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     me.template += '</tr>';
                     
                     if(me.autoLoad){
-                        if(me.url === null)    me.setData(me.data);
+                        if(me.url === null) me.setData(me.data);
                         else                me.loadData();
                     }
                 },
                 
     /** Size up the columns of the table to match the headings @private */
-    sizeCols:        function (){
-                        var me = this, totalColWidth = 0;
-                        Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
-                        for(var i = 0; i < me.cols.length; i++){
-                            var colWidth = me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0);
-                            me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
-                            totalColWidth += colWidth;
-                        }
-                        me.tbl.css({width:totalColWidth});
-                    },
+    sizeCols:   function (){
+                    var me = this, totalColWidth = 0;
+                    Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                    for(var i = 0; i < me.cols.length; i++){
+                        var colWidth = me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0);
+                        me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
+                        totalColWidth += colWidth;
+                    }
+                    me.tbl.css({width:totalColWidth});
+                },
                     
     /**
     @param    {object}    Column object associated with a particular column element
     Sort the grid based on the values of one or more columns. If the grid is paging
     then sort remotely.
     */
-    sortList:        function(col) {
-                        var me = this;
-                        
-                        me.mngSorters(col);
-                        
-                        // Sort the list
-                        var listitems = me.items;
-                        listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+    sortList:   function(col) {
+                    var me = this;
+                    
+                    me.mngSorters(col);
+                    
+                    // Sort the list
+                    var listitems = me.items;
+                    listitems.sort(function(a, b){ return me.doSort(0, a, b); });
 
-                        me.tbl.detach();
-                        // Place items and reset alternate coloring
-                        $.each(listitems, function(idx, row) { 
-                            var isEven = idx % 2 === 0;
-                            row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
-                        });
-                        me.tbl.appendTo(me.tblContainer);
-                        me.resetSelect();
-                    }
+                    me.tbl.detach();
+                    // Place items and reset alternate coloring
+                    $.each(listitems, function(idx, row) { 
+                        var isEven = idx % 2 === 0;
+                        row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
+                    });
+                    me.tbl.appendTo(me.tblContainer);
+                    me.sizeCols();
+                    me.resetSelect();
+                }
 });
 
 }(jQuery,Wui));
@@ -2272,7 +2293,7 @@ Wui.stateMachine.prototype = {
                         var state    = this.getState();
                             
                         for(var i in state){
-                            if(state[i].view === target && state[i].params[key]){
+                            if(state[i].view === target){
                                 state[i].params[key] = value;
                                 this.setState(state);
                                 return value;
@@ -2655,8 +2676,8 @@ return self;
 })(jQuery,this);
 
 
-/*! W 1.1
- * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+/*! Wui 1.1
+ * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
  * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
@@ -2712,20 +2733,21 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     clearData:  function(){ this.setData(); },
 
     /** Display errors generated by validating the form */
-    dispErrors:    function(){
+    dispErrors: function(){
                     var msg = '';
                     for(var e = 0; e < this.errors.length; e++) msg += this.errors[e] + '<br/>';
                     Wui.errRpt(msg,'Form Errors');
                 },
 
     /**
-    @param {function} fn A function that gets called for each item of the form with the exception of Wui.Note objects
+    @param {function}   f           A function that gets called for each item of the form with the exception of Wui.Note objects.
+    @param {boolean}    [blockNote] If defined and true, Wui.Note objects will be not be processed.
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    each:        function(f){
+    each:       function(f, blockNote){
                     return Wui.O.prototype.each.call(this,function(itm,i){
-                        if(!(itm instanceof Wui.Note)) return f(itm,i);
+                        if(!(itm instanceof Wui.Note && blockNote)) return f(itm,i);
                     });
                 },
 
@@ -2754,7 +2776,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     @param {string} fieldname name of the desired field.
     @return Form item, not the DOM element, but the item in memory
     Returns a form item. */
-    getFrmItm:    function(fieldname){
+    getFrmItm:  function(fieldname){
                     var retItm = undefined;
                     this.each(function(itm,idx){ if(itm.name == fieldname) retItm = itm; });
                     return retItm;
@@ -2765,12 +2787,12 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     Gets the values of form fields without performing validation */
     getRawData: function(){
                     var ret = {};
-                    this.each(function(itm){ ret[itm.name] = itm.val(); });
+                    this.each(function(itm){ ret[itm.name] = itm.val(); }, true);
                     return ret;
                 },
                 
     /** Method that will run immediately when the object is constructed. */           
-    init:        function(){},
+    init:       function(){},
                 
     /**
     @param    {object|Wui.FrmField}    itm    Object to be added to a form
@@ -2823,7 +2845,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     @return The new length of the array 
     Similar to the Wui.O.push() with the addition of running normFrmItem() on the item first.
     */
-    push:        function(){
+    push:       function(){
                     var me = this, itms = [];
                     $.each(arguments,function(i,arg){ itms.push(me.normFrmItem(arg)); });
                     return Wui.O.prototype.push.apply(this,itms);
@@ -2833,7 +2855,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     @return True
     Removes a form field from a form based on its name.
     */
-    remFrmItm:    function(fieldname){
+    remFrmItm:  function(fieldname){
                     var me = this;
                     this.each(function(itm,idx){ if(itm.name == fieldname) Wui.O.prototype.splice.call(me,idx,1); });
                     return true;
@@ -2865,17 +2887,17 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                                 this.each(function(itm){ 
                                     if(data[itm.name]) 
                                         itm.val(data[itm.name],fireEvents);
-                                });
+                                }, true);
                             }
-                    else    {    this.each(function(itm){ itm.val(null,fireEvents); }); }
+                    else    {    this.each(function(itm){ itm.val(null,fireEvents); }, true); }
                     this.formChange(false);
                 },
     
     /** Disable all form fields */
-    disable:    function(){ return this.each(function(itm){ itm.disable(); }); },
+    disable:    function(){ return this.each(function(itm){ itm.disable(); }, true); },
     
     /** Enable all form fields */
-    enable:        function(){ return this.each(function(itm){ itm.enable(); }); },
+    enable:     function(){ return this.each(function(itm){ itm.enable(); }, true); },
     
     /**
     @param {string} fieldname The name of the field to set a value on
@@ -2884,14 +2906,14 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     This method will fail unless the items of the form are initialized W formField objects
     */
     setField:   function(fieldname, v){
-                    this.each(function(itm){ if(itm.name == fieldname) itm.val(v); });
+                    this.each(function(itm){ if(itm.name == fieldname) itm.val(v); }, true);
                 },
     
     /**
     @param {string} err An error message.
     Adds a thrown error to the form's errrs array so that all errors on a form can be reported at once.
     */
-    throwError:   function(err){this.errors.push(err); return false;},
+    throwError: function(err){this.errors.push(err); return false;},
     
     /**
     Runs the validate() function for each of a form's fields.
@@ -2901,7 +2923,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     me.errors = [];
                     me.each(function(itm){ 
                         if(itm.el && itm.el.toggleClass) { itm.el.toggleClass(me.errCls,!itm.validate()); }
-                    });
+                    }, true);
                     this.formChange(false);
                     return (me.errors.length === 0);
                 }
@@ -2916,12 +2938,13 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 Wui.Note = function(args){ 
     $.extend(this,{
         /** The HTML to be placed in the note */
-        html:''
-    },args); this.init();
+        html:   ''
+    },args);
+    this.init();
 };
 Wui.Note.prototype = $.extend(new Wui.O(),{
     /** Method that will run immediately when the object is constructed. */
-    init:       function(){ this.el = $('<div>').html(this.html).addClass('wui-note'); }
+    init:   function(){ this.el = $('<div>').html(this.html).addClass('wui-note'); }
 });
 
 
@@ -2987,28 +3010,40 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
     */
     setLabelSize:       function(size){
                             var me = this;
-                            size = size || me.labelSize;
+                            size = $.isNumeric(size) ? size : me.labelSize;
 
                             // Clear out and reset the size of el padding
-                            this.el.css({
-                                paddingLeft:    undefined,
-                                paddingRight:   undefined,
-                                paddingTop:     undefined,
-                                paddingBottom:  undefined
+                            me.el.css({
+                                paddingLeft:    '',
+                                paddingRight:   '',
+                                paddingTop:     '',
+                                paddingBottom:  ''
                             });
                             // Clear out and reset the size of the label
-                            this.label.css({
-                                width:    undefined,
-                                height:   undefined
+                            me.label.css({
+                                width:          '',
+                                height:         '',
+                                marginLeft:     '',
+                                marginRight:    ''
                             });
 
                             if($.isNumeric(size)){
-                                var dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width',
-                                    margin = (dimension == 'height') ? 0 : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) : parseInt(me.label.css('margin-left'));
-                                this.el.css('padding-' + me.labelPosition, size);
-                                this.label.css(dimension, size - margin);
+                                var margin = (dimension == 'height') ? 0 : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) : parseInt(me.label.css('margin-left')),
+                                    dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
+                                me.el.css('padding-' + me.labelPosition, size);
+                                me.label.css(dimension, size - margin);
                                 if(me.field)
                                     me.field.labelSize = me.labelSize = size;
+                            }
+
+                            me.adjustField();
+                        },
+
+    /** Adjusts the size of the field in case the size of the label overflows */
+    adjustField:        function(){
+                            var me = this, dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
+                            if(me.field && dimension == 'width' && me.label.outerHeight() > me.field.el.height()){
+                                me.field.el.css('min-height', me.label.outerHeight());
                             }
                         },
 
@@ -3032,7 +3067,7 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
 
 
 /**
-    @event valchange When a value changes on a form field (WUI FormField, value)
+    @event valchange When a value changes on a form field (event, WUI FormField, value, old value)
     @event hiddenchange Same as valchange but for fields without an 'el' property (like hidden fields. Called on the window (WUI FormField, value)
     
     The base object that WUI form elements extend from
@@ -3040,7 +3075,7 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
 Wui.FormField = function(args){
     $.extend(this,{
         /** Whether or not the field will be disabled. A disabled field is still accessible to the form, just not to the user. */
-        disabled:        false,
+        disabled:       false,
         
         /** Message to display to the user when validation fails. If not specified the form will attempt to use the field's label. */
         invalidMsg:     null,
@@ -3052,16 +3087,16 @@ Wui.FormField = function(args){
         labelPosition:  'top',
         
         /** A special class to put on the label if desired */
-        labelCls:        null,
+        labelCls:       null,
 
         /** A size (in pixels) for the label in its given relative position to the field - defaults defined in CSS */
-        labelSize:       null,
+        labelSize:      null,
         
         /** Whether or not the field is required. May be pre-empted by other validation. See validate() method. */
         required:       false,
         
         /** A regular expression whereby to validate a field's input. May be pre-empted by other validation. See validate() method. */
-        validRegEx:        null,
+        validRegEx:     null,
         
         /** A function to validate field input. This function is passed the value of the field, for example: validTest: function(val){ return val == 3; } */
         validTest:      null
@@ -3072,7 +3107,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
         @return The el of the object
         Runs immediately when the object is constructed. Wraps the field in a label if a label has been defined.
     */
-    init:          function(){
+    init:       function(){
                     var me = this;
                     me.value = me.hasOwnProperty('value') ? me.value : null;
                     me.el = $('<div>').addClass('wui-fe');
@@ -3086,10 +3121,14 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                 },
                 
     /** Will disable the object if its disabled property is set to true and set a value on the field if one has been defined. */
-    onRender:    function(){
+    onRender:   function(){
                     if(this.disabled)                   this.disable();
                     if(this.hasOwnProperty('value'))    this.val(this.value,false);
                 },
+
+    /** Runs after the element has been placed on the DOM */
+    afterRender:function(){ if(this.lbl)  this.lbl.adjustField(); },
+
     /** Disables the field so the user cannot interact with it. */
     disable:    function(){
                     this.disabled = true;
@@ -3177,7 +3216,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     Marks the parent form as changed if the field belongs to a form, calls the valChange event hooks and listeners
     if the field doesn't have an 'el' property, it will call 'hiddenchange'
     */
-    setChanged:    function(oldVal){
+    setChanged: function(oldVal){
                     // Marks the parent form as 'changed'
                     if(this.parent && this.parent instanceof Wui.Form)
                         this.parent.formChange(true, this);
@@ -3199,7 +3238,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     Generally do not use this function. Use val() instead which acts as both a getter and a setter depending whether
     arguments are passed. val() will fire all of the needed events and event hooks.
     */
-    getVal:        function(){
+    getVal:     function(){
                     return this.value;
                 },
     
@@ -3209,7 +3248,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     Generally do not use this function. Use val() instead which acts as both a getter and a setter depending whether
     arguments are passed. val() will fire all of the needed events and event hooks.
     */
-    setVal:        function(sv){
+    setVal:     function(sv){
                     this.value = sv;
                 },
     
@@ -3217,7 +3256,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     @param {string}    newVal    New value being set on the field
     An event hook for when the value changes. Useful for extending objects, but generally use the 'valchange' event listener
     */
-    valChange:    function(newVal){}
+    valChange:  function(newVal){}
 });
 
 
@@ -3241,13 +3280,13 @@ Wui.Text = function(args){
         blankText:  ''
     },args,{
         /** The HTML element */
-        field:$('<input>').attr({type:'text'})
+        field:      $('<input>').attr({type:'text'})
     }); 
     this.init();
 };
 Wui.Text.prototype = $.extend(new Wui.FormField(),{
     /** Runs immediately when the object is created */
-    init:            function(){
+    init:           function(){
                         var me = this;
                         Wui.FormField.prototype.init.call(me);
                         
@@ -3257,7 +3296,7 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
                     },
                     
     /** Sets the blank text on the field. If the HTML 5 placeholder isn't supported, mimic it by replacing the native jQuery val function */
-    setBlankText:    function(bt){
+    setBlankText:   function(bt){
                         var me = this, f = me.field;
                         
                         me.blankText = bt;
@@ -3298,7 +3337,7 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
     Puts listeners on the field, mostly to handle blankText in the event that HTML 5 placeholder isn't supported 
     Also calls the setListeners() of any extending object automagically.
     */
-    setListeners:    function(t){
+    setListeners:   function(t){
                         var me = this,
                             fieldState = null;
                         
@@ -3313,12 +3352,12 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
     @param {string}    sv    Value to set the field text to
     Changes the value of the text in the field without changing the value of the object
     */
-    fieldText:        function(sv){
+    fieldText:      function(sv){
                         this.field.val(sv);
                         if(this.blankText && this.blankText.length)    this.setBlankText(this.blankText);
                     },
-    getVal:            function(){ return (this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null); },
-    setVal:            function(sv){ 
+    getVal:         function(){ return (this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null); },
+    setVal:         function(sv){ 
                         this.fieldText(this.value = (sv && $.trim(sv).length) ? sv : null);
                     }
 });
@@ -3326,17 +3365,35 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
 
 /** WUI Text Area */
 Wui.Textarea = function(args){
-    $.extend(this, args, { 
+    $.extend(this, { 
         /** The HTML element */
-        field:    $('<textarea>'),
+        field:  $('<textarea>'),
         
         /** Determines the height of the field */
-        height:    100
-    });
+        height: 80
+    }, args);
     this.init();
 };
 Wui.Textarea.prototype = $.extend(new Wui.Text(), {
-    init:    function(){    Wui.Text.prototype.init.call(this); this.field.css({height:this.field.parent().parent().height});  }
+    init:       function(){
+                    var me = this;
+                    Wui.Text.prototype.init.call(me); 
+                    /*if(me.lbl){
+                        me.lbl.setLabelSize = function(){
+                            Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
+                            if($.inArray(me.lbl.labelPosition,['top','bottom']) >= 0)
+                                me.field.css('height',(me.height - me.lbl.label.outerHeight()));
+                        }  
+                    }*/
+                },
+
+    /** Overrides Wui.O.cssByParam to include resizing the textarea within the object */
+    cssByParam: function(){
+                    Wui.O.prototype.cssByParam.apply(this,arguments);
+                    var lblVert = (this.lbl && $.inArray(this.lbl.labelPosition,['top','bottom']) >= 0) ? this.lbl.label.outerHeight() : 0;
+                    this.field.css('height',(this.height - lblVert));
+                        
+                }
 });
 
 
@@ -3494,9 +3551,9 @@ Wui.Radio = function(args){
         options:    [],
         
         /** Default template for the radio group */
-        template:        '<li><input type="radio" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
+        template:   '<li><input type="radio" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
     },args,{
-        el:$('<div>')
+        el:         $('<div>')
     });
     this.init();
 };
@@ -3537,14 +3594,14 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     }
                     
                     // Append to DOM
-                    me.el.append(ul);
+                    me.append(ul);
                 },
     
     /** What to do when an individual element changes */
     elemChange:    function(elem){ this.val(elem.val()); },
     
     /** If buttonStyle = true, the actual radio input is hidden  */
-    onRender:    function(){
+    onRender:   function(){
                     var me = this;
                     me.el.find('input').each(function(){
                         $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
@@ -3568,7 +3625,7 @@ Wui.Checkbox = function(args){
         name:       'wui-checkbox',
         
         /** Default template for the checkbox group */
-        template:    '<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
+        template:   '<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
     },args);
 this.init(); };
 Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
@@ -3588,19 +3645,23 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
 
     /** Runs immediately when the object is created. Adds listeners and styles */
     init:       function(){
-                    if(this.options.length === 0) this.options.push({val:1,title:''});
+                    var me = this;
+                    if(me.options.length === 0) me.options.push({val:1,title:''});
                     
-                    Wui.Radio.prototype.init.call(this);
-                    this.el.removeClass('wui-radio').addClass('wui-checkbox');
+                    Wui.Radio.prototype.init.call(me);
+                    me.el.removeClass('wui-radio').addClass('wui-checkbox');
                     
-                    //steal label if button style
-                    if(this.options.length == 1){
-                        this.el.find('li label').text(this.el.children('label').text());
-                        this.el.children('label').text('');
+                    //steal label if there is only one option
+                    if(me.options.length == 1){
+                        if(!(me.label && me.label.length))
+                            throw('Wui Forms - A Checkbox field ' + (me.name ? '(\'' + me.name + '\')' : '') + ' requires a label if it doesn\'t have options defined.');
+                        me.el.find('li label').html(me.label);
+                        me.lbl.label.html('');
+                        me.el.css({paddingTop:0, paddingBottom:0});
                     }
                 },
-    getVal:        function(){ return this.calcVal(); },
-    setVal:        function(sv){
+    getVal:     function(){ return this.calcVal(); },
+    setVal:     function(sv){
                     var me = this;
                     
                     if($.isArray(sv))               { me.value = sv; }
@@ -3621,17 +3682,16 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
                     }
                 },
     /** The check-box will validate false if the value is 0 and the box is required.  */
-    validTest:    function(){ if(this.required && this.val() === 0) return false;    return true; }
+    validTest:  function(){ if(this.required && this.val() === 0) return false;    return true; }
 });
 
 
+/** Creates a Combo box.  The Wui combo box can be presented in three general flavors depending on what configs are set:
 
-// Make jQuery contains case insensitive
-$.expr[":"].contains = $.expr.createPseudo(function(arg) {
-    return function( elem ) {
-        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
-    };
-});
+1. Local Combo Box: Configs - data set in the object definition
+2. Remote Search: Configs, url, [params], searchLocal = false
+3. Pre-Loaded Remotely: Configs - url, [params], autoLoad = true
+*/
 Wui.Combo = function(args){ 
     $.extend(this, {
         /** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
@@ -3639,28 +3699,28 @@ Wui.Combo = function(args){
         autoLoad:   false,
         
         /** CSS class to place on the drop-down element. */
-        ddCls:        '',
+        ddCls:      '',
         
         /** Name of a shared data store. Whenever the shared store updates, this updates too. If defined, Pre-empts locally defined data and remote calls on init. */
-        dataName:    null,
+        dataName:   null,
         
         /** Text to display in the drop-down when no results are returned.  */
         emptyText:  '(empty)',
         
         /** The DOM element for the field */
-        field:        $('<input>').attr({type:'text'}),
+        field:      $('<input>').attr({type:'text'}),
 
         /** Whether to filter results at all */
-        filterField:  true,
+        filterField:true,
         
         /** Whether the drop-down DOM element will be kept in place or appended out to the body and absolutely
         positioned. Keeping the drop-down in line will make it susceptible to being clipped by containing elements.*/
-        keepInline:    false,
+        keepInline: false,
         
         /** Minimum number of characters entered before the combo will filter remotely. */
         minKeys:    2,
         
-        /** Event hook for when the combo loses focus */
+        /** @eventhook Called when the combo loses focus. */
         onBlur:     function(){},
         
         /** Whether to filter the drop-down amidst the locally loaded results or to go to the server. */
@@ -3677,9 +3737,7 @@ Wui.Combo = function(args){
         The key in the data that will be used as the value for the combo when an item is selected.
         */
         valueItem:  null
-    },args,{
-        cls:(args.cls) ? args.cls + ' wui-combo' : 'wui-combo',
-    }); 
+    },args); 
     
     // Create template when one hasn't been defined
     if(!this.hasOwnProperty('template') && this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && this.valueItem && this.titleItem) 
@@ -3698,7 +3756,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     keyDown:        function(){
                         if(!this.dd.is(':visible')){
                             this.selectCurr();
-                            this.showDD();
+                            this.toggleDD('open');
                             this.field.select();
                         }else{
                             var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
@@ -3721,51 +3779,39 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             } 
                         }
                     },
-                    
-    /** Hides the drop-down menu */
-    hideDD:         function(){this.dd.hide();},
     
     /** Method that runs when the object is initiated */
     init:           function(){
-                        var me = this,
-                            ddAddCls = (me.keepInline) ? 'wui-inline-dd' : '';
-                        
+                        var me = this;
+                        Wui.Text.prototype.init.call(me);
+
                         //setup combobox variables
                         me.tplEngine = new Wui.Template({template:me.template});
                         me.selectItm = null;
-                        
-                        //put field inside a wrapper and add drop-down switch
-                        Wui.Text.prototype.init.call(me);
-                        
-                        me.wrapper = $('<div>').addClass('dd-wrapper');
+
+                        // Place field elements
+                        me.append(
+                            me.wrapper = $('<div>').addClass('wui-combo').append(
+                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).hide(),
+                                me.field
+                            )
+                        );
+
+                        // Create Dropdown Button
                         me.ddSwitch = new Wui.Button({
-                            click:        function(){
-                                            if(!me.dd.is(':visible')){
-                                                me.field.focus();
-                                                me.selectCurr();
-                                                me.showDD();
-                                            }else{
-                                                me.hideDD();
-                                            }
-                                        },
-                            text:        '',
-                            tabIndex:    -1,
-                            appendTo:    me.wrapper,
-                            cls:         'field-btn dd-switch'
+                            click:      function(){ me.toggleDD(); },
+                            text:       '',
+                            tabIndex:   -1,
+                            appendTo:   me.wrapper,
+                            cls:        'field-btn dd-switch'
                         });
-                            
-                        me.append(me.wrapper.append(
-                            me.dd = $('<ul>').addClass('wui-combo-dd ' + ddAddCls + ' ' + me.ddCls),
-                            me.field.addClass('has-dd')
-                        ));
                         me.ddSwitch.place();
-                        
+
+                        // Get the combo to look at another data store
                         if(me.dataName && me.dataName.length > 0){
                             $(window).on('datachanged',function(event,name,dataObj){
-                                if(name == me.dataName){
+                                if(name == me.dataName)
                                     me.setData(dataObj.data);
-                                    me.renderData();
-                                }
                             });
                         }else{
                             if(me.autoLoad)   me.loadData();
@@ -3775,13 +3821,40 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         // For locally defined data
                         me.total = me.data.length;
                     },
+
+    /**
+    @param  {string}    force   [open|close] Will force the toggle to open or close the drop down. 
+    Open or closes the drop down based on whether it is visible, positioning it on the screen relative to the combo field.
+    */
+    toggleDD:   function(force){
+                    var me = this, isVis = me.dd.is(':visible');
+
+                    if(force !== undefined){
+                        if(force == 'open') showDD();
+                        else                hideDD();
+                    }else{
+                        if(isVis)           hideDD();
+                        else                showDD();
+                    }
+
+                    function hideDD(){ me.dd.hide(); }
+                    function showDD(){
+                        if(!isVis){
+                            var width   = (me.field.width() < 100) ? 100 : me.field.width(); 
+                            // Clear the drop down when it loses focus
+                            $(document).one('click',function(){ hideDD(); });
+                            $('body').append(me.dd.width(width).show());
+                            Wui.positionItem(me.field,me.dd);
+                        }   
+                    }
+                },
     
     /** Populates the drop-down with data/search results or shows empty text  */
     renderData:     function(){
-                        var me = this,
-                            holder = $('<ul>');
-                        me.dd.html('');
-                        if(me.total){ 
+                        var me = this, holder = $('<ul>');
+                        
+                        me.dd.empty();
+                        if(me.data.length){ 
                             me.dataEach(function(d,i){
                                 me.tplEngine.data = d;
                                 holder.append(
@@ -3800,7 +3873,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     
     /** Hides the drop-down and sets the current selection as the combo's value */
     rsltClick:      function(){
-                        this.hideDD();
+                        this.toggleDD();
                         this.val(this.data[this.selectItm.index()]);
                     },
                     
@@ -3814,9 +3887,13 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                     },
     
     /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
-    setParams:        function(){
-                        if(this.searchFilter)
-                            $.extend(this.params,{srch: this.searchFilter});
+    setParams:      function(){
+                        return (this.searchFilter)  ? $.extend(this.params,{srch: this.searchFilter}) : false;
+                    },
+
+    /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
+    onSuccess:      function(){
+                        return (this.searchFilter) ? this.toggleDD('open') : false;
                     },
 
     /** 
@@ -3828,13 +3905,20 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             this.searchFilter = srchVal;
                             
                             if(this.searchLocal){
-                                this.showDD();
-                                this.dd.children()[(srchVal && srchVal.length > 0) ? 'hide' : 'show']();
-                                this.dd.children(':contains(' +srchVal+ ')').show();
+                                this.toggleDD('open');
+                                this.dd.children().each(function(i,itm){
+                                    itm = $(itm);
+                                    var itmTxt = itm.text();
+
+                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                                    else                                                            clearHilight(itm).hide();
+
+                                    function hilightText(obj){ return clearHilight(obj).html( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
+                                });
                                 this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
                             }else{
-                                if(srchVal.length >= this.minKeys || srchVal.length === 0)
-                                    this.loadData();
+                                if(srchVal.length >= this.minKeys || srchVal.length === 0){ this.loadData(); }
                             }    
                         }
                     },
@@ -3860,15 +3944,15 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     /** 
     @param {Wui Object} t Wui Object to add listeners to
     Sets additional listeners on the field that give it combo-box like interactions */
-    setListeners:    function(t){
+    setListeners:   function(t){
                         t.field
                         .focus(function(e){
                             t.field.isBlurring = undefined;
                         })
                         .blur(function(e){
                             if(t.field.isBlurring !== false){
-                                t.hideDD();
-                                
+                                t.toggleDD();
+                                    
                                 // If the combo has a non-value item in the search field
                                 // select the seleted item or clear the value
                                 var titlePresent = false;
@@ -3885,24 +3969,20 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             }
                          })
                         .click(function(){
-                            t.showDD();
-                            t.field.select();
+                            t.toggleDD('open');
                         })
                         .keyup(function(evnt){
-                            var currVal = t.field.val();
                             switch(evnt.keyCode){
                                 case 40:    /*Do Nothing*/  break;
                                 case 38:    /*Do Nothing*/  break;
                                 case 13:    /*Do Nothing*/  break;
                                 case 9:     /*Do Nothing*/  break;
-                                default:    t.searchData(currVal);
+                                default:    t.searchData(t.field.val());
                             }
                         })
                         .keydown(function(evnt){
-                            var currVal = t.field.val();
-                            
                             //clear the value if the user blanks out the field
-                            if(currVal.length === 0) t.value = null;
+                            if(t.field.val().length === 0) t.value = null;
                             
                             if(t.data.length > 0){
                                 switch(evnt.keyCode){
@@ -3922,32 +4002,11 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         });
                         return t.field;
                     },
-    
-    /** Shows the drop-down menu by either simply making it appear, or by positioning it absolutely to appear to drop-down from the combo's text field
-    based on the value of keepInline. */
-    showDD:         function(){
-                        if(!this.keepInline){
-                            var fld     = this.field,
-                                ofst    = fld.offset(),
-                                ddWid   = parseInt(this.dd.css('width')),
-                                width   = (ddWid && ddWid > fld.outerWidth()) ? ddWid : fld.outerWidth() - 1;
-                            
-                            this.dd.appendTo('body').css({
-                                left:       ofst.left + ((ofst.left + width < $.viewportW()) ? 0 : fld.outerWidth() - width),
-                                top:        ofst.top + fld.outerHeight(),
-                                width:      width,
-                                display:    'block',
-                                zIndex:     Wui.maxZ()
-                            });
-                        }else{
-                            this.dd.css({ zIndex:Wui.maxZ() }).show();
-                        }
-                    },
-    getVal:            function(){
+    getVal:         function(){
                         var me = this;
                         return (me.value && me.value[me.valueItem]) ? me.value[me.valueItem] : me.value;
                     },
-    setVal:            function(sv){
+    setVal:         function(sv){
                         var me = this, selectVal = null;
                         
                         if(sv === null){
@@ -3994,7 +4053,7 @@ Wui.Link = function(args){
 Wui.Link.prototype = $.extend(new Wui.FormField(),{
     /** Builds a preview of the link while it is being entered - gives feedback/validation to the user  @private */
     buildOutput:function(){
-                     if(this.outputFld === undefined)    this.elAlias.append(this.outputFld = $('<div>').attr({tabindex:-1}).addClass('feedback'));
+                    if(this.outputFld === undefined)    this.elAlias.append(this.outputFld = $('<div>').attr({tabindex:-1}).addClass('feedback'));
         
                     if(this.testLink()){
                         var tp = new Wui.Template({data:this.value, template:'<span>Preview:</span> <a href="{uri}" target="{target}" class="{((target == "_blank") ? "uri-new-win" : "")}">{title}</a>'});
@@ -4062,10 +4121,10 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                     return (fullPath.test(this.value.uri) || relativePath.test(this.value.uri));
                 },
                 
-    getVal:        function(){
+    getVal:     function(){
                     return this.value;
                 },
-    setVal:        function(sv){
+    setVal:     function(sv){
                     $.extend(this.value,sv);
                     this.urlField.val(this.value.uri);
                     this.titleField.val(this.value.title);
@@ -4074,7 +4133,7 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                 },
     
     /** Overrides the Wui.FormField function and provides added validation */
-    validTest:    function(){ if(this.required && !this.testLink()) return false; return true; }
+    validTest:  function(){ if(this.required && !this.testLink()) return false; return true; }
 });
 
 
@@ -4100,7 +4159,15 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
  "ten months from now"
 */
 Wui.Datetime = function(args){ 
-    $.extend(this,args,{ field: $('<input>').attr({type:'text'}) });
+    $.extend(this,args,{ 
+        field:      $('<input>').attr({type:'text'}),
+
+        /** The date furthest in the past that this control will accept as valid. */
+        minDate:    null,
+
+        /** The date furthest in the future that this control will accept as valid. */
+        maxDate:    null
+    });
     this.init();
 };
 
@@ -4119,13 +4186,13 @@ $.extend(Date,{
                                 pmDesignator: "PM"
                             },
     
-    isLeapYear:                function(year) {
+    isLeapYear:             function(year) {
                                 return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
                             },
-    getDaysInMonth:            function(year, month) {
+    getDaysInMonth:         function(year, month) {
                                 return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
                             },
-    getTimezoneOffset:        function(s, dst) {
+    getTimezoneOffset:      function(s, dst) {
                                 return (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST[s.toUpperCase()] : Date.CultureInfo.abbreviatedTimeZoneStandard[s.toUpperCase()];
                             },
     getTimezoneAbbreviation:function(offset, dst) {
@@ -4140,17 +4207,17 @@ $.extend(Date,{
                             }
 });
 $.extend(Date.prototype,{
-    getDaysInMonth:    function() {
+    getDaysInMonth: function() {
                         return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
                     },
     addMilliseconds:function(value) {
                         this.setMilliseconds(this.getMilliseconds() + value);
                         return this;
                     },
-    addSeconds:        function(value) {
+    addSeconds:     function(value) {
                         return this.addMilliseconds(value * 1000);
                     },
-    addMinutes:        function(value) {
+    addMinutes:     function(value) {
                         return this.addMilliseconds(value * 60000);
                     },
     addHours:        function(value) {
@@ -4159,17 +4226,17 @@ $.extend(Date.prototype,{
     addDays:        Date.prototype.addDays = function(value) {
                         return this.addMilliseconds(value * 86400000);
                     },
-    addWeeks:        function(value) {
+    addWeeks:       function(value) {
                         return this.addMilliseconds(value * 604800000);
                     },
-    addMonths:        function(value) {
+    addMonths:      function(value) {
                         var n = this.getDate();
                         this.setDate(1);
                         this.setMonth(this.getMonth() + value);
                         this.setDate(Math.min(n, this.getDaysInMonth()));
                         return this;
                     },
-    addYears:        function(value) {
+    addYears:       function(value) {
                         return this.addMonths(value * 12);
                     },
     add:            function(config) {
@@ -4201,14 +4268,14 @@ $.extend(Date.prototype,{
                         }
                         return this;
                     },
-    getDayName:        function(abbrev) {
+    getDayName:     function(abbrev) {
                         return abbrev ? Date.CultureInfo.abbreviatedDayNames[this.getDay()] : Date.CultureInfo.dayNames[this.getDay()];
                     },
-    getMonthName:    function(abbrev) {
+    getMonthName:   function(abbrev) {
                         return abbrev ? Date.CultureInfo.abbreviatedMonthNames[this.getMonth()] : Date.CultureInfo.monthNames[this.getMonth()];
                     },
-    _toString:        Date.prototype.toString,
-    toString:        function(format) {
+    _toString:      Date.prototype.toString,
+    toString:       function(format) {
                         var self = this;
                         var p = function p(s) {
                                 return (s.toString().length == 1) ? "0" + s : s;
@@ -4278,9 +4345,15 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     /** Array of feedback words or phrases to randomly display when a user's input is not understood by the control */
     sarcasmArray:   ["Not quite.","Huh?","Nope","Arg..","Sorry","What?","Bleck.","Nuh-uh.","Keep Trying.","No Entiendo."],
     
-    /** The date furthest in the past that this control will accept as valid */
-    minDate:        null,
-    
+    /** String specifying the format that will be displayed to the user. */
+    dispFormat:     'ddd MM-dd-yyyy h:mm tt',
+
+    /** String for format of the date returned from the datepicker. */
+    dtFormat:       'MM-dd-yyyy h:mm tt',
+
+    /** When true, locks the datetime control to only deal in dates without times. If the user specifies custom values for dispFormat and dtFormat this setting has no effect. */
+    dateOnly:       false,
+
     /**
     @param {string} overrideText    Text that will absolutely be displayed instead of the formatted version of the field's value
     @return The value passed in, or the calculated value of the datetime
@@ -4291,13 +4364,14 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                         
                         // process current date value
                         if(overrideText !== undefined){ me.displayDiv.html(overrideText); return overrideText; }
-                        if(me.value === "" || me.value === null) { return null; }
+                        if(me.value === "" || (!me.value)) { return null; }
                         
-                        //validation for min-date
-                        if(!(me.minDate !== null && me.value < me.minDate)) me.displayDiv.html(me.value.toString('ddd MM-dd-yyyy h:mm tt'));
-                        else                                                me.displayDiv.html(me.value.toString('Less than minimum required date of MM-dd-yyyy'));
+                        //validation for min and max
+                        if(me.minDate && me.value < me.minDate)         me.displayDiv.html(me.minDate.toString(me.dtFormat) + ' is before the min date.');
+                        else if (me.maxDate && me.value > me.maxDate)   me.displayDiv.html(me.maxDate.toString(me.dtFormat) + ' is past the max date.');
+                        else                                            me.displayDiv.html(me.value.toString(me.dispFormat));
                         
-                        return  me.value.toString('MM/dd/yyyy h:mm tt');
+                        return  me.value.toString(me.dtFormat);
                     },
      
      /** 
@@ -4314,6 +4388,14 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     init:           function(){
                         var me = this;
                         Wui.Text.prototype.init.call(me);
+
+                        // Limit field to dates only if specified
+                        if(me.dateOnly){
+                            if(!me.hasOwnProperty('dispFormat')) me.dispFormat = 'ddd MM-dd-yyyy';
+                            if(!me.hasOwnProperty('dtFormat')) me.dtFormat = 'MM-dd-yyyy';
+                        }
+
+                        // Add datepicker
                         me.append(
                             $('<div>').addClass('wui-date').append(
                                 me.setListeners(me),
@@ -4368,8 +4450,8 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
             
                         //replace the written words with numbers
                         words = words.toString().replace(/ and /g,' ').replace(/-/g,' ');
-                        $.each(numberRepl,function(i,itm){
-                            words = words.replace(new RegExp('(^|[ ]|-)' + itm + '(-|[ ]|$)','g'),' ' + numberRepl[itm] + ' ');
+                        $.each(numberRepl,function(i){
+                            words = words.replace(new RegExp('(^|[ ]|-)' + i + '(-|[ ]|$)','g'),' ' + numberRepl[i] + ' ');
                         });
                         
                         var wArray = $.trim(words).split(/[ ]+/),
@@ -4432,8 +4514,12 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                                 // this loop is for weekdays (cells)
                                 for (j = 0; j <= 6; j++) { 
                                     html += '<td>';
-                                    if (day <= monthLength && (i > 0 || j >= startingDay))
-                                        html += '<a class="wui-cal-day">' +(day++)+ '</a>';
+                                    if (day <= monthLength && (i > 0 || j >= startingDay)){
+                                        var dayDt = new Date(year,month,day),
+                                            disableCls = ((me.minDate && dayDt < me.minDate) || me.maxDate && dayDt > me.maxDate) ? ' wui-cal-disabled' : '';
+                                        
+                                        html += '<a class="wui-cal-day' +disableCls+ '">' +(day++)+ '</a>';
+                                    }
                                     html += '</td>';
                                 }
                                 // stop making rows if we've run out of days
@@ -4459,7 +4545,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                             if(today.getMonth() == month && today.getFullYear() == year)
                                 tbl.find('a:contains(' +today.getDate()+ '):first').addClass('highlight');
 
-                            tbl.find('td a').click(onSelect);
+                            tbl.find('td a:not(.wui-cal-disabled)').click(onSelect);
                             return tbl;
                         }
                     },
@@ -4526,7 +4612,8 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                             var n       = me.num2Dec(intvF[1]),
                                 directn = {from:1, after:1, before:-1, 'previous to':-1},
                                 dir     = directn[intvF[4]],
-                                dt      = me.translateDate(intvF[5]);  
+                                dt      = me.translateDate(intvF[5]); 
+
                             return dt['add' + intvF[3].charAt(0).toUpperCase() + intvF[3].slice(1) + 's'](n * dir);
                         }
                        
@@ -4630,15 +4717,15 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     i.e. The array [1,100,50,5] -> 155, [5,1000,20,3] -> 5023  */
     txt2Num:        function(wArray){
                         //split into an array and combine them according to magnitude
-                        var pos = 0, theNum = 0, nextNum = 0, lastNum = 0;
+                        var pos = 0, theNum = 0, currNum = 0, nextNum = 0, lastNum = 0, smallerThanNext = false;
                        
                         if(wArray.length == 1){
                             return wArray[0];
                         }else{
                             while(wArray[pos + 1] !== undefined){
-                                var currNum = parseInt(wArray[pos]),
-                                    smallerThanNext = this.getM(currNum) <= this.getM(nextNum);
+                                currNum = parseInt(wArray[pos]);
                                 nextNum = parseInt(wArray[pos + 1]);
+                                smallerThanNext = this.getM(currNum) <= this.getM(nextNum);
                                 lastNum = parseInt(wArray[wArray.length - 1]);
 
                                 if(pos === 0){
@@ -4657,7 +4744,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                     
     getVal:         function(){ return this.value; },
                     
-    setVal:            function(sv){
+    setVal:         function(sv){
                         if(sv !== null){
                             if(typeof sv == 'string'){
                                 this.fieldText(sv);
@@ -4678,7 +4765,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     @param {date}    dt    A date object
     @return    A boolean
     Determines whether the date object passed in is valid or not. */
-    validDate:       function(dt){
+    validDate:      function(dt){
                         if(dt !== null && dt.toString() == 'Invalid Date')  return false;
                         else if (dt === null)                               return false;
                         else                                                return true;
@@ -4692,46 +4779,47 @@ Creates a form field for uploading files. By the nature of file uploads and thei
 */
 Wui.File = function(args){ 
     $.extend(this,{
-        /** An event hook to perform any functionality before a file is uploaded @eventhook */
-        beforeSubmit:function(){},
+        /** @eventhook To perform any functionality before a file is uploaded @eventhook */
+        beforeSubmit:   function(){},
         
         /** A value to send to the server where it will filter/block file uploads according to file type */
         fileTypeFilter: null,
         
         /** The name of the field that contains the file */
-        upFieldName:'fileupload',
+        upFieldName:    'fileupload',
         
         /** Additional parameters to send to the server besides the file*/
-        params:   {},
+        params:         {},
         
-        /** Event hook to be performed when a file is successfully uploaded. @eventhook */
-        upSuccess:  function(){},
+        /** @eventhook To be performed when a file is successfully uploaded. @eventhook */
+        upSuccess:      function(){},
         
         /** The server-side page where the file will be uploaded. */
-        url:   '',
+        url:            '',
         
         /** The name of the parameter of the file title. */
-        upTitleName:'title'
+        upTitleName:    'title'
     },args,{
-        field:    $('<input>').attr({type:'text'})
+        field:          $('<input>').attr({type:'text'})
     });
 };
 Wui.File.prototype = $.extend(new Wui.Text(),{
-    /** */
+    /** Fires when the 'X' button is clicked to change the currently selected file to something else. */
     changeClick:function(){
                      //swap buttons
-                     this.changeBtn.el.fadeOut('fast');
-                     this.upBtn.el.parents('div:first').fadeIn('slow'); 
+                     this.changeBtn.hide();
+                     this.upBtn.show();
+                     me.fileFrm.show();
                      this.field.removeClass().focus();
-                 },
+                },
     
-    /** */
+    /** Set up the file upload control. */
     init:       function(){
                     var me = this;
                     Wui.Text.prototype.init.call(me);
 
                     // Wrap the field in order to add absolutely positioned buttons
-                    me.append(me.wrapper = $('<div>').addClass('wui-file').append(me.field));
+                    me.append(me.wrapper = $('<div>').addClass('wui-file').append(me.field.off('blur')));
                     me.elAlias = me.wrapper;
 
                     var uniqueId = Wui.id();
@@ -4770,6 +4858,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                     );
                 },
 
+
     /** Submit the form */
     submit:     function() {
                     var me = this;
@@ -4780,20 +4869,20 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                     me.params[me.upTitleName] = me.field.val();
                     
                     // for file filtering
-                    if(me.fileTypeFilter !== null) me.params[file_type_filter] = me.fileTypeFilter;
+                    if(me.fileTypeFilter !== null) me.params['file_type_filter'] = me.fileTypeFilter;
 
                     me.field.addClass('has-file uploading').attr('disabled', true).val('uploading...');
                     
-                    /** add additional paramters before sending */
+                    // add additional paramters before sending
                     me.fileFrm.el.children("input[type!='file']").remove();
                     $.each(me.params, function(key, value) {
                         me.fileFrm.append($('<input>').attr({type:'hidden', name:key, value:value}));
                     });
                     
-                    /** Submit the actual form */
+                    // Submit the actual form
                     me.fileFrm.el.submit(); 
                     
-                    /** Do something after we are finished uploading */
+                    // Do something after we are finished uploading
                     me.iframe.el.unbind().load(function() {
                         me.onComplete($('body',me.iframe.el.contents()).text()); //done :D
                     });
@@ -4802,10 +4891,11 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
     /**
     @param {object} unwrapped The Wui.unwrapData unwrapped results of the file upload.
     This function is for developers to run whatever analysis they desire on the raw output of the file upload.
+    @eventhook
     */
     devHook:    function(){},
 
-    /** */            
+    /** Fires when the file upload completes and handles errors if any. */            
     onComplete: function(r){
                     try{
                         var me = this,
@@ -4825,8 +4915,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                             if(d.errors && d.errors[0] && d.errors[0].fileTypeError){
                                 Wui.errRpt(d.errors[0].fileTypeError,'Invalid File Type');
                                 me.field.removeClass('has-file uploading').removeAttr('disabled');
-                                if(me.beforeSelectTitle)
-                                    me.fieldText(me.beforeSelectTitle);
+                                me.fieldText('');
                             }else{
                                 me.upFailure(d);
                             }
@@ -4836,32 +4925,37 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                         me.upFailure(err,r);
                     }
                 },
+
+    /** @eventhook Signals the user that there was an upload failure. Can be overridden, but doesn't have to be.*/
     upFailure:  function(e,e2){
                     console.log(e,e2);
-                    Wui.Text.prototype.val.call(this,'Upload Failure');
+                    this.fieldText('Upload Failure');
                 },
-    /** */
-    getVal:        function(){ return this.value || {}; },
-    /** */
-    setVal:        function(sv){
+    
+    /** @return The value of the field, or an empty object is returned. */
+    getVal:     function(){ return this.value || {}; },
+    
+    /** Overrides Wui.FormField.setVal() to work with the file field. @return The value passed in. */
+    setVal:     function(sv){
                     this.value = this.value || {};
                     $.extend(this.value,sv);
+                    return sv;
                 },
-    /** */
+    
+    /**  Adds callback functionality to Wui.FormField.val() */
     val:        function(sv,callback){
                     var retVal = Wui.FormField.prototype.val.apply(this,arguments);
                     if(this[callback] && typeof this[callback] == 'function') this[callback]();
                     return retVal;
                 },
     
-    /** */
+    /** Overrides Wui.FormField.valChange, performs similar fuctionality, but adds specific code for showing/hiding buttons. */
     valChange:  function(){
                     var me = this;
                     if(me.value){
                         me.field.addClass('has-file').removeAttr('disabled');
                         me.upBtn.hide();
                         me.fileFrm.hide();
-                        asdf = me.upBtn;
                         me.changeBtn.show();
                         
                         //changed to a 'file-selected' view and display a nicely formatted file
@@ -4884,6 +4978,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
 @param {string}     [msgTitle]  The title for the window, defaults to 'Input'.
 @param {array}      [inputs]    Array of Wui.FormFields to display on the window. When this array has only one item it merely replaces the default text field and is required. 
 @param {string}     [content]   HTML content to display above the form fields.
+@return The Wui.Form that was created by the input. Use the returned value .parent to get the window.
 
 Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
 */
@@ -4891,10 +4986,8 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
     // make sure the inputs will be acceptable on the form
     if(inputs){
         if(!inputs.length){
-            if(inputs instanceof Wui.FormField || inputs.ftype)
-                inputs = [inputs];
-            else
-                inputs = [{ftype:'Wui.Text'}];
+            if(inputs instanceof Wui.FormField || inputs.ftype) inputs = [inputs];
+            else                                                inputs = [{ftype:'Wui.Text'}];
         }
     }else{
         inputs = [{ftype:'Wui.Text'}];
@@ -4907,31 +5000,30 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
         Msg = new Wui.Window({
             title:      msgTitle || 'Input',
             bbar:        [ 
-                            new Wui.Button({text:'Cancel', click:function(){ Msg.answerRun = true; Msg.close(); }}),
+                            new Wui.Button({text:'Cancel', click:function(){ Msg.closeOkay = true; Msg.close(); }}),
                             new Wui.Button({text:'Submit', click:function(){ Msg.getVal(); }})
             ],
             isModal:    true,
             items:      [inputFrm],
             cls:        'wui-input-window',
-            width:      600, 
-            height:     250,
+            width:      600,
             getVal:        function(){
                             var formData = inputFrm.getData();
                             if(formData){
                                 if(callback && typeof callback == 'function'){
-                                    var len = Wui.getKeys(formData).length;
-                                    if(len == 1 && formData.inputField) callback(formData.inputField);
-                                    else                                callback(formData);
+                                    var len = Wui.getKeys(formData).length,
+                                        cbkResult = callback((len == 1 && formData.inputField) ? formData.inputField : formData);
+                                    Msg.closeOkay = (callback === undefined) ? true : cbkResult;
+                                }else{
+                                    Msg.closeOkay = true;
                                 }
-                                Msg.answerRun = true;
                                 Msg.close();
                             }
                         },
-            onWinClose: function(){ return ((Msg.answerRun !== true) ? false : Msg.answerRun); }
+            onWinClose: function(){ return ((Msg.closeOkay !== true) ? false : Msg.closeOkay); }
         });
     Msg.header.splice(0,1);
     return inputFrm;
 };
 
 })(jQuery,Wui);
-

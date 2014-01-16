@@ -43,7 +43,7 @@
     animation-name: nodeInserted; -o-animation-name: nodeInserted; -ms-animation-name: nodeInserted; -moz-animation-name: nodeInserted; -webkit-animation-name: nodeInserted;
 }
 
-.wui-msg { margin:0.5em 0 1em; font-size:0.8em;}
+.wui-msg { margin:0.5em 0.5em 1em; font-size:0.8em;}
 .wui-err { padding:1em; font-weight:bold; color:#900;}
     
 /******************   MODAL WINDOW STYLES   ********************/
@@ -157,7 +157,7 @@ button::-moz-focus-inner { border:0; }
 .wui-highlight { text-shadow: 0 0 1px #000, 0 0 3px #000; color:#fff; font-weight: bold;}
 .wui-combo-dd {
     background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
-    max-height:150px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
+    max-height:300px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
 }
 .wui-inline-dd {right:0; top:98%; width:100%;}
 .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
@@ -366,6 +366,9 @@ button::-moz-focus-inner { border:0; }
 
 .wui-paging-pad {position:relative; width:1px;}
 .wui-paging-pad table {position:absolute; left:0;}
+
+/********************* Form Elements in Grid ***************************/
+.grid-body table tr td div.wui-fe, .grid-body table tr td div.wui-fe div {padding:0;}
 
 /********************* Tab Styles ***************************/
 .wui-tab-panel {width:100%; height:100%; min-width: 100%; min-height: 100%; display:none; overflow: auto;}

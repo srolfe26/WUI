@@ -128,7 +128,7 @@ Wui.stateMachine.prototype = {
                         var state    = this.getState();
                             
                         for(var i in state){
-                            if(state[i].view === target && state[i].params[key]){
+                            if(state[i].view === target){
                                 state[i].params[key] = value;
                                 this.setState(state);
                                 return value;

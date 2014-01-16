@@ -1,5 +1,5 @@
 ﻿/*! Wui 1.1
- * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
  * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
@@ -72,16 +72,16 @@ Wui.getKeys = function(obj){
 @return Number specifying the scrollbar width for the current page in pixels
 */
 Wui.scrollbarWidth = function() {
-  var parent, child, width;
+    var parent, child, width;
 
-  if(width===undefined) {
-    parent = $('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo('body');
-    child=parent.children();
-    width=child.innerWidth()-child.height(99).innerWidth();
-    parent.remove();
-  }
+    if(width===undefined) {
+        parent = $('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo('body');
+        child=parent.children();
+        width=child.innerWidth()-child.height(99).innerWidth();
+        parent.remove();
+    }
 
- return width;
+    return width;
 };
 
 /** 
@@ -127,15 +127,12 @@ Wui.Data.prototype.dataContainer and Wui.Data.prototype.totalContainer.
 */
 Wui.unwrapData = function(r){
     var me          = this,
-        retObj      = {},
-        dc            = me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
-        tc            = me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
+        dc          = me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
+        tc          = me.hasOwnProperty('totalContainer') ? me.totalContainer : Wui.Data.prototype.totalContainer,
         response    = (dc && r[dc]) ? r[dc] : r,
-        total         = (tc && r[tc]) ? r[tc] : response.length;
+        total       = (tc && r[tc]) ? r[tc] : response.length;
     
-    retObj.data = response;
-    retObj.total = total;
-    return retObj;
+    return {data:response, total:total};
 };
 
 /** 
@@ -269,7 +266,7 @@ Wui.O.prototype = {
     If the object has a 'appendTo' or 'prependTo' config, that action will be used, otherwise the
     passed in action is used if defined, otherwise uses 'append'.
     */
-    addToDOM:    function(obj, tgt, act){
+    addToDOM:   function(obj, tgt, act){
                     // Take the target and action from the passed object first if defined, then default to passed arguments, 
                     // then to a default of $('body') and 'append'
                     var target     = (obj.appendTo !== undefined) ? obj.appendTo :
@@ -299,7 +296,7 @@ Wui.O.prototype = {
     @param {object}    item    A jQuery object to be added
     Appends item to the WUI Object's 'elAlias' or 'el', whichever is defined.
     */
-    append:        function(obj){
+    append:     function(obj){
                     var me = this, el = me.elAlias || me.el;
                     $.each(arguments,function(i,itm){
                         el.append(itm);
@@ -308,7 +305,7 @@ Wui.O.prototype = {
 
 
     /** Removes only the DOM items from the WUI Object's 'elAlias' or 'el', whichever is defined. */
-    clear:        function(){
+    clear:      function(){
                     var me = this, el = me.elAlias || me.el;
                     el.children().remove();
                 },
@@ -318,7 +315,7 @@ Wui.O.prototype = {
     object is using a 'fit' layout and performs layout on the item, calls its children's callRender(), 
     and finally calls its own afterRender() if it exists.
     */
-    callRender:    function(){
+    callRender: function(){
                     var me = this;
                     
                     me.cssByParam(me);                  // Add styles if they didn't get added
@@ -338,7 +335,7 @@ Wui.O.prototype = {
     
     Tests whether the passed in value is valid, then uses the jQuery .attr method to apply an attribute to the el of the WUI object.
     */
-    applyAttr:    function(name,val){
+    applyAttr:  function(name,val){
                     var validVal = (val !== undefined && (typeof val === 'string' || typeof val === 'number'));
                     if(validVal) $(this.el).attr(name,val);
                     return validVal;
@@ -391,7 +388,7 @@ Wui.O.prototype = {
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    each:        function(f,ascending){
+    each:       function(f,ascending){
                     ascending = (ascending === undefined) ? true : ascending;
                     var i = (ascending) ? 0 : this.items.length;
                     
@@ -436,19 +433,19 @@ Wui.O.prototype = {
 
     /** A function to run layout on just the objects children without calling cssByParam. */
     layoutKids: function(){
-        var me = this, needFit = false;
+                    var me = this, needFit = false;
 
-        // Perform Wui.fit on items that need it
-        me.each(function(itm){ if(itm.fit){ 
-            needFit = true; return false;
-        }});
-            
-        if(me.fitDimension || needFit)
-            Wui.fit(me.items, (me.fitDimension || undefined));
-            
-        // Perform layout for child elements
-        me.each(function(itm){ if(itm.layout) itm.layout(); });
-    },
+                    // Perform Wui.fit on items that need it
+                    me.each(function(itm){ if(itm.fit){ 
+                        needFit = true; return false;
+                    }});
+                        
+                    if(me.fitDimension || needFit)
+                        Wui.fit(me.items, (me.fitDimension || undefined));
+                        
+                    // Perform layout for child elements
+                    me.each(function(itm){ if(itm.layout) itm.layout(); });
+                },
 
     /**
     @param {function} [after]    A function to be called after an object has been placed
@@ -521,7 +518,7 @@ Wui.O.prototype = {
     @return The el or elAlias of the object being shown
     Shows an object with the options of an animated fadein and callback function
     */
-    show:        function(){ 
+    show:       function(){ 
                     var args = ['fadeIn'];
                     $.each(arguments,function(i,arg){ args.push(arg); });
                     this.hidden = false;
@@ -535,7 +532,7 @@ Wui.O.prototype = {
     This is an internal function used by show() and hide(). Fn is required, but speed and callback
     are optional and their order is interchangeable.
     */
-    showHide:    function(fn,speed,callback){
+    showHide:   function(fn,speed,callback){
                      speed = (typeof speed == 'number') ? speed : 1;
                      if(typeof arguments[1] == 'function') callback = arguments[0];
                      return this.el[fn](speed, callback);
@@ -706,19 +703,19 @@ Wui.Data = function(args){
 Wui.Data.prototype = {
     /** An object in the remote response actually containing the data.
     Best set modifying the prototype eg. Wui.Data.prototype.dataContainer = 'payload'; */
-    dataContainer:      null,
+    dataContainer:  null,
     /** An object in the remote response specifying the total number of records. Setting this
     feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
-    totalContainer:     null,
+    totalContainer: null,
     
     /** When the object is waiting, default amount of time in milliseconds before trying to perform loadData() again */
-    ajaxWait:           10,
+    ajaxWait:       10,
     
     /** 
     @param {array}    newData    Array of the new data
-    Event hook for when data is changed.
+    @eventhook Used for when data is changed.
     */
-    dataChanged:        function(){},
+    dataChanged:    function(){},
     
     /**
     @param {function} fn A function that gets called for each item in the object's data array
@@ -726,7 +723,7 @@ Wui.Data.prototype = {
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    dataEach:        function(f){
+    dataEach:       function(f){
                         for(var i = 0; i < this.data.length; i++)
                             if(f(this.data[i],i) === false)
                                 break;
@@ -748,7 +745,7 @@ Wui.Data.prototype = {
     
     Upon failure will fire onFailure()
     */
-    loadData:        function(){
+    loadData:       function(){
                         var me = this,
                             config = $.extend({
                                 data:       me.params,
@@ -770,11 +767,12 @@ Wui.Data.prototype = {
                     },
     /**
     @param {object} params    Params to be set
+    @eventhook Can be used as is or overridden to run when parameters change.
     Can be used as is to set parameters before an AJAX load, or it can also be used as an event hook and overridden.
     This method is called from loadData with its arguments passed on, so arguments passed to load data will be sent here. 
     See loadData().
     */
-    setParams:        function(params){
+    setParams:      function(params){
                         if(params && typeof params === 'object')
                             $.extend(this.params,params);
                     },
@@ -801,20 +799,20 @@ Wui.Data.prototype = {
                         me.afterSet(me.data);
                     },
     
-    /** Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
-    beforeLoad:        function(){},
+    /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    beforeLoad:     function(){},
     
     /**
     @param    {array}    data    The value of the data cofig of the current object
-    Event hook that fires after data is set. Meant to be overridden. See loadData().
+    @eventhook  Fires after data is set. Meant to be overridden. See loadData().
     */
-    afterSet:        function(){},
+    afterSet:       function(){},
     
     /**
     @param {array} d Data to be set on the ojbect
-    Event hook that fires after the remote call but before data is set on the object. Meant to be overridden. See loadData().
+    @eventhook  Fires after the remote call but before data is set on the object. Meant to be overridden. See loadData().
     */
-    beforeSet:        function(){},
+    beforeSet:      function(){},
     
     /**
     @param {object or array} r Response from the server in JSON format
@@ -828,15 +826,13 @@ Wui.Data.prototype = {
                         me.setData(unwrapped.data, unwrapped.total);
                     },
     
-    /**
-    Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
-    */
-    onSuccess:        function(){},
+    /** @eventhook AllowS for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    onSuccess:      function(){},
     
-    /**
-    Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
-    */
-    onFailure:        function(){},
+    /** @eventhook Allows for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    onFailure:      function(){},
+    
+    /** Runs when loadData() fails. Clears the waiting flag and called the event hook onFailure. */
     failure:        function(e){
                         this.waiting = false;
                         this.onFailure(e);
@@ -855,50 +851,50 @@ Wui.Data.prototype = {
 Wui.Template = function(args){ $.extend(this,args); };
 Wui.Template.prototype = {
     /** The HTML template that the data will fit into. Null value will cause an error to be thrown. Specification required. */
-    template:    null,
+    template:   null,
     
     /** A single record to be applied to the template. Null value will cause an error to be thrown. Specification required.  */
-    data:        null,
+    data:       null,
     
     /**
     @param {number} [index] An optional number to make an index available to the record
     @return A jQuery object containing the template paired with its data
     Creates the template 
     */
-    make:    function(index){
-                var me = this;
-                if(me.data && me.template){
-                    var tplCopy = me.template;
-                    
-                    if($.isNumeric(index))    $.extend(me.data,{wuiIndex:index});
-                    
-                    return $(
-                        tplCopy
-                        // replaces straight values
-                        .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
-                        // accounts for complex expressions
-                        .replace(/\{\((.*?)\)\}/g,function(m,fn){
-                            var keys = Wui.getKeys(me.data), vals = [], i = 0;
-                            
-                            // Removes any key values that may start with a number and ruin the engine
-                            for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
+    make:       function(index){
+                    var me = this;
+                    if(me.data && me.template){
+                        var tplCopy = me.template;
+                        
+                        if($.isNumeric(index))    $.extend(me.data,{wuiIndex:index});
+                        
+                        return $(
+                            tplCopy
+                            // replaces straight values
+                            .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
+                            // accounts for complex expressions
+                            .replace(/\{\((.*?)\)\}/g,function(m,fn){
+                                var keys = Wui.getKeys(me.data), vals = [], i = 0;
+                                
+                                // Removes any key values that may start with a number and ruin the engine
+                                for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
 
-                            // fill arrays of keys and their values and make sure they are in the same order
-                            for(i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
-                            
-                            // add the passed in conditional as the body of the function created below
-                            keys.push("return " + fn);
-                            
-                            // create function that will perform the conditional statement
-                            var newFn = Function.apply(null,keys);
-                            
-                            // call the function with the keys as variables in scope
-                            return newFn.apply(null,vals);
-                        })
-                    );
+                                // fill arrays of keys and their values and make sure they are in the same order
+                                for(i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
+                                
+                                // add the passed in conditional as the body of the function created below
+                                keys.push("return " + fn);
+                                
+                                // create function that will perform the conditional statement
+                                var newFn = Function.apply(null,keys);
+                                
+                                // call the function with the keys as variables in scope
+                                return newFn.apply(null,vals);
+                            })
+                        );
+                    }
+                    throw new Error('Wui.js - Template engine missing data and/or template.');
                 }
-                throw new Error('Wui.js - Template engine missing data and/or template.');
-            }
 };
 
 
@@ -955,16 +951,17 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return The item passed in will be returned.
     Performs mutations and fires listeners when an item is selected @private
     */
-    itemSelect:function(itm, silent){
+    itemSelect: function(itm, silent){
                     var me = this;
                         
                     me.el.find('.wui-selected').removeClass('wui-selected');
                     itm.el.addClass('wui-selected');
                     me.selected = [itm];
                     
-                    if(!me.multiSelect && !silent)
+                    if(!me.multiSelect && !silent){
                         me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
-                    
+                        me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                    }
                     return itm;
                 },
 
@@ -979,7 +976,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
                     me.el.trigger($.Event('deselect'),[me, itm.el, itm.rec]);
-                    
+                    me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     return itm;
                 },
     
@@ -988,7 +985,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return The item passed in with listeners added
     Adds the click listeners to the item and calls modifyItem to add greater flexibility
     */
-    createItem:    function(itm){
+    createItem: function(itm){
                     var me = this,
                         clicks = 0,
                         timer = null;
@@ -1029,8 +1026,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                             if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                             else                me.selected.push(itm);
+
+                            me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                         }
-                        me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     }
 
                     function doubleClick(e){
@@ -1049,10 +1047,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return The DOM element
     Performs any desired modification on an object - this method is meant to be overridden.
     */
-    modifyItem:    function(itm){ return itm.el; },
+    modifyItem: function(itm){ return itm.el; },
     
     /** Creates the templates based on current data. Then appends them to the el with listeners */
-    make:        function(){
+    make:       function(){
                     var me = this,
                         holdingData = me.data || [],
                         holder = $('<div>');
@@ -1087,7 +1085,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                 },
                 
     /** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
-    onRender:    function(){
+    onRender:   function(){
                     if(this.autoLoad){
                         if(this.url === null)   this.make();
                         else                    this.loadData();
@@ -1137,15 +1135,15 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @param    {string|number} val The value to look for
     @return An object containing the dataList, row, and record, or undefined if there was no matching row.
     Selects an item according to the key value pair to be found in a record. */
-    selectBy:        function(key,val){
-                        var me = this, retVal = undefined;
-                        me.each(function(itm){
-                            if(itm.rec[key] !== undefined && itm.rec[key] == val)
-                                return retVal = me.itemSelect(itm);
-                        });
-                        me.scrollToCurrent();
-                        return retVal;
-                    }
+    selectBy:   function(key,val){
+                    var me = this, retVal = undefined;
+                    me.each(function(itm){
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
+                            return retVal = me.itemSelect(itm);
+                    });
+                    me.scrollToCurrent();
+                    return retVal;
+                }
 });
 
 
@@ -1157,16 +1155,16 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 Wui.Button = function(args){
     $.extend(this, {
         /** The button element. Can be overridden according to the needs of the design. */
-        el:            $('<button>').attr({unselectable:'on'}),
+        el:         $('<button>').attr({unselectable:'on'}),
         
         /** Whether the button is disabled. */
-        disabled:    false,
+        disabled:   false,
         
         /** Tool tip text for the button. */
         toolTip:    null,
         
         /** Tab index will make the button focusable by the browser. Changing this value will result in it receiving a higher precedence than what it would receive in that natural flow of the page. */
-        tabIndex:    0,
+        tabIndex:   0,
         
         /** Text to appear on the button. Can be HTML if a more complex button design is desired. */
         text:       'Button'
@@ -1175,7 +1173,7 @@ Wui.Button = function(args){
     this.init();
 };
 Wui.Button.prototype = $.extend(new Wui.O(),{
-    /** Event hook for the button click. */
+    /** @eventhook Event hook for the button click. */
     click:      function(){},
     
     /** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
@@ -1211,14 +1209,16 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     .attr('disabled',true)
                     .removeAttr('tabindex');
                 },
+
     /** Enables the button */
-    enable:        function(){
+    enable:     function(){
                     this.disabled = false;
                     this.el
                     .toggleClass('disabled',this.disabled)
                     .removeAttr('disabled')
                     .attr({tabindex:this.tabIndex});
                 },
+
     /** Sets the button text. Can be HTML. */
     setText:    function(txt){ return this.el.html(txt); },
 });
@@ -1235,25 +1235,25 @@ Wui.Pane = function(args){
         bbar:       [],
         
         /** Whether or not the pane has a border */
-        border:        true,
+        border:     true,
         
         /** An array of items that will be added to the header */
         tbar:       [],
         
         /** Whether or not the pane is disabled on load */
-        disabled:    false,
+        disabled:   false,
         
         /** Alignment of the heading title (left,center,right) */
-        titleAlign:    'left',
+        titleAlign: 'left',
                 
         /** Default height */
-        height:        '100%',
+        height:     '100%',
     
         /** HTML to show in the mask when the pane is disabled */
-        maskHTML:    'Empty',
+        maskHTML:   'Empty',
         
         /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
-        title:        null
+        title:      null
     },args); 
     this.init();
 };
@@ -1270,7 +1270,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                     },
     
     /** Enables the pane by removing the mask and enabling all buttons */
-    enable:            function(){
+    enable:         function(){
                             var me = this;
                             me.removeMask();
                             me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
@@ -1310,7 +1310,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                     },
     
     /** Method that will run immediately when the object is constructed. */
-    init:            function(wuiPane){
+    init:           function(wuiPane){
                         var me = wuiPane || this;
                         me.el       = $('<div>').addClass('wui-pane').append(
                                         $('<div>').addClass('wui-pane-wrap').append(
@@ -1391,7 +1391,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                     },
     
     /** Changes the title on the pane. */
-    setTitleAlign:    function(t){ 
+    setTitleAlign:  function(t){ 
                         var me = this;
                         
                         me.titleAlign = t || me.titleAlign;
@@ -1538,7 +1538,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     If width and height aren't specified, the window is sized vertically to try to fit its contents 
     without getting larger than the browser viewport.
     */
-    resize:        function(resizeWidth, resizeHeight){
+    resize:     function(resizeWidth, resizeHeight){
                     var me = this,
                         totalHeight = me.container[0].scrollHeight,
                         containerHeight = me.container.height(),
@@ -1591,10 +1591,10 @@ Wui.msg = function(msg, msgTitle, callback, content){
             title:      msgTitle || 'Message', 
             isModal:    true,
             items:      cntnt, 
-            width:      350, 
-            height:     200,
+            width:      350,
             onWinClose: callback || function(){}
         });
+    msgWin.resize();
     return msgWin;
 };
 
@@ -1610,6 +1610,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
     err.container.find('.wui-msg').addClass('wui-err');
+    err.resize();
     return err;
 };
 
@@ -1636,6 +1637,7 @@ Wui.confirm = function(msg, msgTitle, callback, content){
         new Wui.Button({text:'Yes', click:function(){ cw.doAnswer(true); }})
     );
     cw.header.splice(0,1);
+    cw.resize();
     return cw;
 };
 
