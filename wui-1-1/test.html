@@ -15,61 +15,8 @@
     <script type="text/javascript" src="js/wui.js"></script>
     <script type="text/javascript" src="js/forms.js"></script>
     <script type="text/javascript" src="js/grid.js"></script>
-    <script type="text/javascript" src="js/combo-new.js"></script>
-    
-    <style>
-        /* combo */
-        .wui-combo {position: relative;}
-        .wui-fe .has-dd {padding-right:27px;}
-        .wui-combo-dd {
-            background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
-            max-height:150px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
-        }
-        .wui-inline-dd {right:0; top:98%; width:100%;}
-        .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
-            .wui-combo-dd li.wui-selected { background:#19f; color:#fff; }
-            .wui-combo-dd li.wui-combo-hover { background:#aef; }
-        .dd-wrapper, .wui-file {position:relative;}
-        .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
-    </style>
-
     <script type="text/javascript">
         $(document).ready(function(){
-            a = new Wui.Combo2({label:'Local', identity:'id', titleItem:'name', data:[
-                {id:'1', name:'Tony'},
-                {id:'2', name:'Dan'},
-                {id:'3', name:'Keith'},
-                {id:'4', name:'Julie'},
-                {id:'5', name:'Josh'},
-                {id:'6', name:'Catherine'}
-            ]});
-            a.place();
-
-            b = new Wui.Combo2({ 
-                label:        'Remote', 
-                blankText:    'Type Something', 
-                name:        'demo-combo', 
-                name:        'combo', 
-                identity:    'tx_id',
-                titleItem:    'description',
-                autoLoad:    true,
-                searchLocal:false,
-                
-                // used to simulate a server filtering the data on search
-                processData:function(r){
-                                if(this.searchFilter){
-                                    for(var i = r.length - 1; i >= 0; i--){
-                                        if(r[i][this.titleItem].toUpperCase().indexOf(this.searchFilter.toUpperCase()) < 0) r.splice(i,1);
-                                    }
-                                }
-                                return r;                            
-                            },
-                url:         'docs/data.txt'
-            });
-            b.place();
-
-
-
             /* Add a new grid on the body
             
             id = new Date();
@@ -115,7 +62,7 @@
                 height:         '90%'
             });
             sub_a.place();
-            
+            */
             a = new Wui.Grid({
                 height:    500,
                 width:950,
@@ -130,12 +77,16 @@
                             //    var b = new Wui.Button({ text:'Reconcile', appendTo:cell, click:function(){ Wui.msg(val); }}); b.place(); return '';
                             //}},
                         ],
-                multiSelect:true,
-                afterMake: function(){ Wui.Grid.prototype.afterMake.call(this); var ed = new Date(); console.log((ed.getTime() - id.getTime()));}
+                multiSelect: true
             });
-            a.place();*/
+            a.place();
         }); // end document.ready
     </script>
 </head>
-<body></body>
+<body>
+    
+<div class="wui-pane wui-grid has-vert-columns" style="border-width: 0px; height: 417px; width: 615px;"><div class="wui-pane-wrap" style="padding-top: 0px; padding-bottom: 0px;"><div class="wui-pane-content"><div class="grid-body" style="height: 268px; top: 149px;"><table style="width: 612px;"><tbody><tr class="even"><td style="width: 242px;"><div>Appropriate Technical  Content &amp; Free From Advertising</div></td><td style="width: 50px;"><div>3</div></td><td style="width: 50px;"><div>4</div></td><td style="width: 50px;"><div>3</div></td><td style="width: 50px;"><div>3</div></td><td style="width: 50px;"><div>3</div></td><td style="width: 120px;"><div>3.2</div></td></tr><tr class="odd"><td><div>Value &amp; Relevance to Conference</div></td><td><div>3</div></td><td><div>4</div></td><td><div>4</div></td><td><div>4</div></td><td><div>3</div></td><td><div>3.6</div></td></tr><tr class="even"><td><div>Originality</div></td><td><div>3</div></td><td><div>3</div></td><td><div>4</div></td><td><div>4</div></td><td><div>4</div></td><td><div>3.6</div></td></tr><tr class="odd"><td><div>Clarity of Abstract</div></td><td><div>3</div></td><td><div>4</div></td><td><div>4</div></td><td><div>3</div></td><td><div>4</div></td><td><div>3.6</div></td></tr></tbody></table></div><div class="wui-gh"><ul><li unselectable="on" class="wui-gc undefined ui-resizable" style="width: 243px;"><div>Criteria</div><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90; display: block;"></div></li><li unselectable="on" class="wui-gc vert-col" style="width: 50px;"><div>Marianne Sidwell</div></li><li unselectable="on" class="wui-gc vert-col" style="width: 50px;"><div>Luca Maresi</div></li><li unselectable="on" class="wui-gc vert-col" style="width: 50px;"><div>Sonya Warner</div></li><li unselectable="on" class="wui-gc vert-col" style="width: 50px;"><div>Aaron Rogers</div></li><li unselectable="on" class="wui-gc vert-col" style="width: 50px;"><div>Charles Swenson</div></li><li unselectable="on" class="wui-gc undefined ui-resizable" style="width: 121px;"><div>Average</div><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90; display: block;"></div></li></ul></div></div></div></div>
+
+
+</body>
 </html>

@@ -315,6 +315,8 @@ button::-moz-focus-inner { border:0; }
         position: relative;
         transform: rotate(-90deg);
         transform-origin: 44% 158% 0;
+        -webkit-transform: rotate(-90deg);
+        -webkit-transform-origin: 44% 158% 0;
         width: 150px; max-width:150px; min-width:150px;
     }
     .wui-gc .ui-resizable-handle.ui-resizable-e {
@@ -338,14 +340,12 @@ button::-moz-focus-inner { border:0; }
 .wui-pane-content > .wg-loader.hidden {left:0; top:0;}
 
 .grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
-.grid-body table {border-collapse:collapse; table-layout:fixed;}
-.grid-body table tr td {
-    background-color:#fff; background-position:center center; border-bottom:0; border:1px dotted #ccc;
-}
-.grid-body table tr td div {width:100%; height:100%; padding:0.25em; position:relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.grid-body table .even td {background-color:#fff;}
-.grid-body table .odd td {background-color:#eee;}
-.grid-body table .wui-selected td {background-color:#0cf;}
+.grid-body table {border-collapse:collapse;}
+    .grid-body td { background-position:center center; border-bottom:0; border:1px dotted #ccc; }
+        .grid-body tr:nth-child(2n+1) { background-color: #eee; }
+            .grid-body td > div {width:100%; height:100%; padding:0.25em; position:relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+
+        .wui-selected td {background-color:#0cf;}
 
 .wui-gc:after {
     background-color: rgba(0, 0, 0, 0.3);

@@ -281,9 +281,13 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     
     /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
     layout:     function(){
-                    Wui.O.prototype.layout.call(this);
+                    Wui.O.prototype.layout.apply(this,arguments);
                     this.posDataWin();
                     if(this.cols.length) this.sizeCols();
+                    
+                    // Necessary to define in javascript because webkit won't use the style
+                    // until the width of the table has been defined.
+                    this.tbl.css({tableLayout:'fixed'});
                 },
                     
     /** Overrides DataList.loadData(), to add the load mask */   
@@ -429,7 +433,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     me.renderers = [];
                     
                     // clear template
-                    me.template = '<tr class="{((wuiIndex % 2 == 0) ? \'even\' : \'odd\')}">';
+                    me.template = '<tr>';
                     
                     // apply columns on grid
                     $.each(cols,function(i,col){
@@ -488,10 +492,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
 
                     me.tbl.detach();
                     // Place items and reset alternate coloring
-                    $.each(listitems, function(idx, row) { 
-                        var isEven = idx % 2 === 0;
-                        row.el.toggleClass('even',isEven).toggleClass('odd',!isEven).appendTo(me.tbl);
-                    });
+                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
                     me.tbl.appendTo(me.tblContainer);
                     me.sizeCols();
                     me.resetSelect();
