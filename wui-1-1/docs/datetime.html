@@ -36,6 +36,36 @@
             ts.test("Tomorrow",function(){ var tomorrow = new Date(); tomorrow.addDays(1); a.val('tomorrow'); return a.value.toString('yyyy-MM-dd') == tomorrow.toString('yyyy-MM-dd'); });
             ts.test("Yesterday",function(){ var yest = new Date(); yest.addDays(-1); a.val('yesterday'); return a.value.toString('yyyy-MM-dd') == yest.toString('yyyy-MM-dd'); });
             ts.test("Five months after 9/20/2013",function(){ var dt = new Date('02/20/2014'); a.val("Five months after 9/20/2013"); return a.val().toString('yyyy-MM-dd') == dt.toString('yyyy-MM-dd'); });
+            /* Original tests from the creation of the Datetime object
+            '3-29',
+            '3-29 @ 6pm',
+            'eight 55 pm',
+            '5/26/92',
+            'next may',
+            'next january 31',
+            'May 26',
+            '05/26/1983',
+            '2012-6-7',
+            'September 21, 1978',
+            'September 11, 2001 9:56am',
+            '3-3-49',
+            'march 3, 83 at noon',
+            '3/3/49 at noon',
+            '1/5/50',
+            '1/5/51',
+            '9/9/2012',
+            'today at 5',
+            'yesterday at ten thirty-five',
+            'two hundred thousand seconds from now',
+            'twenty five days from tomorrow',
+            '2012-9-7',
+            '2012-8-14 @ 10:55pm',
+            'next friday',
+            'last tuesday',
+            'next wednesday @ 5',
+            'one day previous to tomorrow',
+            'tomorrow at six o\'clock'
+            */
         }); // end document.ready        
     </script>
 </head>
