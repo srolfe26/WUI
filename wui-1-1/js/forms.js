@@ -1185,6 +1185,22 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                                        .click(function(){ me.rsltClick(); })
                                 );
                             });
+
+                            //hilight search results
+                            if(me.searchFilter && me.searchFilter.length){
+                                
+                                holder.children().each(function(i,itm){
+                                    itm = $(itm);
+                                    var itmTxt = itm.text(),
+                                        srchVal = me.searchFilter;
+
+                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                                    function hilightText(obj){ return clearHilight(obj).html( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
+                                });   
+                            }
+
+                            // Append children to the DD
                             me.dd.append(holder.children().unwrap());
                         }else{ 
                             me.dd.html(this.emptyText);
@@ -1273,7 +1289,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         })
                         .blur(function(e){
                             if(t.field.isBlurring !== false){
-                                t.toggleDD();
+                                t.toggleDD('close');
                                     
                                 // If the combo has a non-value item in the search field
                                 // select the seleted item or clear the value

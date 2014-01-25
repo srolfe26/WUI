@@ -973,7 +973,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     me.el.find('.wui-selected').removeClass('wui-selected');
                     itm.el.addClass('wui-selected');
                     me.selected = [itm];
-                    
+                    Wui.DataList.prototype.hasFocus = me.el;
+
                     if(!me.multiSelect && !silent){
                         me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
                         me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
@@ -1098,10 +1099,31 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                 
     /** Runs when the object has been appended to its target. Then appends the data templates with listeners. */
     onRender:   function(){
-                    if(this.autoLoad){
-                        if(this.url === null)   this.make();
-                        else                    this.loadData();
+                    var me = this;
+
+                    // Loads data per the method appropriate for the object
+                    if(me.autoLoad){
+                        if(this.url === null)   me.make();
+                        else                    me.loadData();
                     }
+
+                    // Adds a document listener
+                    $(document).on('keyup',function(evnt){
+                        if(Wui.DataList.prototype.hasFocus == me.el && me.selected && me.selected[0]){
+                            // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
+                            if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
+                            if(evnt.keyCode == 38)  selectAjacent(-1);  // 38 = up
+                            if(evnt.keyCode == 40)  selectAjacent(1);   // 40 = down
+                        }
+                    
+                        function selectAjacent(num){
+                            var selectAjc = me.selected[0].el.parent().children(':nth-child(' +(me.selected[0].el.index() + num + 1)+ ')');
+                            me.each(function(itm){
+                                if(itm.el[0] == selectAjc[0]) me.itemSelect(itm);
+                            });
+                            me.scrollToCurrent();
+                        }
+                    });
                 },
                 
     /** Refreshes the DataList to match the data or reload it from the server */
@@ -1195,9 +1217,11 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     me.el
                     .addClass('wui-btn')
                     .click(btnClick)
+                    .keydown(function(evnt){ if(evnt.keyCode == 13) return false; })
                     .keyup(function(evnt){
                         if(evnt.keyCode == 13 || evnt.keyCode == 32)
                             btnClick(evnt);
+                        return false;
                     })
                     .html(me.text)
                     .attr({title:me.toolTip, tabindex:me.tabIndex});
@@ -3858,6 +3882,22 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                                        .click(function(){ me.rsltClick(); })
                                 );
                             });
+
+                            //hilight search results
+                            if(me.searchFilter && me.searchFilter.length){
+                                
+                                holder.children().each(function(i,itm){
+                                    itm = $(itm);
+                                    var itmTxt = itm.text(),
+                                        srchVal = me.searchFilter;
+
+                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                                    function hilightText(obj){ return clearHilight(obj).html( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
+                                });   
+                            }
+
+                            // Append children to the DD
                             me.dd.append(holder.children().unwrap());
                         }else{ 
                             me.dd.html(this.emptyText);
@@ -3946,7 +3986,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         })
                         .blur(function(e){
                             if(t.field.isBlurring !== false){
-                                t.toggleDD();
+                                t.toggleDD('close');
                                     
                                 // If the combo has a non-value item in the search field
                                 // select the seleted item or clear the value
