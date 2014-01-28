@@ -1,8 +1,8 @@
 ﻿/*! Wui 1.1
- * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
+ * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
 
 /******************   PANE STYLES   ********************/
@@ -44,7 +44,6 @@
 }
 
 .wui-msg { margin:0.5em 0.5em 1em; font-size:0.8em;}
-.wui-err { padding:1em; font-weight:bold; color:#900;}
     
 /******************   MODAL WINDOW STYLES   ********************/
 .wui-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(100,100,100,0.7);}
@@ -90,7 +89,7 @@ button::-moz-focus-inner { border:0; }
 .wui-btn.field-btn, .wui-fe input[type=text] {height:26px;}
 .wui-btn.field-btn {line-height:26px; position: absolute; right:0; border-radius:0 4px 4px 0; top:0;}
 .wui-btn.field-btn:hover, .wui-file-upload .wui-btn:hover, .wui-browse-btn:hover {background-color:#ccc; border-color:#bbb;}
-.wui-btn.field-btn:focus, .wui-file-upload .wui-btn:focus, .wui-browse-btn:focus {box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
+.wui-btn.field-btn:focus, .wui-file-upload .wui-btn:focus, .wui-browse-btn:focus {box-shadow:0 0 3px #aaa inset;}
 
 /***********************************************   FORM   ***********************************************/
 .wui-form {padding:.5em; margin:0; clear:both; position:relative; text-align: left;}
@@ -154,14 +153,12 @@ button::-moz-focus-inner { border:0; }
 
 /* combo */
 .wui-fe .has-dd {padding-right:27px;}
-.wui-highlight { text-shadow: 0 0 1px #000, 0 0 3px #000; color:#fff; font-weight: bold;}
 .wui-combo-dd {
     background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
     max-height:300px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
 }
 .wui-inline-dd {right:0; top:98%; width:100%;}
 .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
-    .wui-combo-dd li.selected { background:#19f; color:#fff; }
 .dd-wrapper, .wui-file {position:relative;}
 .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
 .wui-combo input {padding-right:30px;}
@@ -193,8 +190,6 @@ button::-moz-focus-inner { border:0; }
 .wui-cal-header-day td {font-size: 0.7em; text-transform: uppercase; text-align: center;}
 .wui-cal-day {width:30px; text-align: right; padding:0.1em 0.25em 0.1em 0.1em; background-color: #ddd; display: inline-block; cursor: pointer;}
 .wui-cal-day:hover {background-color: #ccc;}
-.wui-cal-day.highlight { background-color:#fc0; }
-.wui-cal-day.selected { background-color:#0cf; }
 .wui-cal-day.wui-cal-disabled {opacity:0.7; cursor: default; background-color: #eee;}
 .wui-cal-day.wui-cal-disabled:hover {background-color: #eee;}
 .wui-cal-toggle {background-repeat:no-repeat; background-position:-95px -32px; background-color: transparent; width:13px; height:12px; position:absolute; right:0.5em; top:6px; border:0;}
@@ -268,18 +263,25 @@ button::-moz-focus-inner { border:0; }
 .wui-disabled .button label { background-color:transparent; border-style: dotted; color: #999; }
 
 /******************************************   validation styles   *******************************************/
-.wui-form-err {background-color:rgba(255,100,100,0.5);}
+.wui-form-err, .wui-form-err.wui-fe {background-color:#ffa094;}
 .wui-form-err.wui-lbl{padding:26px 0.5em 0.5em 0.5em;}
 .wui-form-err.wui-lbl.lbl-left { padding: 0.5em 0.5em 0.5em 200px; }
 .wui-form-err.wui-lbl.lbl-right { padding:0.5em 200px 0.5em 0.5em; }
 .wui-form-err.wui-lbl.lbl-bottom { padding: 0.5em 0.5em 26px 0.5em; }
-.wui-form-err.wui-fe {background-color:rgba(255,100,100,0.5); border-color:#c00;}
 
-.wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a {color:#900;}
+.wui-form-err.wui-fe, .wui-form-err input[type=text], 
+.wui-fe.wui-form-err > input[type=text], .wui-form-err textarea, 
+.wui-form-err .wui-btn.field-btn, 
+.wui-form-err .wui-fe input.has-file[type="text"][disabled],
+.wui-form-err .button li label, .wui-form-err .wui-btn.field-btn {border-color:#b0463b;}
+
+.wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a, .wui-err {color:#b0463b;}
+.wui-err { padding:1em; font-weight:bold; }
+
 .wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
-.wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text], .wui-form-err textarea {border-color:#c00; background-color:white; box-shadow: inset 0 0 5px rgba(255,0,0,0.5);}
-.wui-form-err .wui-btn.field-btn {border: 1px solid #c00; border-left:none;}
-.wui-form-err .wui-fe input.has-file[type="text"][disabled] {  background-color: #eee;  border: 1px solid #c00; }
+.wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text], .wui-form-err textarea {background-color:white; box-shadow: inset 0 0 5px #ff463b;}
+.wui-form-err .wui-btn.field-btn {border-left:none;}
+.wui-form-err .wui-fe input.has-file[type="text"][disabled] { background-color: #eee; }
 
 /**********************************************   grid styles   ************************************************/
 .wui-ghs {height:1px !important; overflow:hidden; margin:-1px 0 0;}
@@ -345,8 +347,6 @@ button::-moz-focus-inner { border:0; }
         .grid-body tr:nth-child(2n+1) { background-color: #eee; }
             .grid-body td > div {width:100%; height:100%; padding:0.25em; position:relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
-        .wui-selected td {background-color:#0cf;}
-
 .wui-gc:after {
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 1em 1em 1em 1em;
@@ -366,6 +366,12 @@ button::-moz-focus-inner { border:0; }
 
 .wui-paging-pad {position:relative; width:1px;}
 .wui-paging-pad table {position:absolute; left:0;}
+
+/********************* Selection & Hilighting Styles ***************************/
+.wui-selected td, .wui-selected {background-color:#0cf;}
+    .wui-combo-dd li.wui-selected { color:#fff; }
+.wui-highlight { background-color:#fc0;}
+    .wui-selected.wui-highlight, .wui-selected .wui-highlight { background-color:#288D58; }
 
 /********************* Form Elements in Grid ***************************/
 .grid-body table tr td div.wui-fe, .grid-body table tr td div.wui-fe div {padding:0;}

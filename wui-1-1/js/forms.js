@@ -2,7 +2,7 @@
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
- * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
+ * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
  */
 
 (function($,Wui) {
@@ -773,14 +773,15 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                 },
     onRender:   function(){
                     var me = this, 
-                        edit = me.editor = me.iframe[0].contentWindow.document;
+                        edit = me.editor = me.iframe[0].contentWindow.document,
+                        editorBody = edit.body;
                     
                     // Make the iframe editable and set up its style
                     edit.designMode = 'on';
                     edit.open();
                     edit.close();
                     if(me.css.length) $('head',edit).append($('<style>').attr({type:'text/css'}).text(me.css));
-
+                    
                     // Perform standard for field stuff
                     Wui.FormField.prototype.onRender.call(me);
 
@@ -799,6 +800,9 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                     me.left.click(function(){ me.exec("justifyLeft"); });
                     me.center.click(function(){ me.exec("justifyCenter"); });
                     me.right.click(function(){ me.exec("justifyRight"); });
+
+                    // If the field is blank - add a space
+                    if(!$(edit.body).children().length) me.exec('insertHTML',false,' ');
                 },
     exec:       function (a, b, c) {
                     this.iframe[0].contentWindow.focus();
@@ -1081,7 +1085,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             this.toggleDD('open');
                             this.field.select();
                         }else{
-                            var si = (this.selectItm === null) ? 0 : this.dd.children('.selected ~ :visible:first').index(),
+                            var si = (this.selectItm === null) ? 0 : this.dd.children('.wui-selected ~ :visible:first').index(),
                                 idx = (si > 0) ? si : 0;
                             this.rsltHover(this.dd.children(':eq(' + idx + ')'));
                         }
@@ -1094,7 +1098,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             
                             if(idx < 0){
                                 this.field.focus().select();
-                                this.dd.children().removeClass('selected');
+                                this.dd.children().removeClass('wui-selected');
                                 this.selectItm = null;
                             }else{
                                 this.rsltHover(this.dd.children(':eq(' + idx + ')'));
@@ -1220,8 +1224,8 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     rsltHover:      function(itmTarget){
                         if(!itmTarget.addClass)
                             itmTarget = $(itmTarget.currentTarget);
-                        this.dd.children().removeClass('selected');
-                        this.selectItm = itmTarget.addClass('selected');
+                        this.dd.children().removeClass('wui-selected');
+                        this.selectItm = itmTarget.addClass('wui-selected');
                     },
     
     /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
@@ -1878,10 +1882,10 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                             });
                             
                             if(me.value && me.value.getMonth() == month && me.value.getFullYear() == year)
-                                tbl.find('a:contains(' +selectDy+ '):first').addClass('selected');
+                                tbl.find('a:contains(' +selectDy+ '):first').addClass('wui-selected');
                             
                             if(today.getMonth() == month && today.getFullYear() == year)
-                                tbl.find('a:contains(' +today.getDate()+ '):first').addClass('highlight');
+                                tbl.find('a:contains(' +today.getDate()+ '):first').addClass('wui-highlight');
 
                             tbl.find('td a:not(.wui-cal-disabled)').click(onSelect);
                             return tbl;
@@ -2147,7 +2151,7 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                      //swap buttons
                      this.changeBtn.hide();
                      this.upBtn.show();
-                     me.fileFrm.show();
+                     this.fileFrm.show();
                      this.field.removeClass().focus();
                 },
     
@@ -2172,10 +2176,9 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
                                             me.changeClick(); 
                                         },
                             text:       'X',
-                            tabIndex:   -1,
                             cls:        'file-change field-btn'
                         }),
-                        me.upBtn = new Wui.Button({text:'Browse', cls:'field-btn', tabIndex:-1 }),
+                        me.upBtn = new Wui.Button({text:'Browse', cls:'field-btn', click:function(){ me.fileInput.click(); } }),
                         me.fileFrm = new Wui.O({
                             el:$('<form>').attr({
                                 method:     'post',
@@ -2188,11 +2191,9 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
 
                     me.fileFrm.append(
                         // The file field
-                        me.fileInput = $('<input>')
+                        me.fileInput = $('<input>').attr({tabIndex:-1})
                         .attr({name:me.upFieldName, type:'file'})
-                        .change(function(){ me.submit(); })
-                        .focus(function(){ me.upBtn.el.addClass('selected'); })
-                        .blur(function(){ me.upBtn.el.removeClass('selected'); })
+                        .change(function(){ me.submit(); me.field.focus(); })
                     );
                 },
 

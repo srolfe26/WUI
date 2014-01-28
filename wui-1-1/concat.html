@@ -23,12 +23,13 @@
                                         me.queue.push(function(){
                                             me.pause();
                                             $.ajax({
-                                                url:    path,
-                                                dataType: 'text',
-                                                success:function(r){
-                                                            concatString += '\n\n\n' + r;
-                                                            me.resume();
-                                                        }
+                                                url:        path,
+                                                dataType:   'text',
+                                                cache:      false,
+                                                success:    function(r){
+                                                                concatString += '\n\n\n' + r;
+                                                                me.resume();
+                                                            }
                                             }) 
                                         });
                                     }else{
