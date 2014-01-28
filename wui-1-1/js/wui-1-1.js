@@ -1684,7 +1684,7 @@ Wui.confirm = function(msg, msgTitle, callback, content){
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.1/license.html
  */
 
 (function($,Wui) {
@@ -2183,10 +2183,10 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
 
 
 /*! W 1.1
- * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
+ * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.1/license.html
  */
 
 (function($, window, Wui) {
@@ -2699,7 +2699,7 @@ return self;
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.1/license.html
  */
 
 (function($,Wui) {
@@ -3943,12 +3943,13 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     Searches locally within the drop-down's data for the srchVal, otherwise if searchLocal is false,
     the data is searched remotely. */
     searchData:     function(srchVal){
-                        if(this.filterField){
-                            this.searchFilter = srchVal;
+                        var me = this;
+                        if(me.filterField){
+                            me.searchFilter = srchVal;
                             
-                            if(this.searchLocal){
-                                this.toggleDD('open');
-                                this.dd.children().each(function(i,itm){
+                            if(me.searchLocal){
+                                me.toggleDD('open');
+                                me.dd.children().each(function(i,itm){
                                     itm = $(itm);
                                     var itmTxt = itm.text();
 
@@ -3958,9 +3959,9 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                     function hilightText(obj){ return clearHilight(obj).text( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
                                     function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
                                 });
-                                this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
+                                me.rsltHover(me.dd.children(':contains("' +srchVal+ '"):first'));
                             }else{
-                                if(srchVal.length >= this.minKeys || srchVal.length === 0){ this.loadData(); }
+                                if(srchVal.length >= me.minKeys || srchVal.length === 0){ me.loadData(); }
                             }    
                         }
                     },
