@@ -1259,7 +1259,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                     if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
                                     else                                                                                    clearHilight(itm).hide();
 
-                                    function hilightText(obj){ return clearHilight(obj).text( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function hilightText(obj){ return clearHilight(obj).html( obj.text().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
                                     function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
                                 });
                                 me.rsltHover(me.dd.children(':contains("' +srchVal+ '"):first'));
