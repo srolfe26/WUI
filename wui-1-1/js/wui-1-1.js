@@ -3763,8 +3763,11 @@ Wui.Combo = function(args){
     },args); 
     
     // Create template when one hasn't been defined
-    if(!this.hasOwnProperty('template') && this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && this.valueItem && this.titleItem) 
+    if(!this.hasOwnProperty('template') && this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && this.valueItem && this.titleItem){
         this.template = '<li>{' +this.titleItem+ '}</li>';
+        this.noSpecifiedTemplate = true;
+    }
+        
     if(!this.template) throw new Error('Wui.js - valueItem and titleItem, or template, are required configs for a Combo.');
 
     this.init(); 
@@ -3888,7 +3891,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             });
 
                             //hilight search results
-                            if(me.searchFilter && me.searchFilter.length){
+                            if(me.searchFilter && me.searchFilter.length && me.noSpecifiedTemplate){
                                 
                                 holder.children().each(function(i,itm){
                                     itm = $(itm);
@@ -3896,7 +3899,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                         srchVal = me.searchFilter;
 
                                     if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
-                                    function hilightText(obj){ return clearHilight(obj).html( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function hilightText(obj){ return clearHilight(obj).html( obj.text().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
                                     function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
                                 });   
                             }
@@ -3949,10 +3952,10 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                     itm = $(itm);
                                     var itmTxt = itm.text();
 
-                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
-                                    else                                                            clearHilight(itm).hide();
+                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
+                                    else                                                                                    clearHilight(itm).hide();
 
-                                    function hilightText(obj){ return clearHilight(obj).html( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                    function hilightText(obj){ return clearHilight(obj).text( obj.html().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
                                     function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
                                 });
                                 this.rsltHover(this.dd.children(':contains("' +srchVal+ '"):first'));
