@@ -18,7 +18,7 @@ jQuery.extend(verge);
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.1/license.html
  */
  
  
@@ -970,10 +970,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     itemSelect: function(itm, silent){
                     var me = this;
                         
-                    me.el.find('.wui-selected').removeClass('wui-selected');
-                    itm.el.addClass('wui-selected');
+                    me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
+                    itm.el.addClass('wui-selected').attr('tabindex',1).focus();
                     me.selected = [itm];
-                    Wui.DataList.prototype.hasFocus = me.el;
+
 
                     if(!me.multiSelect && !silent){
                         me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
@@ -1109,7 +1109,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                     // Adds a document listener
                     $(document).on('keyup',function(evnt){
-                        if(Wui.DataList.prototype.hasFocus == me.el && me.selected && me.selected[0]){
+                        if(me.selected && me.selected[0] && (document.activeElement == me.selected[0].el[0])){
                             // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
                             if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
                             if(evnt.keyCode == 38)  selectAjacent(-1);  // 38 = up
