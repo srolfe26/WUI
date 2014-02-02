@@ -301,33 +301,35 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
     mngSorters: function(col,dir){
                     var me = this,
                         sortClasses = ['one','two','three','four','five'];
-                    if(dir !== undefined){
-                        col.sortDir = dir;
-                        me.sorters.push(col);
-                    }else{
-                        if(col.sortDir){
-                            if(col.sortDir == 'desc'){
-                                delete col.sortDir;
-                                col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-                                
-                                $.each(me.sorters,function(i,itm){
-                                    if(itm == col)    me.sorters.splice(i,1);
-                                });
-                            }else{
-                                col.sortDir = 'desc';
-                            }
-                        }else{
-                            // Can't sort on more than 5 columns
-                            if(me.sorters.length > 5){
-                                col.el.removeClass().addClass('wui-gc').addClass(col.cls);
-                                return false;
-                            }
-                            
-                            col.sortDir = 'asc';
+                    if(col !== undefined){
+                        if(dir !== undefined){
+                            col.sortDir = dir;
                             me.sorters.push(col);
-                        }
+                        }else{
+                            if(col.sortDir){
+                                if(col.sortDir == 'desc'){
+                                    delete col.sortDir;
+                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                    
+                                    $.each(me.sorters,function(i,itm){
+                                        if(itm.el == col.el)    me.sorters.splice(i,1);
+                                    });
+                                }else{
+                                    col.sortDir = 'desc';
+                                }
+                            }else{
+                                // Can't sort on more than 5 columns
+                                if(me.sorters.length > 5){
+                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                    return false;
+                                }
+                                
+                                col.sortDir = 'asc';
+                                me.sorters.push(col);
+                            }
+                        }    
                     }
-                        
+                    
                     $.each(me.sorters,function(i,itm){
                         itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
                     });
@@ -440,7 +442,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                         // Deal with vertical columns - forces them to be 48px wide
                         if(col.vertical){
                             me.el.addClass('has-vert-columns');
-                            if(col.cls)    col.cls += ' vert-col';
+                            if(col.cls) col.cls += ' vert-col';
                             else        col.cls = 'vert-col';
                             
                             col.width = 50;
@@ -453,13 +455,35 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), new Wui.DataList(),{
                     
                     // finish template
                     me.template += '</tr>';
+
+                    // clear sorters for columns that no longer exist and reapply local sort
+                    if(me.sorters && me.sorters.length && me.cols.length){
+                        for(var i = me.sorters.length - 1; i >= 0; i--){
+                            var remCol = true;
+                            for(var j = 0; j < me.cols.length; j++){
+                                if(me.cols[j].dataItem == me.sorters[i].dataItem){
+                                    // A handshake of information so the sorter doesn't get confused
+                                    me.sorters[i].el = me.cols[j].el; 
+                                    me.cols[j].sortDir = me.sorters[i].sortDir;
+                                    remCol = false; 
+                                    break;
+                                }
+                            }
+                            if(remCol) me.sorters.splice(i,1);
+                        }
+                    }
                     
                     if(me.autoLoad){
                         if(me.url === null) me.setData(me.data);
                         else                me.loadData();
                     }
                 },
-                
+    
+    setData:    function(){
+                    Wui.DataList.prototype.setData.apply(this,arguments);
+                    this.sortList();
+                },
+
     /** Size up the columns of the table to match the headings @private */
     sizeCols:   function (){
                     var me = this, totalColWidth = 0;

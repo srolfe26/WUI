@@ -63,13 +63,13 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 
     /**
     @param {function}   f           A function that gets called for each item of the form with the exception of Wui.Note objects.
-    @param {boolean}    [blockNote] If defined and true, Wui.Note objects will be not be processed.
+    @param {boolean}    [blockNote] If defined and true, items that do not inherit from Wui.FormField will not be processed.
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
     each:       function(f, blockNote){
                     return Wui.O.prototype.each.call(this,function(itm,i){
-                        if(!(itm instanceof Wui.Note && blockNote)) return f(itm,i);
+                        if(!(blockNote && !(itm instanceof Wui.FormField))) return f(itm,i);
                     });
                 },
 
@@ -80,7 +80,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     @return Object containing the data of the form fields, or false if there was a validation error
     Performs validation on the form and returns either the form data or false. */
     getData:    function(){
-                    if(this.validate())    { return this.getRawData(); }
+                    if(this.validate()) { return this.getRawData(); }
                     else                { this.dispErrors(); return false; }
                 },
 
@@ -1882,7 +1882,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                             header.children('a').click(function(){
                                 var dir = $(this).hasClass('wui-cal-prev') ? -1 : 1;
                                 calendar.html('');
-                                calendar.append(genHTML(new Date(year, month + dir, today.getDate())));
+                                calendar.append(genHTML(new Date(year, month + dir, 1)));
                             });
                             
                             if(me.value && me.value.getMonth() == month && me.value.getFullYear() == year)
