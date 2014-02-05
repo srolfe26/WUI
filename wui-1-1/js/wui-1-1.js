@@ -336,11 +336,12 @@ Wui.O.prototype = {
                     
                     me.cssByParam(me);                  // Add styles if they didn't get added
                     if(me.onRender)  me.onRender();     // Perform render for this
-                    me.layoutKids();                    // Handles fit and layout for child elements
-                        
+                    
                     // Perform rendering for child elements
                     me.each(function(itm){ if(itm.callRender) itm.callRender(); });
                     if(me.afterRender)  me.afterRender();
+
+                    me.layoutKids();                    // Handles fit and layout for child elements
                 },
     
     /**
@@ -399,14 +400,14 @@ Wui.O.prototype = {
                 },
     /**
     @param {function} fn Function that gets called for each item of the object.
-    @param {boolean} ascending Whether the loop happens in ascending or descending order.
+    @param {boolean} ascending Whether the loop happens in ascending or descending order. Defaults to true.
     
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
     each:       function(f,ascending){
                     ascending = (ascending === undefined) ? true : ascending;
-                    var i = (ascending) ? 0 : this.items.length;
+                    var i = (ascending) ? 0 : this.items.length - 1;
                     
                     if(ascending){
                         for(i; i < this.items.length; i++){
@@ -1545,7 +1546,10 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     .resizable({
                         minWidth:   me.width,
                         minHeight:  me.height,
-                        resize:     function(){ me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); }
+                        resize:     function(){
+                                        me.layoutKids();  
+                                        me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); 
+                                    }
                     })
                     .css('z-index',Wui.maxZ())
                     .click(bringToFront);
@@ -1602,7 +1606,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
                     if(this.isModal){ this.modalEl.css({width:'', height:''}); }    // Remove CSS that accidentally gets applied to the modal cover
-                    this.resize();                                                  // Resize the window and center
+                    if(this.windowEl)
+                        this.resize();                                              // Resize the window and center
                 },
 
     /** Set the height of the window */
@@ -1678,14 +1683,6 @@ Wui.confirm = function(msg, msgTitle, callback, content){
 };
 
 }(jQuery,this));
-
-
-/*! Wui 1.1
- * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
- *
- * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.1/license.html
- */
 
 (function($,Wui) {
 
@@ -2718,14 +2715,6 @@ return self;
 
 })(jQuery,this);
 
-
-/*! Wui 1.1
- * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
- *
- * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.1/license.html
- */
-
 (function($,Wui) {
 
 $.fn.overrideNodeMethod = function(methodName, action) {
@@ -3421,21 +3410,20 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
     init:       function(){
                     var me = this;
                     Wui.Text.prototype.init.call(me); 
-                    /*if(me.lbl){
-                        me.lbl.setLabelSize = function(){
-                            Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
-                            if($.inArray(me.lbl.labelPosition,['top','bottom']) >= 0)
-                                me.field.css('height',(me.height - me.lbl.label.outerHeight()));
-                        }  
-                    }*/
                 },
 
     /** Overrides Wui.O.cssByParam to include resizing the textarea within the object */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
                     var lblVert = (this.lbl && $.inArray(this.lbl.labelPosition,['top','bottom']) >= 0) ? this.lbl.label.outerHeight() : 0;
-                    this.field.css('height',(this.height - lblVert));
-                        
+                    this.el.css({
+                        height:     '',
+                        minHeight:  (this.height)
+                    });
+                    this.field.css({
+                        height:     '',
+                        minHeight:  (this.height - lblVert)
+                    }); 
                 }
 });
 
@@ -3576,6 +3564,7 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                             .replace(/<hr>/gi, ""));
                     return this.value = (retVal.length === 0) ? null : retVal;
                 },
+    /** Overrides WUI.FormField Set val to take the WYSIWYG editor into account */
     setVal:     function(sv){
                     var me = this;
                     me.value = sv;

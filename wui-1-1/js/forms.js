@@ -700,21 +700,20 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
     init:       function(){
                     var me = this;
                     Wui.Text.prototype.init.call(me); 
-                    /*if(me.lbl){
-                        me.lbl.setLabelSize = function(){
-                            Wui.Label.prototype.setLabelSize.apply(me.lbl,arguments);
-                            if($.inArray(me.lbl.labelPosition,['top','bottom']) >= 0)
-                                me.field.css('height',(me.height - me.lbl.label.outerHeight()));
-                        }  
-                    }*/
                 },
 
     /** Overrides Wui.O.cssByParam to include resizing the textarea within the object */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
                     var lblVert = (this.lbl && $.inArray(this.lbl.labelPosition,['top','bottom']) >= 0) ? this.lbl.label.outerHeight() : 0;
-                    this.field.css('height',(this.height - lblVert));
-                        
+                    this.el.css({
+                        height:     '',
+                        minHeight:  (this.height)
+                    });
+                    this.field.css({
+                        height:     '',
+                        minHeight:  (this.height - lblVert)
+                    }); 
                 }
 });
 
@@ -855,6 +854,7 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                             .replace(/<hr>/gi, ""));
                     return this.value = (retVal.length === 0) ? null : retVal;
                 },
+    /** Overrides WUI.FormField Set val to take the WYSIWYG editor into account */
     setVal:     function(sv){
                     var me = this;
                     me.value = sv;
