@@ -84,6 +84,30 @@ Wui.scrollbarWidth = function() {
     return width;
 };
 
+
+/**
+    Determines whether a value is a percent string
+    @return True if there is a string passed in containing a '%', else false.
+*/
+Wui.isPercent = function(){
+    return (arguments[0] && arguments[0].indexOf && arguments[0].indexOf('%') != -1);
+};
+
+
+/**
+    @param {object} el          jQuery Object the percents are being calculated for. 
+    @param {string} percent     Percent to be calculated into pixels
+    @param {string} dim         Dimension [height,width] for comparing to parent objects
+    @return Number in pixels of the percentage passed in.
+*/
+Wui.percentToPixels = function(el,percent,dim){
+    var parent = el.parent(),
+        useWindow = (parent[0] === $(window)[0] || parent[0] === $('html')[0] || parent[0] === $('body')[0]),
+        parentSize = (useWindow) ? ((dim == 'height') ? $.viewportH() : $.viewportW()) : parent[dim]();
+    return Math.floor((parseFloat(percent) / 100) * parentSize);
+};
+
+
 /** 
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
@@ -186,7 +210,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
                     break;
 
         var sbw         = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0
-            parentSize  = (($(parentEl)[0] === $('body')) ? $(window) : $(parentEl))[dim]() - sbw,
+            parentSize  = (($(parentEl)[0] === $('body')[0]) ? $(window) : $(parentEl))[dim]() - sbw,
             fitCt       = 0,
             fixedSize   = 0,
             fitMux      = 0;
@@ -343,7 +367,7 @@ Wui.O.prototype = {
                 },
     
     /**
-    @param {object} item    A WUI Object, or if undefined, the object that this method is a member of
+    @param {object} item    A WUI Object, or if undefined, the object that this method is a member of.
     
     @return    The object's el if it has one, or just the object
     
@@ -364,15 +388,12 @@ Wui.O.prototype = {
                         try{ if(m.attr && typeof m.attr == 'object') m.el.attr(m.attr); }catch(e){ }
                         
                         // calculate dimensions
-                        if($.isNumeric(m.height) && m.height >= 0)    m.el.css({height: m.height});
+                        if($.isNumeric(m.height) && m.height >= 0)      m.el.css({height: m.height});
                         if($.isNumeric(m.width) && m.width >= 0)        m.el.css({width: m.width});
 
                         // calculate percentage based dimensions
-                        if(m.width && m.width.indexOf && m.width.indexOf('%') != -1)
-                            m.el.css({width: Math.floor((parseFloat(m.width) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).width())});
-                        if(m.height && m.height.indexOf && m.height.indexOf('%') != -1){
-                            m.el.css({height: Math.floor((parseFloat(m.height) / 100) * ($(m.el.parent())[0] == $('body')[0] ? $(window) : m.el.parent()).height())});
-                        }
+                        if(Wui.isPercent(m.width))  m.el.css({width:Wui.percentToPixels(m.el,m.width,'width')});
+                        if(Wui.isPercent(m.height)) m.el.css({height:Wui.percentToPixels(m.el,m.height,'height')});
                         
                         // hide an object based on its hidden value
                         if(m.hidden) m.el.css('display','none');
@@ -1486,6 +1507,15 @@ Wui.Window = function(args){
         
         /** Change what comes by default in the pane */
         maskHTML:   'Loading <span class="wui-spinner"></span>',
+
+        /** Whether or not the user can resize the window */
+        resizable:  true,
+
+        /** The left position of the window when it is resized using Wui.Window.resize() or when it firtst appears. */
+        windowLeft: null,
+
+        /** The top position of the window when it is resized using Wui.Window.resize() or when it firtst appears. */
+        windowTop:  null
     },args);  
     this.init(); 
 };
@@ -1527,25 +1557,26 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     me.windowEl = me.el
                     .draggable({handle: me.header.el, start:bringToFront})
                     .addClass('wui-window')
-                    .resizable({
-                        minWidth:   me.width,
-                        minHeight:  me.height,
-                        resize:     function(){
-                                        me.layoutKids();  
-                                        me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]); 
-                                    }
-                    })
                     .css('z-index',Wui.maxZ())
                     .click(bringToFront);
                     
+                    // Add resizable option if the window is resizable
+                    if(me.resizable === true)
+                        me.windowEl.resizable({
+                            minWidth:   me.width,
+                            minHeight:  me.height,
+                            resize:     function(){ me.fireResize(); }
+                        });
+
+                    // Put the window on the body
                     me.place();
                     
                     // Make the overlay the el so that when the window is closed it gets taken with it
                     if(me.isModal)    me.el = me.modalEl;
                     
-                    this.onWinOpen(me);
+                    me.onWinOpen(me);
                     me.windowEl.trigger($.Event('open'),[me]);
-                    this.resize();
+                    me.resize();
 
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
@@ -1555,6 +1586,13 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     }
                 },
 
+    /** Fires the resize event and runs layout on the windows children */
+    fireResize: function(){
+        var me = this;
+        me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
+        return me.layoutKids(); 
+    },
+
     /** 
     @param {[number]} resizeWidth Number of pixels for the window width
     @param {[number]} resizeHeight Number of pixels for the window height
@@ -1563,26 +1601,31 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     without getting larger than the browser viewport.
     */
     resize:     function(resizeWidth, resizeHeight){
-                    var me = this,
-                        totalHeight = me.container[0].scrollHeight,
+                    var me = this;
+
+                    if(Wui.isPercent(resizeWidth))  resizeWidth = Wui.percentToPixels(me.windowEl, resizeWidth, 'width');
+                    if(Wui.isPercent(resizeHeight)) resizeHeight = Wui.percentToPixels(me.windowEl, resizeHeight, 'height');
+
+                    var totalHeight = me.container[0].scrollHeight,
                         containerHeight = me.container.height(),
                         headHeight = (me.header && $.isNumeric(me.header.el.outerHeight())) ? me.header.el.outerHeight() : 0,
                         footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
                         headersHeight = headHeight + footHeight,
                         useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
-                                        (containerHeight < totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : me.height;
+                                        (containerHeight < totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : 
+                                            Wui.isPercent(me.height) ? Wui.percentToPixels(me.windowEl, me.height, 'height') : me.height;
 
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
-                    me.windowEl.css({
-                        height:     useHeight,
-                        width:      (arguments.length) ? resizeWidth : undefined,
-                        top:        Math.floor(($.viewportH() / 2) - (useHeight / 2)) + 'px',
-                        left:       Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)) + 'px'
-                    });
+                    me.windowEl.css({ height: useHeight, width: (arguments.length) ? resizeWidth : undefined, });
+                    var posLeft =   (me.windowLeft) 
+                                        ? ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) 
+                                        : Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)),
+                        posTop =    (me.windowTop) 
+                                        ? ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) 
+                                        : Math.floor(($.viewportH() / 2) - (useHeight / 2));
+                    me.windowEl.css({ top:posTop, left:posLeft });
                     
-                    me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
-                    me.layoutKids();
-
+                    me.fireResize();
                     return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
                 },
 
