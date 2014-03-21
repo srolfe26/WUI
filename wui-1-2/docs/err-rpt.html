@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Wui.errRpt() - WUI 1.1</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../js/wui.js','Wui.errRpt','Wui.errRpt()');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            var confirm = new Wui.Button({
+                text:       'Click Here To Launch The Error Report Window',
+                appendTo:    $('#wui-doc-example'),
+                click:      function(){
+                                Wui.confirm('Click yes or no to see your answer regurgutated back to you.', 'Example', function(val){ alert(val); },'<div>help</div>');
+                            }
+            });
+            confirm.place();
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            ts = new Wui.ts();
+
+            
+            ts.test('Test msg is displayed',function() {
+                var msg = 'msg';
+                a = Wui.errRpt(msg, 'Title');
+                //console.log(a);
+                var ret = a.el.find('.wui-pane-content').text();
+                a.footer.items[0].click();
+                return ret==msg;
+            });
+            
+        }); // end document.ready        
+    </script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

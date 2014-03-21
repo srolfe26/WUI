@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Radio - WUI 1.1</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../js/forms.js','Wui.Radio','Radio');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            // Add a text formItem onto the body
+            a = new Wui.Radio({
+                label:            'Should I stay or should I go?',
+                name:            '82s',
+                //buttonStyle:    true,
+                appendTo:        $('#wui-doc-example'),
+                labelPosition:    'left',
+                options:        [
+                                     {val:0, title:'Stay = trouble.'},
+                                     {val:1, title:'Go = double trouble.'}
+                                ]
+            });
+            a.place();
+        });
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){            
+            /* TESTING
+            ts = new Wui.ts();
+            ts.test("Get value on blank text field",function(){ return a.val() == null; });
+            */
+            
+        }); // end document.ready        
+    </script>
+</head>
+<body class="wui-docs"></body>
+</html>

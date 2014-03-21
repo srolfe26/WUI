@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>JS Concat</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <script type="text/javascript" src="js/jquery-1-10-2-ui-1-10-3.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            var concatString =  "";
+
+            var concat = function(){
+                var me = this;
+                $.extend(me,{
+                    count:      0,
+                    paused:     false,
+                    queue:      [],
+                    add:        function(path){
+                                    if(typeof path != 'function'){
+                                        me.queue.push(function(){
+                                            me.pause();
+                                            $.ajax({
+                                                url:        path,
+                                                dataType:   'text',
+                                                cache:      false,
+                                                success:    function(r){
+                                                                concatString += '\n\n\n' + r;
+                                                                me.resume();
+                                                            }
+                                            }) 
+                                        });
+                                    }else{
+                                         me.queue.push(path);
+                                    }
+                                    
+                                    me.run();
+                                },
+                    pause:      function(){ me.paused = true; },
+                    resume:     function(){
+                                    me.paused = false;
+                                    setTimeout(me.run,1);
+                                },
+                    run:        function(){
+                                    if (!me.paused && me.queue.length) {
+                                        me.queue.shift()();
+                                        if (!me.paused) me.resume();
+                                    }
+                                }
+                });
+            };
+
+            var a = new concat();
+
+            a.add('js/jquery-1-10-2-ui-1-10-3.js');
+            a.add('js/wui.js');
+            a.add('js/grid.js');
+            a.add('js/state.js');
+            a.add('js/forms.js');
+            a.add(function(){ $('code').append(concatString.replace(/</g,'&lt;').replace(/>/g,'&gt;')); });
+        });
+    </script>
+</head>
+<body><pre><code></code></pre></body>
+</html>

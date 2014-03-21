@@ -172,6 +172,28 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     $.each(arguments,function(i,arg){ itms.push(me.normFrmItem(arg)); });
                     return Wui.O.prototype.push.apply(this,itms);
                 },
+
+    /**
+    @param  {number}    idx         Position to start making changes in the items array.
+    @param  {number}    howMany     Number of elements to remove.
+    @param  {object}    [obj,...]   One or more objects to be added to the array at position idx
+    @return An array of the removed objects, or an empty array. 
+    Similar to the Wui.O.splice() with the addition of running normFrmItem().
+    */
+    splice:     function(idx,howMany){
+                    var me = this, 
+                        itms = [],
+                        index = Array.prototype.shift.apply(arguments),
+                        remove = Array.prototype.shift.apply(arguments);
+
+                    // Create/normalize passed in objects
+                    $.each(arguments,function(i,arg){ itms.push(me.normFrmItem(arg)); });
+
+                    // Add Elements back in
+                    itms.splice(0,0,index,remove);
+                    return Wui.O.prototype.splice.apply(this,itms);
+                },
+
     /**
     @param {string} fieldname The name of the field to be removed
     @return True
@@ -586,11 +608,11 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
 });
 
 
-/** A Wui.FormField that has no DOM element. Even more hidden than an HTML hidden input, the hidden field exists only in memory. */
+/** A Wui.FormField that is hidden on the DOM. */
 Wui.Hidden = function(args){
     $.extend(this,{
-        /** By default a hidden field produces no DOM element */
-        el:null
+        /** Only produces a DOM element for the sake of splicing */
+        el:     $('<div>').hide()
     },args); 
     this.init();
 };
@@ -669,7 +691,12 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
                         
                         t.field
                         .focusin(function(){ fieldState = me.field.val(); }) // Set fieldState (closure variable) to allow for comparison on blur
-                        .blur(function(){ if(fieldState != me.field.val()) me.setChanged(); }); // Call val function so that valchange will be fired if needed
+                        .blur(function(){ 
+                            if(fieldState != me.field.val()){
+                                me.val(); 
+                                me.setChanged();
+                            }
+                        }); // Call val function so that valchange will be fired if needed
                         
                         if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
                         return t.field;
@@ -1053,6 +1080,9 @@ Wui.Combo = function(args){
         /** @eventhook Called when the combo loses focus. */
         onBlur:     function(){},
         
+        /** The name of the search parameter that will be sent to the server for remote filters. */
+        searchArgName:'srch',
+
         /** Whether to filter the drop-down amidst the locally loaded results or to go to the server. */
         searchLocal:true,
         
@@ -1121,6 +1151,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         //setup combobox variables
                         me.tplEngine = new Wui.Template({template:me.template});
                         me.selectItm = null;
+                        me.el.addClass(me.idCls = Wui.id());
 
                         // Place field elements
                         me.append(
@@ -1175,7 +1206,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         if(!isVis){
                             var width   = (me.field.width() < 100) ? 100 : me.field.width(); 
                             // Clear the drop down when it loses focus
-                            $(document).one('click',function(){ hideDD(); });
+                            $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){ if(evnt.target !== me.field[0]) hideDD(); });
                             $('body').append(me.dd.width(width).show());
                             Wui.positionItem(me.field,me.dd);
                         }   
@@ -1213,6 +1244,9 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
 
                             // Append children to the DD
                             me.dd.append(holder.children().unwrap());
+
+                            if(this.value)
+                                this.val(this.value);
                         }else{ 
                             me.dd.html(this.emptyText);
                         }
@@ -1237,7 +1271,14 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     
     /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
     setParams:      function(){
-                        return (this.searchFilter)  ? $.extend(this.params,{srch: this.searchFilter}) : false;
+                        if(this.searchFilter){
+                            var o = {};
+                            o[this.searchArgName] = this.searchFilter;
+                            return $.extend(this.params, o);
+                        }else{
+                            delete this.params[this.searchArgName];
+                            return (this.autoLoad);
+                        }
                     },
 
     /** Overrides the event hook in Wui.Data to set the parameters of the data object with the search value */
@@ -1268,7 +1309,13 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                 });
                                 me.rsltHover(me.dd.children(':contains("' +srchVal+ '"):first'));
                             }else{
-                                if(srchVal.length >= me.minKeys || srchVal.length === 0){ me.loadData(); }
+                                if(srchVal.length >= me.minKeys || srchVal.length === 0){
+                                    if(srchVal.length === 0){
+                                        me.selectItm = null;
+                                        me.val(null);
+                                    }
+                                    me.loadData();
+                                }
                             }    
                         }
                     },
@@ -1298,6 +1345,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         t.field
                         .focus(function(e){
                             t.field.isBlurring = undefined;
+                            t.toggleDD('open');
                         })
                         .blur(function(e){
                             if(t.field.isBlurring !== false){
@@ -1312,15 +1360,11 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                         break;
                                     }
                                 }
-                                if(!titlePresent)    t.val(null);
                                 
                                 // Event hook function
                                 t.onBlur();
                             }
                          })
-                        .click(function(){
-                            t.toggleDD('open');
-                        })
                         .keyup(function(evnt){
                             switch(evnt.keyCode){
                                 case 40:    /*Do Nothing*/  break;
@@ -1381,7 +1425,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         
                         //select the item out of the data set
                         me.dataEach(function(d,i){
-                            if(d[me.valueItem] === selectVal){
+                            if(d[me.valueItem] === selectVal || d[me.valueItem] === parseInt(selectVal)){
                                 me.selectCurr(i);
                                 me.fieldText(d[me.titleItem]);
                                 return false;

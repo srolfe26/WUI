@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Pane - WUI 1.1</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../js/wui.js','Wui.Pane','Pane');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            pane = new Wui.Pane({
+                height:        500,
+                appendTo:    $('#wui-doc-example'),
+                title:        'Pane 1',
+                x:          10,
+                items:        [
+                                new Wui.Pane({
+                                    title:    'Pane 2',
+                                    height:    '100%',
+                                    items:    [
+                                                new Wui.Pane({
+                                                    title:    'Pane 3',
+                                                    height:    '100%',
+                                                    items:    [
+                                                                new Wui.Pane({
+                                                                    title:    'Pane 4',
+                                                                    height:    '100%',
+                                                                    items:    [
+                                                                                new Wui.Pane({
+                                                                                    title:    'Pane 5',
+                                                                                    height:    '100%'
+                                                                                })
+                                                                            ]
+                                                                })
+                                                            ]
+                                                })
+                                            ]
+                                })
+                            ]
+            })
+            pane.place();
+        });
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            ts = new Wui.ts();
+            
+            //ts.test('Push a new WUI object on to the \'stage\'', function(){});
+            
+            ts.test('Disable the pane', function(){ pane.disable(); return pane.disabled == true; });
+            
+            ts.test('Enable the pane', function(){ pane.enable(); return pane.disabled == false; });
+            
+            ts.test('Set the Mask HTML', function(){ 
+                pane.setMaskHTML("<h1>Hello World</h1>"); 
+                // console.log(pane.maskHTML);
+                return pane.maskHTML == "<h1>Hello World</h1>";
+            });
+            
+                
+            ts.test('Set pane title', function(){
+                var testStr = "Title Changed in Unit Test";
+                pane.setTitle(testStr);
+                return pane.title == testStr;
+            });
+            
+            ts.test('Set the title alignment', function() { pane.setTitleAlign("center"); return pane.titleAlign == "center"; });
+                        
+        }); // end document.ready        
+    </script>
+</head>
+<body class="wui-docs"></body>
+</html>

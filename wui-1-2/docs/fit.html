@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Fit - WUI 1.1</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <style type="text/css" class="wui-doc-code">
+        .fit-test-container {background:#ddd; position:relative; margin:2em 1em; display:inline-block; overflow:auto;}
+        .fit-test-container > div {
+            display:block; width:100%; color:#fff; font-weight:bold; text-shadow:0 0 5px rgba(0,0,0,0.5); padding:1em;
+            text-align: left;
+            -moz-box-sizing:    border-box !important;
+            -webkit-box-sizing: border-box !important;
+            box-sizing:         border-box !important;
+        }
+        .b {float:left; background:#fC0;}
+        .c {float:left; background:#0Cf;}
+        .d {float:left; background:#999;}
+        .e {float:left; background:#9f0;}
+    </style>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../js/wui.js','Wui.fit','WUI Fit');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            // Add a text formItem onto the body
+            a = new Wui.O({ width:500, height:500, el:$('<div>'), cls:'fit-test-container', fitDimension:'width', items:[
+                b = new Wui.O({width:137, height:'100%', cls:'b', el:$('<div>').text('Width = 137px') }),
+                c = new Wui.O({width:'20%', height:'100%', cls:'c', el:$('<div>').text('Width = 20%') }),
+                d = new Wui.O({fit:1, height:'100%', cls:'d', el:$('<div>').text('Fit = 1') })
+            ], appendTo:$('#wui-doc-example') });
+            a.place();
+            
+            e = new Wui.O({ width:500, height:500, el:$('<div>'), cls:'fit-test-container', fitDimension:'height', items:[
+                f = new Wui.O({height:80, cls:'b', el:$('<div>').text('Height = 80px') }),
+                g = new Wui.O({height:'37%', cls:'c', el:$('<div>').text('Height = 37%') }),
+                h = new Wui.O({fit:1, cls:'d', el:$('<div>').text('Fit = 1') }),
+                i = new Wui.O({fit:3, cls:'e', el:$('<div>').text('Fit = 3') })
+            ], appendTo:$('#wui-doc-example') });
+            e.place();
+            
+            
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){    
+            // TESTING
+            ts = new Wui.ts();
+            
+            ts.test("Get value on blank text field",function(){
+                // See Examples area
+                j = new Wui.O({ width:500, height:500, el:$('<div>'), cls:'fit-test-container', items:[
+                    k = new Wui.O({fit:2, width:600, cls:'b', el:$('<div>').text('Fit = 2') }),
+                    l = new Wui.O({cls:'c', el:$('<div>').text('No sizing information whatever (will default to fit = 1)') }),
+                    m = new Wui.O({fit:3, cls:'d', el:$('<div>').text('Fit = 3') })
+                ], appendTo:$('#wui-doc-example') });
+                
+                j.place();
+                
+                var totHeight = j.el.height() - Wui.scrollbarWidth();
+                return k.el.outerHeight() == Math.floor((totHeight/6) * 2) && l.el.outerHeight() == Math.floor((totHeight/6)) && m.el.outerHeight() == Math.floor((totHeight/6) * 3);
+            });
+        }); // end document.ready        
+    </script>
+</head>
+<body class="wui-docs">
+
+</body>
+</html>

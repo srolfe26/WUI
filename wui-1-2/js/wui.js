@@ -592,14 +592,14 @@ Wui.O.prototype = {
                         
                     //append any additional el's in proper order
                     if(me.items.length == numAdded){                      //items ended up replacing the array
-                        for(i = 0; i < me.items.length; i++)          { me.addToDOM(me.items[i],el); callPrcessors(me.items[i]); }
+                        for(i = 0; i < me.items.length; i++)          { me.addToDOM(me.items[i],el); callProcessors(me.items[i]); }
                     }else if(me.items[(idx + numAdded)] === undefined){    //meaning the new items were inserted at the end of the array
-                        for(i = idx; i < me.items.length; i++)        { me.addToDOM(me.items[i],me.items[i-1].el,'after'); callPrcessors(me.items[i]); }
+                        for(i = idx; i < me.items.length; i++)        { me.addToDOM(me.items[i],me.items[i-1].el,'after'); callProcessors(me.items[i]); }
                     }else if (numAdded !== 0){                             //items at the beginning/middle of the array
-                        for(i = (idx + numAdded); i > 0; i--)         { me.addToDOM(me.items[i-1],me.items[i].el,'before'); callPrcessors(me.items[i-1]); }
+                        for(i = (idx + numAdded); i > 0; i--)         { me.addToDOM(me.items[i-1],me.items[i].el,'before'); callProcessors(me.items[i-1]); }
                     }
 
-                    function callPrcessors(arg){
+                    function callProcessors(arg){
                         arg.parent = me;
                         if(arg.onRender)    arg.onRender();
                         if(arg.layout)      arg.layout();
@@ -782,16 +782,19 @@ Wui.Data.prototype = {
                         var me = this,
                             config = $.extend({
                                 data:       me.params,
-                                dataType:    'json',
+                                dataType:   'json',
                                 success:    function(r){ me.success.call(me,r); },
-                                error:        function(e){ me.failure.call(me,e); },
+                                error:      function(e){ me.failure.call(me,e); },
                             },me.ajaxConfig);
                         
                         if(!me.waiting){
-                            me.waiting = true;
-                            me.setParams.apply(me,arguments);
-                            me.beforeLoad.apply(me,arguments);
-                            $.ajax(me.url,config);
+                            var paramsOkay = me.setParams.apply(me,arguments),
+                                beforeLoad = me.beforeLoad.apply(me,arguments);
+
+                            if(paramsOkay !== false && beforeLoad !== false){
+                                me.waiting = true;
+                                $.ajax(me.url,config);
+                            }
                         }else{
                             setTimeout(function(){
                                 me.loadData.apply(me,arguments);
@@ -803,7 +806,7 @@ Wui.Data.prototype = {
     @eventhook Can be used as is or overridden to run when parameters change.
     Can be used as is to set parameters before an AJAX load, or it can also be used as an event hook and overridden.
     This method is called from loadData with its arguments passed on, so arguments passed to load data will be sent here. 
-    See loadData().
+    See loadData(). If this function returns false, load data will not make a remote call.
     */
     setParams:      function(params){
                         if(params && typeof params === 'object')
@@ -824,7 +827,7 @@ Wui.Data.prototype = {
                         
                         // Set the data
                         me.data = me.processData(d);
-                        me.total = (t !== undefined) ? t : me.data.length;
+                        me.total = ($.isNumeric(t)) ? t : (me.data) ? me.data.length : 0;
                         
                         // Event hooks for after the data is set
                         me.dataChanged(me.data);
@@ -832,7 +835,8 @@ Wui.Data.prototype = {
                         me.afterSet(me.data);
                     },
     
-    /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
+    /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+        If this function returns false, load data will not make a remote call. */
     beforeLoad:     function(){},
     
     /**

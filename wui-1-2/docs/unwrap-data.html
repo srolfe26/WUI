@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI unwrap data - WUI 1.1</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+    <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+    <script type="text/javascript" src="../js/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../js/wui.js','Wui.unwrapData','Wui.unwrapData()');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            var data = [{val1:'Yee', val2:'Haw!'}, {val1:'Aah', val2:'Yeah!'}, {val1:'Boy', val2:'Howdy'}];
+            
+            var a = Wui.unwrapData(data);
+
+            // Fill in example area
+            $('#wui-doc-example').append($('<p>').text("a = " + JSON.stringify(a)));
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            var ts = new Wui.ts();
+            
+            ts.test('Data without any wrapper is processed returning data and total:', function(){
+                var data = [{val1:'Yee', val2:'Haw!'}, {val1:'Aah', val2:'Yeah!'}, {val1:'Boy', val2:'Howdy'}],
+                    a = Wui.unwrapData(data);
+                    
+                return (a.data && a.total && a.total == a.data.length);
+            });
+            
+            ts.test('Data with a wrapper and the Data.prototype values set to match:', function(){
+                Wui.Data.prototype.dataContainer = 'payload';
+                Wui.Data.prototype.totalContainer = 'total';
+                
+                var data = {payload:[{val1:'Yee', val2:'Haw!'}, {val1:'Aah', val2:'Yeah!'}, {val1:'Boy', val2:'Howdy'}], total:3, success:true},
+                    a = Wui.unwrapData(data);
+                    
+                return (a.data && a.total);
+            });
+            
+            ts.test('This test shows that the unwrap fails if its passed wrapped data but the data wrappers are not set:', function(){
+                Wui.Data.prototype.dataContainer = null;
+                Wui.Data.prototype.totalContainer = null;
+                
+                var data = {payload:[{val1:'Yee', val2:'Haw!'}, {val1:'Aah', val2:'Yeah!'}, {val1:'Boy', val2:'Howdy'}], total:3, success:true},
+                    a = Wui.unwrapData(data);
+                    
+                return !Wui.isNumeric(a.total)
+            });
+            
+            ts.test('Ensure the method will look at the containing parameters on the calling scope if they\'re not on the Wui.data.prototype:', function(){
+                Wui.Data.prototype.dataContainer = null;
+                Wui.Data.prototype.totalContainer = null;
+                
+                var o = {dataContainer:'payload',totalContainer:'total'},
+                    data = {payload:[{val1:'Yee', val2:'Haw!'}, {val1:'Aah', val2:'Yeah!'}, {val1:'Boy', val2:'Howdy'}], total:3, success:true},
+                    // Call the method with 'o' as the calling scope
+                    a = Wui.unwrapData.call(o,data);
+                    
+                return (a.data && a.total);
+            });
+        }); // end document.ready        
+    </script>
+</head>
+<body class="wui-docs">
+</body>
+</html>
