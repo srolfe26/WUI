@@ -1,4 +1,4 @@
-﻿/*! Wui 1.1
+﻿/*! Wui 1.2
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
@@ -217,7 +217,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
 
         // Tally all sizes we're dealing with
         $.each(collection,function(i,itm){
-            if(itm.fit){
+            if($.isNumeric(itm.fit) && itm.fit > 0){
                 fitCt += itm.fit;           // Tally fit values
                 itm[dim] = -1;              /* Set to -1 so that CSSByParam will not act on it (just deleting it was
                                              * ineffective because this property can be inherited through the prototype chain)*/
@@ -444,7 +444,19 @@ Wui.O.prototype = {
                     this.hidden = true;
                     return this.showHide.apply(this,args);
                 },
-
+    /**
+    @return A number where the object is positioned.
+    Returns the index of the item within the object's parent.items array. If the object has no parent, it returns undefined.
+    This function is DIFFERENT from jQuery's index() function which provides a DOM elements position within its parent node.
+    */
+    index:       function(){ 
+                    var me = this, myPosition = undefined;
+                    if(me.parent){
+                        // Get my position within the parental array
+                        me.parent.each(function(itm,idx){ if(itm === me) myPosition = idx; });
+                    }
+                    return myPosition;
+                },
     /**
     @param {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
@@ -473,7 +485,32 @@ Wui.O.prototype = {
                     // Perform layout for child elements
                     me.each(function(itm){ if(itm.layout) itm.layout(); });
                 },
+    /**
+    @param {numeric}    position    Position to move the item to
 
+    Moves the item within the items array it is a member of. If not a member of an items array, this does nothing.
+    */
+    move:       function(newPosition){
+                    var me = this, myPosition = me.index();
+                        
+                    // Bounds checking
+                    newPosition = $.isNumeric(newPosition) ? newPosition : 0;
+
+                    if(myPosition !== undefined){
+                        // Moves my position in memory
+                        me = Array.prototype.splice.call(me.parent.items,myPosition,1)[0];
+                        Array.prototype.splice.call(me.parent.items,newPosition,0, me);
+                        
+                        // Depending on my position in memory, move DOM element accordingly
+                        if(newPosition === 0) {                             //Place at the beginning of the DOM.
+                            me.parent.items[1].el.before(me.el);
+                        }else if(newPosition > me.parent.items.length) {    // The new position is greater than array length in memory, place at the end of DOM.
+                            me.parent.items[me.parent.items.length-2].el.after(me.el);
+                        }else{                                              // Place according to the new position in the DOM.
+                            me.parent.items[newPosition-1].el.after(me.el);
+                        }
+                    }
+                },
     /**
     @param {function} [after]    A function to be called after an object has been placed
     @return The object that was placed 

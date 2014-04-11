@@ -20,26 +20,43 @@
     </script>
     
     <script type="text/javascript" class="wui-doc-code">
+        var a = null, b = null;
         $(document).ready(function(){
             // Add a text formItem onto the body
+            b = new Wui.Combo({ 
+                label:      'Remote Search Combo Box', 
+                blankText:  'Search', 
+                name:       'demo-combo', 
+                valueItem:  'tx_id',
+                titleItem:  'description',
+                searchLocal:false,
+                
+                // used to simulate a server filtering the data 
+                // on search for the purpose of this demo.
+                processData:function(r){
+                                if(this.searchFilter){
+                                    for(var i = r.length - 1; i >= 0; i--){
+                                        if(r[i][this.titleItem]
+                                            .toUpperCase()
+                                            .indexOf(this.searchFilter.toUpperCase()) < 0
+                                        )
+                                            r.splice(i,1);
+                                    }
+                                }
+                                return r;                            
+                            },
+                url:        'data.txt',
+                appendTo:   $('#wui-doc-example')
+            });
+            b.place();
+
             a = new Wui.Combo({ 
-                label:      'Combo Box', 
+                label:      'Pre-Loaded Remotely Combo Box', 
                 blankText:  'Type Something', 
                 name:       'demo-combo', 
                 valueItem:  'tx_id',
                 titleItem:  'description',
                 autoLoad:   true,
-                searchLocal:false,
-                
-                // used to simulate a server filtering the data on search
-                processData:function(r){
-                                if(this.searchFilter){
-                                    for(var i = r.length - 1; i >= 0; i--){
-                                        if(r[i][this.titleItem].toUpperCase().indexOf(this.searchFilter.toUpperCase()) < 0) r.splice(i,1);
-                                    }
-                                }
-                                return r;                            
-                            },
                 url:        'data.txt',
                 appendTo:   $('#wui-doc-example')
             });

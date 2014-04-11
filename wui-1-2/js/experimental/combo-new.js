@@ -17,9 +17,17 @@ Wui.Combo2 = function(args){
     },args); 
 
     // Create template when one hasn't been defined
-    if(!this.hasOwnProperty('template') && this.hasOwnProperty('identity') && this.hasOwnProperty('identity') && this.identity && this.titleItem) 
+    if( !(this.hasOwnProperty('template') && this.template !== null && this.template !== undefined) 
+        && this.hasOwnProperty('valueItem') 
+        && this.hasOwnProperty('titleItem') 
+        && this.valueItem 
+        && this.titleItem
+    ){
         this.template = '<li>{' +this.titleItem+ '}</li>';
-    if(!this.template) throw new Error('Wui.js - identity and titleItem, or template, are required configs for a Combo.');
+        this.noSpecifiedTemplate = true;
+    }
+    // Ensure that all required items are present
+    if(!this.template) throw new Error('Wui.js - valueItem and titleItem, or template, are required configs for a Combo.');
 
     this.init(); 
 };
@@ -40,7 +48,7 @@ Wui.Combo2.prototype = $.extend(new Wui.DataList(), new Wui.Text(), {
                     }
                 },
                     
-    /** Fires when the down up is pressed */
+    /** Fires when the up is pressed */
     keyUp:      function(){
                     if(this.selectItm !== undefined){
                         var idx = this.selectItm.prevAll(':visible:first').index();

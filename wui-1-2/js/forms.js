@@ -1,4 +1,4 @@
-﻿/*! Wui 1.1
+﻿/*! Wui 1.2
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
@@ -570,7 +570,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                         this.parent.formChange(true, this);
                     
                     // Calls functionally defined valChange() - one will override another
-                    this.valChange(this);
+                    this.valChange(this, this.value, oldVal);
                     
                     // Calls listeners for valchange - in the case of hidden fields calls 'hiddenchange'
                     if(this.el){
@@ -1054,7 +1054,7 @@ Wui.Combo = function(args){
         /** Whether to load remote elements the moment the combobox is created, or wait to load remote elements
         until a search value is entered. */
         autoLoad:   false,
-        
+
         /** CSS class to place on the drop-down element. */
         ddCls:      '',
         
@@ -1079,6 +1079,9 @@ Wui.Combo = function(args){
         
         /** @eventhook Called when the combo loses focus. */
         onBlur:     function(){},
+
+        /** Lets values that are not in the data set be represented in the drop down regardless */
+        outliersOK: true,
         
         /** The name of the search parameter that will be sent to the server for remote filters. */
         searchArgName:'srch',
@@ -1098,21 +1101,26 @@ Wui.Combo = function(args){
         */
         valueItem:  null
     },args); 
-    
+
     // Create template when one hasn't been defined
-    if(!this.hasOwnProperty('template') && this.hasOwnProperty('valueItem') && this.hasOwnProperty('titleItem') && this.valueItem && this.titleItem){
+    if( !(this.hasOwnProperty('template') && this.template !== null && this.template !== undefined) 
+        && this.hasOwnProperty('valueItem') 
+        && this.hasOwnProperty('titleItem') 
+        && this.valueItem 
+        && this.titleItem
+    ){
         this.template = '<li>{' +this.titleItem+ '}</li>';
         this.noSpecifiedTemplate = true;
     }
-        
+    // Ensure that all required items are present
     if(!this.template) throw new Error('Wui.js - valueItem and titleItem, or template, are required configs for a Combo.');
 
     this.init(); 
 };
 Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
-    /** Fires when the enter key is pressed */
+    /** Fires when the enter key or tab is pressed */
     enterKey:       function(){
-                        if(this.selectItm !== null)   this.selectItm.click();
+                        if(this.selectItm !== null)   this.rsltClick();
                     },
                     
     /** Fires when the down arrow is pressed */
@@ -1128,7 +1136,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         }
                     },
                     
-    /** Fires when the down up is pressed */
+    /** Fires when the up is pressed */
     keyUp:          function(){
                         if(this.selectItm !== null){
                             var idx = this.selectItm.prevAll(':visible:first').index();
@@ -1156,7 +1164,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         // Place field elements
                         me.append(
                             me.wrapper = $('<div>').addClass('wui-combo').append(
-                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).hide(),
+                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls),
                                 me.field
                             )
                         );
@@ -1221,16 +1229,11 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         if(me.data.length){ 
                             me.dataEach(function(d,i){
                                 me.tplEngine.data = d;
-                                holder.append(
-                                    me.tplEngine.make().mouseenter(function(evnt){ me.rsltHover(evnt); })
-                                                       .mousedown(function(e){me.field.isBlurring = false;})
-                                                       .click(function(){ me.rsltClick(); })
-                                );
+                                holder.append(me.tplEngine.make());
                             });
 
                             //hilight search results
                             if(me.searchFilter && me.searchFilter.length && me.noSpecifiedTemplate){
-                                
                                 holder.children().each(function(i,itm){
                                     itm = $(itm);
                                     var itmTxt = itm.text(),
@@ -1242,15 +1245,19 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                 });   
                             }
 
+                            // Add listeners to children
+                            holder.children()
+                                            .mouseenter(function(evnt){ me.rsltHover(evnt); })
+                                           .mousedown(function(e){me.field.isBlurring = false;})
+                                           .click(function(){ me.rsltClick(); });
+
                             // Append children to the DD
                             me.dd.append(holder.children().unwrap());
-
-                            if(this.value)
-                                this.val(this.value);
                         }else{ 
                             me.dd.html(this.emptyText);
                         }
-                        
+
+                        if(me.value) me.selectByValue(me.value[me.valueItem] || me.value);
                         return true;
                     },
     
@@ -1275,6 +1282,8 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             var o = {};
                             o[this.searchArgName] = this.searchFilter;
                             return $.extend(this.params, o);
+                        }else if(this.searchLocal === true){
+                            return this.params;
                         }else{
                             delete this.params[this.searchArgName];
                             return (this.autoLoad);
@@ -1291,32 +1300,38 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     Searches locally within the drop-down's data for the srchVal, otherwise if searchLocal is false,
     the data is searched remotely. */
     searchData:     function(srchVal){
-                        var me = this;
+                        var me = this, oldSearch = me.searchFilter || undefined;
                         if(me.filterField){
                             me.searchFilter = srchVal;
                             
                             if(me.searchLocal){
-                                me.toggleDD('open');
-                                me.dd.children().each(function(i,itm){
-                                    itm = $(itm);
-                                    var itmTxt = itm.text();
+                                if(srchVal.length === 0){
+                                    me.selectItm = null;
+                                    me.val(null);
+                                    me.toggleDD('close');
+                                }else{
+                                    me.toggleDD('open');
+                                    me.dd.children().each(function(i,itm){
+                                        itm = $(itm);
+                                        var itmTxt = itm.text();
 
-                                    if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
-                                    else                                                                                    clearHilight(itm).hide();
+                                        if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
+                                        else                                                                                    clearHilight(itm).hide();
 
-                                    function hilightText(obj){ return clearHilight(obj).html( obj.text().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
-                                    function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
-                                });
-                                me.rsltHover(me.dd.children(':contains("' +srchVal+ '"):first'));
+                                        function hilightText(obj){ return clearHilight(obj).html( obj.text().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
+                                        function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
+                                    });
+                                    me.rsltHover(me.dd.children(':contains("' +srchVal+ '"):first'));
+                                }
                             }else{
-                                if(srchVal.length >= me.minKeys || srchVal.length === 0){
+                                if((srchVal.length >= me.minKeys || srchVal.length === 0) && me.searchFilter != oldSearch){
                                     if(srchVal.length === 0){
                                         me.selectItm = null;
                                         me.val(null);
                                     }
                                     me.loadData();
                                 }
-                            }    
+                            }  
                         }
                     },
     
@@ -1345,21 +1360,11 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         t.field
                         .focus(function(e){
                             t.field.isBlurring = undefined;
-                            t.toggleDD('open');
+                            if(t.searchLocal === true) t.toggleDD('open');
                         })
                         .blur(function(e){
                             if(t.field.isBlurring !== false){
                                 t.toggleDD('close');
-                                    
-                                // If the combo has a non-value item in the search field
-                                // select the seleted item or clear the value
-                                var titlePresent = false;
-                                for(var d in t.data){
-                                    if(t.field.val() == t.data[d][t.titleItem]){
-                                        titlePresent = true;
-                                        break;
-                                    }
-                                }
                                 
                                 // Event hook function
                                 t.onBlur();
@@ -1367,30 +1372,30 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                          })
                         .keyup(function(evnt){
                             switch(evnt.keyCode){
-                                case 40:    /*Do Nothing*/  break;
-                                case 38:    /*Do Nothing*/  break;
-                                case 13:    /*Do Nothing*/  break;
-                                case 9:     /*Do Nothing*/  break;
+                                case 40:    /*Do Nothing*/          break;
+                                case 38:    /*Do Nothing*/          break;
+                                case 13:    /*Do Nothing*/          break;
+                                case 9:     /*Do Nothing*/          break;
                                 default:    t.searchData(t.field.val());
                             }
                         })
                         .keydown(function(evnt){
-                            //clear the value if the user blanks out the field
-                            if(t.field.val().length === 0) t.value = null;
-                            
+                            t.toggleDD('open');
+
                             if(t.data.length > 0){
                                 switch(evnt.keyCode){
-                                    case 40:    t.keyDown();   break;
-                                    case 38:    t.keyUp();     break;
+                                    case 40:    t.keyDown();            break;
+                                    case 38:    t.keyUp();              break;
+                                    case 27:    t.toggleDD('close');    break;
                                     case 13:
-                                    case 9:     t.enterKey();  break;
+                                    case 9:     t.enterKey();           break;
                                 }
                                 
                                 //scroll the list to the currently selected item
                                 if(t.selectItm !== null){
                                     var beforeHeight = 0;
                                     t.selectItm.siblings(':lt(' +t.selectItm.index()+ '):visible').each(function(){ beforeHeight+= $(this).outerHeight(); });
-                                    t.selectItm.parent().animate({scrollTop:beforeHeight}, 100);
+                                    t.selectItm.parent().animate({scrollTop:beforeHeight}, 50);
                                 }
                             }
                         });
@@ -1402,16 +1407,14 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                     },
     setVal:         function(sv){
                         var me = this, selectVal = null;
-                        
                         if(sv === null){
                             me.value = null;
-                            me.renderData();
                             me.fieldText('');
                         }else if(typeof sv == 'object'){
                             me.value = sv;
                             
                             //add the piece of data to the dd data if it does not exist there
-                            var addData = true;
+                            var addData = (true && me.outliersOK);
                             for(var d in me.data) if(me.data[d] == sv) addData = false;
                             if(addData){
                                 me.data.push(me.value);
@@ -1422,15 +1425,25 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             me.value = sv;
                             selectVal = me.value;
                         }
-                        
-                        //select the item out of the data set
-                        me.dataEach(function(d,i){
-                            if(d[me.valueItem] === selectVal || d[me.valueItem] === parseInt(selectVal)){
-                                me.selectCurr(i);
-                                me.fieldText(d[me.titleItem]);
-                                return false;
-                            }
-                        });
+
+                        me.selectByValue(selectVal);
+                    },
+    selectByValue:  function(v){
+                        var me = this, selectedSomething = false;
+
+                        if(v !== null && v !== undefined){
+                            me.dataEach(function(d,i){
+                                if(d[me.valueItem] === v || d[me.valueItem] === parseInt(v)){
+                                    me.selectCurr(i);
+                                    me.fieldText(d[me.titleItem]);
+                                    me.value = d;
+                                    selectedSomething = true;
+                                    return false;
+                                }
+                            });
+                            if(!selectedSomething) me.val(null);
+                        }
+                        return me.value;
                     }
 });
 

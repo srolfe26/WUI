@@ -1,4 +1,4 @@
-﻿/*! Wui 1.1
+﻿/*! Wui 1.2
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
@@ -121,15 +121,16 @@ The grid pane provides table-like functionality for data sets. Grids can be popu
 or have their data locally defined. Grids also support infinite scrolling by defining paging
 parameters. Columns for the grid are defined in an array and with the following options:
 
-heading         - The title of the column heading
 cls             - A special class to add to the column
-vertical        - Makes the column text oriented vertical and the column height at 150px
-dataType        - The type of data used in the column (used for sorting)
 dataItem        - The item in the record that correlates to this column
 dataTemplate    - Sort of a full on renderer, this allows you to format inserted data similar to
                   what is available in Wui.Template
-width           - A pixel value for the width of the column
+dataType        - The type of data used in the column used for sorting (date, numeric, string:default)
 fit             - A numeric indicator of the relative size of the column
+resizable       - Whether a column can be resized (defaults to true)
+heading         - The title of the column heading
+vertical        - Makes the column text oriented vertical and the column height at 150px, not resizable
+width           - A pixel value for the width of the column
 
 Custom renderers can be applied to columns.  These renderers are defined as function that can
 either be defined in the column definition, or defined elsewhere in scope and simply named by
@@ -305,9 +306,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     delete col.sortDir;
                                     col.el.removeClass().addClass('wui-gc').addClass(col.cls);
                                     
-                                    $.each(me.sorters,function(i,itm){
-                                        if(itm.el == col.el)    me.sorters.splice(i,1);
-                                    });
+                                    for(var i = me.sorters.length; i > 0; i--)
+                                        if(me.sorters[i - 1].el == col.el)
+                                            me.sorters.splice(i - 1,1);
                                 }else{
                                     col.sortDir = 'desc';
                                 }
@@ -323,7 +324,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             }
                         }    
                     }
-                    
+
                     $.each(me.sorters,function(i,itm){
                         itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
                     });
@@ -386,6 +387,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                                                 me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
                                                         })(col.renderer) : '',
                         index:      idx,
+                        resizable:  typeof col.resizable === 'undefined' ? true : col.resizable,
                         width:      col.width === undefined ? 0 : col.width,
                         el:         $('<li>')
                                     .append($('<div>').text(col.heading))
@@ -395,7 +397,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     });
                     
                     //grids with single columns shouldn't have a resizable option
-                    if(me.columns.length > 1 && !col.vertical){
+                    if(me.columns.length > 1 && !col.vertical && col.resizable){
                         col.el.resizable({
                             handles:    'e',
                             start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
