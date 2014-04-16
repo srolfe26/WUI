@@ -444,6 +444,7 @@ Wui.O.prototype = {
                     this.hidden = true;
                     return this.showHide.apply(this,args);
                 },
+
     /**
     @return A number where the object is positioned.
     Returns the index of the item within the object's parent.items array. If the object has no parent, it returns undefined.
@@ -457,6 +458,7 @@ Wui.O.prototype = {
                     }
                     return myPosition;
                 },
+
     /**
     @param {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
@@ -485,6 +487,7 @@ Wui.O.prototype = {
                     // Perform layout for child elements
                     me.each(function(itm){ if(itm.layout) itm.layout(); });
                 },
+
     /**
     @param {numeric}    position    Position to move the item to
 
@@ -511,6 +514,7 @@ Wui.O.prototype = {
                         }
                     }
                 },
+
     /**
     @param {function} [after]    A function to be called after an object has been placed
     @return The object that was placed 
@@ -747,6 +751,9 @@ Wui.Data = function(args){
         
         /** Name of the data object. Allows the object to be identified in the listeners */
         name:           null,
+
+        /** Whether or not to namespace the datachanged event */
+        namespaceEvent:false,
         
         /** Object containing keys that will be passed remotely */
         params:         {},
@@ -866,10 +873,19 @@ Wui.Data.prototype = {
                         me.data = me.processData(d);
                         me.total = ($.isNumeric(t)) ? t : (me.data) ? me.data.length : 0;
                         
-                        // Event hooks for after the data is set
+                        me.fireDataChanged();
+                    },
+
+    fireDataChanged:function(){
+                        var me = this, dn = (me.name || 'wui-data');
+
                         me.dataChanged(me.data);
-                        $(window).trigger($.Event('datachanged'),[(me.name || 'wui-data'), me]);
+
+                        if(me.namespaceEvent)   $(document).trigger($.Event('datachanged-' + dn),[dn, me]);
+                        else                    $(document).trigger($.Event('datachanged'),[dn, me]);
+
                         me.afterSet(me.data);
+                        
                     },
     
     /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
@@ -915,7 +931,31 @@ Wui.Data.prototype = {
     /** 
     @param {array} Data to be processed.
     Allows for pre-processing of the data before it is taken into the data object. Meant to be overridden, otherwise will act as a pass-through. See loadData().*/
-    processData:    function(response){ return response; }
+    processData:    function(response){ return response; },
+
+    /**
+    @param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
+    @return The new length of the array 
+    Same as Array.push() but acting on the data array of the object.
+    */
+    push:           function(){
+                        var retVal = Array.prototype.push.apply(this.data,arguments);
+                        this.fireDataChanged();
+                        return retVal;
+                    },
+
+    /**
+    @param  {number}    idx         Position to start making changes in the items array.
+    @param  {number}    howMany     Number of elements to remove.
+    @param  {object}    [obj,...]   One or more objects to be added to the array at position idx
+    @return An array of the removed objects, or an empty array. 
+    Same as Array.splice() but acting on the data array of the object.
+    */
+    splice:         function(){
+                        var retVal = Array.prototype.splice.apply(this.data,arguments);
+                        this.fireDataChanged();
+                        return retVal;
+                    }
 };
 
 

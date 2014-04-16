@@ -2179,6 +2179,30 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
                     }
 });
 
+/**
+@author Dan Perry (dan.perry@usurf.usu.edu)
+An HTML5 file upload than can upload files via ajax. Supported in IE10+
+When the form data is aggregated, it must be passed with a javascript FormData object.
+If using jQuery $.ajax(): cache, contentType, processData parameters must be set to false.
+*/
+Wui.FileBasic = function(args) {
+    $.extend(this,{
+        field: $('<input>').attr({type:'file'})
+    },args);
+    this.init();
+};
+
+Wui.FileBasic.prototype = $.extend(new Wui.FormField(), {
+   init: function(){
+       var me = this;
+       Wui.FormField.prototype.init.call(me);
+       me.append(me.field);
+   },
+   getVal: function(){
+       return this.field[0].files[0];
+   }
+});
+
 
 /**
 @author Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
