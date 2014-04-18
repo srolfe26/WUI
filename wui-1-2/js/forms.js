@@ -2187,19 +2187,23 @@ If using jQuery $.ajax(): cache, contentType, processData parameters must be set
 */
 Wui.FileBasic = function(args) {
     $.extend(this,{
-        field: $('<input>').attr({type:'file'})
+        multiple:   false,
+        field:      $('<input>').attr({type:'file'})
     },args);
     this.init();
 };
 
-Wui.FileBasic.prototype = $.extend(new Wui.FormField(), {
+Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
    init: function(){
-       var me = this;
-       Wui.FormField.prototype.init.call(me);
-       me.append(me.field);
+        var me = this;
+        Wui.Text.prototype.init.call(me);
+        me.append(me.field);
+
+        if(me.multiple)
+            me.field.attr('multiple', true);
    },
    getVal: function(){
-       return this.field[0].files[0];
+       return this.field[0].files;
    }
 });
 
