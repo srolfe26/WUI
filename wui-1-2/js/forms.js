@@ -1076,6 +1076,9 @@ Wui.Combo = function(args){
         
         /** Minimum number of characters entered before the combo will filter remotely. */
         minKeys:    2,
+
+        /** Makes the combo changes namespaced */
+        namespaceEvent:true,
         
         /** @eventhook Called when the combo loses focus. */
         onBlur:     function(){},
@@ -1164,7 +1167,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         // Place field elements
                         me.append(
                             me.wrapper = $('<div>').addClass('wui-combo').append(
-                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls),
+                                me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).hide(),
                                 me.field
                             )
                         );
@@ -1180,12 +1183,16 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         me.ddSwitch.place();
 
                         // Get the combo to look at another data store
-                        if(me.dataName && me.dataName.length > 0){
-                            $(window).on('datachanged',function(event,name,dataObj){
+                        if(me.dataName && me.dataName.length && Wui['datastore-' + me.dataName]){
+                            $(window).on('datachanged-' + me.dataName,function(event,name,dataObj){
                                 if(name == me.dataName)
                                     me.setData(dataObj.data);
                             });
                         }else{
+                            // Sets an indicator that the data store is loaded
+                            if(me.dataName && me.dataName.length)
+                                Wui['datastore-' + me.dataName] = true;
+                            
                             if(me.autoLoad)   me.loadData();
                             else              me.renderData();
                         }
@@ -1403,7 +1410,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                     },
     getVal:         function(){
                         var me = this;
-                        return (me.value && me.value[me.valueItem]) ? me.value[me.valueItem] : me.value;
+                        return (me.value && typeof me.value[me.valueItem] !== 'undefined') ? me.value[me.valueItem] : me.value;
                     },
     setVal:         function(sv){
                         var me = this, selectVal = null;
@@ -1426,14 +1433,15 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             selectVal = me.value;
                         }
 
-                        me.selectByValue(selectVal);
+                        return me.selectByValue(selectVal);
                     },
-    selectByValue:  function(v){
+    selectByValue:  function(v,item){
                         var me = this, selectedSomething = false;
+                        item = item || 'valueItem';
 
                         if(v !== null && v !== undefined){
                             me.dataEach(function(d,i){
-                                if(d[me.valueItem] === v || d[me.valueItem] === parseInt(v)){
+                                if(d[me[item]] === v || d[me[item]] === parseInt(v)){
                                     me.selectCurr(i);
                                     me.fieldText(d[me.titleItem]);
                                     me.value = d;
@@ -1441,7 +1449,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                     return false;
                                 }
                             });
-                            if(!selectedSomething) me.val(null);
+                            if(me.data.length && !selectedSomething) me.val(null);
                         }
                         return me.value;
                     }
@@ -1578,165 +1586,168 @@ Wui.Datetime = function(args){
     this.init();
 };
 
-$.extend(Date,{
-    CultureInfo:            {
-                                name: "en-US",
-                                englishName: "English (United States)",
-                                nativeName: "English (United States)",
-                                dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-                                abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                                shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-                                firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
-                                monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-                                abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                                amDesignator: "AM",
-                                pmDesignator: "PM"
-                            },
-    
-    isLeapYear:             function(year) {
-                                return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
-                            },
-    getDaysInMonth:         function(year, month) {
-                                return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
-                            },
-    getTimezoneOffset:      function(s, dst) {
-                                return (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST[s.toUpperCase()] : Date.CultureInfo.abbreviatedTimeZoneStandard[s.toUpperCase()];
-                            },
-    getTimezoneAbbreviation:function(offset, dst) {
-                                var n = (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST : Date.CultureInfo.abbreviatedTimeZoneStandard,
-                                    p;
-                                for (p in n) {
-                                    if (n[p] === offset) {
-                                        return p;
+// If date has already been extended, dont' attempt to extend it again
+if(typeof Date._toString === 'undefined'){
+    $.extend(Date,{
+        CultureInfo:            {
+                                    name: "en-US",
+                                    englishName: "English (United States)",
+                                    nativeName: "English (United States)",
+                                    dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                    abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                                    shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+                                    firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
+                                    monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                                    abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                                    amDesignator: "AM",
+                                    pmDesignator: "PM"
+                                },
+        
+        isLeapYear:             function(year) {
+                                    return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
+                                },
+        getDaysInMonth:         function(year, month) {
+                                    return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+                                },
+        getTimezoneOffset:      function(s, dst) {
+                                    return (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST[s.toUpperCase()] : Date.CultureInfo.abbreviatedTimeZoneStandard[s.toUpperCase()];
+                                },
+        getTimezoneAbbreviation:function(offset, dst) {
+                                    var n = (dst || false) ? Date.CultureInfo.abbreviatedTimeZoneDST : Date.CultureInfo.abbreviatedTimeZoneStandard,
+                                        p;
+                                    for (p in n) {
+                                        if (n[p] === offset) {
+                                            return p;
+                                        }
                                     }
+                                    return null;
                                 }
-                                return null;
-                            }
-});
-$.extend(Date.prototype,{
-    getDaysInMonth: function() {
-                        return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
-                    },
-    addMilliseconds:function(value) {
-                        this.setMilliseconds(this.getMilliseconds() + value);
-                        return this;
-                    },
-    addSeconds:     function(value) {
-                        return this.addMilliseconds(value * 1000);
-                    },
-    addMinutes:     function(value) {
-                        return this.addMilliseconds(value * 60000);
-                    },
-    addHours:        function(value) {
-                        return this.addMilliseconds(value * 3600000);
-                    },
-    addDays:        Date.prototype.addDays = function(value) {
-                        return this.addMilliseconds(value * 86400000);
-                    },
-    addWeeks:       function(value) {
-                        return this.addMilliseconds(value * 604800000);
-                    },
-    addMonths:      function(value) {
-                        var n = this.getDate();
-                        this.setDate(1);
-                        this.setMonth(this.getMonth() + value);
-                        this.setDate(Math.min(n, this.getDaysInMonth()));
-                        return this;
-                    },
-    addYears:       function(value) {
-                        return this.addMonths(value * 12);
-                    },
-    add:            function(config) {
-                        if (typeof config == "number") {
-                            this._orient = config;
+    });
+    $.extend(Date.prototype,{
+        getDaysInMonth: function() {
+                            return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+                        },
+        addMilliseconds:function(value) {
+                            this.setMilliseconds(this.getMilliseconds() + value);
                             return this;
-                        }
-                        var x = config;
-                        if (x.millisecond || x.milliseconds) {
-                            this.addMilliseconds(x.millisecond || x.milliseconds);
-                        }
-                        if (x.second || x.seconds) {
-                            this.addSeconds(x.second || x.seconds);
-                        }
-                        if (x.minute || x.minutes) {
-                            this.addMinutes(x.minute || x.minutes);
-                        }
-                        if (x.hour || x.hours) {
-                            this.addHours(x.hour || x.hours);
-                        }
-                        if (x.month || x.months) {
-                            this.addMonths(x.month || x.months);
-                        }
-                        if (x.year || x.years) {
-                            this.addYears(x.year || x.years);
-                        }
-                        if (x.day || x.days) {
-                            this.addDays(x.day || x.days);
-                        }
-                        return this;
-                    },
-    getDayName:     function(abbrev) {
-                        return abbrev ? Date.CultureInfo.abbreviatedDayNames[this.getDay()] : Date.CultureInfo.dayNames[this.getDay()];
-                    },
-    getMonthName:   function(abbrev) {
-                        return abbrev ? Date.CultureInfo.abbreviatedMonthNames[this.getMonth()] : Date.CultureInfo.monthNames[this.getMonth()];
-                    },
-    _toString:      Date.prototype.toString,
-    toString:       function(format) {
-                        var self = this;
-                        var p = function p(s) {
-                                return (s.toString().length == 1) ? "0" + s : s;
-                            };
-                        return format ? format.replace(/dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|zz?z?/g, function(format) {
-                            switch (format) {
-                            case "hh":
-                                return p(self.getHours() < 13 ? self.getHours() : (self.getHours() - 12));
-                            case "h":
-                                return self.getHours() < 13 ? self.getHours() : (self.getHours() - 12);
-                            case "HH":
-                                return p(self.getHours());
-                            case "H":
-                                return self.getHours();
-                            case "mm":
-                                return p(self.getMinutes());
-                            case "m":
-                                return self.getMinutes();
-                            case "ss":
-                                return p(self.getSeconds());
-                            case "s":
-                                return self.getSeconds();
-                            case "yyyy":
-                                return self.getFullYear();
-                            case "yy":
-                                return self.getFullYear().toString().substring(2, 4);
-                            case "dddd":
-                                return self.getDayName();
-                            case "ddd":
-                                return self.getDayName(true);
-                            case "dd":
-                                return p(self.getDate());
-                            case "d":
-                                return self.getDate().toString();
-                            case "MMMM":
-                                return self.getMonthName();
-                            case "MMM":
-                                return self.getMonthName(true);
-                            case "MM":
-                                return p((self.getMonth() + 1));
-                            case "M":
-                                return self.getMonth() + 1;
-                            case "t":
-                                return self.getHours() < 12 ? Date.CultureInfo.amDesignator.substring(0, 1) : Date.CultureInfo.pmDesignator.substring(0, 1);
-                            case "tt":
-                                return self.getHours() < 12 ? Date.CultureInfo.amDesignator : Date.CultureInfo.pmDesignator;
-                            case "zzz":
-                            case "zz":
-                            case "z":
-                                return "";
+                        },
+        addSeconds:     function(value) {
+                            return this.addMilliseconds(value * 1000);
+                        },
+        addMinutes:     function(value) {
+                            return this.addMilliseconds(value * 60000);
+                        },
+        addHours:        function(value) {
+                            return this.addMilliseconds(value * 3600000);
+                        },
+        addDays:        Date.prototype.addDays = function(value) {
+                            return this.addMilliseconds(value * 86400000);
+                        },
+        addWeeks:       function(value) {
+                            return this.addMilliseconds(value * 604800000);
+                        },
+        addMonths:      function(value) {
+                            var n = this.getDate();
+                            this.setDate(1);
+                            this.setMonth(this.getMonth() + value);
+                            this.setDate(Math.min(n, this.getDaysInMonth()));
+                            return this;
+                        },
+        addYears:       function(value) {
+                            return this.addMonths(value * 12);
+                        },
+        add:            function(config) {
+                            if (typeof config == "number") {
+                                this._orient = config;
+                                return this;
                             }
-                        }) : this._toString();
-                    }
-});
+                            var x = config;
+                            if (x.millisecond || x.milliseconds) {
+                                this.addMilliseconds(x.millisecond || x.milliseconds);
+                            }
+                            if (x.second || x.seconds) {
+                                this.addSeconds(x.second || x.seconds);
+                            }
+                            if (x.minute || x.minutes) {
+                                this.addMinutes(x.minute || x.minutes);
+                            }
+                            if (x.hour || x.hours) {
+                                this.addHours(x.hour || x.hours);
+                            }
+                            if (x.month || x.months) {
+                                this.addMonths(x.month || x.months);
+                            }
+                            if (x.year || x.years) {
+                                this.addYears(x.year || x.years);
+                            }
+                            if (x.day || x.days) {
+                                this.addDays(x.day || x.days);
+                            }
+                            return this;
+                        },
+        getDayName:     function(abbrev) {
+                            return abbrev ? Date.CultureInfo.abbreviatedDayNames[this.getDay()] : Date.CultureInfo.dayNames[this.getDay()];
+                        },
+        getMonthName:   function(abbrev) {
+                            return abbrev ? Date.CultureInfo.abbreviatedMonthNames[this.getMonth()] : Date.CultureInfo.monthNames[this.getMonth()];
+                        },
+        _toString:      Date.prototype.toString,
+        toString:       function(format) {
+                            var self = this;
+                            var p = function p(s) {
+                                    return (s.toString().length == 1) ? "0" + s : s;
+                                };
+                            return format ? format.replace(/dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|zz?z?/g, function(format) {
+                                switch (format) {
+                                case "hh":
+                                    return p(self.getHours() < 13 ? self.getHours() : (self.getHours() - 12));
+                                case "h":
+                                    return self.getHours() < 13 ? self.getHours() : (self.getHours() - 12);
+                                case "HH":
+                                    return p(self.getHours());
+                                case "H":
+                                    return self.getHours();
+                                case "mm":
+                                    return p(self.getMinutes());
+                                case "m":
+                                    return self.getMinutes();
+                                case "ss":
+                                    return p(self.getSeconds());
+                                case "s":
+                                    return self.getSeconds();
+                                case "yyyy":
+                                    return self.getFullYear();
+                                case "yy":
+                                    return self.getFullYear().toString().substring(2, 4);
+                                case "dddd":
+                                    return self.getDayName();
+                                case "ddd":
+                                    return self.getDayName(true);
+                                case "dd":
+                                    return p(self.getDate());
+                                case "d":
+                                    return self.getDate().toString();
+                                case "MMMM":
+                                    return self.getMonthName();
+                                case "MMM":
+                                    return self.getMonthName(true);
+                                case "MM":
+                                    return p((self.getMonth() + 1));
+                                case "M":
+                                    return self.getMonth() + 1;
+                                case "t":
+                                    return self.getHours() < 12 ? Date.CultureInfo.amDesignator.substring(0, 1) : Date.CultureInfo.pmDesignator.substring(0, 1);
+                                case "tt":
+                                    return self.getHours() < 12 ? Date.CultureInfo.amDesignator : Date.CultureInfo.pmDesignator;
+                                case "zzz":
+                                case "zz":
+                                case "z":
+                                    return "";
+                                }
+                            }) : this._toString();
+                        }
+    });
+}
 /** End borrowing from date.js */
 
 Wui.Datetime.prototype = $.extend(new Wui.Text(),{

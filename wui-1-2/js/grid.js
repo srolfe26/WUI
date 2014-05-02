@@ -129,6 +129,7 @@ dataType        - The type of data used in the column used for sorting (date, nu
 fit             - A numeric indicator of the relative size of the column
 resizable       - Whether a column can be resized (defaults to true)
 heading         - The title of the column heading
+sortable        - Whether or not a column can be sorted
 vertical        - Makes the column text oriented vertical and the column height at 150px, not resizable
 width           - A pixel value for the width of the column
 
@@ -136,7 +137,7 @@ Custom renderers can be applied to columns.  These renderers are defined as func
 either be defined in the column definition, or defined elsewhere in scope and simply named by
 a string. The rendering function is defined passed the following parameters as below:
 
-renderer: function(grid, cell, value, record, row){}
+renderer: function(grid, cell, value, record, row, grid){}
 
 Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
 descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
@@ -338,7 +339,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
                             val = itm.rec[r.dataItem];
                         
-                        cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el));
+                        cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el, me));
                     });
                     return itm.el;
                 },
@@ -358,12 +359,18 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     this.getColumns();
                 },
     
-    /** Positions the height and width of the data table's container @private */
+    /** Positions the height and width of the data table's container. @private */
     posDataWin: function(){
                     var hh = this.headingContainer.height() - 1;
                     this.tblContainer.css({height:this.container.height() - hh, top:hh});
                 },
     
+    /** Overrides Pane.configBar() to add positioning the data window when tbars or bbars are added/removed. @private */
+    configBar:  function(){
+                    Wui.Pane.prototype.configBar.apply(this,arguments);
+                    this.posDataWin();
+                },
+
     /** Overrides DataList.refresh() to add disabling the grid to add the load mask */
     refresh:    function(){
                     if(this.url === null)   this.setData(this.data);
@@ -377,7 +384,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     $.extend(col,{
                         dataType:   col.dataType || me.defaultDataType,
-                        fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : 0 : col.fit,
+                        fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : -1 : col.fit,
                         cls:        col.cls || '',
                         renderer:   (col.renderer) ?    (function(a){
                                                             // Handles renderer if it exists
@@ -388,14 +395,17 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                                         })(col.renderer) : '',
                         index:      idx,
                         resizable:  typeof col.resizable === 'undefined' ? true : col.resizable,
+                        sortable:   typeof col.sortable === 'undefined' ? true : col.sortable,
                         width:      col.width === undefined ? 0 : col.width,
                         el:         $('<li>')
                                     .append($('<div>').text(col.heading))
                                     .attr({unselectable:'on'})
-                                    .addClass('wui-gc ' + col.cls)
-                                    .click(function(){ me.sortList(col); })
+                                    .addClass('wui-gc').addClass(col.cls)
                     });
                     
+                    if(col.sortable)    col.el.click(function(){ me.sortList(col); });
+                    else                col.el.addClass('wui-no-sort');
+
                     //grids with single columns shouldn't have a resizable option
                     if(me.columns.length > 1 && !col.vertical && col.resizable){
                         col.el.resizable({
@@ -478,6 +488,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     setData:    function(){
                     Wui.DataList.prototype.setData.apply(this,arguments);
                     this.sortList();
+                    this.sizeCols();
                 },
 
     /** Size up the columns of the table to match the headings @private */

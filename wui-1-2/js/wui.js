@@ -32,22 +32,60 @@
 
 
 // Make sure the WUI is defined
-var Wui = Wui || {};
+var Wui = Wui || {
+    version: '1.2.0'
+};
 
 (function($,window) {
 
-// AJAX error reporting and caching
+// AJAX error reporting, caching, and to change options if the request is sending a FormData object.
 $.ajaxSetup({ 
-    cache:  false,
-    error:  function(response){
-                console.log(response);
-                var err = null;
-                try{        err = $.parseJSON( response.responseText ); }
-                catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
-                if(err !== null)
-                    Wui.errRpt(err.fatalError);
-            }
+    cache:      false,
+    error:      function(response){
+                    // console.log(response);
+                    var err = null;
+                    try{        err = $.parseJSON( response.responseText ); }
+                    catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
+                    if(err !== null)
+                        Wui.errRpt(err.fatalError);
+                },
+    beforeSend: function(xhr,options){
+                    if(options.data instanceof FormData){
+                        options.contentType = false;
+                        options.processData = false;
+                        options.cache = false;
+                    }
+                }
 });
+
+
+/**
+    @param {object} obj Object containing named keys.
+    @return A javascript FormData object containing the key/values passed in including files.
+
+    Allows the WUI to upload files via ajax by using the javascript FormData object made
+    available in HTML5 (https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+
+    Changes jQuery's ajax setup temporarily to perform the file upload, then changes it
+    back to previous settings after the next ajax request to successfully execute.
+*/
+Wui.forAjaxFileUpload = function(obj){
+    var formData = new FormData();
+
+    // Adds all of the keys in obj to formData
+    for (var a in obj) {
+        if(obj[a] instanceof FileList) {
+            for( var x=0; x < obj[a].length;x++)
+                formData.append(a+'_'+x,obj[a][x]);
+        }else{
+            if      (obj[a]===null) formData.append(a,"");
+            else    formData.append(a,obj[a]);
+        }
+    }
+
+    return formData;
+};
+
 
 /** @return Returns a unique id */
 Wui.id = function(){
@@ -217,7 +255,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
 
         // Tally all sizes we're dealing with
         $.each(collection,function(i,itm){
-            if($.isNumeric(itm.fit) && itm.fit > 0){
+            if($.isNumeric(itm.fit) && itm.fit >= 0){
                 fitCt += itm.fit;           // Tally fit values
                 itm[dim] = -1;              /* Set to -1 so that CSSByParam will not act on it (just deleting it was
                                              * ineffective because this property can be inherited through the prototype chain)*/
@@ -785,9 +823,6 @@ Wui.Data.prototype = {
     feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
     totalContainer: null,
     
-    /** When the object is waiting, default amount of time in milliseconds before trying to perform loadData() again */
-    ajaxWait:       10,
-    
     /** 
     @param {array}    newData    Array of the new data
     @eventhook Used for when data is changed.
@@ -840,9 +875,7 @@ Wui.Data.prototype = {
                                 $.ajax(me.url,config);
                             }
                         }else{
-                            setTimeout(function(){
-                                me.loadData.apply(me,arguments);
-                            }, me.ajaxWait);
+                            me.furtherRequests = arguments;
                         }
                     },
     /**
@@ -906,14 +939,29 @@ Wui.Data.prototype = {
     
     /**
     @param {object or array} r Response from the server in JSON format
-    Runs when loadData() successfully completes a remote call. Gets data straight or gets it out of the dataContainer and totalContainer. See loadData().
+    Runs when loadData() successfully completes a remote call.
+    Gets data straight or gets it out of the dataContainer and totalContainer.
+    
+    Works in conjuction with loadData to limit requests on a particular resource
+    if there are additional parameters coming in by setting an undocumented
+    member variable named 'furtherRequests' which contains arguments previously
+    sent to loadData - if any. This mainly applies in the case of text searches
+    on a field. See loadData().
+
     Calls setData() passing the response and total.
     */
     success:        function(r){
-                        var me = this, unwrapped = Wui.unwrapData.call(me,r);
+                        var me = this;
                         me.waiting = false;
-                        me.onSuccess(r);
-                        me.setData(unwrapped.data, unwrapped.total);
+
+                        if(me.furtherRequests){
+                            me.loadData.apply(me,me.furtherRequests);
+                            me.furtherRequests = undefined;
+                        }else{
+                            var unwrapped = Wui.unwrapData.call(me,r);
+                            me.onSuccess(r);
+                            me.setData(unwrapped.data, unwrapped.total);
+                        }
                     },
     
     /** @eventhook AllowS for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
@@ -1328,7 +1376,8 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     
                     function btnClick(e){
                         if(!me.disabled){
-                            me.click(arguments);
+                            Array.prototype.push.call(arguments,me);
+                            me.click.apply(me,arguments);
                             me.el.trigger($.Event('wuibtnclick'),[me]);
                         }
                         return false;
