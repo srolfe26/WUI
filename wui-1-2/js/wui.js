@@ -38,7 +38,7 @@ var Wui = Wui || {
 
 (function($,window) {
 
-// AJAX error reporting, caching, and to change options if the request is sending a FormData object.
+// AJAX error reporting and caching.
 $.ajaxSetup({ 
     cache:      false,
     error:      function(response){
@@ -48,13 +48,6 @@ $.ajaxSetup({
                     catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
                     if(err !== null)
                         Wui.errRpt(err.fatalError);
-                },
-    beforeSend: function(xhr,options){
-                    if(options.data instanceof FormData){
-                        options.contentType = false;
-                        options.processData = false;
-                        options.cache = false;
-                    }
                 }
 });
 
@@ -68,6 +61,12 @@ $.ajaxSetup({
 
     Changes jQuery's ajax setup temporarily to perform the file upload, then changes it
     back to previous settings after the next ajax request to successfully execute.
+
+    NOTE:
+    contentType:false,
+    processData:false
+
+    must be added in the options of the request.
 */
 Wui.forAjaxFileUpload = function(obj){
     var formData = new FormData();
