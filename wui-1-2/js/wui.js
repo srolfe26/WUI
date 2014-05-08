@@ -2,7 +2,7 @@
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2/license.html
  */
  
  
@@ -69,7 +69,7 @@ $.ajaxSetup({
     must be added in the options of the request.
 */
 Wui.forAjaxFileUpload = function(obj){
-    var formData = new FormData();
+    var formData = new FormData();                                                                    
 
     // Adds all of the keys in obj to formData
     for (var a in obj) {
@@ -1077,11 +1077,11 @@ Wui.DataList = function(args){
         /** Determines whether templates are made immediately when the DataList is rendered */
         autoLoad:       true,
         
-        /** DOM element where all of the data templates will be appended. */
-        el:             $('<div>'),
-        
         /** Maximum number of data elements to display, even if data set is larger. */
         displayMax:     -1,
+
+        /** DOM element where all of the data templates will be appended. */
+        el:             $('<div>'),
         
         /** Method that will run immediately when the object is constructed. */
         init:           function(){},

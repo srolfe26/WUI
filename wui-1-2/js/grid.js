@@ -231,7 +231,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         }
                         
                         if(compare !== 0 || me.sorters[depth + 1] === undefined)    return compare * srtVal;
-                        else                                                    return me.doSort(depth + 1,a,b);
+                        else                                                        return me.doSort(depth + 1,a,b);
                     }else{
                         return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
                     }
@@ -413,7 +413,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
                             stop:       function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
                             resize:     function(event,ui){ 
-                                            col.width = ui.size.width; col.fit = 0;
+                                            col.width = ui.size.width; col.fit = -1;
                                             Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
                                         }
                         });

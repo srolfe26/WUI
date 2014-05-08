@@ -284,7 +284,7 @@ button::-moz-focus-inner { border:0; }
 .wui-form-err .wui-fe input.has-file[type="text"][disabled] { background-color: #eee; }
 
 /**********************************************   grid styles   ************************************************/
-.wui-ghs {height:1px !important; overflow:hidden; margin:-1px 0 0;}
+.wui-ghs {overflow:hidden; margin:-1px 0 0;}
 .wui-gh {width:100%; overflow:hidden; position: absolute; background-color:#555;}
 .wui-gh * {-moz-user-select:none; -webkit-user-select:none;}
 .wui-gh ul {margin:0; padding:0; min-width:100%; max-width:100%; width:100%; height:2em; overflow:hidden;}
@@ -344,6 +344,7 @@ button::-moz-focus-inner { border:0; }
 
 .grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
 .grid-body table {border-collapse:collapse;}
+.grid-body table.wui-infinite-table {position: absolute; left:0; top:0;}
     .grid-body td { background-position:center center; border-bottom:0; border:1px dotted #ccc; }
         .grid-body tr:nth-child(2n) { background-color: #fff; }
         .grid-body tr:nth-child(2n+1) { background-color: #eee; }

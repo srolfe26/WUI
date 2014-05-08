@@ -2,7 +2,7 @@
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2/license.html
  */
 
 (function($,Wui) {
@@ -2205,17 +2205,21 @@ Wui.FileBasic = function(args) {
 };
 
 Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
-   init: function(){
-        var me = this;
-        Wui.Text.prototype.init.call(me);
-        me.append(me.field);
+   init:    function(){
+                var me = this;
+                Wui.Text.prototype.init.call(me);
+                me.append(me.field);
 
-        if(me.multiple)
-            me.field.attr('multiple', true);
-   },
-   getVal: function(){
-       return this.field[0].files;
-   }
+                if(me.multiple)
+                    me.field.attr('multiple', true);
+            },
+    getVal: function(){
+                return this.field[0].files;
+            },
+    setVal: function(sv){
+                if(sv == null)
+                    this.field.val('');
+            }
 });
 
 
@@ -2450,7 +2454,7 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
             items:      [inputFrm],
             cls:        'wui-input-window',
             width:      600,
-            getVal:        function(){
+            getVal:     function(){
                             var formData = inputFrm.getData();
                             if(formData){
                                 if(callback && typeof callback == 'function'){
@@ -2460,7 +2464,6 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
                                 }else{
                                     Msg.closeOkay = true;
                                 }
-                                Msg.close();
                             }
                         },
             onWinClose: function(){ return ((Msg.closeOkay !== true) ? false : Msg.closeOkay); }

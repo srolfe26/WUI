@@ -1,8 +1,8 @@
-﻿/*! W 1.1
+﻿/*! W 1.2
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2/license.html
  */
 
 (function($, window, Wui) {

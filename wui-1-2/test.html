@@ -17,7 +17,45 @@
     <script type="text/javascript" src="js/grid.js"></script>
     <script type="text/javascript">
         var startTimeA = null, startTimeB = null, finishTimeA = null, finishTimeB = null;
-        new Date();
+        
+        Wui.Template.prototype.make = function (index){
+            var me = this;
+            if(me.data && me.template){
+                if(!me.physicalTemplate){
+                    me.physicalTemplate = $(me.template);
+                }
+                return $(me.physicalTemplate[0].cloneNode(true));
+                /*var tplCopy = me.template;
+                
+                if($.isNumeric(index))    $.extend(me.data,{wuiIndex:index});
+                
+                return $(
+                    tplCopy
+                    // replaces straight values
+                    .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
+                    // accounts for complex expressions
+                    .replace(/\{\((.*?)\)\}/g,function(m,fn){
+                        var keys = Wui.getKeys(me.data), vals = [], i = 0;
+                        
+                        // Removes any key values that may start with a number and ruin the engine
+                        for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
+
+                        // fill arrays of keys and their values and make sure they are in the same order
+                        for(i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
+                        
+                        // add the passed in conditional as the body of the function created below
+                        keys.push("return " + fn);
+                        
+                        // create function that will perform the conditional statement
+                        var newFn = Function.apply(null,keys);
+                        
+                        // call the function with the keys as variables in scope
+                        return newFn.apply(null,vals);
+                    })
+                );*/
+            }
+            throw new Error('Wui.js - Template engine missing data and/or template.');
+        };
 
         $(document).ready(function(){
             a = new Wui.Grid({
