@@ -5,7 +5,7 @@
     <title>JS Concat</title>
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <script type="text/javascript" src="js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="js/jquery-2-1-1-ui-1-10-4.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function(){
@@ -54,9 +54,10 @@
 
             var a = new concat();
 
-            a.add('js/jquery-1-10-2-ui-1-10-3.js');
+            a.add('js/jquery-2-1-1-ui-1-10-4.js');
             a.add('js/wui.js');
             a.add('js/grid.js');
+            a.add('js/infinite-grid.js');
             a.add('js/state.js');
             a.add('js/forms.js');
             a.add(function(){ $('code').append(concatString.replace(/</g,'&lt;').replace(/>/g,'&gt;')); });

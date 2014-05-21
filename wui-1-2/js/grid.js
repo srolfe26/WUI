@@ -2,7 +2,7 @@
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2/license.html
  */
 
 (function($,Wui) {
@@ -146,9 +146,6 @@ appearing on the right side of the column heading.
 
 Columns can be resized by dragging the heading borders left and right. Columns can be sized to 
 extend beyond the width of the grid frame, but when sized smaller will pop back into position.
-
-While not using Wui.fit(), the same principles apply in the sizing of elements, although percentage
-values are not supported at this time.
 */
 Wui.Grid = function(args){
     $.extend(this,{
@@ -182,6 +179,13 @@ Wui.Grid = function(args){
         
         /** An array of the currently selected records */
         selected:       [],
+
+        /** An array containing objects in the following format, that 
+        define the initial sort of the data: {dataItem:'name', order:'asc/desc'} */
+        sort:           [],
+
+        /** @private Used internally to keep track of sorting, items added to sort will be used in the sorters array */
+        // sorters:     []
         
         /** An array of items that will be added to the header */
         tbar:           []
@@ -299,8 +303,14 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         sortClasses = ['one','two','three','four','five'];
                     if(col !== undefined){
                         if(dir !== undefined){
+                            var addItem = true;
+                            for(i = me.sorters.length; i > 0; i--)
+                                if(me.sorters[i-1].dataItem == col.dataItem)
+                                    addItem = false;
+
                             col.sortDir = dir;
-                            me.sorters.push(col);
+                            if(addItem)
+                                me.sorters.push(col);
                         }else{
                             if(col.sortDir){
                                 if(col.sortDir == 'desc'){
@@ -486,9 +496,17 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                 },
     
     setData:    function(){
-                    Wui.DataList.prototype.setData.apply(this,arguments);
+                    var me = this, i = null, j = null;
+                    Wui.DataList.prototype.setData.apply(me,arguments);
+
+                    // If the config sorters is defined, add them to the array
+                    if(me.sort.length && !me.sorters.length)
+                        for(i = 0; i < me.sort.length; i++)
+                            for(j = 0; j < me.cols.length; j++)
+                                if(me.cols[j].dataItem == me.sort[i].dataItem)
+                                    me.mngSorters(me.cols[j],me.sort[i].order);
+
                     this.sortList();
-                    this.sizeCols();
                 },
 
     /** Size up the columns of the table to match the headings @private */

@@ -23,8 +23,29 @@ $.fn.overrideNodeMethod = function(methodName, action) {
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
 @event  formupdate Fires when a field on the form changes. Passes (event, form, [field])
-A WUI Form is a collection of Wui.FormField objects with methods to
-both collectively and individually interact with those objects.
+
+The WUI Form is a wrapper for Wui.FormField()s. The WUI Form extends some basic Wui Object 
+functionality to work specifically for a form. For example, the each method of a Wui form
+operates on all of the items in the form's items array, but can optionally only operate on
+only those items which are of the Wui.FormField type.
+
+Items can be pushed and spliced on a Wui form using the push and splice methods, but these
+items will receive additional processing through the normFrmItem method which will apply
+form properties if they're not already specified on the object (like label position and
+enabled status).
+
+FormFields can be defined in a couple of different ways in a form. The first way, is to use
+the new operator (i.e. new Wui.Text({})), the other way is to declare an object containing an
+ftype:
+
+{ftype:'Wui.Text', [other properties...]}
+
+Data can be set on a form by passing an object with keys matching the form's field names to 
+the setData method. getData() works inverse to setData, but will return false rather than
+an object if there is a validation problem on the form.  For information about validation, 
+see Wui.FormField.validate().
+
+Form items can be accessed by name using the getFrmItm() method.
 */
 Wui.Form = function(args){
     $.extend(this,{
@@ -62,15 +83,20 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                 },
 
     /**
-    @param {function}   f           A function that gets called for each item of the form with the exception of Wui.Note objects.
-    @param {boolean}    [blockNote] If defined and true, items that do not inherit from Wui.FormField will not be processed.
+    @param {function}   f               A function that gets called for each item of the form with the exception of Wui.Note objects.
+    @param {boolean}    [blockNote]     If defined and true, items that do not inherit from Wui.FormField will not be processed.
+    @param {boolean}    [ascending]     Whether the loop happens in ascending or descending order. Defaults to true.
     @return true
     The passed in function gets called with two parameters the item, and the item's index.
     */
-    each:       function(f, blockNote){
-                    return Wui.O.prototype.each.call(this,function(itm,i){
-                        if(!(blockNote && !(itm instanceof Wui.FormField))) return f(itm,i);
-                    });
+    each:       function(f, blockNote,ascending){
+                    return Wui.O.prototype.each.call(
+                        this,
+                        function(itm,i){
+                            if(!(blockNote && !(itm instanceof Wui.FormField))) return f(itm,i);
+                        },
+                        ascending
+                    );
                 },
 
     /** Class to hilight form fields when they fail validation */
@@ -296,6 +322,8 @@ Wui.Note.prototype = $.extend(new Wui.O(),{
     The label object will wrap around a Wui.FormField when the 'label' config is specified
     on the field. The labelPosition is usually supplied by the field the label will wrap, but
     it has its own property, and can be instantiated by itself.
+
+    When a label is part of a Wui.FormField, it is accessible by the lbl property of the field.
 */
 Wui.Label = function(args){ 
     $.extend(this,{
@@ -414,7 +442,13 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
     @event valchange When a value changes on a form field (event, WUI FormField, value, old value)
     @event hiddenchange Same as valchange but for fields without an 'el' property (like hidden fields. Called on the window (WUI FormField, value)
     
-    The base object that WUI form elements extend from
+    Wui.FormField contains configs and methods that are common to all form elements. For 
+    a form to interact properly with a field, it must be an instance of Wui.FormField. Vlidation
+    is provided by the FormField ojbect, but can be overridden for specific needs in a given
+    field. See the validate() documentaton for information about how to display custom error messages,
+    validate with regular expressions, and write custom functions for validation.
+
+    An input must be an instance of Wui.FormField for it to interact properly with a Wui form.
 */
 Wui.FormField = function(args){
     $.extend(this,{
@@ -684,6 +718,22 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
     @param  {Wui Object}  t  The object to have listeners applied to the field
     Puts listeners on the field, mostly to handle blankText in the event that HTML 5 placeholder isn't supported 
     Also calls the setListeners() of any extending object automagically.
+
+    The parameter (t) is automatically passed in to the setListeners method and
+    represent the object. Listeners can be added to the field like this:
+
+    t.field.blur([some function that will happen on blur.])
+
+    Listeners can also be chained:
+
+    t.field.blur(...).focus(...).click(...) 
+
+    Unlike other functions in the WUI, if the field already has a setListeners method defined,
+    there is no need to call the prototype to still get the functionality of the base method. If
+    you desire to turn a particular listener off (though not recommended), this can be done with 
+    tandard jQuery for turning a listener off:
+
+    t.field.off('click');
     */
     setListeners:   function(t){
                         var me = this,
@@ -749,7 +799,7 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
 });
 
 
-/** Creates a WYSIWYG editor from a textfield.  
+/** Creates a WYSIWYG (What You See Is What You Get) editor from a textfield.   
 @author Stephen Nielsen
 */
 Wui.Wysiwyg = function(args){
@@ -773,8 +823,6 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                         me.iframe = $('<iframe>').addClass('wui-editor'),
                         me.tools = $('<div>').addClass('wui-editor-tools')
                     );
-
-                    (me.elAlias || me.el).resizable();
 
                     me.tools.append(
                         me.bold = $('<a>').addClass('bold').attr({tabIndex:-1, title:'Bold'}),
@@ -833,6 +881,8 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
 
                     // If the field is blank - add a space
                     if(!$(edit.body).children().length) me.exec('insertHTML',false,' ');
+
+                    (me.elAlias || me.el).resizable();
                 },
     exec:       function (a, b, c) {
                     this.iframe[0].contentWindow.focus();
@@ -1254,9 +1304,10 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
 
                             // Add listeners to children
                             holder.children()
-                                            .mouseenter(function(evnt){ me.rsltHover(evnt); })
-                                           .mousedown(function(e){me.field.isBlurring = false;})
-                                           .click(function(){ me.rsltClick(); });
+                                .bind('touchstart',function(evnt){ me.rsltHover(evnt); me.field.isBlurring = false; })
+                                .mouseenter(function(evnt){ me.rsltHover(evnt); })
+                                .mousedown(function(e){me.field.isBlurring = false;})
+                                .click(function(){ me.rsltClick(); });
 
                             // Append children to the DD
                             me.dd.append(holder.children().unwrap());
@@ -1553,25 +1604,29 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
 
 
 /**
- * Borrowed from Date.js and tweaked a TON - See license below, and check out the full library if you're doing tons with dates
- * Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
- * License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
- * Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
- 
- The Datetime field can be used in conjunction with a calendar-style datepicker. When dates are changed, any time information is
- retained.
- 
- Feedback is given to the user so concerns about whether the date is in a proper format can be allayed before validation occurs.
- Dates can be entered in a variety of formats of which what is below is a very small sample:
- 
- "Five months after 9/20/2013"
- "Yesterday"
- "05/26/1983"
- "2012-12-12"
- "today at noon"
- "tomorrow at five thirty pm"
- "10-9-2013 5:30 PM"
- "ten months from now"
+The Datetime field allows the user to enter a date in any format 
+they choose, as well as providing a date picker. When dates are 
+changed, any time information is retained.
+
+In order to eliminate data entry issues, feedback about whether 
+the date was understood by the software is given instantly.
+
+Dates can be entered in a variety of formats of which what is 
+below is a very small sample:
+
+"Five months after 9/20/2013"
+"Yesterday"
+"05/26/1983"
+"2012-12-12"
+"today at noon"
+"tomorrow at five thirty pm"
+"10-9-2013 5:30 PM"
+"ten months from now"
+
+* Borrowed from Date.js and tweaked a TON - See license below, and check out the full library if you're doing tons with dates
+* Copyright (c) 2006-2007, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+* License: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
+* Website: http://www.datejs.com/ or http://www.coolite.com/datejs/
 */
 Wui.Datetime = function(args){ 
     $.extend(this,args,{ 
@@ -2192,12 +2247,16 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
 
 /**
 @author Dan Perry (dan.perry@usurf.usu.edu)
-An HTML5 file upload than can upload files via ajax. Supported in IE10+
-When the form data is aggregated, it must be passed with a javascript FormData object.
-If using jQuery $.ajax(): cache, contentType, processData parameters must be set to false.
+An HTML5 file tool than can upload files via ajax.
+To upload files via AJAX successfully, the form data must be processed with Wui.forAjaxFileUpload().
+See the documentation of Wui.forAjaxFileUpload() for more information.
+
+Because FileBasic can upload via AJAX, it doesn't require the tight server coupling that
+Wui.File() does, and thus doesn't have to be extended to be immediately useful.
 */
 Wui.FileBasic = function(args) {
     $.extend(this,{
+        /** When set to true, allows the user to select multiple files to upload */
         multiple:   false,
         field:      $('<input>').attr({type:'file'})
     },args);
@@ -2213,6 +2272,12 @@ Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
                 if(me.multiple)
                     me.field.attr('multiple', true);
             },
+    validTest:function(v){ 
+                if(this.required) 
+                    return v.length !== 0;
+
+                return true;
+            },
     getVal: function(){
                 return this.field[0].files;
             },
@@ -2225,7 +2290,11 @@ Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
 
 /**
 @author Stephen Nielsen (stephen.nielsen@usurf.usu.edu)
-Creates a form field for uploading files. By the nature of file uploads and their tight pairing to a backend server, this control must be extended itself to be used for uploading files.
+Creates a form field for uploading files. By the nature of file uploads and their tight pairing 
+to a backend server, this control must be extended itself to be used for uploading files.
+
+Because Wui.FileBasic() can upload via AJAX, it doesn't require the tight server coupling that
+Wui.File() does, and thus doesn't have to be extended to be immediately useful.
 */
 Wui.File = function(args){ 
     $.extend(this,{
@@ -2427,7 +2496,8 @@ Wui.File.prototype = $.extend(new Wui.Text(),{
 @param {string}     [content]   HTML content to display above the form fields.
 @return The Wui.Form that was created by the input. Use the returned value .parent to get the window.
 
-Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. For the various configurations, see the example source.
+Presents a WUI Form in a modal window.  In its simplest form, just passing in a single 'msg' string will present a window with a text field and the 'msg' as a label for the field. 
+The example source contains various configurations: Basic, Input with Title, Input with a single replacement, and a full form.
 */
 Wui.input = function(msg, callback, msgTitle, inputs, content){
     // make sure the inputs will be acceptable on the form

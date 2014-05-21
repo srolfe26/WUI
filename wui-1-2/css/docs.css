@@ -1,4 +1,4 @@
-﻿/*! Wui 1.1
+﻿/*! WUI 1.2
  * Copyright (c) 2013 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
@@ -7,7 +7,9 @@
 
 body { 
     font-family: Arial, Helvetica, Verdana, sans-serif; font-size:16px; text-decoration: none;
-    padding:0 1.5em;
+    padding:3em 2em;
+    margin:0;
+    background-color: #F5F2F0;
 }
 
 body, body * {
@@ -32,8 +34,8 @@ h1 span {
 body.about-page {margin:0; padding:0;}
 
 .about-page .about-header {
-    height:400px;
-    padding:50px;
+    height:250px;
+    padding:25px;
     background-color: #369;
     color:#fff;
     font-size: 3em;
@@ -82,7 +84,7 @@ body.about-page {margin:0; padding:0;}
 
 
 /* DOCUMENTATION */
-.wui-doc {border:1px solid #aaa; margin:0.5em; padding:1em;}
+.wui-doc {}
 .wui-doc a {color:#930; text-decoration: none; font-size: 0.8em;}
 .wui-doc a.doc-item-title {
     float: left;
@@ -205,7 +207,7 @@ body.about-page {margin:0; padding:0;}
     float: right;
     height: 26px;
     line-height: 24px;
-    margin: 0 0 1em 0.15em;
+    margin: 1em;
 }
 .wui-inherited-toggle:hover, .wui-inherited-toggle:active {color:#fff; background-color:#369; border-color:#036;}
 .wui-inherited-toggle:active {box-shadow:inset 0 0 5px rgba(0,0,0,0.5); border:1px solid #036;}
@@ -233,3 +235,53 @@ body.about-page {margin:0; padding:0;}
 .wui-doc-deprecated { width:6.5em;  color:#F60;  border-color:#F9O; }
 .wui-doc-eventhook { width:6.5em;  color:#90F;  border-color:#90F; }
 .wui-doc-awesome{ width:6em;  color: #09F;  border-color: #09F; letter-spacing:1px; }
+
+/*** Icons are freebies from http://www.finest.graphics/freebie/40-user-interface-icons/ **/
+.utility-icon {background-image:url('../img/docs/utility.png');}
+.func-icon {background-image:url('../img/docs/function.png');}
+.obj-icon {background-image:url('../img/docs/object.png');}
+.utility-icon, .func-icon, .obj-icon {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 20px auto;
+}
+
+
+/*********************************************************************************************************************/
+/***************************************************** MOBILE ********************************************************/
+/*********************************************************************************************************************/
+@media only screen and (max-width: 890px) {
+
+    body { 
+        padding:0;
+    }
+
+    .wui-doc {
+        border: 0;
+        margin: 0;
+        padding: 0 0.25em;
+    }
+
+    .doc-nav-list {display:none;}
+
+    .wui-doc-btn-dock  .wui-btn.toggler {
+        margin: 0 0 0 0.5em;
+        overflow: hidden;
+        padding: 0 0.15em;
+        text-indent: -3em;
+        text-transform: none;
+    }
+
+    .license-btn, .git-btn, .download-btn {
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 20px auto;
+        text-indent: -40em;
+        overflow: hidden;
+        width: 30px;
+    }
+
+    .license-btn {background-image:url('../img/docs/license.png'); background-size: 24px 18px;}
+    .git-btn {background-image:url('../img/docs/github.png');}
+    .download-btn {background-image:url('../img/docs/download.png');}
+}

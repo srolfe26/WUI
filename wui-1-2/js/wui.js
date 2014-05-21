@@ -53,29 +53,34 @@ $.ajaxSetup({
 
 
 /**
-    @param {object} obj Object containing named keys.
-    @return A javascript FormData object containing the key/values passed in including files.
+    @param  {object}    obj         Object containing named keys.
+    @param  {boolean}   [addIndex]  For fileLists, add the index of the file regardless of whether there is one or many. 
+    @return A javascript FormData object (<a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/FormData">Mozilla Developer Network: FormData</a>) containing the key/values passed in including files.
 
     Allows the WUI to upload files via ajax by using the javascript FormData object made
-    available in HTML5 (https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+    available in HTML5. In cases where a field contains multiple files, the FileList it
+    contains will be broken down into multiple keys in the FormData with the keys being named
+    {fieldName}_{number-th-file starting with 0} (i.e. 'image_0','image_1',etc...). 
 
-    Changes jQuery's ajax setup temporarily to perform the file upload, then changes it
-    back to previous settings after the next ajax request to successfully execute.
+    The following MUST be added to the config of the ajax object:
 
-    NOTE:
     contentType:false,
     processData:false
 
-    must be added in the options of the request.
+
 */
-Wui.forAjaxFileUpload = function(obj){
-    var formData = new FormData();                                                                    
+Wui.forAjaxFileUpload = function(obj,addIndex){
+    var a = 0, x = 0, formData = new FormData();                                                                    
 
     // Adds all of the keys in obj to formData
-    for (var a in obj) {
+    for (a in obj) {
         if(obj[a] instanceof FileList) {
-            for( var x=0; x < obj[a].length;x++)
-                formData.append(a+'_'+x,obj[a][x]);
+            if(obj[a].length > 1 || addIndex){
+                for(x = 0; x < obj[a].length; x++)
+                    formData.append(a+'_'+x,obj[a][x]);
+            }else{
+                formData.append(a,obj[a][0]);
+            }
         }else{
             if      (obj[a]===null) formData.append(a,"");
             else    formData.append(a,obj[a]);
@@ -86,16 +91,31 @@ Wui.forAjaxFileUpload = function(obj){
 };
 
 
-/** @return Returns a unique id */
+/** @return The id of the string. 
+    Returns a string that will be a unique to use on the DOM. 
+    Ids are returned in the format wui-{number}.
+*/
 Wui.id = function(){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
     return 'wui-' + Wui.idCounter++;
 };
 
 
-/**
-    @param {object} Object containing named keys
-    @return Array containing the key names of the passed in object in alphabetical order
+/**Returns an array of the keynames of an object. For example:
+
+Wui.getKeys({
+    first:  1,
+    second: 2,
+    third:  'three'    
+})
+
+Will return:
+
+['first','second','third']
+
+@preserve_format
+@param {object} Object containing named keys
+@return Array containing the key names of the passed in object in alphabetical order.
 */
 Wui.getKeys = function(obj){
     var retArray = [];
@@ -104,9 +124,10 @@ Wui.getKeys = function(obj){
     return retArray.sort();
 };
 
-/** 
+/** A function to get the scrollbar width is necessary because it varies among browsers, and is useful
+for sizing objects within a container with overflow set to scroll, or auto.
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-@return Number specifying the scrollbar width for the current page in pixels
+@return Number specifying the scrollbar width for the current page in pixels.
 */
 Wui.scrollbarWidth = function() {
     var parent, child, width;
@@ -123,7 +144,7 @@ Wui.scrollbarWidth = function() {
 
 
 /**
-    Determines whether a value is a percent string
+    Determines whether a value is a percent string.
     @return True if there is a string passed in containing a '%', else false.
 */
 Wui.isPercent = function(){
@@ -131,7 +152,7 @@ Wui.isPercent = function(){
 };
 
 
-/**
+/** Converts a percentage to a number of pixels given the containing element's dimensions.
     @param {object} el          jQuery Object the percents are being calculated for. 
     @param {string} percent     Percent to be calculated into pixels
     @param {string} dim         Dimension [height,width] for comparing to parent objects
@@ -199,10 +220,10 @@ Wui.unwrapData = function(r){
 /** 
 @param {object} parent The element to which the child will be relatively positioned.
 @param {object} child The element to be positioned.
-Absolutely positions a child element such that it will be within the window and at the max z-index.
+Absolutely positions a child element, relative to its parent, such that it will 
+be visible within the viewport and at the max z-index. Useful for dialogs and drop-downs.
 */
 Wui.positionItem = function(parent,child){
-    // Position calendar to ensure it will be seen
     var ofst    = parent.offset(),
         cHeight = child.outerHeight(),
         cWidth  = child.outerWidth(),
@@ -301,12 +322,49 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
 };
 
 
-/** The base object from which all other WUI Objects extend
+/** The base object from which all other WUI Objects extend. The Wui Object contains some
+foundational configs and methods that are key to understanding with WUI at large. Each of these 
+methods and configs are found in every reusable object <img src="../img/object.png" width="20" height="20" /> in the WUI.
+
+Each object has an 'el' which represents the HTML object/element that can be added to the DOM. In the case
+of the base Wui.O, this element must be defined.
+
+Each object also has a representaion of itself in memory. This object in memory contains an items array.
+Although items can be appended to the 'el' without being added to the items array, the items array is meant
+to contain all of the child elements of an object.
+
+When a Wui.O is added to another object's items array in memory, its 'el' is appended to the parent object's
+'el' on the DOM, as a child DOM node.  This works conversly when removing an item from the items array. The
+primary methods for adding/removing items are push(), and splice(); and these are involved in much of the 
+manipulation of objects using the WUI. Both push and splice follow in form and function JavaScript's methods of the
+same name.
+
+It is important to note that with all WUI objects, there is a distinction between when an object is instantiated
+in memory, and when it is actually rendered on the page. Every Wui.O has a event hook called onRender() that can
+be defined to do certain things when the object is rendered on the page.
+
+
  *  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 */
 Wui.O = function(args){ $.extend(this,{
     /** Whether the object is hidden on the DOM */
     hidden:    false
+
+    /** If id has a value, the HTML attribute id will be set on the element. */
+    //id:       undefined,
+
+    /** If name has a value, the HTML attribute name will be set on the element. 
+    This is useful for naming objects for listeners. */
+    //name:     undefined,
+
+    /** This item can contain a space separated list of classes that will be applied
+    to the element of the object. Additional classes may be added by the object itself. This
+    is useful for adding additional styling to objects. */
+    //cls:      undefined,
+
+    /** tabIndex is used to give an item the ability to be tabbed to, and to order that tabbing. 
+    A -1 in this value will make the element un-tabbable. */
+    //tabIndex: undefined,
 },args); };
 Wui.O.prototype = {
     /**
@@ -401,7 +459,7 @@ Wui.O.prototype = {
     Tests whether the passed in value is valid, then uses the jQuery .attr method to apply an attribute to the el of the WUI object.
     */
     applyAttr:  function(name,val){
-                    var validVal = (val !== undefined && (typeof val === 'string' || typeof val === 'number'));
+                    var validVal = (typeof val === 'string' || typeof val === 'number');
                     if(validVal) $(this.el).attr(name,val);
                     return validVal;
                 },
@@ -444,14 +502,15 @@ Wui.O.prototype = {
                     }
                 },
     /**
-    @param {function} fn Function that gets called for each item of the object.
-    @param {boolean} ascending Whether the loop happens in ascending or descending order. Defaults to true.
+    @param {function}   fn          Function that gets called for each item of the object.
+    @param {boolean}    [ascending] Whether the loop happens in ascending or descending order. Defaults to true.
     
     @return true
-    The passed in function gets called with two parameters the item, and the item's index.
+    Loops through each of the objects items. The passed in function gets 
+    called with two parameters the item, and the item's index.
     */
     each:       function(f,ascending){
-                    ascending = (ascending === undefined) ? true : ascending;
+                    ascending = (typeof ascending === 'undefined') ? true : ascending;
                     var i = (ascending) ? 0 : this.items.length - 1;
                     
                     if(this.items){
@@ -469,8 +528,8 @@ Wui.O.prototype = {
                     return true;
                 },
     /**
-    @param {number} [speed] Time in milliseconds for the hiding element to fade out
-    @param {function} [callback] A function that gets called at the end of the fadeout/hide
+    @param {number}     [speed]     Time in milliseconds for the hiding element to fade out.
+    @param {function}   [callback]  A function that gets called at the end of the fadeout/hide.
     
     @return The el or elAlias of the object being hidden
     Hides an object with the options of an animated fadeout and callback function
@@ -497,7 +556,7 @@ Wui.O.prototype = {
                 },
 
     /**
-    @param {function}   afterLayout A function to run after the layout has occurred.
+    @param  {function}   afterLayout A function to run after the layout has occurred.
     Runs cssByParam and Wui.fit() on itself and its children.  Similar to callRender(),
     but without the rendering of objects - useful to resize things that are already rendered.
     */
@@ -528,7 +587,8 @@ Wui.O.prototype = {
     /**
     @param {numeric}    position    Position to move the item to
 
-    Moves the item within the items array it is a member of. If not a member of an items array, this does nothing.
+    Moves the item within the items array it is a member of. If not a member 
+    of an items array, this does nothing.
     */
     move:       function(newPosition){
                     var me = this, myPosition = me.index();
@@ -687,14 +747,25 @@ Wui.O.prototype = {
                 }
 };
 
-/** WUI Long Poll
+/** The Long Poll object provides a way to poll a remote resource at a given interval.
+This is similar to listening on a socket, but is rather repeatedly polling a resource via AJAX.
+Long polling is useful for checking on the status of an item, or reloading data that 
+changes in real-time while the user has the page on the screen.
+
+The example source is the best way to understand how to use this resource.
+If you have a javascript console available, watching the console while this page is loaded
+will give you a demonstration if what is happening.
+
+The WUI Long Poll has a self-decaying retry feature: In the case that the resource is unavailable,
+rather than continuing to poll at a constant interval, the poll will slow its polling by a factor of the
+waitFactor config, until it eventually stops trying. If the resource returns, the poll will revert to
+its initial interval.
+
  @event     pollStart     Fires before polling starts (event, Wui.longPoll)
  @event     pollSuccess   Fires When the poll recieves a successful response. Includes remote data. (event, Wui.longPoll, data)
  @event     pollError     Fires when $.ajax() has an error in the request. (event, Wui.longPoll, err)
  @event     pollStopped   Fires after polling has stopped. Stopping polling doesn't trigger until the startup of the next poll. (event, Wui.longPoll)
  @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
-
-An object to long poll a remote resouce on a given interval with events.
 */
 Wui.LongPoll = function(args){
     $.extend(this,{
@@ -772,11 +843,17 @@ Wui.LongPoll.prototype = {
 };
 
 
-/** WUI Data Object
+/**
  @event        datachanged    When the data changes (name, data object)
  @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
 
-The object for handling data whether remote or local
+The WUI Data Object is for handling data whether remote or local. It will fire 
+namespacedevents that can be used by an application, and provides a uniform 
+framework for working with data.
+
+If data is remote, Wui.Data is an additional wrapper around the jQuery AJAX method 
+and provides for pre-processing data. Data can be pushed and spliced into/out of 
+the object and events will be fired accordingly.
 */
 Wui.Data = function(args){
     $.extend(this,{
@@ -871,7 +948,7 @@ Wui.Data.prototype = {
 
                             if(paramsOkay !== false && beforeLoad !== false){
                                 me.waiting = true;
-                                $.ajax(me.url,config);
+                                return $.ajax(me.url,config);
                             }
                         }else{
                             me.furtherRequests = arguments;
@@ -917,7 +994,6 @@ Wui.Data.prototype = {
                         else                    $(document).trigger($.Event('datachanged'),[dn, me]);
 
                         me.afterSet(me.data);
-                        
                     },
     
     /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
@@ -987,6 +1063,7 @@ Wui.Data.prototype = {
     */
     push:           function(){
                         var retVal = Array.prototype.push.apply(this.data,arguments);
+                        this.total = this.data.length;
                         this.fireDataChanged();
                         return retVal;
                     },
@@ -1000,14 +1077,37 @@ Wui.Data.prototype = {
     */
     splice:         function(){
                         var retVal = Array.prototype.splice.apply(this.data,arguments);
+                        this.total = this.data.length;
                         this.fireDataChanged();
                         return retVal;
                     }
 };
 
 
-/**
+/**The template engine is a simple way to create DOM elements based on data. A template string is provided that contains the
+template html with the variable interspersed surrounded by '{}'. For example, a simple data template to display a list
+of names may be: 
 
+'<li>{name}</li>'
+
+There are more complex operations that can be performed with a template. For example, suppose I had a set that contained
+the data name, address, gender, and age. I can operate programmatically on the data by using the form '{()}', where 
+everything inside the parenthesis is processed like a function. In essence, with the previously described data set, 
+'{('some code here')}' is equivalent to the following functions, where the values of each row are passed in:
+
+function(name, address, gender, age){
+    return 'some code here';
+};
+
+If I wanted to display this information in a table, but I didn't want to display the age if it was over 20. I also 
+wanted to append 'Mr.', or 'Ms.' depending on the gender.My template could take the following form:
+
+'<tr>' +
+    '<td>{( ((gender == "female") ? "Ms. " : "Mr. ") + name )}</td>' +
+    '<td>{( (parseInt(age) > 20) ? '-' : age )}</td>' +
+    '<td>{address}</td>' +
+'</tr>'
+@preserve_format
 */
 Wui.Template = function(args){ $.extend(this,args); };
 Wui.Template.prototype = {
@@ -1059,7 +1159,19 @@ Wui.Template.prototype = {
 };
 
 
-/** WUI Data List
+/**
+ WUI Data List extends both Wui.Data and Wui.Template and allows for additional events such as selecting
+ and deselecting items. When data is loaded, the template engine will automatically re-render the data set.
+
+ A data list is the basis for Wui.Grid, but can provide powerful tools for creating advanced 
+ interface elements. Creating advanced elements can be done using the modifyItem method which allows
+ the programmer to add various additional functionality to each template created.  Depending on the level
+ of interactivity, CreateItem (the method that adds the listeners to select/deselect the item) must also
+ be modified so that interactions with an item don't inadvertently select/deselect the item itself.
+
+ Items in a datalist can be selected programmatically using the selectBy method. Items will be reselected
+ after a refresh if the 'identity' config is set to the name of the dataItem that is the identity field.
+ 
 @event        wuiselect         A data template is selected ( DataList, el, record )
 @event        wuichange         The selected item info along with the previous selected record if it exists ( DataList, el, record, selection array )
 @event        wuideselect       A selected item is clicked again, and thus deselected ( DataList, el, record )
@@ -1137,7 +1249,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     var me = this;
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
-                    me.el.trigger($.Event('deselect'),[me, itm.el, itm.rec]);
+                    me.el.trigger($.Event('wuideselect'),[me, itm.el, itm.rec]);
                     me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     return itm;
                 },
@@ -1330,6 +1442,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 /**
  @event        wuibtnclick        Fires when the button is pressed and not disabled. Avoided using the standard 'click' event for this reason ( Button Object )
  @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+
+ A Wui.Button creates a uniformly styled HTML button with additional functionality of being 
+ able to be disabled/enabled.  The action of the button can be defined by using the 'click'
+ method, or by naming the button and implementing a listener on the 'wuibtnclick' event.
 */
 Wui.Button = function(args){
     $.extend(this, {
@@ -1409,7 +1525,24 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
 /**
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
-WUI Pane
+The WUI Pane is a box that contains a top bar (header), a bottom bar (footer), and a content area.
+The Pane is surrounded by a border that can be manipulated via the borderStyle config.
+
+The header and footer are Wui Objects with their own array of items and methods to add and remove
+items. When items are added to the footer it will be added to the pane, and when items are removed
+to the point ito becomes empty, it will be removed and the content area will be resized accordingly.
+The header will also be added/removed from the pane as objects are added/removed, with the exception
+that if a title is set on the pane (any value besides null), then the header will remain until the 
+title is cleared.
+
+The content area of the pane is not a Wui object, but is the area where the items of the pane are
+added to and removed from. The content area can be refreshed using the layout() method.
+
+The pane can be disabled and enabled, as well as masked and unmaksed (see the methods below).
+
+The title of the pane can be set as a config, as well as modified via the setTitle method.
+
+A Wui.Pane is the base object for the Wui.Window and the above applies to windows as well.
 */
 Wui.Pane = function(args){ 
     $.extend(this,{
@@ -1440,8 +1573,77 @@ Wui.Pane = function(args){
     this.init();
 };
 Wui.Pane.prototype = $.extend(new Wui.O(),{
+    /** 
+    Adds a mask over the content area of the pane 
+    @param  {object}    target  A target to apply the mask, otherwise the pane's container will be masked.
+    @return The mask object
+    */
+    addMask:        function(target){
+                        target = (target) ? target : this.container.parent();
+                        if(target.children('wui-mask').length === 0)
+                            return this.mask = $('<div>').addClass('wui-mask').html(this.maskHTML).appendTo(target);
+                        else
+                            return null;
+                    },
+
+    /** Runs after a pane is rendered. Sets up layout listeners and sets focus on the bottom-right-most button if any */
+    afterRender:    function(){
+                        var me = this;
+                        
+                        document.addEventListener("animationstart", doLayout, false);       // standard + firefox
+                        document.addEventListener("MSAnimationStart", doLayout, false);     // IE
+                        document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
+                        
+                        function doLayout(){
+                            if(!me.parent && !(me instanceof Wui.Window)) me.layout();
+                        }
+
+                        // If the pane is disabled then it disables it
+                        if(me.disabled) me.disable();
+
+                        // Do the layout for the header and footer
+                        me.configBar('header');
+                        me.configBar('footer');
+
+                        Wui.O.prototype.afterRender.call(this);
+                    },
+
     /** Configuration for the pane border - follows the jQuery CSS convention */
     borderStyle:    { borderWidth: 6 },
+
+    /**
+    @param {barName} bar     Either the header or footer bar on the pane ['header','footer']
+    Shows/hides the header or footer depending on whether that item has child items.
+     */
+    configBar:      function(barName){
+                        var me = this, bar = me[barName], isHeader = (barName == 'header'),
+                            cssProp = (isHeader) ? 'Top' : 'Bottom',
+                            hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
+                            pad = hasItems ? bar.el.css('height') : 0,
+                            border = (hasItems) ? 0 : undefined;
+
+                        // Still enforce borders for tabs
+                        if(me.parent && me.parent instanceof Wui.Tabs && ((isHeader && me.tabsHideHeader) || (me.tabsBottom && !hasItems))) border = 6;
+                        
+                        me.sureEl.css('border' +cssProp+ 'Width', border).children('.wui-pane-wrap').css('padding' +cssProp, pad);
+                        if(hasItems){
+                            bar.place();
+                            bar.callRender();
+                            if(isHeader){
+                                me.setTitle(me.title);
+                                this.setTitleAlign();
+                            }else{
+                                // Set focus to the bottom right most button in the pane
+                                if(!me.disabled)
+                                    asdf = bar.items[bar.items.length - 1].el.focus();
+                            }
+                        }else{
+                            bar.el.detach();
+                        }
+
+                        // Set  border if applicable
+                        me.updateBorder();
+                    },
 
     /** Disables the pane by masking it and disabling all buttons */
     disable:        function(){
@@ -1459,38 +1661,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         me.header.each(function(itm){ if(itm.enable) itm.enable(); });
                         return me.disabled = false;
                     },
-    
-    /** 
-    Adds a mask over the content area of the pane 
-    @param  {object}    target  A target to apply the mask, otherwise the pane's container will be masked.
-    @return The mask object
-    */
-    addMask:        function(target){
-                        target = (target) ? target : this.container.parent();
-                        return this.mask = $('<div>').addClass('wui-mask').html(this.maskHTML).appendTo(target);
-                    },
 
-    /** Removes the mask over the content area of the pane */
-    removeMask:     function(){
-                        var me = this, mask = me.mask || me.el.find('.wui-mask');
-                        
-                        if(mask){
-                            mask.fadeOut(500,function(){ 
-                                me.mask = undefined;
-                                me.el.find('.wui-mask').remove();
-                            });
-                        }
-                    },
-
-    /**
-    @param    {string} html    New HTML content to be set on the disabled mask
-    Sets the maskHTML property to the value of html passed in. If mask presently exists it will change the value on the current mask.
-    */
-    setMaskHTML:    function(html){
-                        this.maskHTML = html;
-                        if(this.mask)    this.mask.html(html);
-                    },
-    
     /** Method that will run immediately when the object is constructed. */
     init:           function(wuiPane){
                         var me = wuiPane || this;
@@ -1531,38 +1702,25 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         me.elAlias  = me.container;
                     },
 
-    /**
-    @param {barName} bar     Either the header or footer bar on the pane ['header','footer']
-    Shows/hides the header or footer depending on whether that item has child items.
-     */
-    configBar:      function(barName){
-                        var me = this, bar = me[barName], isHeader = (barName == 'header'),
-                            cssProp = (isHeader) ? 'Top' : 'Bottom',
-                            hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
-                            pad = hasItems ? bar.el.css('height') : 0,
-                            border = (hasItems) ? 0 : undefined;
-
-                        // Still enforce borders for tabs
-                        if(me.parent && me.parent instanceof Wui.Tabs && ((isHeader && me.tabsHideHeader) || (me.tabsBottom && !hasItems))) border = 6;
+    /** Removes the mask over the content area of the pane */
+    removeMask:     function(){
+                        var me = this, mask = me.mask || me.el.find('.wui-mask');
                         
-                        me.sureEl.css('border' +cssProp+ 'Width', border).children('.wui-pane-wrap').css('padding' +cssProp, pad);
-                        if(hasItems){
-                            bar.place();
-                            bar.callRender();
-                            if(isHeader){
-                                me.setTitle(me.title);
-                                this.setTitleAlign();
-                            }else{
-                                // Set focus to the bottom right most button in the pane
-                                if(!me.disabled)
-                                    asdf = bar.items[bar.items.length - 1].el.focus();
-                            }
-                        }else{
-                            bar.el.detach();
+                        if(mask){
+                            mask.fadeOut(250,function(){ 
+                                me.mask = undefined;
+                                me.el.find('.wui-mask').remove();
+                            });
                         }
+                    },
 
-                        // Set  border if applicable
-                        if(me.border && me.hasOwnProperty('borderStyle')) me.el.css(me.borderStyle);
+    /**
+    @param    {string} html    New HTML content to be set on the disabled mask
+    Sets the maskHTML property to the value of html passed in. If mask presently exists it will change the value on the current mask.
+    */
+    setMaskHTML:    function(html){
+                        this.maskHTML = html;
+                        if(this.mask)    this.mask.html(html);
                     },
     
     /** Changes the title on the pane. */
@@ -1583,37 +1741,39 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         var itemsAlignment = me.titleAlign === 'right' ? 'left' : 'right'; 
                         me.header.elAlias.css('text-align',itemsAlignment);
                     },
-    
-    /** Runs after a pane is rendered. Sets up layout listeners and sets focus on the bottom-right-most button if any */
-    afterRender:    function(){
+
+    /** Updates the border on a pane. If a parameter is passed in, it will get updated to what is passed.
+    Otherwise it merely refreshes what is already set in the config of the pane.
+    @param      {object}    [newStyle]  An object containing border style configs. See borderStyle.
+    @returns    true
+    */
+    updateBorder:   function(newStyle){
                         var me = this;
-                        
-                        document.addEventListener("animationstart", doLayout, false);         // standard + firefox
-                        document.addEventListener("MSAnimationStart", doLayout, false);     // IE
-                        document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
-                        
-                        function doLayout(){
-                            if(!me.parent && !(me instanceof Wui.Window)) me.layout();
+
+                        if(newStyle){
+                            me.el.css(me.borderStyle = newStyle);
+                        }else if(me.border && me.hasOwnProperty('borderStyle')){
+                            me.el.css(me.borderStyle);
                         }
-
-                        // If the pane is disabled then it disables it
-                        if(me.disabled) me.disable();
-
-                        // Do the layout for the header and footer
-                        me.configBar('header');
-                        me.configBar('footer');
-
-                        Wui.O.prototype.afterRender.call(this);
                     }
 });
 
 
 /**
-@event        open    When the window is opened (window)
-@event        resize    When the window is resized (width, height)
-@event        close    When the window is closed (window)
+@event      open    When the window is opened (window)
+@event      resize  When the window is resized (width, height)
+@event      close   When the window is closed (window)
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-WUI Window
+
+A WUI Window is based on a Wui.Pane and inherits much of its functionality from the pane,
+especially with regard to borders, the header, footer, content area, enable/disable functionality
+and masking.
+
+Windows can additionally be resizable, draggable, positionable, and modal.
+
+A window will appear in the forefront of the page, and does not need to be placed like other WUI
+objects do because it is placed directly at the end of the body on init.
+
 */
 Wui.Window = function(args){ 
     $.extend(this,{
@@ -1818,6 +1978,7 @@ Wui.msg = function(msg, msgTitle, callback, content){
 @param {[string]}       msgTitle    Title for the window. Default is 'Error'
 @param {[array]}        buttons     Array containing Wui.Button(s) to give additional functionality.
 @param {[function]}     callback    Function to perform when the error window closes - returning false will prevent the window from closing.
+@return The Wui.Window object of the error message window.
 @author     Stephen Nielsen
 */
 Wui.errRpt = function(errMsg, msgTitle, buttons, callback){

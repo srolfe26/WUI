@@ -2,16 +2,17 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Grid - WUI 1.1</title>
+    <title>Grid - WUI 1.2</title>
     
     <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
     <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../js/docs/prism.css" type="text/css" media="all">
     
-    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <script type="text/javascript" src="../js/jquery-2-1-1-ui-1-10-4.js"></script>
     <script type="text/javascript" src="../js/wui.js"></script>
     <script type="text/javascript" src="../js/forms.js"></script>
     <script type="text/javascript" src="../js/grid.js"></script>
-    <script type="text/javascript" src="../js/docs.js"></script>
+    <script type="text/javascript" src="../js/docs/docs.js"></script>
     
     <script type="text/javascript">
         $(document).ready(function(){
@@ -23,15 +24,15 @@
         $(document).ready(function(){
             // Add a new grid on the body
             a = new Wui.Grid({
-                height:    500,
-                appendTo:$('#wui-doc-example'),
-                url:    'data.txt',
-                columns:[
-                            {heading:'Date', dataItem:'date', dataType:'date', fit:1},
-                            {heading:'Check Number', dataItem:'check_number', dataType:'numeric', fit:1},
-                            {heading:'Description', dataItem:'description', fit:7},
-                            {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
-                        ],
+                height:     500,
+                appendTo:   $('#wui-doc-example'),
+                url:        'data.txt',
+                columns:    [
+                                {heading:'Date', dataItem:'date', dataType:'date', fit:1},
+                                {heading:'Check Number', dataItem:'check_number', dataType:'numeric', fit:1},
+                                {heading:'Description', dataItem:'description', fit:7},
+                                {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
+                            ],
             });
             a.place();
         });
@@ -43,7 +44,8 @@
             
             //ts.test("Today",function(){ var today = new Date(); a.val('today'); return a.val().toString('yyyy-MM-dd') == today.toString('yyyy-MM-dd'); });
         }); // end document.ready        
-    </script>
+    </script>        
+    <script type="text/javascript" src="../js/docs/prism.js"></script>
 </head>
 <body class="wui-docs">
 </body>

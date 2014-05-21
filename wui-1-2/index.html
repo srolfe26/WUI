@@ -2,15 +2,38 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>WUI 1.1 Docs</title>
+    <title>WUI 1.2 Docs</title>
 
     <link rel="stylesheet" href="css/wui.css" type="text/css" media="all">
-    <script type="text/javascript" src="js/wui-1-1-min.js"></script>
+    <link rel="stylesheet" href="css/docs.css" type="text/css" media="all">
     <style type="text/css">
         body {margin:0; padding:0;}
-        .iframe-pane {position:absolute; right:0; top:0;}
+        iframe[name="iframe_pane"] {
+            border:0; background-color:#fff; position: absolute; right: 0; bottom:0;
+        }
+
+        .wui-pane.menu-col, .wui-pane.menu-col * {
+            font-size: 12px;
+        }
+
+        .wui-gc.icon_heading {
+            padding: 0.5em 35px 0.5em 0;
+        }
+
+        .wui-gc.icon_heading:after {
+            bottom: 3px;
+            font-size: 10px;
+            right: 3px;
+        }
     </style>
-    
+
+    <script type="text/javascript" src="js/jquery-2-1-1-ui-1-10-4.js"></script>
+    <script type="text/javascript" src="js/wui.js"></script>
+    <script type="text/javascript" src="js/forms.js"></script>
+    <script type="text/javascript" src="js/grid.js"></script>
+    <script type="text/javascript" src="js/state.js"></script>
+
+    <script type="text/javascript" src="js/docs/docs-index-data.js"></script>
     <script type="text/javascript">
         var kSink = {};
         
@@ -22,98 +45,97 @@
                 var page = kSink.sm.getParam('main','t');
                 if(page) setPage(page);    
             });
-            
+
             kSink.main = new Wui.Pane({
-                height:        '100%',
-                title:        'Wui 1.1 Docs',
-                appendTo:     $('body'),
+                height:     '100%',
+                title:      'Wui 1.2 Docs',
+                appendTo:   $('body'),
                 fitDimension:'width',
                 cls:        'wui-kitchen-sink',
-                tbar:            [
-                                    new Wui.Button({ text:'Download WUI 1.1', click:function(){ window.open('WUI-1-1.zip'); } }),
-                                    new Wui.Button({
-                                        text:    'License',
-                                        click:    function(){ 
-                                                    new Wui.Window({
-                                                        title:      'License',
-                                                        isModal:    true,
-                                                        width:      733,
-                                                        height:     550,
-                                                        items:      [
-                                                                        new Wui.O({el:$('<iframe>').attr({src:'license.html'}).css({border:0}), width:733, height:466})
-                                                                    ]
-                                                    });
-                                                }
-                                    }),
-                                    new Wui.Button({ text:'WUI on GitHub', click:function(){ window.open('https://github.com/srolfe26/WUI'); } })
-                                ],
-                items:        [
-                                kSink.selectorGrid = new Wui.Grid({
-                                    data:            [
-                                                        {link:'docs/about.html', title:'-- About --'},
-                                                        {link:'docs/o.html', title:'WUI Object'},
-                                                        {link:'docs/text.html', title:'Text Box'},
-                                                        {link:'docs/textarea.html', title:'Text Area'},
-                                                        {link:'docs/template.html', title:'Template Engine'},
-                                                        {link:'docs/wysiwyg.html', title:'WYSIWYG'},
-                                                        {link:'docs/radio.html', title:'Radio'},
-                                                        {link:'docs/checkbox.html', title:'Checkbox'},
-                                                        {link:'docs/state.html', title:'State Machine', target:'_blank'},
-                                                        {link:'docs/data.html', title:'Data'},
-                                                        {link:'docs/data-list.html', title:'Data List'},
-                                                        {link:'docs/button.html', title:'Button'},
-                                                        {link:'docs/combo.html', title:'Combo'},
-                                                        {link:'docs/link.html', title:'Link Input'},
-                                                        {link:'docs/long-poll.html', title:'Long Poll'},
-                                                        {link:'docs/datetime.html', title:'Date/Time Input'},
-                                                        {link:'docs/file.html', title:'File'},
-                                                        {link:'docs/fit.html', title:'fit()'},
-                                                        {link:'docs/pane.html', title:'Pane'},
-                                                        {link:'docs/window.html', title:'Window'},
-                                                        {link:'docs/forms.html', title:'Form'},
-                                                        {link:'docs/grid.html', title:'Grid'},
-                                                        {link:'docs/tabs.html', title:'Tabs'},
-                                                        {link:'docs/scrollbar-width.html', title:'scrollbarWidth()'},
-                                                        {link:'docs/input.html', title:'input()'},
-                                                        {link:'docs/err-rpt.html', title:'errRpt()'},
-                                                        {link:'docs/confirm.html', title:'confirm()'},
-                                                        {link:'docs/message.html', title:'msg()'},
-                                                        {link:'docs/get-keys.html', title:'getKeys()'},
-                                                        {link:'docs/rand-num.html', title:'randNum()'},
-                                                        {link:'docs/max-z.html', title:'maxZ()'},
-                                                        {link:'docs/label.html', title:'Label'},
-                                                        {link:'docs/note.html', title:'Note'},
-                                                        {link:'docs/form-field.html', title:'Form Field'},
-                                                        {link:'docs/hidden.html', title:'Hidden'},
 
-                                                    ],
-                                    processData:    function(d){
-                                                        //console.log('asdf');
-                                                        return d.sort(function(a,b){
-                                                            return $.trim(a.title).toUpperCase().localeCompare($.trim(b.title).toUpperCase());
-                                                        });
-                                                    },
-                                    columns:        [{heading:'Feature', dataItem:'title'}],
-                                    borderStyle:    {borderWidth: '0 6px 0 0', borderColor:'#888'},
-                                    fit:             1.15,
-                                    height: '100%'
-                                }),
-                                kSink.frame = new Wui.O({
-                                    cls:    'iframe-pane',
-                                    attr:    {name:'iframe_pane'},
-                                    el:     $('<iframe>').css({border:'none', backgroundColor:'#fff'}),
-                                    fit:     5,
-                                    height: '100%'
-                                })
-                            ]
+                // Override layout to provide a responsive experience
+                layout:     function(){
+                                if(this.el.width() < 890){
+                                    this.items[0].height = (this.el.outerHeight() < 460) ? 100 : 150;
+                                    this.items[0].width = '100%';
+                                    this.items[0].updateBorder({borderWidth: '0 0 6px 0', borderColor:'#888'});
 
+                                    this.items[1].fit = 1;
+                                    this.items[1].width = '100%';
+
+                                    this.fitDimension = 'height';
+                                }else{
+                                    this.items[0].width = 350;
+                                    this.items[0].height = '100%';
+                                    this.items[0].updateBorder({borderWidth: '0 6px 0 0', borderColor:'#888'});
+
+                                    this.items[1].fit = 1;
+                                    this.items[1].height = '100%';
+
+                                    this.fitDimension = 'width';
+                                }
+                                Wui.O.prototype.layout.apply(this,arguments);
+                            },
+                tbar:   [
+                            new Wui.Button({ text:'Download WUI 1.2', cls:'download-btn', attr:{title:'Download WUI 1.2'}, click:function(){ window.open('WUI-1-2.zip'); } }),
+                            new Wui.Button({
+                                text:   'License',
+                                cls:    'license-btn',
+                                attr:   {title:'License'},
+                                click:  function(){ 
+                                            new Wui.Window({
+                                                title:      'License',
+                                                isModal:    true,
+                                                width:      733,
+                                                height:     550,
+                                                items:      [
+                                                                new Wui.O({el:$('<iframe>').attr({src:'license.html'}).css({border:0}), width:733, height:466})
+                                                            ]
+                                            });
+                                        }
+                            }),
+                            new Wui.Button({ text:'WUI on GitHub', attr:{title:'WUI on GitHub'}, cls:'git-btn', click:function(){ window.open('https://github.com/srolfe26/WUI'); } })
+                        ],
+                items:  [
+                            kSink.selectorGrid = new Wui.Grid({
+                                cls:        'menu-col',
+                                data:       indexData,
+                                columns:    [
+                                                {   
+                                                    heading:'',
+                                                    resizable:false,
+                                                    dataItem:'icon', 
+                                                    width:37, 
+                                                    cls:'icon_heading', 
+                                                    renderer:function(cell, value, record, row, grid){
+                                                        cell.addClass(value);
+                                                        return '&nbsp;';
+                                                    }
+                                                },
+                                                {heading:'Feature', dataItem:'title',width:140},
+                                                {heading:'Description', dataItem:'desc'}
+                                            ],
+                                borderStyle:{borderWidth: '0 6px 0 0', borderColor:'#888'},
+                                width:      350,
+                                height:     '100%',
+                                sort:       [{dataItem:'icon', order:'asc'}, {dataItem:'title', order:'asc'}]
+                            }),
+
+                            kSink.frame = new Wui.O({
+                                name:   'iframe_pane',
+                                el:     $('<iframe>'),
+                                fit:     1,
+                                height: '100%'
+                            })
+                        ]
             });
             kSink.main.place();
             
             kSink.selectorGrid.el.on('wuiselect',function(event,grid,el,rec){
                 kSink.main.layout();
-                if(!rec.target)    kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
-                else            window.location = rec.link;
+                kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
+                // if(!rec.target) kSink.sm.setState('main?t=' + rec.link.replace('.html','').replace('/','_'));
+                // else            window.location = rec.link;
             });
             
             // When the page loads, see if there is anything on the URL, else load the default

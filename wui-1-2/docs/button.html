@@ -2,17 +2,21 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>WUI Button - WUI 1.1</title>
+    <title>WUI Button - WUI 1.2</title>
+    
+    
     
     <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
     <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
-    
-    <script type="text/javascript" src="../js/jquery-1-10-2-ui-1-10-3.js"></script>
+    <link rel="stylesheet" href="../js/docs/prism.css" type="text/css" media="all">
+        
+    <script type="text/javascript" src="../js/jquery-2-1-1-ui-1-10-4.js"></script>
     <script type="text/javascript" src="../js/wui.js"></script>
     <script type="text/javascript" src="../js/forms.js"></script>
     <script type="text/javascript" src="../js/grid.js"></script>
-    <script type="text/javascript" src="../js/docs.js"></script>
-    
+    <script type="text/javascript" src="../js/docs/docs.js"></script>
+
+    <script type="text/javascript" src="../js/docs/prism.js"></script>
     <style type="text/css" class="wui-doc-code">
         .wui-btn.test-page {height: 40px; line-height: 40px;}
     </style>
@@ -28,11 +32,15 @@
             a = new Wui.Button({
                 text:    'Test Button',
                 cls:    'test-page',
+                click:  function(){
+                    console.log("The button was clicked.");
+                },
                 appendTo:$('#wui-doc-example')
             });
             a.place();
         });
     </script>
+
     <script type="text/javascript">
         $(document).ready(function(){
             // TESTING
