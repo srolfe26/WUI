@@ -37,7 +37,7 @@
     height:100%; overflow:auto; position: relative;
 }
 .grid-body tr:last-child, .wui-form, .wui-pane-content{
-    -webkit-animation-duration: 0.0001s; animation-duration: 0.0001s;
+    -webkit-animation-duration: 0.00001s; animation-duration: 0.00001s;
     -webkit-animation-name: nodeInserted; animation-name: nodeInserted;
 }
 
@@ -196,7 +196,7 @@ button::-moz-focus-inner { border:0; }
 /* files */
 .wui-file input[type=text] {padding-right:65px;}
 .wui-file .has-file { padding:0 30px; background-repeat:no-repeat; background-position: 7px 4px; }
-.wui-file .has-file.uploading, .wui-spinner {background-image:url(../img/16x16-cc.gif);}
+.wui-file .has-file.uploading, .wui-spinner {background-image:url(../img/loader.gif);}
 .wui-file form {position:absolute; width:65px; top:0; right:0; overflow:hidden; height:28px;}
 .wui-file form > input {width: 65px; padding:0; border:0; opacity:0; height:100%;}
 .wui-file .wui-btn {width:65px;}

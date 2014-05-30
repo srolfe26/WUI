@@ -7,18 +7,6 @@
 
 (function($,Wui) {
 
-$.fn.overrideNodeMethod = function(methodName, action) {
-    var originalVal = $.fn[methodName];
-    var thisNode = this;
-    $.fn[methodName] = function() {
-        if (this[0]==thisNode[0]) {
-            return action.apply(this, arguments);
-        } else {
-            return originalVal.apply(this, arguments);
-        }
-    };
-};
-
 /** 
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
@@ -400,9 +388,17 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             });
 
                             if($.isNumeric(size)){
-                                var margin = (dimension == 'height') ? 0 : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) : parseInt(me.label.css('margin-left')),
+                                var margin = (dimension == 'height') ? 0 
+                                                : (me.labelPosition == 'left') ? parseInt(me.label.css('margin-right')) 
+                                                    : parseInt(me.label.css('margin-left')),
                                     dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
+                                
                                 me.el.css('padding-' + me.labelPosition, size);
+
+                                // Chrome is not able to access the margin-right value and returns NaN. 
+                                // It appears that IE is not able to either and returns 0, while FF returns 5.
+                                if (isNaN(margin)) margin = 5; 
+
                                 me.label.css(dimension, size - margin);
                                 if(me.field)
                                     me.field.labelSize = me.labelSize = size;
@@ -677,39 +673,15 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
                         me.append(Wui.Text.prototype.setListeners.call(me,me));
                     },
                     
-    /** Sets the blank text on the field. If the HTML 5 placeholder isn't supported, mimic it by replacing the native jQuery val function */
+    /** 
+    @param {string} bt  The value of the placeholder text for the field.
+    @return The blank text that was passed in.
+    Sets the blank text on the field. */
     setBlankText:   function(bt){
-                        var me = this, f = me.field;
+                        var me = this;
                         
                         me.blankText = bt;
-                        
-                        // if the HTML 5 placeholder isn't supported, mimic it by
-                        // replacing the native jQuery val function
-                        if('placeholder' in document.createElement('input')){
-                            me.field.attr('placeholder', bt);
-                        }else{
-                            var valFn = $.fn.val;
-                            
-                            f.overrideNodeMethod('val',function(){
-                                var v = valFn.apply(f,arguments);
-                                if(!arguments.length)    if(v == me.blankText) return '';
-                                else                    return v;
-                            });
-                            
-                            f.focusin(function () {
-                                if(valFn.call(f) == me.blankText) f.val('');
-                                f.removeClass(me.blankCls);
-                            }).blur(function () {
-                                var v = f.val();
-                                if(v === me.blankText || !v.length)
-                                    f.addClass(me.blankCls).val(me.blankText);
-                            });
-                            
-                            // set the blank text on the field
-                            console.log(f.val().length);
-                            if(!f.val().length)
-                                f.addClass(this.blankCls).val(bt);    
-                        }
+                        me.field.attr('placeholder', bt);
                         
                         return bt;
                     },
@@ -1119,6 +1091,10 @@ Wui.Combo = function(args){
 
         /** Whether to filter results at all */
         filterField:true,
+
+        /** When set to true, the field will be blanked out if an option from the drop down is
+        not selected. */
+        forceSelect:false,
         
         /** Whether the drop-down DOM element will be kept in place or appended out to the body and absolutely
         positioned. Keeping the drop-down in line will make it susceptible to being clipped by containing elements.*/
@@ -1302,15 +1278,8 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                 });   
                             }
 
-                            // Add listeners to children
-                            holder.children()
-                                .bind('touchstart',function(evnt){ me.rsltHover(evnt); me.field.isBlurring = false; })
-                                .mouseenter(function(evnt){ me.rsltHover(evnt); })
-                                .mousedown(function(e){me.field.isBlurring = false;})
-                                .click(function(){ me.rsltClick(); });
-
-                            // Append children to the DD
-                            me.dd.append(holder.children().unwrap());
+                            // Add listeners then append children to the DD
+                            me.dd.append(me.itemListeners(holder.children()).unwrap());
                         }else{ 
                             me.dd.html(this.emptyText);
                         }
@@ -1319,6 +1288,24 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         return true;
                     },
     
+    /** 
+    @param  {jQuery Array}  collection  Zero or more jquery objects.
+    @return The collection that was passed in.
+
+    Adds listeners to the drop down objects. The existing listeners are vital to the operation of
+    the drop down, so when overrriding this function, be sure to call the prototype method as
+    well as returning the collection.
+    */
+    itemListeners:  function(collection){
+                        var me = this; 
+
+                        return collection
+                            .bind('touchstart',function(evnt){ me.rsltHover(evnt); me.field.isBlurring = false; })
+                            .mouseenter(function(evnt){ me.rsltHover(evnt); })
+                            .mousedown(function(e){me.field.isBlurring = false;})
+                            .click(function(){ me.rsltClick(); });
+                    },
+
     /** Hides the drop-down and sets the current selection as the combo's value */
     rsltClick:      function(){
                         this.toggleDD();
@@ -1424,6 +1411,10 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             if(t.field.isBlurring !== false){
                                 t.toggleDD('close');
                                 
+                                if(t.forceSelect && t.value === null){
+                                    t.fieldText('');
+                                }
+
                                 // Event hook function
                                 t.onBlur();
                             }

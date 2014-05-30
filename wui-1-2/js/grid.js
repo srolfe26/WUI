@@ -279,9 +279,26 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     if(me.hideHeader)    me.headingContainer.height(0);
                 },
     
-    /** Overrides the Wui.O layout function and positions the data and sizes the columns. */
+    /** Overrides the Wui.O layout to allow for the optional sizing to fit content, column sizing, and data positioning. */
     layout:     function(){
                     Wui.O.prototype.layout.apply(this,arguments);
+                    
+                    if(this.fitToContent === true){
+                        var me = this,
+                            toolBarsH = me.header.el.outerHeight() + me.footer.el.outerHeight(),
+                            maxHeight = $.isNumeric(me.maxHeight) ? me.maxHeight : 0,
+                            totalHeight = me.headingContainer.outerHeight();
+
+                        me.tblContainer.children().each(function(){
+                            totalHeight += $(this).outerHeight();
+                        });
+
+                        totalHeight = (maxHeight > 0 && totalHeight + toolBarsH > maxHeight) ? maxHeight : totalHeight;
+
+                        me.height = totalHeight + toolBarsH;
+                        Wui.O.prototype.layout.apply(me,arguments);
+                    }
+
                     this.posDataWin();
                     if(this.cols.length) this.sizeCols();
                 },

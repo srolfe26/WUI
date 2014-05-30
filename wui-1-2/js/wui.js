@@ -348,23 +348,28 @@ be defined to do certain things when the object is rendered on the page.
 */
 Wui.O = function(args){ $.extend(this,{
     /** Whether the object is hidden on the DOM */
-    hidden:    false
+    hidden:         false
 
     /** If id has a value, the HTML attribute id will be set on the element. */
-    //id:       undefined,
+    //id:           undefined,
 
     /** If name has a value, the HTML attribute name will be set on the element. 
     This is useful for naming objects for listeners. */
-    //name:     undefined,
+    //name:         undefined,
 
     /** This item can contain a space separated list of classes that will be applied
     to the element of the object. Additional classes may be added by the object itself. This
     is useful for adding additional styling to objects. */
-    //cls:      undefined,
+    //cls:          undefined,
+
+    /** The fit dimension determines whether objects contained within it are fit
+    horizontally or vertically. Possible values are 'width' (= horizontal fitting) 
+    or 'height' (= vertical fitting). */
+    //fitDimension: 'width',
 
     /** tabIndex is used to give an item the ability to be tabbed to, and to order that tabbing. 
     A -1 in this value will make the element un-tabbable. */
-    //tabIndex: undefined,
+    //tabIndex:     undefined,
 },args); };
 Wui.O.prototype = {
     /**
@@ -1557,6 +1562,9 @@ Wui.Pane = function(args){
         
         /** Whether or not the pane is disabled on load */
         disabled:   false,
+
+        /** When set to true the pane will size itself to the height of its content on layout */
+        fitToContent:false,
         
         /** Alignment of the heading title (left,center,right) */
         titleAlign: 'left',
@@ -1566,7 +1574,11 @@ Wui.Pane = function(args){
     
         /** HTML to show in the mask when the pane is disabled */
         maskHTML:   'Empty',
-        
+
+        /** The maximum height the pane will expand to when fitToContent is set to true. If
+        fitToContent is false, this property does nothing.*/
+        maxHeight:  null,
+
         /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
         title:      null
     },args); 
@@ -1702,6 +1714,28 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         me.elAlias  = me.container;
                     },
 
+    /** Overrides the Wui.O layout to allow for the optional sizing to fit content */
+    layout:     function(){
+                    Wui.O.prototype.layout.apply(this,arguments);
+                    
+                    if(this.fitToContent === true){
+                        var me = this,
+                            toolBarsH = me.header.el.outerHeight() + me.footer.el.outerHeight(),
+                            maxHeight = $.isNumeric(me.maxHeight) ? me.maxHeight : 0,
+                            totalHeight = 0;
+                        
+                        me.container.children().each(function(){
+                            totalHeight += $(this).height();
+                            console.log($(this).height());
+                        });
+
+                        totalHeight = (maxHeight > 0 && totalHeight + toolBarsH > maxHeight) ? maxHeight : totalHeight;
+
+                        me.height = totalHeight + toolBarsH;
+                        Wui.O.prototype.layout.apply(me,arguments);
+                    }
+                },
+
     /** Removes the mask over the content area of the pane */
     removeMask:     function(){
                         var me = this, mask = me.mask || me.el.find('.wui-mask');
@@ -1807,6 +1841,16 @@ Wui.Window = function(args){
         /** Change what comes by default in the pane */
         maskHTML:   'Loading <span class="wui-spinner"></span>',
 
+        /** Set a minimum height that the window can be resized to. If this property
+        is not, it will default to the declared height of the window, or zero if the 
+        declared height is a percentage. */
+        //minHeight: undefined,
+
+        /** Set a minimum width that the window can be resized to. If this property
+        is not, it will default to the declared width of the window, or zero if the 
+        declared width is a percentage. */
+        //minWidth: undefined,
+
         /** Whether or not the user can resize the window */
         resizable:  true,
 
@@ -1870,8 +1914,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Add resizable option if the window is resizable
                     if(me.resizable === true)
                         me.windowEl.resizable({
-                            minWidth:   me.width,
-                            minHeight:  me.height,
+                            minWidth:   me.minWidth || me.width,
+                            minHeight:  me.minHeight || me.height,
                             resize:     function(){ me.fireResize(); }
                         });
 
