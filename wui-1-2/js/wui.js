@@ -237,82 +237,112 @@ Wui.positionItem = function(parent,child){
     });
 };
 
-/** 
+
+/**
+@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+@param      {string}   prop    The name of a css property
+@return     The property name, or false
+
+Detects whether a CSS property is supported by the current browser. If its not supported,
+the method returns false. If the property is supported, the passed in string will be
+returned as-is, or with the necessary vendor appropriate prefix.
+*/
+
+Wui.cssCanIuse = function(prop){
+    var i           = 0,
+        parts       = prop.split('-'),
+        ucProp      = '';
+
+    // camelCase dashed items
+    for(; i < parts.length; i++)
+        ucProp += parts[i].charAt(0).toUpperCase() + parts[i].slice(1);
+
+
+    var n           = 0,
+        d           = document.createElement("detect"),
+        camelProp   = ucProp.charAt(0).toLowerCase() + ucProp.slice(1);
+        omPrefixes  = 'Webkit Moz O ms'.split(' '),
+        prefixes    = '-webkit- -moz- -o- -ms-'.split(' '),
+        all         = (prop+' '+camelProp+' '+omPrefixes.join(ucProp+' ') + ucProp).split(' '),
+        property    = false;
+
+    for (; n < all.length; n++) {
+        if (d.style[all[n]] === "") {
+            property = all[n];
+            break;
+        }
+    }
+
+    // The property is not supported
+    if(!property) return false;
+
+    // Return the property if it is supported, or prefixed if needed
+    switch(n) {
+        case 0:
+        case 1:
+            return prop;
+            break;
+        default:
+            return prefixes[n-2] + prop;
+    }
+}
+
+
+/**
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
-@param {array}        collection            A collection of items that will be fit within a container.
+@param {array}      collection           A collection of items that will be fit within a container.
 @param {string}     [dim]                The dimension to perform the fit on, 'height','width', height is default.
-@param {boolean}    [mindTheScrollbar]    Defaults to false, otherwise includes the scrollbar in the calculation.
 
 This function will size items relative to each other via a 'fit' value, as well as percentages and fixed values.
 */
-Wui.fit = function(collection,dim,mindTheScrollbar){
+Wui.fit = function(collection,dim){
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
         var i           = 0,
+            fitCt       = 0,
             dimArray    = ['height','width'],
             parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
-            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent;
+            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
+            dir         = null;
 
-        // Make sure dim is a lowercase string, or just leave it alone for now
+        // Format the dimension to ensure its usable, then translate from Wui-1-1 to Wui-1-2 inputs
         dim = (dim && dim.toLowerCase) ? dim.toLowerCase() : dim;
-
-        // Make sure the value of dim is something this method will be able to utilize
         dim = ($.inArray(dim,dimArray) >= 0) ? dim : dimArray[0];
-        var dimOpposite = dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
+        dir = (dim == 'width') ? 'row' : 'column';
 
-        // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
-        if(mindTheScrollbar !== true && parentEl.css('overflow') != 'hidden')
-            for(i = 0; i < collection.length; i++)
-                if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
-                    break;
+        // Make the containing element flex
+        parentEl
+            .css('display','flex')
+            .css(Wui.cssCanIuse('flex-direction'),dir);
 
-        var sbw         = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0
-            parentSize  = (($(parentEl)[0] === $('body')[0]) ? $(window) : $(parentEl))[dim]() - sbw,
-            fitCt       = 0,
-            fixedSize   = 0,
-            fitMux      = 0;
-
-        // Tally all sizes we're dealing with
         $.each(collection,function(i,itm){
             if($.isNumeric(itm.fit) && itm.fit >= 0){
                 fitCt += itm.fit;           // Tally fit values
                 itm[dim] = -1;              /* Set to -1 so that CSSByParam will not act on it (just deleting it was
                                              * ineffective because this property can be inherited through the prototype chain)*/
             }else if(itm[dim]){
-                // Tally fixed size values & percentage based size values. Doing this gives percentages precedence over fit.
-                if($.isNumeric(itm[dim]))   { fixedSize += itm[dim]; }
-                else                        {
-                                              var itmDimension = Math.floor((parseFloat(itm[dim]) / 100) * parentSize);
-                                              fixedSize += (itm[dim] = itmDimension);
-                                            }
                 delete itm.fit;             // Ensure the item doesn't have a dimension and a fit specified
             }else{
                 fitCt += (itm.fit = 1);     // Add a fit value to an item that doesn't have dimensions specified
             }
         });
-        
-        // If the grid becomes entirely fixed widths the fit won't work so the items will be set to fits
-        if(fitCt === 0 && fixedSize != parentSize){
-            fitCt = 1;
-            
-            $.each(collection,function(i,itm){
-                itm.fit = itm[dim] / fixedSize;
-                itm[dim] = -1;
-            });
+       
+        // If a collection becomes entirely fixed widths the flex will have a few problems
+        if(fitCt === 0){
+            var itm = collection[collection.length - 1];
+            fitCt += (itm.fit = 1);
+            itm[dim] = -1;
         }
-        
-        // Get the fit multiplier
-        fitMux = (fitCt !== 0) ? (parentSize - fixedSize) / fitCt : 0;
-        
-        // Size 'fit' items and others which aren't WUI Objects
+       
+        // Apply CSS Flex properties
         $.each(collection,function(i,itm){
             var css = {};
             if(itm.fit){
-                css[dim] = Math.floor(fitMux * itm.fit);
-                $(itm.el).css(css);
+                $(itm.el).css(Wui.cssCanIuse('flex-grow'),itm.fit);
             }else if(itm.cssByParam === undefined){
                 $(itm.el).css(dim,itm[dim]);
+                $(itm.el).css(Wui.cssCanIuse('flex-grow'),'');
             }
         });
     }else{
@@ -354,7 +384,11 @@ Wui.O = function(args){ $.extend(this,{
     //id:           undefined,
 
     /** If name has a value, the HTML attribute name will be set on the element. 
-    This is useful for naming objects for listeners. */
+    This is useful for naming objects for listeners. 
+
+    Adding the name property to an object will fire a namespaced event as well as the generic
+    event. Listeners for these events follow the convention: [eventname].[name]. These listeners
+    can be turned on and off using the jQuery .on() and .off() methods. */
     //name:         undefined,
 
     /** This item can contain a space separated list of classes that will be applied
@@ -809,7 +843,7 @@ Wui.LongPoll.prototype = {
 
     /** Polls a resource and sends events on success, failure, and if/when polling stops. */
     poll:       function(){
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     setTimeout(function() { 
                         $.ajax($.extend(me.ajaxParams, { 
                             url:        me.url,
@@ -817,20 +851,25 @@ Wui.LongPoll.prototype = {
                             beforeSend: function(jqXHR){
                                             if(me.pollTime > me.originalPollTime * me.maxRetry){
                                                 jqXHR.abort();
-                                                $(window).trigger($.Event('pollStopped'),[me]);
+                                                $(window).trigger($.Event('pollStopped'+ dn),[me])
+                                                    .trigger($.Event('pollStopped'),[me]);
                                                 return false;
                                             }
                                         },
                             success:    function(data) { 
                                             me.pollTime = me.naturalPollTime;
-                                            $(window).trigger($.Event('pollSuccess'),[me, data]);
+                                            $(window).trigger($.Event('pollSuccess' + dn),[me, data])
+                                                .trigger($.Event('pollSuccess'),[me, data]);
                                         },
                             complete:   function(){ me.poll(); },
                             timeout:    me.pollTime,
                             error:      function(err){ 
-                                            // This allows the poll to retry once at the original poll time before increasing by a factor of waitFactor
-                                            me.pollTime = (me.pollTime == me.naturalPollTime) ? me.originalPollTime : me.pollTime * me.waitFactor;
-                                            $(window).trigger($.Event('pollError'),[me, err]);
+                                            // This allows the poll to retry once at the original poll time before increasing 
+                                            // by a factor of waitFactor
+                                            me.pollTime = (me.pollTime == me.naturalPollTime) ? me.originalPollTime 
+                                                : me.pollTime * me.waitFactor;
+                                            $(window).trigger($.Event('pollError' + dn),[me, err])
+                                                .trigger($.Event('pollError'),[me, err]);
                                         }
                         })); 
                     }, me.pollTime);
@@ -841,9 +880,11 @@ Wui.LongPoll.prototype = {
 
     /** Resumes polling instantly. */
     start:      function(){
-                    this.pollTime = this.naturalPollTime;
-                    $(window).trigger($.Event('pollStart'),[this]);
-                    this.poll();
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                    me.pollTime = me.naturalPollTime;
+                    $(window).trigger($.Event('pollStart' + dn),[me])
+                        .trigger($.Event('pollStart'),[me]);
+                    me.poll();
                 }
 };
 
@@ -868,11 +909,8 @@ Wui.Data = function(args){
         /** Name a key in the data that represents the identity field. */
         identity:       null,
         
-        /** Name of the data object. Allows the object to be identified in the listeners */
+        /** Name of the data object. Allows the object to be identified in the listeners, and namespaces events. */
         name:           null,
-
-        /** Whether or not to namespace the datachanged event */
-        namespaceEvent:false,
         
         /** Object containing keys that will be passed remotely */
         params:         {},
@@ -994,10 +1032,8 @@ Wui.Data.prototype = {
                         var me = this, dn = (me.name || 'wui-data');
 
                         me.dataChanged(me.data);
-
-                        if(me.namespaceEvent)   $(document).trigger($.Event('datachanged-' + dn),[dn, me]);
-                        else                    $(document).trigger($.Event('datachanged'),[dn, me]);
-
+                        $(document).trigger($.Event('datachanged.' + dn),[dn, me])
+                            .trigger($.Event('datachanged'),[dn, me]);
                         me.afterSet(me.data);
                     },
     
@@ -1217,10 +1253,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     
     /** Clears the selection on the data list */
     clearSelect:function(){
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     me.el.find('.wui-selected').removeClass('wui-selected');
                     me.selected = [];
-                    me.el.trigger($.Event('wuichange'), [me, me.el, me.selected]);
+                    me.el.trigger($.Event('wuichange' + dn), [me, me.el, me.selected])
+                        .trigger($.Event('wuichange'), [me, me.el, me.selected]);
                 },
     
     /**
@@ -1230,7 +1267,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Performs mutations and fires listeners when an item is selected @private
     */
     itemSelect: function(itm, silent){
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                         
                     me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
                     itm.el.addClass('wui-selected').attr('tabindex',1).focus();
@@ -1238,8 +1275,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
 
                     if(!me.multiSelect && !silent){
-                        me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec]);
-                        me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                        me.el.trigger($.Event('wuiselect'+ dn), [me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     }
                     return itm;
                 },
@@ -1251,11 +1290,13 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Performs mutations and fires listeners when an item is deselected @private
     */        
     itemDeselect:function(itm){
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
-                    me.el.trigger($.Event('wuideselect'),[me, itm.el, itm.rec]);
-                    me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                    me.el.trigger($.Event('wuideselect' + dn),[me, itm.el, itm.rec])
+                        .trigger($.Event('wuichange' + dn), [me, itm.el, itm.rec, me.selected])
+                        .trigger($.Event('wuideselect'),[me, itm.el, itm.rec])
+                        .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     return itm;
                 },
     
@@ -1267,7 +1308,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     createItem: function(itm){
                     var me = this,
                         clicks = 0,
-                        timer = null;
+                        timer = null, 
+                        dn = (me.name) ? '.' + me.name : '';
                     
                     itm.el.on("click", function(e){
                         var retVal = null;
@@ -1302,14 +1344,17 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                             if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                             else                me.selected.push(itm);
 
-                            me.el.trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                            me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                         }
                     }
 
                     function doubleClick(e){
                         me.itemSelect(itm,true);
-                        me.el.trigger($.Event('wuidblclick'),[me, itm.el, itm.rec])
-                             .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                        me.el.trigger($.Event('wuidblclick'+ dn),[me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuidblclick'),[me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                              
                         return false; // stops propagation & prevents default
                     }
@@ -1328,7 +1373,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     make:       function(){
                     var me = this,
                         holdingData = me.data || [],
-                        holder = $('<div>');
+                        holder = $('<div>'), 
+                        dn = (me.name) ? '.' + me.name : '';
                     
                     // Clear out items list
                     me.items = [];
@@ -1353,7 +1399,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     
                     // Event hook and event
                     me.afterMake();
-                    me.el.trigger($.Event('refresh'),[me,me.data]);
+                    me.el.trigger($.Event('refresh'+ dn),[me,me.data])
+                        .trigger($.Event('refresh'),[me,me.data]);
                     
                     // Reset selected items if any
                     me.resetSelect();
@@ -1478,7 +1525,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
     
     /** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
     init:       function(){ 
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     
                     me.el
                     .addClass('wui-btn')
@@ -1498,7 +1545,8 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                         if(!me.disabled){
                             Array.prototype.push.call(arguments,me);
                             me.click.apply(me,arguments);
-                            me.el.trigger($.Event('wuibtnclick'),[me]);
+                            me.el.trigger($.Event('wuibtnclick' + dn),[me])
+                                .trigger($.Event('wuibtnclick'),[me]);
                         }
                         return false;
                     }
@@ -1647,7 +1695,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             }else{
                                 // Set focus to the bottom right most button in the pane
                                 if(!me.disabled)
-                                    asdf = bar.items[bar.items.length - 1].el.focus();
+                                    bar.items[bar.items.length - 1].el.focus();
                             }
                         }else{
                             bar.el.detach();
@@ -1726,7 +1774,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         
                         me.container.children().each(function(){
                             totalHeight += $(this).height();
-                            console.log($(this).height());
                         });
 
                         totalHeight = (maxHeight > 0 && totalHeight + toolBarsH > maxHeight) ? maxHeight : totalHeight;
@@ -1868,9 +1915,10 @@ Wui.Window = function(args){
 Wui.Window.prototype = $.extend(new Wui.Pane(),{
     /** Closes the window unless onWinClose() event hook returns false. */
     close:      function(){ 
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     if(me.onWinClose(me) !== false){
-                        me.windowEl.trigger($.Event('close'),[me]);
+                        me.windowEl.trigger($.Event('close' + dn),[me])
+                            .trigger($.Event('close'),[me]);
                         me.remove();
                     }
                 },
@@ -1885,7 +1933,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                 
     /** Method that will run immediately when the object is constructed. */
     init:       function(){
-                    var me = this;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     me.appendTo = $('body');
                     
                     // Make it a modal window & add everything to the DOM
@@ -1926,7 +1974,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     if(me.isModal)    me.el = me.modalEl;
                     
                     me.onWinOpen(me);
-                    me.windowEl.trigger($.Event('open'),[me]);
+                    me.windowEl.trigger($.Event('open' + dn),[me])
+                        .trigger($.Event('open'),[me]);
                     me.resize();
 
                     function bringToFront(e){
@@ -1939,8 +1988,9 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 
     /** Fires the resize event and runs layout on the windows children */
     fireResize: function(){
-        var me = this;
-        me.container.trigger($.Event('resize'),[me.container.width(), me.container.height()]);
+        var me = this, dn = (me.name) ? '.' + me.name : '';
+        me.container.trigger($.Event('resize' + dn),[me.container.width(), me.container.height()])
+            .trigger($.Event('resize'),[me.container.width(), me.container.height()]);
         return me.layoutKids(); 
     },
 

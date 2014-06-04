@@ -226,9 +226,12 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     @return The value of the changed 
     */
     formChange: function(changed,changedItem){
-                    if(changed) this.el.trigger($.Event('formupdate'), [this, changedItem]);
-                    this.formChanged = changed;
-                    return this.formChanged;
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                    if(changed)
+                        me.el.trigger($.Event('formupdate'), [me, changedItem])
+                            .trigger($.Event('formupdate' + dn), [me, changedItem]);
+                    me.formChanged = changed;
+                    return me.formChanged;
                 },
     
     
@@ -595,19 +598,22 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     if the field doesn't have an 'el' property, it will call 'hiddenchange'
     */
     setChanged: function(oldVal){
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
                     // Marks the parent form as 'changed'
-                    if(this.parent && this.parent instanceof Wui.Form)
-                        this.parent.formChange(true, this);
+                    if(me.parent && me.parent instanceof Wui.Form)
+                        me.parent.formChange(true, me);
                     
                     // Calls functionally defined valChange() - one will override another
-                    this.valChange(this, this.value, oldVal);
+                    me.valChange(me, me.value, oldVal);
                     
                     // Calls listeners for valchange - in the case of hidden fields calls 'hiddenchange'
-                    if(this.el){
-                        this.el.trigger($.Event('valchange'), [this, this.value, oldVal]); 
+                    if(me.el){
+                        me.el.trigger($.Event('valchange'), [me, me.value, oldVal])
+                            .trigger($.Event('valchange' + dn), [me, me.value, oldVal]);
                     }else{
-                        if(this.parent && this.parent instanceof Wui.Form)
-                            this.parent.el.trigger($.Event('hiddenchange'), [this, this.value, oldVal]);
+                        if(me.parent && me.parent instanceof Wui.Form)
+                            me.parent.el.trigger($.Event('hiddenchange'), [me, me.value, oldVal])
+                                .trigger($.Event('hiddenchange' + dn), [me, me.value, oldVal]);
                     }
                 },
     
@@ -1210,7 +1216,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
 
                         // Get the combo to look at another data store
                         if(me.dataName && me.dataName.length && Wui['datastore-' + me.dataName]){
-                            $(window).on('datachanged-' + me.dataName,function(event,name,dataObj){
+                            $(window).on('datachanged.' + me.dataName,function(event,name,dataObj){
                                 if(name == me.dataName)
                                     me.setData(dataObj.data);
                             });

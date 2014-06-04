@@ -74,7 +74,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     Sets the specified tab to active. Runs layout on the newly activated item.
     */
     giveFocus:      function(tab, supressEvent){
-                        var me = this;
+                        var me = this, dn = (me.name) ? '.' + me.name : '';
       
                         supressEvent = (supressEvent !== undefined) ? supressEvent : false;
                         
@@ -84,7 +84,9 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                             itm.el.toggleClass('active', isActive);
                             if(isActive){
                                 me.currentTab = itm;
-                                if(!supressEvent) me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
+                                if(!supressEvent) 
+                                    me.el.trigger($.Event('tabchange'),[me, itm.tab, itm])
+                                        .trigger($.Event('tabchange' + dn),[me, itm.tab, itm]);
                                 itm.layout();
                             }
                         });
@@ -441,7 +443,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             stop:       function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
                             resize:     function(event,ui){ 
                                             col.width = ui.size.width; col.fit = -1;
-                                            Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                                            Wui.fit(me.cols,'width');
                                         }
                         });
                     }
@@ -528,16 +530,25 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
 
     /** Size up the columns of the table to match the headings @private */
     sizeCols:   function (){
-                    var me = this, totalColWidth = 0;
-                    Wui.fit(me.cols,'width',(me.tbl.find('tr:first').height() * me.total > me.tblContainer.height()));
+                    var me = this, 
+                        hc = me.headingContainer,
+                        acctForScrollBar = me.tbl.find('tr:first').height() * me.total > me.tblContainer.height(),
+                        sbWid = acctForScrollBar ? Wui.scrollbarWidth() : 0;
+
+                    hc.css('padding-right', sbWid);
+                    Wui.fit(me.cols,'width');
+
                     for(var i = 0; i < me.cols.length; i++){
-                        var colWidth = me.cols[i].el.outerWidth() - ((i === 0 || i == me.cols.length - 1) ? 1 : 0);
-                        me.tbl.find('td:eq(' +i+ ')').css({width:colWidth}); // account for table borders
-                        totalColWidth += colWidth;
+                        // account for table borders
+                        var subtractPx = (i === 0 || i == me.cols.length - 1) ? 1 : 0,
+                            colWidth = me.cols[i].el.outerWidth() - subtractPx;
+
+                        me.tbl.find('td:eq(' +i+ ')').css({width:colWidth});
                     }
+
                     // Necessary to define in javascript because webkit won't use the style
                     // until the width of the table has been defined.
-                    me.tbl.css({width:totalColWidth, tableLayout:'fixed'});
+                    me.tbl.css({width: hc.width(), tableLayout: 'fixed'});
                 },
                     
     /**
