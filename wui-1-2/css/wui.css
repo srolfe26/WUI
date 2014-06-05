@@ -18,7 +18,7 @@
 
 .wui-pane { position: relative; border-width:0; border-style:solid; border-color:#777; width:100%; background:#fff; overflow:hidden; text-align: left; }
 .wui-pane-bar { text-align:right; overflow:hidden; background:#777; color:#eee; }
-    .wui-pbar-left {float:left;}
+    .wui-pbar-left, .wui-pane-bar > .wui-fe.wui-pbar-left, .wui-h-cntnt > .wui-fe.wui-pbar-left {float:left;}
 .wui-pane-header {top:0;}
 .wui-pane-footer {bottom:0;}
     .wui-pane-bar, .wui-h-cntnt, .wui-h-title {position:absolute; left:0; height:40px; width:100%; line-height: 40px;}

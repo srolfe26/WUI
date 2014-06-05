@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>cssCanIuse - WUI 1.2</title>
+    <title>cssCheck - WUI 1.2</title>
     
     <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
     <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
@@ -16,14 +16,14 @@
     
     <script type="text/javascript">
         $(document).ready(function(){
-            Wui.docCode('../js/wui.js','Wui.cssCanIuse','Wui.cssCanIuse()');
+            Wui.docCode('../js/wui.js','Wui.cssCheck','Wui.cssCheck()');
         }); // end document.ready        
     </script>
     
     <script type="text/javascript" class="wui-doc-code">
-        Wui.cssCanIuse('border-width');     // Will return 'border-width' in all browsers
-        Wui.cssCanIuse('user-focus');       // Returns '-moz-user-focus' in Firefox, false in IE
-        Wui.cssCanIuse('some-property');    // Returns false
+        Wui.cssCheck('border-width');     // Will return 'border-width' in all browsers
+        Wui.cssCheck('user-focus');       // Returns '-moz-user-focus' in Firefox, false in IE
+        Wui.cssCheck('some-property');    // Returns false
     </script>
     
     <script type="text/javascript">

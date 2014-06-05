@@ -248,7 +248,7 @@ the method returns false. If the property is supported, the passed in string wil
 returned as-is, or with the necessary vendor appropriate prefix.
 */
 
-Wui.cssCanIuse = function(prop){
+Wui.cssCheck = function(prop){
     var i           = 0,
         parts       = prop.split('-'),
         ucProp      = '';
@@ -301,26 +301,17 @@ Wui.fit = function(collection,dim){
     if(collection instanceof Array && collection.length > 0){
         var i           = 0,
             fitCt       = 0,
-            dimArray    = ['height','width'],
             parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
             parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
-            dir         = null;
-
-        // Format the dimension to ensure its usable, then translate from Wui-1-1 to Wui-1-2 inputs
-        dim = (dim && dim.toLowerCase) ? dim.toLowerCase() : dim;
-        dim = ($.inArray(dim,dimArray) >= 0) ? dim : dimArray[0];
-        dir = (dim == 'width') ? 'row' : 'column';
+            dir         = (dim == 'width') ? 'row' : 'column';
 
         // Make the containing element flex
-        parentEl
-            .css('display','flex')
-            .css(Wui.cssCanIuse('flex-direction'),dir);
+        parentEl.css('display',Wui.cssCheck('flex')).css(Wui.cssCheck('flex-direction'),dir);
 
         $.each(collection,function(i,itm){
             if($.isNumeric(itm.fit) && itm.fit >= 0){
                 fitCt += itm.fit;           // Tally fit values
-                itm[dim] = -1;              /* Set to -1 so that CSSByParam will not act on it (just deleting it was
-                                             * ineffective because this property can be inherited through the prototype chain)*/
+                itm[dim] = -1;              // Set to -1 so that CSSByParam will not act on it
             }else if(itm[dim]){
                 delete itm.fit;             // Ensure the item doesn't have a dimension and a fit specified
             }else{
@@ -339,15 +330,14 @@ Wui.fit = function(collection,dim){
         $.each(collection,function(i,itm){
             var css = {};
             if(itm.fit){
-                $(itm.el).css(Wui.cssCanIuse('flex-grow'),itm.fit);
+                $(itm.el).css(Wui.cssCheck('flex-grow'),itm.fit);
             }else if(itm.cssByParam === undefined){
                 $(itm.el).css(dim,itm[dim]);
-                $(itm.el).css(Wui.cssCanIuse('flex-grow'),'');
+                $(itm.el).css(Wui.cssCheck('flex-grow'),'');
             }
         });
     }else{
         console.log('Improper collection specified', arguments);
-        //throw('Improper collection specified');
     }
 };
 

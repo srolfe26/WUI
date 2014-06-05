@@ -25,7 +25,7 @@ var indexData = [
     {icon:'obj-icon',       link:'docs/file.html',          title:'File',               desc:'File upload form field'},
     {icon:'obj-icon',       link:'docs/file-basic.html',    title:'File Basic (HTML5)', desc:'AJAX file uploads'},
 
-    {icon:'func-icon',      link:'docs/css-can-i-use.html', title:'cssCanIuse()',       desc:'Tests whether css can be used'},
+    {icon:'func-icon',      link:'docs/css-check.html',     title:'cssCheck()',         desc:'Tests whether css can be used'},
     {icon:'func-icon',      link:'docs/fit.html',           title:'fit()',              desc:'Sizes items relative to each other'},
     {icon:'func-icon',      link:'docs/id.html',            title:'id()',               desc:'Returns a unique id'},
     {icon:'func-icon',      link:'docs/percent-to-px.html', title:'percentToPixels()',  desc:'Converts a percentage'},

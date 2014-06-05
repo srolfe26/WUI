@@ -538,13 +538,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     hc.css('padding-right', sbWid);
                     Wui.fit(me.cols,'width');
 
-                    for(var i = 0; i < me.cols.length; i++){
-                        // account for table borders
-                        var subtractPx = (i === 0 || i == me.cols.length - 1) ? 1 : 0,
-                            colWidth = me.cols[i].el.outerWidth() - subtractPx;
-
-                        me.tbl.find('td:eq(' +i+ ')').css({width:colWidth});
-                    }
+                    for(var i = 0; i < me.cols.length; i++)
+                        me.tbl.find('td:eq(' +i+ ')').css({ width: me.cols[i].el.innerWidth() });
 
                     // Necessary to define in javascript because webkit won't use the style
                     // until the width of the table has been defined.
