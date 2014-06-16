@@ -97,7 +97,7 @@ Wui.stateMachine.prototype = {
                         
                         window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
                             var itm = {};
-                            viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]+)/g,function(match,delim,key,val){
+                            viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]*)/g,function(match,delim,key,val){
                                 itm[key] = val;
                                 return '';
                             });

@@ -1341,10 +1341,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                     function doubleClick(e){
                         me.itemSelect(itm,true);
-                        me.el.trigger($.Event('wuidblclick'+ dn),[me, itm.el, itm.rec])
+                        me.el
                             .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuidblclick'),[me, itm.el, itm.rec])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                            .trigger($.Event('wuidblclick'+ dn),[me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuidblclick'),[me, itm.el, itm.rec]);
                              
                         return false; // stops propagation & prevents default
                     }
@@ -1411,19 +1412,29 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                         if(me.selected && me.selected[0] && (document.activeElement == me.selected[0].el[0])){
                             // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
                             if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
-                            if(evnt.keyCode == 38)  selectAjacent(-1);  // 38 = up
-                            if(evnt.keyCode == 40)  selectAjacent(1);   // 40 = down
+                            if(evnt.keyCode == 38)  me.selectAjacent(-1);  // 38 = up
+                            if(evnt.keyCode == 40)  me.selectAjacent(1);   // 40 = down
                         }
                     
-                        function selectAjacent(num){
-                            var selectAjc = me.selected[0].el.parent().children(':nth-child(' +(me.selected[0].el.index() + num + 1)+ ')');
-                            me.each(function(itm){
-                                if(itm.el[0] == selectAjc[0]) me.itemSelect(itm);
-                            });
-                            me.scrollToCurrent();
-                        }
+                        
                     });
                 },
+
+    /**
+    @param    {number} num Direction to go to select an ajacent value [1,-1]
+    Selects the list item immediately before or after the currently selected item.
+    */
+    selectAjacent:  function(num){
+                        var me = this,
+                            retVal = undefined,
+                            selectAjc = me.selected[0].el.parent().children(':nth-child(' +(me.selected[0].el.index() + num + 1)+ ')');
+                        me.each(function(itm){
+                            if(itm.el[0] == selectAjc[0]) 
+                                retVal = me.itemSelect(itm);
+                        });
+                        me.scrollToCurrent();
+                        return retVal;
+                    },
                 
     /** Refreshes the DataList to match the data or reload it from the server */
     refresh:    function(){ this.onRender(); },
@@ -1763,7 +1774,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             totalHeight = 0;
                         
                         me.container.children().each(function(){
-                            totalHeight += $(this).height();
+                            totalHeight += $(this).outerHeight();
                         });
 
                         totalHeight = (maxHeight > 0 && totalHeight + toolBarsH > maxHeight) ? maxHeight : totalHeight;
@@ -1798,7 +1809,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     setTitle:       function(t){ 
                         this.title = t;
                         t = (t && typeof t === 'string') ? t : ''
-                        this.header.title.text(t);
+                        this.header.title.html(t);
                         return this.title;
                     },
     

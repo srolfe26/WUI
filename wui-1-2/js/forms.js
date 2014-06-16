@@ -523,39 +523,51 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     @return True or False
     Validate will construct an error message based on the following precedence:
     1. Custom message (invalidMsg)
-    2. The label on the field
-    3. The name of the field
-    4. Report that "A required field has an improper value."
+    2. Character count (if applicable)
+    3. The label on the field
+    4. The name of the field
+    5. Report that "A required field has an improper value."
     
     Then, validates a field using the following order of validation precedence:
     1. Custom testing function (validTest)
-    2. Regular Expression (validRegEx)
-    3. Required flag (required)
-    4. No validation - returns true.
+    2. Character count (maxChars - only applicable on Text and Textarea)
+    3. Regular Expression (validRegEx)
+    4. Required flag (required)
+    5. No validation - returns true.
     
     Then sends the error message, if any, to the parent form's throwError() method where the invalidation messages are concatenated and the fields
     are hilighted for the user to see what fields need their attention.
     */
     validate:   function(){
                     var me = this,
+                        v = me.val(),
+                        fieldName = (me.label !== null ) ? me.label : (typeof me.name !== 'undefined') ? me.name : null,
                         errMsg = (me.invalidMsg !== null) ? me.invalidMsg : 
-                                    (me.label !== null ) ? 'A value for \'' +me.label+ '\' is required.' :
-                                        (me.name !== undefined) ? 'A value for \'' +me.name+ '\' is required.' :
-                                            "A required field has an improper value.";
+                                    (fieldName !== null) ? 'A value for \'' +fieldName+ '\' is required.' :
+                                        "A required field has an improper value.";
                     
                     // If a custom test is defined 
                     if(me.validTest && typeof me.validTest == 'function')
-                        if(me.validTest(me.val()) === false)
+                        if(me.validTest(v) === false)
                             return parentThrow();
                                             
+                    // If maxChars is defined, this will be checked first
+                    if($.isNumeric(me.maxChars)){
+                        if(v && v.length > me.maxChars){
+                            errMsg = (fieldName && $.trim(fieldName).length) ? 
+                                        '\'' + fieldName + '\' must be less than ' +me.maxChars+ ' characters.' :
+                                        "You have a field with too many characters in it."
+                            return parentThrow();
+                        }
+                    }
+
                     // If a regular expression is defined for a test, this will be tested first
                     if(me.validRegEx !== null)
-                        if(!me.validRegEx.test($.trim(me.val())))
+                        if(!me.validRegEx.test($.trim(v)))
                             return parentThrow();
                                         
                     // If no regular expression test exists, test whether a value is required and throw an error if blank
                     if(me.required){
-                        var v = me.val();
                         if(v === null || v === undefined)                   return parentThrow();
                         if(typeof v == 'string' && $.trim(v).length === 0)  return parentThrow();
                     } 
@@ -661,7 +673,11 @@ Wui.Text = function(args){
         /** The CSS class that denotes an empty field */
         blankCls:   'empty',
         /** A value that appears in the field until text is entered (HTML 5), or focus is gained (JavaScript implemented) */
-        blankText:  ''
+        blankText:  '',
+
+        /** A maximum number of characters that can be entered into the field. Adding a number
+        here creates a character countdown on the field as well as adds validation for character count */
+        maxChars:   null
     },args,{
         /** The HTML element */
         field:      $('<input>').attr({type:'text'})
@@ -725,6 +741,19 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
                                 me.setChanged();
                             }
                         }); // Call val function so that valchange will be fired if needed
+
+                        // Add a character counter
+                        if($.isNumeric(t.maxChars)){
+                            t.append(t.charCounter = $('<div>').addClass('wui-char-counter'));
+                            t.field.keyup(function(){
+                                var initVal = (t.val()) ? t.maxChars - t.val().length : t.maxChars;
+                                t.charCounter.text(initVal);
+                                if(initVal >= 0)    t.charCounter.css('color','#333');
+                                else                t.charCounter.css('color','#900');
+                            });
+
+                            t.field.keyup();
+                        }
                         
                         if(this.setListeners !== Wui.Text.prototype.setListeners) this.setListeners(this);
                         return t.field;
@@ -1123,6 +1152,9 @@ Wui.Combo = function(args){
 
         /** Whether to filter the drop-down amidst the locally loaded results or to go to the server. */
         searchLocal:true,
+
+        /** Whether or not to show the drop-down button */
+        showDD:     true,
         
         /**
         @required
@@ -1205,14 +1237,16 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                         );
 
                         // Create Dropdown Button
-                        me.ddSwitch = new Wui.Button({
-                            click:      function(){ me.toggleDD(); },
-                            text:       '',
-                            tabIndex:   -1,
-                            appendTo:   me.wrapper,
-                            cls:        'field-btn dd-switch'
-                        });
-                        me.ddSwitch.place();
+                        if(me.showDD){
+                            me.ddSwitch = new Wui.Button({
+                                click:      function(){ me.toggleDD(); },
+                                text:       '',
+                                tabIndex:   -1,
+                                appendTo:   me.wrapper,
+                                cls:        'field-btn dd-switch'
+                            });
+                            me.ddSwitch.place();
+                        }
 
                         // Get the combo to look at another data store
                         if(me.dataName && me.dataName.length && Wui['datastore-' + me.dataName]){
@@ -1264,6 +1298,8 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
     renderData:     function(){
                         var me = this, holder = $('<ul>');
                         
+                        me.el.find('.combo-spinner').remove();
+
                         me.dd.empty();
                         if(me.data.length){ 
                             me.dataEach(function(d,i){
@@ -1380,6 +1416,7 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                                         me.selectItm = null;
                                         me.val(null);
                                     }
+                                    me.append('<div class="wui-spinner combo-spinner">&nbsp;</div>');
                                     me.loadData();
                                 }
                             }  
@@ -2253,6 +2290,9 @@ Wui.File() does, and thus doesn't have to be extended to be immediately useful.
 */
 Wui.FileBasic = function(args) {
     $.extend(this,{
+        /** Sets the accept attribute on the html element */
+        accept:     null,
+
         /** When set to true, allows the user to select multiple files to upload */
         multiple:   false,
         field:      $('<input>').attr({type:'file'})
@@ -2268,6 +2308,9 @@ Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
 
                 if(me.multiple)
                     me.field.attr('multiple', true);
+
+                if(me.accept && me.accept.length)
+                    me.field.attr('accept', me.accept);
             },
     validTest:function(v){ 
                 if(this.required) 

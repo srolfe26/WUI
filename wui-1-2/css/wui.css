@@ -122,6 +122,12 @@ button::-moz-focus-inner { border:0; }
 .wui-fe input:focus, .wui-fe textarea:focus, .wui-editor:focus, .button li label:focus { background-color:#eee; border-color:#999; }
 .wui-fe .empty { color:#777; }
 .wui-fe textarea { height:100%; width:100%; max-height:100%; max-width:100%; }
+.wui-char-counter { 
+    font-size: 0.75em; 
+    position: absolute; 
+    right: 0.5em; 
+    top: 3px; 
+}
 
 /* radio/checkbox */
 .wui-fe input[type=radio], .wui-fe input[type=checkbox] {width:auto;}
@@ -161,6 +167,7 @@ button::-moz-focus-inner { border:0; }
 .dd-wrapper, .wui-file {position:relative;}
 .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
 .wui-combo input {padding-right:30px;}
+.wui-spinner.combo-spinner {position:absolute; right: 30px; top: 5px;}
 
 /* hyperlink */
 .wui-link-third {
@@ -275,6 +282,7 @@ button::-moz-focus-inner { border:0; }
 .wui-form-err .button li label, .wui-form-err .wui-btn.field-btn {border-color:#b0463b;}
 
 .wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a, .wui-err {color:#b0463b;}
+.wui-lbl.lbl-right.wui-form-err > label, .wui-lbl.lbl-left.wui-form-err > label { padding:0.5em 0;}
 .wui-err { padding:1em; font-weight:bold; }
 
 .wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
@@ -379,7 +387,7 @@ button::-moz-focus-inner { border:0; }
 .wui-paging-pad table {position:absolute; left:0;}
 
 /********************* Selection & Hilighting Styles ***************************/
-.wui-selected td, .wui-selected {background-color:#0cf;}
+.wui-selected td, .wui-selected {background-color:#038BE0;}
     .wui-combo-dd li.wui-selected { color:#fff; }
 .wui-highlight { background-color:#fc0;}
     .wui-selected.wui-highlight, .wui-selected .wui-highlight { background-color:#288D58; }
@@ -477,7 +485,13 @@ button::-moz-focus-inner { border:0; }
 @media only screen and (max-width: 640px) {
     /* All labels become top labels on mobile */
     .wui-lbl {padding:0; margin:0.75em 0;}
-    .wui-lbl.lbl-left, .wui-lbl.lbl-right, .wui-lbl.lbl-bottom {position:relative; padding:26px 0 0 0 !important; margin:0.33em 0; height:auto;}
+    .wui-lbl.lbl-left, .wui-lbl.lbl-right, .wui-lbl.lbl-bottom {
+        position:relative; 
+        padding:26px 0 0 0;
+        padding-left:0 !important; 
+        margin:0.33em 0; 
+        height:auto;
+    }
     .wui-lbl.lbl-left > label, .wui-lbl.lbl-right > label, .wui-lbl.lbl-bottom > label {
         display:block; color:#555; font-weight:bold; font-size:0.9em; position:absolute; left:0; top:0; line-height:26px; width:100% !important;
         overflow: hidden; text-overflow:ellipsis; white-space: nowrap; text-align: left;

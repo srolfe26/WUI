@@ -197,7 +197,7 @@ Wui.Grid = function(args){
 Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     /** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
     afterMake:  function(){
-                    this.sizeCols();
+                    this.layout();
                     this.removeMask();
                 },
     
