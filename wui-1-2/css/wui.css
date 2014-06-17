@@ -126,7 +126,7 @@ button::-moz-focus-inner { border:0; }
     font-size: 0.75em; 
     position: absolute; 
     right: 0.5em; 
-    top: 3px; 
+    top: 7px; 
 }
 
 /* radio/checkbox */
@@ -179,7 +179,7 @@ button::-moz-focus-inner { border:0; }
 .wui-link-third.wui-link-focus {display:inline-block; width:60%;}
     
 /* date picker / date range */
-.wui-date {position:relative;}
+.wui-date {}
 .wui-date input {padding-right: 26px;}
 .feedback { font-size: 0.7em; text-transform:uppercase; overflow:hidden;}
 .feedback a {text-transform:none; color: #1AF; }

@@ -283,7 +283,8 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     var me = this;
                     me.errors = [];
                     me.each(function(itm){ 
-                        if(itm.el && itm.el.toggleClass) { itm.el.toggleClass(me.errCls,!itm.validate()); }
+                        if(typeof itm.el.toggleClass !== 'undefined')
+                            itm.el.toggleClass(me.errCls,!itm.validate());
                     }, true);
                     this.formChange(false);
                     return (me.errors.length === 0);
@@ -556,7 +557,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                         if(v && v.length > me.maxChars){
                             errMsg = (fieldName && $.trim(fieldName).length) ? 
                                         '\'' + fieldName + '\' must be less than ' +me.maxChars+ ' characters.' :
-                                        "You have a field with too many characters in it."
+                                        'You have a field with too many characters in it, the max is ' +me.maxChars+ '.';
                             return parentThrow();
                         }
                     }
@@ -573,7 +574,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     } 
                     
                     function parentThrow(){
-                        return (me.parent && me.parent.throwError) ? me.parent.throwError(errMsg) : false;
+                        return (typeof me.parent.throwError !== 'undefined') ? me.parent.throwError(errMsg) : false;
                     }
                     
                     // Default return value is true
@@ -670,13 +671,15 @@ Wui.Hidden.prototype = $.extend(new Wui.FormField(),{ init: function(){} });
 /** WUI Text */
 Wui.Text = function(args){
     $.extend(this,{
-        /** The CSS class that denotes an empty field */
-        blankCls:   'empty',
-        /** A value that appears in the field until text is entered (HTML 5), or focus is gained (JavaScript implemented) */
+        /** A value that appears in the field until text is entered. (HTML 5 placeholder) */
         blankText:  '',
 
+        /** When set to true, along with maxChars being defined, a character countdown will 
+        be displayed on the field. */
+        counter:    false,
+
         /** A maximum number of characters that can be entered into the field. Adding a number
-        here creates a character countdown on the field as well as adds validation for character count */
+        here adds validation for character count. */
         maxChars:   null
     },args,{
         /** The HTML element */
@@ -743,7 +746,7 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
                         }); // Call val function so that valchange will be fired if needed
 
                         // Add a character counter
-                        if($.isNumeric(t.maxChars)){
+                        if($.isNumeric(t.maxChars) && t.counter === true){
                             t.append(t.charCounter = $('<div>').addClass('wui-char-counter'));
                             t.field.keyup(function(){
                                 var initVal = (t.val()) ? t.maxChars - t.val().length : t.maxChars;
@@ -1451,11 +1454,14 @@ Wui.Combo.prototype = $.extend(new Wui.Text(), new Wui.Data(), {
                             if(t.searchLocal === true) t.toggleDD('open');
                         })
                         .blur(function(e){
+                            t.el.find('.combo-spinner').remove();
+
                             if(t.field.isBlurring !== false){
                                 t.toggleDD('close');
                                 
-                                if(t.forceSelect && t.value === null){
+                                if(t.forceSelect && (t.value === null || t.value === undefined)){
                                     t.fieldText('');
+                                    t.searchData('');
                                 }
 
                                 // Event hook function

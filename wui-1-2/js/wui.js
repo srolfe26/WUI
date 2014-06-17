@@ -260,7 +260,7 @@ Wui.cssCheck = function(prop){
 
     var n           = 0,
         d           = document.createElement("detect"),
-        camelProp   = ucProp.charAt(0).toLowerCase() + ucProp.slice(1);
+        camelProp   = ucProp.charAt(0).toLowerCase() + ucProp.slice(1),
         omPrefixes  = 'Webkit Moz O ms'.split(' '),
         prefixes    = '-webkit- -moz- -o- -ms-'.split(' '),
         all         = (prop+' '+camelProp+' '+omPrefixes.join(ucProp+' ') + ucProp).split(' '),
@@ -1818,7 +1818,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                         var me = this;
                         
                         me.titleAlign = t || me.titleAlign;
-                        me.header.title.removeClass().addClass('wui-h-title ' + me.titleAlign);
+                        me.header.title.removeClass('right,left,center').addClass('wui-h-title ' + me.titleAlign);
                         
                         var itemsAlignment = me.titleAlign === 'right' ? 'left' : 'right'; 
                         me.header.elAlias.css('text-align',itemsAlignment);
