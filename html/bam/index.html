@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>BAM</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/backbone.js"></script>
+        <script src="js/mutations/src/mutation-summary.js"></script>
+        <script src="js/bam.js"></script>
+    </head>
+    <body>
+        <form name="test">
+            <input type="hidden" name="hidden_test">
+        </form>
+        <form name="wildstyle">
+            
+            <label><span>button</span><input type="button" name="butt" value="Hey"></label>
+
+            <label><span>color</span><input type="color" name="a_color"></label>
+
+            <label><span>date</span><input type="date" name="a_date"></label>
+
+            <label><span>datetime</span><input type="datetime" name="datetime"></label>
+
+            <label><span>datetime-local</span><input type="datetime-local" name="asdf"></label>
+
+            <label><span>email</span><input type="email" name="email"></label>
+
+            <label><span>file</span><input type="file" name="a_file"></label>
+
+            <label><span>hidden</span><input type="hidden" name="hide_me"></label>
+
+            <label><span>month</span><input type="month" name="a_month"></label>
+
+            <label><span>number</span><input type="number" name="numbers"></label>
+
+            <label><span>password</span><input type="password" name="pass"></label>
+
+            <label><span>range hey!</span><input type="range" name="ranger" min="0" max="100" step="0.01"><output for="ranger">0</output></label>
+
+            <label><span>search</span><input type="search" name="searchandrescue"></label>
+
+            <label><span>tel</span><input type="tel" name="telly"></label>
+
+            <label><span>time</span><input type="time" name="tim"></label>
+
+            <label><span>url</span><input type="url" name="linky"></label>
+
+            <label><span>week</span><input type="week" name="week"></label>
+
+            <label><span>text</span><input type="text" name="jeffrey" placeholder="Zip Code" pattern="\d{5}" required></label>
+
+            <label><span>textarea</span><textarea name="jeff_too"></textarea></label>   
+            <label><span>checkbox</span><input type="checkbox" name="checkers"></label>
+
+            <label><span>Red</span><input type="radio" name="color" value="red"></label> 
+            <label><span>Blue</span><input type="radio" name="color" value="blue"></label> 
+            
+            <fieldset>
+                <legend>Legend of Zelda</legend>
+                <label><span>datetime is part of the spec but not supported in Chrome</span><input type="datetime" name="weee"></label>
+                <label><span>link has no meaning in the spec, and could be used ourselves?</span><input type="link" name="clickem"></label>
+            </fieldset>
+
+            <label><span>select</span>
+                <select name="combo" multiple="multiple" size="6">
+                    <optgroup label="Numbers">
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </optgroup>
+                    <optgroup label="Letters">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </optgroup>
+                </select>
+            </label>
+
+            <label>
+                <span>datalist see this <a href="http://demo.agektmr.com/datalist/">demo</a></span>
+                <input list="browsers" name="browser">
+                <datalist id="browsers">
+                  <option value="Internet Explorer">
+                  <option value="Firefox">
+                  <option value="Chrome">
+                  <option value="Opera">
+                  <option value="Safari">
+                </datalist>
+            </label>
+
+            <input type="reset" name="resetme">
+            <input type="submit" name="subby">
+        </form>
+    </body>
+</html>

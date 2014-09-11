@@ -2,7 +2,7 @@
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2/license.html
  */
 
 /******************   PANE STYLES   ********************/
@@ -65,10 +65,27 @@
 /**********************************************   BUTTON - nested, disabled   **********************************************/
 button::-moz-focus-inner { border:0; }
 .wui-btn {
-    display:inline-block; width:auto; padding:0 1em; text-align: center; font-size: 0.8em;
-    background-color:#ccc; outline:0; border:1px solid #777; color:#555; line-height:2; margin-left:1px;
-    -webkit-transition: all 0.1s linear; transition: all 0.1s linear;
-    cursor:pointer; -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; user-select:none;
+    display:inline-block; 
+    width:auto; 
+    padding:0 1em; 
+    text-align: center; 
+    font-size: 0.8em;
+    background-color:#ccc; 
+    outline:0; 
+    border:1px solid #777; 
+    color:#555; 
+    line-height:2; 
+    margin-left:1px;
+    -webkit-transition: all 0.1s linear; 
+    transition: all 0.1s linear;
+    cursor:pointer; 
+    -moz-user-select:none; 
+    -webkit-user-select:none; 
+    -ms-user-select:none; 
+    user-select:none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .wui-btn:active, .wui-btn:hover {background-color:#fff; color:#333; }
 .wui-btn:active { box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
@@ -162,12 +179,12 @@ button::-moz-focus-inner { border:0; }
     background:#fff; list-style:none; display:none; margin:0 !important; padding:0; position:absolute; 
     max-height:300px; overflow:auto; border:1px #ccc solid; border-top:none; border-radius: 0 0 4px 4px;
 }
+.wui-combo-dd.wui-spinner { height:auto; width:auto; min-height: 26px; background-repeat: no-repeat; background-position: center center; }
 .wui-inline-dd {right:0; top:98%; width:100%;}
 .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
 .dd-wrapper, .wui-file {position:relative;}
 .wui-btn.field-btn.dd-switch { padding:0; width:26px; background-position: -12px -10px; margin: 0; }
 .wui-combo input {padding-right:30px;}
-.wui-spinner.combo-spinner {position:absolute; right: 30px; top: 5px;}
 
 /* hyperlink */
 .wui-link-third {
@@ -194,7 +211,17 @@ button::-moz-focus-inner { border:0; }
         a.wui-cal-prev:hover {left:2px; background-position:-162px -17px;}
         a.wui-cal-next:hover {right:2px;background-position:-146px -17px;}
 .wui-cal-header-day td {font-size: 0.7em; text-transform: uppercase; text-align: center;}
-.wui-cal-day {width:30px; text-align: right; padding:0.1em 0.25em 0.1em 0.1em; background-color: #ddd; display: inline-block; cursor: pointer;}
+.wui-cal-day {
+    width:30px; 
+    text-align: right; 
+    padding:0.1em 0.25em 0.1em 0.1em; 
+    background-color: #ddd; 
+    display: inline-block; 
+    cursor: pointer;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+}
 .wui-cal-day:hover {background-color: #ccc;}
 .wui-cal-day.wui-cal-disabled {opacity:0.7; cursor: default; background-color: #eee;}
 .wui-cal-day.wui-cal-disabled:hover {background-color: #eee;}
@@ -309,7 +336,8 @@ button::-moz-focus-inner { border:0; }
     }
     .wui-gc.hidden > div {display:none !important;}
 
-    .wui-gc.wui-no-sort {padding-right:0;}
+    .wui-gc.wui-no-sort, .wui-gc.wui-no-sort > div:first-child{padding-right:0;}
+
     .wui-gc:last-child {  border-right:0; }
     .wui-gc div:first-child {
         bottom: 0.5em;
@@ -388,7 +416,7 @@ button::-moz-focus-inner { border:0; }
 
 /********************* Selection & Hilighting Styles ***************************/
 .wui-selected td, .wui-selected {background-color:#038BE0;}
-    .wui-combo-dd li.wui-selected { color:#fff; }
+    .wui-selected { color:#fff; }
 .wui-highlight { background-color:#fc0;}
     .wui-selected.wui-highlight, .wui-selected .wui-highlight { background-color:#288D58; }
 

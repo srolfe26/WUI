@@ -242,7 +242,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
                     }
                 },
-                    
+
     /** Verify that columns have been defined on the grid, or that they are available remotely */
     getColumns: function(){
                     var me = this;
@@ -253,7 +253,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         me.colProxy.loadData();
                     }else if(me.columns.length){
                         // Check for locally defined columns
-                        me.setColumns(me.columns);
+                        return me.setColumns(me.columns);
                     }else{
                         //throw('There are no columns defined for this WUI Grid.');
                     }    
@@ -309,7 +309,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     loadData:   function(){
                     this.setMaskHTML('Loading <span class="wui-spinner"></span>');
                     this.addMask();
-                    Wui.Data.prototype.loadData.apply(this,arguments);
+                    return Wui.Data.prototype.loadData.apply(this,arguments);
                 },            
     
     /** 
@@ -385,7 +385,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     // Start with getting the columns - Many methods waterfall from here
                     me.autoLoad = al;
-                    this.getColumns();
+                    return this.getColumns();
                 },
     
     /** Positions the height and width of the data table's container. @private */
@@ -403,7 +403,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     /** Overrides DataList.refresh() to add disabling the grid to add the load mask */
     refresh:    function(){
                     if(this.url === null)   this.setData(this.data);
-                    else                    this.getColumns();
+                    else                    return this.getColumns();
                 },    
 
     /** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
@@ -454,6 +454,30 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     me.heading.append(col.el);
                 },
     
+    /**
+    @param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
+    @return The new length of the array 
+    Same as Wui.Data.push() but sizes columns on the grid too.
+    */
+    push:           function(){
+                        var retVal = Wui.Data.prototype.push.apply(this,arguments);
+                        this.sizeCols();
+                        return retVal;
+                    },
+
+    /**
+    @param  {number}    idx         Position to start making changes in the items array.
+    @param  {number}    howMany     Number of elements to remove.
+    @param  {object}    [obj,...]   One or more objects to be added to the array at position idx
+    @return An array of the removed objects, or an empty array. 
+    Same as Wui.Data.splice() but sizes columns on the grid too.
+    */
+    splice:     function(){
+                    var retVal = Wui.Data.prototype.splice.apply(this,arguments);
+                    this.sizeCols();
+                    return retVal;
+                },
+
     /** Ensures that columns have all of the proper information */
     setColumns: function(cols){
                     var me = this;
@@ -510,7 +534,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     if(me.autoLoad){
                         if(me.url === null) me.setData(me.data);
-                        else                me.loadData();
+                        else                return me.loadData();
                     }
                 },
     

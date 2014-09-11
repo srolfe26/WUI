@@ -94,6 +94,7 @@ Wui.forAjaxFileUpload = function(obj,addIndex){
 /** @return The id of the string. 
     Returns a string that will be a unique to use on the DOM. 
     Ids are returned in the format wui-{number}.
+    _.uniqueID([prefix]) can fulfill this role
 */
 Wui.id = function(){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
@@ -330,10 +331,10 @@ Wui.fit = function(collection,dim){
         $.each(collection,function(i,itm){
             var css = {};
             if(itm.fit){
-                $(itm.el).css(Wui.cssCheck('flex-grow'),itm.fit);
+                $(itm.el).css(Wui.cssCheck('flex'),itm.fit + ' auto');
             }else if(itm.cssByParam === undefined){
                 $(itm.el).css(dim,itm[dim]);
-                $(itm.el).css(Wui.cssCheck('flex-grow'),'');
+                $(itm.el).css(Wui.cssCheck('flex'),'');
             }
         });
     }else{
@@ -746,7 +747,7 @@ Wui.O.prototype = {
                     var me = this,
                         el = me.elAlias || me.el;
                         idx = parseInt(idx);
-                    
+
                     if(me.items === undefined) me.items = [];
                     
                     //remove specified elements
@@ -1243,11 +1244,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     
     /** Clears the selection on the data list */
     clearSelect:function(){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
-                    me.el.find('.wui-selected').removeClass('wui-selected');
+                    var me = this,
+                        dn = (me.name) ? '.' + me.name : '',
+                        el = me.elAlias || me.el;
+
+                    el.find('.wui-selected').removeClass('wui-selected');
                     me.selected = [];
-                    me.el.trigger($.Event('wuichange' + dn), [me, me.el, me.selected])
-                        .trigger($.Event('wuichange'), [me, me.el, me.selected]);
+                    me.el.trigger($.Event('wuichange' + dn), [me, me.el, {}, me.selected])
+                        .trigger($.Event('wuichange'), [me, me.el, {}, me.selected]);
                 },
     
     /**
@@ -1281,6 +1285,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     */        
     itemDeselect:function(itm){
                     var me = this, dn = (me.name) ? '.' + me.name : '';
+
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
                     me.el.trigger($.Event('wuideselect' + dn),[me, itm.el, itm.rec])
@@ -1415,8 +1420,6 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                             if(evnt.keyCode == 38)  me.selectAjacent(-1);  // 38 = up
                             if(evnt.keyCode == 40)  me.selectAjacent(1);   // 40 = down
                         }
-                    
-                        
                     });
                 },
 
@@ -1425,16 +1428,25 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Selects the list item immediately before or after the currently selected item.
     */
     selectAjacent:  function(num){
-                        var me = this,
-                            retVal = undefined,
-                            selectAjc = me.selected[0].el.parent().children(':nth-child(' +(me.selected[0].el.index() + num + 1)+ ')');
-                        me.each(function(itm){
-                            if(itm.el[0] == selectAjc[0]) 
-                                retVal = me.itemSelect(itm);
-                        });
-                        me.scrollToCurrent();
-                        return retVal;
+                        var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();
+                        return me.selectByEl(selectAjc);
                     },
+
+    /**
+    @param    {jQuery Object} el An object that will match an element in the DataList.
+    Selects the matching DataList item.
+    */
+    selectByEl: function(el){
+                    var me = this, retVal = undefined;
+
+                    me.each(function(itm){
+                        if(itm.el[0] == el[0])
+                            retVal = me.itemSelect(itm);
+                    });
+                    me.scrollToCurrent();
+                    
+                    return retVal;
+                },
                 
     /** Refreshes the DataList to match the data or reload it from the server */
     refresh:    function(){ this.onRender(); },
@@ -1468,10 +1480,15 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     /** Scrolls the list to the currently selected item. */            
     scrollToCurrent:function(){
                         var me = this,
-                            firstSelect = me.el.find('.wui-selected:first'),
+                            el = me.elAlias || me.el,
+                            firstSelect = el.find('.wui-selected:first'),
                             ofstP = firstSelect.offsetParent(),
-                            offset = (function(){ var r = 0; firstSelect.prevAll().each(function(){ r += $(this).outerHeight() - 0.55; }); return  r; })();
-                        ofstP.animate({scrollTop:offset },500);
+                            offset = (function(){ 
+                                var r = 0; 
+                                firstSelect.prevAll().each(function(){ r += $(this).outerHeight() - 0.55; }); 
+                                return  r; 
+                            })();
+                        ofstP.animate({scrollTop:offset },100);
                     },
                     
     /**
@@ -1650,13 +1667,19 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     /** Runs after a pane is rendered. Sets up layout listeners and sets focus on the bottom-right-most button if any */
     afterRender:    function(){
                         var me = this;
-                        
+                        me.layoutInterval = false;
+
                         document.addEventListener("animationstart", doLayout, false);       // standard + firefox
                         document.addEventListener("MSAnimationStart", doLayout, false);     // IE
                         document.addEventListener("webkitAnimationStart", doLayout, false); // Chrome + Safari
                         
+                        // Prevent the layout from occuring more than once ever 100ms
                         function doLayout(){
-                            if(!me.parent && !(me instanceof Wui.Window)) me.layout();
+                            if(me.layoutInterval === false){
+                                if(!me.parent && !(me instanceof Wui.Window)) me.layout();
+                                me.layoutInterval = true;
+                                setTimeout(function(){ me.layoutInterval = false; },100);
+                            }  
                         }
 
                         // If the pane is disabled then it disables it
@@ -2014,7 +2037,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                         footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
                         headersHeight = headHeight + footHeight,
                         useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
-                                        (containerHeight < totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : 
+                                        (containerHeight <= totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : 
                                             Wui.isPercent(me.height) ? Wui.percentToPixels(me.windowEl, me.height, 'height') : me.height;
 
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
@@ -2051,20 +2074,26 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 @param {string}         msg         A message for the user
 @param {[string]}       msgTitle    Title for the window. Default is 'Message'
 @param {[function]}     callback    Function to perform when the message window closes - returning false will prevent the window from closing.
-@param {[string]}       content     An additional Wui object to place on window
+@param {[string]}       content     One or more additional Wui objects to place on the window
 @return The Wui.Window object of the message window.
 @author     Stephen Nielsen
 */
 Wui.msg = function(msg, msgTitle, callback, content){
-    var cntnt = (content !== undefined) ? [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) }), content] : [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) })],
-        msgWin  = new Wui.Window({
+    var cntnt = [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) })];
+    
+    if(typeof content !== 'undefined'){
+        if(typeof content.push == 'function')   cntnt.push.apply(cntnt,content);
+        else                                    cntnt.push(content);
+    }
+
+    var msgWin  = new Wui.Window({
             title:      msgTitle || 'Message', 
             isModal:    true,
             items:      cntnt, 
             width:      350,
             onWinClose: callback || function(){}
         });
-    msgWin.resize();
+
     return msgWin;
 };
 
