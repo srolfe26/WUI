@@ -306,6 +306,8 @@ Wui.fit = function(collection,dim){
             parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
             dir         = (dim == 'width') ? 'row' : 'column';
 
+        dim = (dir == 'row') ? 'width' : 'height';
+
         // Make the containing element flex
         parentEl.css('display',Wui.cssCheck('flex')).css(Wui.cssCheck('flex-direction'),dir);
 

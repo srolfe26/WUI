@@ -103,7 +103,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     selectTabByText:function(txt, supressEvent){
                         var me = this, retVal = undefined;
                         $.each(me.items,function(idx,itm){
-                            if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
+                            if($.trim(itm.tab.el.text()).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
                                 me.giveFocus(itm, supressEvent);
                                 retVal = itm;
                             }

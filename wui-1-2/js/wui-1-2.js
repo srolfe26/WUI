@@ -110,6 +110,7 @@ Wui.forAjaxFileUpload = function(obj,addIndex){
 /** @return The id of the string. 
     Returns a string that will be a unique to use on the DOM. 
     Ids are returned in the format wui-{number}.
+    _.uniqueID([prefix]) can fulfill this role
 */
 Wui.id = function(){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
@@ -320,6 +321,8 @@ Wui.fit = function(collection,dim){
             parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
             parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
             dir         = (dim == 'width') ? 'row' : 'column';
+
+        dim = (dir == 'row') ? 'width' : 'height';
 
         // Make the containing element flex
         parentEl.css('display',Wui.cssCheck('flex')).css(Wui.cssCheck('flex-direction'),dir);
@@ -2052,7 +2055,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                         footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
                         headersHeight = headHeight + footHeight,
                         useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
-                                        (containerHeight < totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : 
+                                        (containerHeight <= totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : 
                                             Wui.isPercent(me.height) ? Wui.percentToPixels(me.windowEl, me.height, 'height') : me.height;
 
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
@@ -2264,7 +2267,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     selectTabByText:function(txt, supressEvent){
                         var me = this, retVal = undefined;
                         $.each(me.items,function(idx,itm){
-                            if($.trim(itm.tab.text).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
+                            if($.trim(itm.tab.el.text()).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
                                 me.giveFocus(itm, supressEvent);
                                 retVal = itm;
                             }
