@@ -152,9 +152,28 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                         if(!(itm.labelSize)) $.extend(itm,{labelSize: me.labelSize});
                         
                         var ft = itm.ftype.split('.');
-                        
-                        if(window[ft[0]] && window[ft[0]][ft[1]])   return new window[ft[0]][ft[1]](itm);
-                        else                                        throw('Object type ' +itm.ftype+ ' is not defined.');
+
+                        switch (ft.length) {
+                            case 1:
+                                if(window[ft[0]])   return new window[ft[0]](itm);
+                                else                throw('Object type ' +itm.ftype+ ' is not defined.');
+                            break;
+                            case 2:
+                                if(window[ft[0]] && window[ft[0]][ft[1]])   return new window[ft[0]][ft[1]](itm);
+                                else                                        throw('Object type ' +itm.ftype+ ' is not defined.');
+                            break;
+                            case 3:
+                                if(window[ft[0]] && window[ft[0]][ft[1]][ft[2]])    return new window[ft[0]][ft[1]][ft[2]](itm);
+                                else                                                throw('Object type ' +itm.ftype+ ' is not defined.');
+                            break;
+                            case 4:
+                                if(window[ft[0]] && window[ft[0]][ft[1]][ft[2]][ft[3]]) return new window[ft[0]][ft[1]][ft[2]][ft[3]](itm);
+                                else                                                    throw('Object type ' +itm.ftype+ ' is not defined.');
+                            break;
+                            default:
+                                throw('Object type ' +itm.ftype+ ' is not defined.');
+                            break;
+                        }
                     }else if(itm instanceof Wui.FormField){
                         // If a field has a label, make it match the format of the form.
                         if(itm.lbl){
