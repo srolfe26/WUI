@@ -1406,7 +1406,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     notFound:   function(val){},
 
     /** Loads data via the appropriate method when added to the DOM */
-    onRender:   function(){
+    afterRender:function(){
                     Wui.FormField.prototype.onRender.apply(this,arguments);
 
                     // Loads data per the method appropriate for the object

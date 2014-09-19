@@ -33,6 +33,7 @@ Wui.selectMonster = function(combo){
         valueItem:      attrs.valueItem,
         data:           data,
         appendTo:       replaceSpan,
+        name:           $combo.attr('name'),
         
         // Right now Wui.Combo only accepts single values, so put selected 
         // records in a separate value
@@ -59,9 +60,10 @@ Wui.Multiple.prototype = $.extend(new Wui.DataList(), new Wui.FormField(), {
                             valueItem:      combo.valueItem,
                             url:            combo.url,
                             params:         combo.params,
+                            appendTo:       me.appendTo || combo.appendTo,
                             selectEl:       $('<select>',{
                                                 multiple:   'multiple',
-                                                name:       me.name || combo.name
+                                                name:       combo.name || me.name
                                             }),
                             selectTemplate:new Wui.Template({
                                                 template:   '<option value={' +combo.valueItem+ '} ' +
