@@ -1502,7 +1502,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                             switch(evnt.keyCode){
                                 case 40:    evnt.preventDefault(); move(1);     break;  // downkey
                                 case 38:    evnt.preventDefault(); move(-1);    break;  // upkey
-                                case 9:     t.isBlurring = false; t.set();      break;  //tab
+                                case 9:     t.set();                            break;  //tab
                                 case 27:                                                // escape
                                     evnt.preventDefault(); 
                                     t.field.val(t.previous);
@@ -1525,13 +1525,15 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                         },
                         focus: function(evnt){
                             t.isBlurring = undefined;
+                            evnt.stopPropagation();
                         },
                         blur: function(evnt){
                             if(t.isBlurring !== false){
                                 t.close();
                             }else{
-                                t.field.focus();
-                                evnt.preventDefault();
+                                // IE needs some time
+                                setTimeout(function(){ t.field.focus(); }, 10);
+                                // evnt.preventDefault();
                             }
                         }
                     });
@@ -1576,7 +1578,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
     /** Returns only the simple value of an item */
     getVal:     function(){
-                    return (this.value && this.value[this.valueItem]) ? this.value[this.valueItem] : this.value;
+                    return (this.value !== null && typeof this.value[this.valueItem] != 'undefined') ? this.value[this.valueItem] : this.value;
                 }
 });
 

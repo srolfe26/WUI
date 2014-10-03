@@ -540,8 +540,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     
     setData:    function(){
                     var me = this, i = null, j = null;
-                    Wui.DataList.prototype.setData.apply(me,arguments);
 
+                    Wui.DataList.prototype.setData.apply(me,arguments);
+                    
                     // If the config sorters is defined, add them to the array
                     if(me.sort.length && !me.sorters.length)
                         for(i = 0; i < me.sort.length; i++)
@@ -589,7 +590,6 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
                     me.tbl.appendTo(me.tblContainer);
                     me.sizeCols();
-                    me.resetSelect();
                 }
 });
 

@@ -18,10 +18,10 @@
         <!-- <i class="fa fa-cog fa-spin" style="font-size:1em;"></i> This is a work in progress -->
         <img src="http://www.journeysinlightphotoblog.net/wp-content/uploads/2012/08/copenhagen-canal-shops1.jpg">
         
-        <section 
+        <div 
             class="wui-pane wui-window" 
             data-is-modal="true" 
-            data-resizable="false" 
+            data-resizable="true" 
             auto-show="true" 
             data-draggable="true" 
             data-width="600" 
@@ -32,49 +32,35 @@
                 <h1>Title</h1>
             </header>
 
-                <section class="wui-pane" style="width:200px">
-                    <header>
-                        <h1>Section 1</h1>
-                    </header>
+                <div class="wui-pane" style="width:200px">
+                    <!-- <header>
+                        <h1>div 1</h1>
+                        <span>Hey</span>
+                    </header> -->
                     <div></div>
                     <footer></footer>
-                </section>
+                </div>
 
-                <section class="wui-pane" style="flex:1;">
+                <div class="wui-pane" style="flex:1;">
                     <div style="display:flex; overflow:auto; flex-direction:column;">
-                        <section class="wui-pane" style="min-height:300px">
+                        <div class="wui-pane" style="min-height:300px">
                             <header>
                                 <h1>Section 3</h1>
                             </header>
-                            <div>Section 2 contains sections 3 and 4</div>
+                            <div>Section 2 contains Sections 3 and 4</div>
                             <footer></footer>
-                        </section>
+                        </div>
 
-                        <section class="wui-pane" style="min-height:200px; flex:1;">
+                        <div class="wui-pane" style="min-height:200px; flex:1;">
                             <header>
                                 <h1>Section 4</h1>
                             </header>
                             <div></div>
-                        </section>
+                        </div>
                     </div>
-                </section>
+                </div>
 
             <footer></footer>
-        </section>
-
-
-        <section class="wui-pane wui-window" style="min-height:200px; flex:1;"
-        data-is-modal="true" 
-            data-resizable="false" 
-            auto-show="true" 
-            data-draggable="true" 
-            data-width="600" 
-            data-height="400"
-            style="min-width:300px; min-height:200px;">
-            <header>
-                <h1>New Window</h1>
-            </header>
-            <div></div>
-        </section>
+        </div>
     </body>
 </html>

@@ -42,8 +42,8 @@ var Wui = Wui || {
 $.ajaxSetup({ 
     cache:      false,
     error:      function(response){
-                    // console.log(response);
                     var err = null;
+                    
                     try{        err = $.parseJSON( response.responseText ); }
                     catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
                     if(err !== null)
@@ -1452,31 +1452,53 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                 
     /** Refreshes the DataList to match the data or reload it from the server */
     refresh:    function(){ this.onRender(); },
+
+    /** 
+    @param    {Array} arry  An array containing objects with a 'rec' member.
+    @return   A new array with just the 'rec' objects which have been copied one level deep
+    Performs a copy on an array of dataList items and gets only the records */
+    copyArryRecs:function(arry){
+                    var newArry = [];
+
+                    arry.forEach(function(itm){
+                        var newRec = {};
+
+                        $.each(itm.rec,function(key,val){ newRec[key] = val; });
+
+                        newArry.push(newRec);
+                    });
+
+                    return newArry;
+                },
     
     /**  Reselects previously selected rows after a data change or sort. Scrolls to the first currently selected row. */
     resetSelect:function(){
                     var me = this,
-                        selList = me.selected;
-                    
-                    // Clear current selection list after making a copy of previously selected items
-                    me.selected = [];
-                    
-                    $.each(selList || [],function(i,sel){
-                        me.each(function(itm){
-                            var sameRec = (me.identity) ? itm.rec[me.identity] === sel.rec[me.identity] : JSON.stringify(itm.rec) === JSON.stringify(sel.rec);
-                            
-                            if(sameRec){
-                                if(me.multiSelect){
-                                    itm.el.addClass('wui-selected');
-                                    me.selected.push(itm, true);
-                                }else{
-                                    me.itemSelect(itm);
-                                }
-                            }
-                        });
-                    });
+                        selList = me.copyArryRecs(me.selected);
 
-                    me.scrollToCurrent();
+                    if(selList.length){
+                        // Clear current selection list after making a copy of previously selected items
+                        me.selected = [];
+
+                        selList.forEach(function(rec){
+                            Wui.O.prototype.each.call(me,function(itm){
+                                var sameRec = (me.identity) 
+                                        ? itm.rec[me.identity] === rec[me.identity] 
+                                        : JSON.stringify(itm.rec) === JSON.stringify(rec);
+                                
+                                if(sameRec){
+                                    if(me.multiSelect){
+                                        itm.el.addClass('wui-selected');
+                                        me.selected.push(itm, true);
+                                    }else{
+                                        me.itemSelect(itm);
+                                    }
+                                }
+                            });
+                        });
+
+                        me.scrollToCurrent();
+                    }
                 },
                     
     /** Scrolls the list to the currently selected item. */            
