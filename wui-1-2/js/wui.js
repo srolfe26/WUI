@@ -1331,15 +1331,33 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                     function singleClick(e,row){
                         // Determine the # of selected items before the change
-                        if(!me.multiSelect || !(e.metaKey || e.ctrlKey)){
+                        if(!me.multiSelect || !(e.metaKey || e.ctrlKey || e.shiftKey)){
                             if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
                             else                                                    me.itemSelect(itm);     //change selection
                         }else{
                             var alreadySelected = $(row).hasClass('wui-selected');
-                            $(row).toggleClass('wui-selected',!alreadySelected);
+                            
+                            if(!e.shiftKey){
+                                // WHEN THE CTRL KEY IS HELD SELECT/DESELECT INDIVIDUAL ITEMS
+                                $(row).toggleClass('wui-selected',!alreadySelected);
 
-                            if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
-                            else                me.selected.push(itm);
+                                if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
+                                else                me.selected.push(itm);
+                            }else{
+                                // WHEN THE SHIFT KEY IS HELD - SELECT ALL ITEMS BETWEEN TWO POINTS
+                                var firstSelected = me.selectByEl(me.el.find('tr.wui-selected:first')),
+                                    currentSelected = me.getItemByEl($(row)),
+                                    dir = (firstSelected.rec.wuiIndex < currentSelected.rec.wuiIndex) ? 1 : -1,
+                                    start = (dir > 0) ? firstSelected : currentSelected,
+                                    end = (dir > 0) ? currentSelected : firstSelected,
+                                    currSelection = [];
+
+                                me.selected = currSelection = me.items.slice(start.rec.wuiIndex,end.rec.wuiIndex + 1);
+                                $('wui-selected').removeClass('wui-selected');
+                                currSelection.forEach(function(rec){
+                                    rec.el.addClass('wui-selected');
+                                });
+                            }
 
                             me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
                                 .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
@@ -1441,11 +1459,21 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     selectByEl: function(el){
                     var me = this, retVal = undefined;
 
-                    me.each(function(itm){
-                        if(itm.el[0] == el[0])
-                            retVal = me.itemSelect(itm);
-                    });
+                    me.itemSelect(retVal = me.getItemByEl(el));
                     me.scrollToCurrent();
+                    
+                    return retVal;
+                },
+
+    /**
+    @param    {jQuery Object} el An object that will match an element in the DataList.
+    @return   The item in the datalist corresponding to that DOM element.
+    Returns the matching DataList item.
+    */
+    getItemByEl:function(el){
+                    var me = this, retVal = undefined;
+
+                    me.each(function(itm){ if(itm.el[0] == el[0]) retVal = itm; });
                     
                     return retVal;
                 },

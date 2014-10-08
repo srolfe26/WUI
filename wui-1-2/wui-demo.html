@@ -1,0 +1,52 @@
+<html lang="en-us"><head>
+    <meta charset="utf-8">
+    <title>Multiple</title>
+
+    <link rel="stylesheet" href="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/css/goodies/multiple.css" type="text/css" media="all">
+    <style type="text/css">
+
+    </style>
+
+    <script type="text/javascript" src="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/js/jquery-2-1-1-ui-1-10-4.js"></script>
+    <script type="text/javascript" src="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/js/wui.js"></script>
+    <script type="text/javascript" src="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/js/forms.js"></script>
+    <script type="text/javascript" src="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/js/goodies/multiple.js"></script>
+
+    <script type="text/javascript">
+        var a = undefined;
+
+        $(document).ready(function(){
+            a = new Wui.Combo({
+                name:   'wui_combo',
+                url:    'docs/data-long.txt',
+                params: {},
+                autoLoad:true,
+                titleItem: 'description',
+                valueItem: 'tx_id',
+                setVal: function(sv){
+                            var me = this;
+                            var returned = Wui.Combo.prototype.setVal.apply(this,arguments);
+                            
+                            if(sv !== null){
+                                me.el.removeAttr('name');
+
+                                if(!me.hidden)
+                                    me.hidden = $('<input>',{type:'hidden', name:me.name}).val(me.value[me.valueItem]).appendTo(me.el);
+                                else
+                                    me.hidden.val(me.value[me.valueItem]);
+                            }
+                        }
+            });
+            a.place();
+        });
+    </script>
+</head>
+<body>
+    <select name="mycombo" multiple="multiple" data-value-item="id" data-title-item="name">
+        <option value="1">Tony</option>
+        <option value="2">Dan</option>
+        <option value="3">Sam</option>
+        <option value="4">Melodi</option>
+    </select>
+</body></html>

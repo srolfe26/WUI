@@ -135,8 +135,10 @@ Wui.Multiple.prototype = $.extend(new Wui.DataList(), new Wui.FormField(), {
     /** Returns only the simple value of an item */
     getVal:         function(){
                         var retArray = [];
-                        for(var i = 0; i < this.value.length; i++)
-                            retArray.push(this.value[i][this.valueItem]);
+
+                        if(this.value !== null && this.value.length)
+                            for(var i = 0; i < this.value.length; i++)
+                                retArray.push(this.value[i][this.valueItem]);
                         
                         return (retArray.length) ? retArray : null;
                     },
