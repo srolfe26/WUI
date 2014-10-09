@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>WUI Window/Button CSS Test</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/wui-style-test.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="wui-pane tbar bbar title wui-window">
+            <!-- Pane Content -->
+            <div class="wui-pane-content"></div>
+            
+            <!-- Pane Title -->
+            <div class="wui-title left"><span>WUI is Normal</span></div>
+
+            <!-- Top Horizontal Bar -->
+            <div class="wui-tbar wui-h-bar">
+                <button unselectable="on" class="wui-btn" tabindex="0">X</button>
+            </div>
+            
+            <!-- Bottom Horizontal Bar -->
+            <div class="wui-bbar wui-h-bar">
+                <button unselectable="on" class="wui-btn" tabindex="0">Close</button>
+            </div>
+        </div>
+
+
+
+        <div class="wui-pane tbar bbar title no-border wui-window">
+            <!-- Pane Title -->
+            <div class="wui-title left"><span>WUI is Normal</span></div>
+
+            <!-- Top Horizontal Bar -->
+            <div class="wui-tbar wui-h-bar">
+                <button unselectable="on" class="wui-btn disabled" tabindex="0">X</button>
+                <button unselectable="on" class="wui-btn" tabindex="0">X</button>
+            </div>
+
+            <!-- Pane Content -->
+            <div class="wui-pane-content">
+                <div class="wui-pane tbar title no-border wui-window">
+                    <!-- Pane Title -->
+                    <div class="wui-title left"><span>Level 2</span></div>
+
+                    <!-- Top Horizontal Bar -->
+                    <div class="wui-tbar wui-h-bar">
+                        <button unselectable="on" class="wui-btn disabled" tabindex="0">X</button>
+                        <button unselectable="on" class="wui-btn" tabindex="0">X</button>
+                    </div>
+
+                    <!-- Pane Content -->
+                    <div class="wui-pane-content">
+                        <div class="wui-pane tbar title no-border wui-window">
+                            <!-- Pane Title -->
+                            <div class="wui-title left"><span>Level 3</span></div>
+
+                            <!-- Top Horizontal Bar -->
+                            <div class="wui-tbar wui-h-bar">
+                                <button unselectable="on" class="wui-btn disabled" tabindex="0">X</button>
+                                <button unselectable="on" class="wui-btn" tabindex="0">X</button>
+                            </div>
+
+                            <!-- Pane Content -->
+                            <div class="wui-pane-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Horizontal Bar -->
+            <div class="wui-bbar wui-h-bar">
+                <button unselectable="on" class="wui-btn" tabindex="0">Close</button>
+            </div>
+        </div>
+
+
+
+        <div class="wui-pane title lbar rbar tbar wui-window">
+            <!-- Pane Content -->
+            <div class="wui-pane-content"></div>
+
+            <!-- Pane Title -->
+            <div class="wui-title left"><span>WUI is Normal</span></div>
+
+            <!-- Right Vertical Bar -->
+            <div class="wui-lbar wui-v-bar">
+                <button unselectable="on" class="wui-btn" tabindex="0">X</button>
+            </div>
+        </div>
+
+
+
+        <div class="wui-pane title rbar wui-window">
+            <!-- Pane Content -->
+            <div class="wui-pane-content"></div>
+
+            <!-- Pane Title -->
+            <div class="wui-title left"><span>WUI is Normal</span></div>
+
+            <!-- Right Vertical Bar -->
+            <div class="wui-rbar wui-v-bar">
+                <button unselectable="on" class="wui-btn" tabindex="0">X</button>
+            </div>
+        </div>
+
+    </body>
+</html>
