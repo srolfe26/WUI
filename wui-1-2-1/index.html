@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI 1.2.1 Test</title>
+
+    <link rel="stylesheet" href="wui.css" type="text/css" media="all">
+
+    <style type="text/css">
+        * {margin: 0; padding:0;}
+    </style>
+
+    <script type="text/javascript" src="jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="wui.js"></script>
+
+    <script type="text/javascript">
+        var pane = null, win = null;
+
+        $(document).on('wuibtnclick',function(){
+        	console.log(arguments);
+        })
+
+        $(document).ready(function(){
+            pane = new Wui.Pane({
+            	title: 		'WUI is Normal',
+            	// border:false,
+            	titleAlign: 'center',
+            	// disabled: 	true,
+            	rbar: 		[
+            					new Wui.Button({
+            						text: 		'Blah',
+            						titleAttr: 	'Ha ha ha ha',
+            						name: 		'named_button'
+            					})
+            				]
+            });
+
+            pane.place();
+            win = new Wui.Window({width:400, height:600});
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
