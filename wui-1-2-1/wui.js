@@ -5,6 +5,12 @@
  * https://static.usurf.usu.edu/resources/wui-1.2.1/license.html
  */
 
+// Make sure the WUI is defined
+var Wui = Wui || {
+    version: '1.2.1'
+};
+
+
 (function($,window) {
 
 // AJAX error reporting and caching.
@@ -21,21 +27,6 @@ $.ajaxSetup({
 });
 
 
-// Make sure the WUI is defined
-var Wui = Wui || {
-    version: '1.2.1'
-};
-
-
-/**
-@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-@param      {string}   prop    The name of a css property
-@return     The property name, or false
-
-Detects whether a CSS property is supported by the current browser. If its not supported,
-the method returns false. If the property is supported, the passed in string will be
-returned as-is, or with the necessary vendor appropriate prefix.
-*/
 Wui.cssCheck = function(prop){
     var i           = 0,
         parts       = prop.split('-'),
@@ -75,21 +66,54 @@ Wui.cssCheck = function(prop){
 };
 
 
-/**
-    @param  {object}    obj         Object containing named keys.
-    @param  {boolean}   [addIndex]  For fileLists, add the index of the file regardless of whether there is one or many. 
-    @return A javascript FormData object (<a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/FormData">Mozilla Developer Network: FormData</a>) containing the key/values passed in including files.
+Wui.fit = function(collection,dim){
+    // Ensure the collection is an array of Wui Objects
+    if(collection instanceof Array && collection.length > 0){
+        var i           = 0,
+            fitCt       = 0,
+            parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
+            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
+            dir         = (dim == 'width') ? 'row' : 'column';
 
-    Allows the WUI to upload files via ajax by using the javascript FormData object made
-    available in HTML5. In cases where a field contains multiple files, the FileList it
-    contains will be broken down into multiple keys in the FormData with the keys being named
-    {fieldName}_{number-th-file starting with 0} (i.e. 'image_0','image_1',etc...). 
+        dim = (dir == 'row') ? 'width' : 'height';
 
-    The following MUST be added to the config of the ajax object:
+        // Make the containing element flex
+        parentEl.css('display',Wui.cssCheck('flex')).css(Wui.cssCheck('flex-direction'),dir);
 
-    contentType:false,
-    processData:false
-*/
+        $.each(collection,function(i,itm){
+            if($.isNumeric(itm.fit) && itm.fit >= 0){
+                fitCt += itm.fit;           // Tally fit values
+                itm[dim] = -1;              // Set to -1 so that CSSByParam will not act on it
+            }else if(itm[dim]){
+                delete itm.fit;             // Ensure the item doesn't have a dimension and a fit specified
+            }else{
+                fitCt += (itm.fit = 1);     // Add a fit value to an item that doesn't have dimensions specified
+            }
+        });
+       
+        // If a collection becomes entirely fixed widths the flex will have a few problems
+        if(fitCt === 0){
+            var itm = collection[collection.length - 1];
+            fitCt += (itm.fit = 1);
+            itm[dim] = -1;
+        }
+       
+        // Apply CSS Flex properties
+        $.each(collection,function(i,itm){
+            var css = {};
+            if(itm.fit){
+                $(itm.el).css(Wui.cssCheck('flex'),itm.fit + ' auto');
+            }else if(itm.cssByParam === undefined){
+                $(itm.el).css(dim,itm[dim]);
+                $(itm.el).css(Wui.cssCheck('flex'),'');
+            }
+        });
+    }else{
+        console.log('Improper collection specified', arguments);
+    }
+};
+
+
 Wui.forAjaxFileUpload = function(obj,addIndex){
     var a = 0, x = 0, formData = new FormData();                                                                    
 
@@ -112,22 +136,6 @@ Wui.forAjaxFileUpload = function(obj,addIndex){
 };
 
 
-/**Returns an array of the keynames of an object. For example:
-
-Wui.getKeys({
-    first:  1,
-    second: 2,
-    third:  'three'    
-})
-
-Will return:
-
-['first','second','third']
-
-@preserve_format
-@param {object} Object containing named keys
-@return Array containing the key names of the passed in object in alphabetical order.
-*/
 Wui.getKeys = function(obj){
     var retArray = [];
     if(obj)
@@ -136,29 +144,18 @@ Wui.getKeys = function(obj){
 };
 
 
-/** @return The id of the string. 
-    Returns a string that will be a unique to use on the DOM. 
-    Ids are returned in the format wui-{number}.
-    _.uniqueID([prefix]) can fulfill this role
-*/
-Wui.id = function(){
+Wui.id = function(prefix){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
-    return 'wui-' + Wui.idCounter++;
+    prefix = (prefix.length !== 0) ? prefix + '-' : 'wui-'
+    return prefix + Wui.idCounter++;
 };
 
 
-/** Determines whether a value is a percent string.
-    @return     True if there is a string passed in containing a '%', else false.
-*/
 Wui.isPercent = function(){
     return (arguments[0] && arguments[0].indexOf && arguments[0].indexOf('%') != -1);
 };
 
 
-/** Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined.
-    @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-    @return     A number representing the maximum z-index on the page plus one. 
-*/
 Wui.maxZ = function(){
     var bodyElems = $('body *'),
         useElems = bodyElems.length < 2500 ? bodyElems : $('body > *, [style*="z-index"]'),
@@ -172,12 +169,6 @@ Wui.maxZ = function(){
 };
 
 
-/** Converts a percentage to a number of pixels given the containing element's dimensions.
-    @param {object} el          jQuery Object the percents are being calculated for. 
-    @param {string} percent     Percent to be calculated into pixels
-    @param {string} dim         Dimension [height,width] for comparing to parent objects
-    @return Number in pixels of the percentage passed in.
-*/
 Wui.percentToPixels = function(el,percent,dim){
     var parent = el.parent(),
         useWindow = (parent[0] === $(window)[0] || parent[0] === $('html')[0] || parent[0] === $('body')[0]),
@@ -186,12 +177,6 @@ Wui.percentToPixels = function(el,percent,dim){
 };
 
 
-/** 
-@param {object} parent The element to which the child will be relatively positioned.
-@param {object} child The element to be positioned.
-Absolutely positions a child element, relative to its parent, such that it will 
-be visible within the viewport and at the max z-index. Useful for dialogs and drop-downs.
-*/
 Wui.positionItem = function(parent,child){
     var ofst    = parent.offset(),
         cHeight = child.outerHeight(),
@@ -207,26 +192,12 @@ Wui.positionItem = function(parent,child){
 };
 
 
-/** 
-@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-
-@param    {number} lower    Lower bound for generating the random number
-@param    {number} upper    Upper bound for generating the random number
-@return A random number within the bounds specified
-
-Generates a random number
-*/
 Wui.randNum = function(lower,upper) {
     upper = upper - lower + 1 ;
     return ( lower + Math.floor(Math.random() * upper) );
 };
 
 
-/** A function to get the scrollbar width is necessary because it varies among browsers, and is useful
-for sizing objects within a container with overflow set to scroll, or auto.
-@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-@return Number specifying the scrollbar width for the current page in pixels.
-*/
 Wui.scrollbarWidth = function() {
     var parent, child, width;
 
@@ -241,14 +212,6 @@ Wui.scrollbarWidth = function() {
 };
 
 
-/** 
-@author     Stephen Nielsen (rolfe.nielsen@gmail.com)
-@param  {object} response   A JSON object which was returned from an XHR response.
-@return An object containing the data removed from any wrapper, and the total number of records received {data:array, total:numeric}
-
-Unwraps the data from any container it may be in to allow it to be used by a containing object. Wrapper values are defined in
-Wui.Data.prototype.dataContainer and Wui.Data.prototype.totalContainer.
-*/
 Wui.unwrapData = function(r){
     var me          = this,
         dc          = me.hasOwnProperty('dataContainer') ? me.dataContainer : Wui.Data.prototype.dataContainer,
@@ -291,7 +254,12 @@ Wui.O.prototype = {
                     
                     return obj;
                 },
-
+    append:     function(obj){
+                    var me = this, el = me.elAlias || me.el;
+                    $.each(arguments,function(i,itm){
+                        el.append(itm);
+                    });
+                },
     applyAttr:  function(name,val){
                     var validVal = (typeof val === 'string' || typeof val === 'number');
                     if(validVal) $(this.el).attr(name,val);
@@ -331,7 +299,7 @@ Wui.O.prototype = {
                     
                     // hide an object based on its hidden value
                     if(me.hidden) el.css('display','none');
-                        
+
                     return el.addClass(me.cls);
                 },
 
@@ -463,36 +431,32 @@ Wui.O.prototype = {
 };
 
 
-/**
- @event     wuibtnclick     Fires when the button is pressed and not disabled. Avoided using the standard 'click' event for this reason ( Button Object )
- @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
-
- A Wui.Button creates a uniformly styled HTML button with additional functionality of being 
- able to be disabled/enabled.  The action of the button can be defined by using the 'click'
- method, or by naming the button and implementing a listener on the 'wuibtnclick' event.
-*/
 Wui.Button = function(args){
     $.extend(this, {
-        /** The button element. Can be overridden according to the needs of the design. */
-        el:         $('<button>').attr({unselectable:'on'}),
-        
-        /** Whether the button is disabled. */
         disabled:   false,
-        
-        /** Tool tip text for the button. */
-        toolTip:    null,
-        
-        /** Tab index will make the button focusable by the browser. Changing this value will result in it receiving a higher precedence than what it would receive in that natural flow of the page. */
+        el:         $('<button>').attr({unselectable:'on'}),
         tabIndex:   0,
-        
-        /** Text to appear on the button. Can be HTML if a more complex button design is desired. */
-        text:       'Button'
+        text:       'Button',
+        toolTip:    null
     }, args);
     
     this.init();
 };
 Wui.Button.prototype = $.extend(new Wui.O(),{
-    /** Method that will run immediately when the object is constructed. Adds the click listener with functionality to disable the button.*/
+    disable:    function(){
+                    this.disabled = true;
+                    this.el
+                    .toggleClass('disabled',this.disabled)
+                    .attr('disabled',true)
+                    .removeAttr('tabindex');
+                },
+    enable:     function(){
+                    this.disabled = false;
+                    this.el
+                    .toggleClass('disabled',this.disabled)
+                    .removeAttr('disabled')
+                    .attr({tabindex:this.tabIndex});
+                },
     init:       function(){ 
                     var me = this;
                     
@@ -517,85 +481,43 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                         return false;
                     }
                 },
-    
-    /** Disables the button */
-    disable:    function(){
-                    this.disabled = true;
-                    this.el
-                    .toggleClass('disabled',this.disabled)
-                    .attr('disabled',true)
-                    .removeAttr('tabindex');
-                },
-
-    /** Enables the button */
-    enable:     function(){
-                    this.disabled = false;
-                    this.el
-                    .toggleClass('disabled',this.disabled)
-                    .removeAttr('disabled')
-                    .attr({tabindex:this.tabIndex});
-                },
-
-    /** Sets the button text. Can be HTML. */
-    setText:    function(txt){ return this.el.html(txt); },
+    setText:    function(txt){ return this.el.html(txt); }
 });
 
 
-// WUI Pane
+
 Wui.Pane = function(args){ 
     $.extend(this,{
-        /** An array of items that will be added to the footer */
         bbar:       [],
-        
-        /** Whether or not the pane has a border */
         border:     true,
-        
-        /** An array of items that will be added to the header */
-        tbar:       [],
-
-        /** An array of items that will be added to the leftbar */
-        lbar:       [],
-
-        /** An array of items that will be added to the rightbar */
-        rbar:       [],
-        
-        /** Whether or not the pane is disabled on load */
         disabled:   false,
-
-        /** When set to true the pane will size itself to the height of its content on layout */
         fitToContent:false,
-        
-        /** Alignment of the heading title (left,center,right) */
-        titleAlign: 'left',
-                
-        /** Default height */
         height:     '100%',
-    
-        /** HTML to show in the mask when the pane is disabled */
+        lbar:       [],
         maskHTML:   'Empty',
-
-        /** The maximum height the pane will expand to when fitToContent is set to true. If
-        fitToContent is false, this property does nothing.*/
         maxHeight:  null,
+        rbar:       [],
+        tbar:       [],
+        title:      null,
+        titleAlign: 'left'
+    },args);
 
-        /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
-        title:      null
-    },args); 
     this.init();
 };
 Wui.Pane.prototype = $.extend(new Wui.O(), {
-    addMask:        function(){
-                        if(this.container.children('wui-mask').length === 0)
+    addMask:        function(target){
+                        target = (target) ? target : this.container;
+
+                        if(target.children('wui-mask').length === 0)
                             return this.mask = $('<div>')
                                                 .addClass('wui-mask')
                                                 .append(
                                                     $('<span>').html(this.maskHTML)
                                                 )
-                                                .appendTo(this.container);
+                                                .appendTo(target);
                         else
                             return null;
                     },
-
     disable:        function(){
                         var me = this;
 
@@ -606,8 +528,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         me.rightbar.each(function(itm){ if(itm.disable) itm.disable(); });
 
                         return me.disabled = true;
-                    },
-    
+                    },   
     enable:         function(){
                         var me = this;
 
@@ -619,7 +540,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                         return me.disabled = false;
                     },
-
     init:           function(){
                         var me = this;
                             el = me.el = $('<div>').addClass('wui-pane');
@@ -687,7 +607,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                             }
                         }
                     },
-
     removeMask:     function(){
                         var me = this, mask = me.mask || me.el.find('.wui-mask');
                         
@@ -696,7 +615,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                             me.mask = undefined;
                         }
                     },
-
     setTitle:       function(t){ 
                         var me = this,
                             hasEl = (typeof me.titleEl !== 'undefined');
@@ -718,7 +636,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                         return t;
                     },
-
     setTitleAlign:  function(t){ 
                         var me = this;
                         
@@ -731,67 +648,48 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
 Wui.Window = function(args){ 
     $.extend(this,{
-        /** An array of items that will be added to the footer */
         bbar:       [],
-        
-        /** Whether or not the pane has a border */
         border:     true,
-        
-        /** Determines whether objects behind the window are accessible */
-        isModal:    false,
-        
-        /** 
-        @param {WUI Window} win    The window being closed.
-        @eventhook Called just before the window closes. If this function returns false, the window will not be closed. 
-        */
-        onWinClose: function(){},
-        
-        /** 
-        @param {WUI Window} win    The window being opened.
-        @eventhook Called when the window opens. 
-        */
-        onWinOpen:  function(){},
-        
-        /** An array of items that will be added to the header */
-        tbar:       [],
-
-        /** An array of items that will be added to the leftbar */
-        lbar:       [],
-
-        /** An array of items that will be added to the rightbar */
-        rbar:       [],
-        
-        /** Text to show on the header of the pane. The header will not show if title is null and the tbar is empty. */
-        title:      'Window',
-        
-        /** Change what comes by default in the pane */
-        maskHTML:   'Loading <span class="wui-spinner"></span>',
-
-        /** Set a minimum height that the window can be resized to. If this property
-        is not, it will default to the declared height of the window, or zero if the 
-        declared height is a percentage. */
-        //minHeight: undefined,
-
-        /** Set a minimum width that the window can be resized to. If this property
-        is not, it will default to the declared width of the window, or zero if the 
-        declared width is a percentage. */
-        //minWidth: undefined,
-
-        /** Whether or not the user can resize the window */
-        resizable:  true,
-
-        /** Whether or not the user can reposition the window */
         draggable:  true,
-
-        /** The left position of the window when it is resized using Wui.Window.resize() or when it firtst appears. */
+        isModal:    false,
+        lbar:       [],
+        maskHTML:   'Loading <span class="wui-spinner"></span>',
+        onWinClose: function(){},
+        onWinOpen:  function(){},
+        rbar:       [],
+        resizable:  true,
+        tbar:       [],
+        title:      'Window',
         windowLeft: null,
-
-        /** The top position of the window when it is resized using Wui.Window.resize() or when it firtst appears. */
         windowTop:  null
     },args);  
     this.init(); 
 };
 Wui.Window.prototype = $.extend(new Wui.Pane(),{
+    close:      function(){ 
+                    var me = this;
+
+                    if(me.onWinClose(me) !== false){
+                        me.windowEl.trigger($.Event('close'),[me]);
+                        me.remove();
+                    }
+                },
+    cssByParam: function(){
+                    Wui.O.prototype.cssByParam.apply(this,arguments);
+                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }    // Remove CSS that accidentally gets applied to the modal cover
+                    if(this.windowEl)
+                        this.resize();                                              // Resize the window and center
+                },  
+    disable:    function(){
+                    Wui.Pane.prototype.disable.call(this);
+                    // Enable the close button for the window - esp. important if its modal
+                    if(this.closeBtn)
+                        this.closeBtn.enable();
+                },
+    fireResize: function(winEl,width,height){
+                    var me = this;
+                    me.container.trigger($.Event('resize'),[me.container.width(), me.container.height(),me,width,height]);
+                },
     init:       function(){
                     var me = this;
                     me.appendTo = $('body');
@@ -828,9 +726,9 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Add resizable option if the window is resizable
                     if(me.resizable === true)
                         me.windowEl.resizes({
-                            // minWidth:   me.minWidth || me.width,
-                            // minHeight:  me.minHeight || me.height,
-                            // resize:     function(){ me.fireResize(); }
+                            minWidth:   me.minWidth || 200,
+                            minHeight:  me.minHeight || 200,
+                            afterResize:function(){ me.fireResize.apply(me,arguments); }
                         });
 
                     // Put the window on the body
@@ -875,41 +773,25 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                                         : Math.floor((verge.viewportH() / 2) - (useHeight / 2));
                     me.windowEl.css({ top:posTop, left:posLeft });
                     
-                    // me.fireResize();
+                    me.fireResize();
                     return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
                 },
+    height:     300,   
+    width:      400
 });
 
 
-/**
- @event        datachanged    When the data changes (name, data object)
- @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
 
-The WUI Data Object is for handling data whether remote or local. It will fire 
-namespacedevents that can be used by an application, and provides a uniform 
-framework for working with data.
-
-If data is remote, Wui.Data is an additional wrapper around the jQuery AJAX method 
-and provides for pre-processing data. Data can be pushed and spliced into/out of 
-the object and events will be fired accordingly.
-*/
 Wui.Data = function(args){
     $.extend(this,{
-        data:           [],
-        
-        identity:       null,
-        
-        name:           null,
-        
-        params:         {},
-        
-        url:            null,
-        
-        waiting:        false,
-        
         ajaxConfig:     {},
-        
-        total:          0
+        data:           [],
+        identity:       null,
+        name:           null,
+        params:         {},
+        total:          0,
+        url:            null,
+        waiting:        false
     },args);
 };
 Wui.Data.prototype = {
@@ -924,7 +806,6 @@ Wui.Data.prototype = {
                                 break;
                         return true;
                     },
-    
     loadData:       function(){
                         var me = this,
                             config = $.extend({
@@ -946,12 +827,10 @@ Wui.Data.prototype = {
                             me.furtherRequests = arguments;
                         }
                     },
-
     setParams:      function(params){
                         if(params && typeof params === 'object')
                             $.extend(this.params,params);
-                    },
-    
+                    },   
     setData:        function(d,t){
                         var me = this;
                         
@@ -964,22 +843,16 @@ Wui.Data.prototype = {
                         
                         me.fireDataChanged();
                     },
-
     fireDataChanged:function(){
                         var me = this, dn = (me.name || 'wui-data');
 
                         me.dataChanged(me.data);
-                        $(document).trigger($.Event('datachanged.' + dn),[dn, me])
-                            .trigger($.Event('datachanged'),[dn, me]);
+                        $(document).trigger($.Event('datachanged'),[dn, me]);
                         me.afterSet(me.data);
-                    },
-    
+                    }, 
     beforeLoad:     function(){},
-    
     afterSet:       function(){},
-    
     beforeSet:      function(){},
-    
     success:        function(r){
                         var me = this;
                         me.waiting = false;
@@ -993,25 +866,19 @@ Wui.Data.prototype = {
                             me.setData(unwrapped.data, unwrapped.total);
                         }
                     },
-    
     onSuccess:      function(){},
-    
     onFailure:      function(){},
-    
     failure:        function(e){
                         this.waiting = false;
                         this.onFailure(e);
                     },
-    
     processData:    function(response){ return response; },
-
     push:           function(){
                         var retVal = Array.prototype.push.apply(this.data,arguments);
                         this.total = this.data.length;
                         this.fireDataChanged();
                         return retVal;
                     },
-
     splice:         function(){
                         var retVal = Array.prototype.splice.apply(this.data,arguments);
                         this.total = this.data.length;
@@ -1024,9 +891,7 @@ Wui.Data.prototype = {
 Wui.Template = function(args){ $.extend(this,args); };
 Wui.Template.prototype = {
     template:   null,
-    
     data:       null,
-    
     make:       function(index){
                     var me = this;
                     if(me.data && me.template){
@@ -1064,14 +929,6 @@ Wui.Template.prototype = {
 };
 
 
-/** Shows an message in a modal window
-@param {string}         msg         A message for the user
-@param {[string]}       msgTitle    Title for the window. Default is 'Message'
-@param {[function]}     callback    Function to perform when the message window closes - returning false will prevent the window from closing.
-@param {[string]}       content     One or more additional Wui objects to place on the window
-@return The Wui.Window object of the message window.
-@author     Stephen Nielsen
-*/
 Wui.msg = function(msg, msgTitle, callback, content){
     var cntnt = [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) })];
     
@@ -1091,14 +948,7 @@ Wui.msg = function(msg, msgTitle, callback, content){
     return msgWin;
 };
 
-/** Shows an error message
-@param {string}         errMsg      Message explaining the error
-@param {[string]}       msgTitle    Title for the window. Default is 'Error'
-@param {[array]}        buttons     Array containing Wui.Button(s) to give additional functionality.
-@param {[function]}     callback    Function to perform when the error window closes - returning false will prevent the window from closing.
-@return The Wui.Window object of the error message window.
-@author     Stephen Nielsen
-*/
+
 Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     var err = Wui.msg(errMsg,msgTitle,callback);
     if($.isArray(buttons))
@@ -1108,16 +958,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     return err;
 };
 
-/** Shows an message in a modal window with yes and no buttons. Answers are passed to callback().
-The window will not close until an answer is selected.
 
-@param {string}         msg         A message for the user
-@param {[string]}       msgTitle    Title for the window. Default is 'Message'
-@param {[function]}     callback    Function to perform when the message window closes - returning false will prevent the window from closing.
-@param {[string]}       content     An additional Wui object to place on window
-@return The Wui.Window object of the confirmation message.
-@author     Stephen Nielsen
-*/
 Wui.confirm = function(msg, msgTitle, callback, content){
     var cw = Wui.msg.apply(this,arguments);
     cw.doAnswer = function(ans){
