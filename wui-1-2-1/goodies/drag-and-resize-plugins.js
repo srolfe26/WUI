@@ -1,3 +1,4 @@
+
 (function($) {
     $.fn.drags = function(opt) {
 
@@ -42,6 +43,7 @@
         var $win = $(this), startX, startY, startWidth, startHeight;
 
         opt = $.extend({
+            anchored:   false,
             minWidth:   0,
             minHeight:  0,
             afterResize:function(){}
@@ -60,12 +62,13 @@
 
                 startX = e.clientX;
                 startY = e.clientY;
-                
+
+                $(document).off('mousemove.resizes');
                 $(document).on('mousemove.resizes', function(e2){
                     var xDif =      e2.clientX - startX,
                         yDif =      e2.clientY - startY,
-                        newWidth =  startWidth + xDif * 2,
-                        newHeight = startHeight + yDif * 2,
+                        newWidth =  startWidth + xDif * (opt.anchored ? 1 : 2),
+                        newHeight = startHeight + yDif * (opt.anchored ? 1 : 2),
                         startL =    (function(){
                                         if(newWidth < opt.minWidth){
                                             xDif = 0;
@@ -84,8 +87,8 @@
                     $win.css({
                         width:  newWidth,
                         height: newHeight,
-                        left:   startL - xDif,
-                        top:    startT - yDif
+                        left:   opt.anchored ? parseInt($win.css('left')) : startL - xDif,
+                        top:    opt.anchored ? parseInt($win.css('top')) : startT - yDif
                     });
 
                     deselect();

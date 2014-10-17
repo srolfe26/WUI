@@ -146,7 +146,7 @@ Wui.getKeys = function(obj){
 
 Wui.id = function(prefix){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
-    prefix = (prefix.length !== 0) ? prefix + '-' : 'wui-'
+    prefix = (prefix && prefix.length !== 0) ? prefix + '-' : 'wui-'
     return prefix + Wui.idCounter++;
 };
 
@@ -181,7 +181,7 @@ Wui.positionItem = function(parent,child){
     var ofst    = parent.offset(),
         cHeight = child.outerHeight(),
         cWidth  = child.outerWidth(),
-        plBelow = (ofst.top + parent.outerHeight() + cHeight < $.viewportH()),
+        plBelow = (ofst.top + parent.outerHeight() + cHeight < verge.viewportH()),
         plRight = (ofst.left + parent.outerWidth() - cWidth > 0); 
 
     child.css({
@@ -927,6 +927,284 @@ Wui.Template.prototype = {
                     throw new Error('Wui.js - Template engine missing data and/or template.');
                 }
 };
+
+
+Wui.DataList = function(args){
+    $.extend(this, {
+        afterMake:      function(){},
+        autoLoad:       true,
+        displayMax:     -1,
+        el:             $('<div>'),
+        init:           function(){},
+        multiSelect:    false,
+        selected:       []
+    }, args);
+    this.init();
+};
+Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(), {
+    dataChanged:function(){ this.make(); },
+    clearSelect:function(){
+                    var me = this,
+                        dn = (me.name) ? '.' + me.name : '',
+                        el = me.elAlias || me.el;
+
+                    el.find('.wui-selected').removeClass('wui-selected');
+                    me.selected = [];
+                    me.el.trigger($.Event('wuichange' + dn), [me, me.el, {}, me.selected])
+                        .trigger($.Event('wuichange'), [me, me.el, {}, me.selected]);
+                },
+    copyArryRecs:function(arry){
+                    var newArry = [];
+
+                    arry.forEach(function(itm){
+                        var newRec = {};
+
+                        $.each(itm.rec,function(key,val){ newRec[key] = val; });
+
+                        newArry.push(newRec);
+                    });
+
+                    return newArry;
+                },
+    createItem: function(itm){
+                    var me = this,
+                        clicks = 0,
+                        timer = null, 
+                        dn = (me.name) ? '.' + me.name : '';
+                    
+                    itm.el.on("click", function(e){
+                        var retVal = null;
+                        var row = this;
+                        
+                        clicks++;  //count clicks
+                        if(clicks === 1) {
+                            timer = setTimeout(function() {
+                                retVal = singleClick(e,row);
+                                clicks = 0;             //after action performed, reset counter
+                            }, 350);
+                        } else {
+                            clearTimeout(timer);    //prevent single-click action
+                            retVal = doubleClick(e,row);
+                            clicks = 0;             //after action performed, reset counter
+                        }
+                        return retVal;
+                    })
+                    .on("dblclick", function(e){
+                        e.preventDefault();  //cancel system double-click event
+                    });
+
+                    function singleClick(e,row){
+                        // Determine the # of selected items before the change
+                        if(!me.multiSelect || !(e.metaKey || e.ctrlKey || e.shiftKey)){
+                            if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
+                            else                                                    me.itemSelect(itm);     //change selection
+                        }else{
+                            var alreadySelected = $(row).hasClass('wui-selected');
+                            
+                            if(!e.shiftKey){
+                                // WHEN THE CTRL KEY IS HELD SELECT/DESELECT INDIVIDUAL ITEMS
+                                $(row).toggleClass('wui-selected',!alreadySelected);
+
+                                if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
+                                else                me.selected.push(itm);
+                            }else{
+                                // WHEN THE SHIFT KEY IS HELD - SELECT ALL ITEMS BETWEEN TWO POINTS
+                                var firstSelected = me.selectByEl(me.el.find('tr.wui-selected:first')),
+                                    currentSelected = me.getItemByEl($(row)),
+                                    dir = (firstSelected.rec.wuiIndex < currentSelected.rec.wuiIndex) ? 1 : -1,
+                                    start = (dir > 0) ? firstSelected : currentSelected,
+                                    end = (dir > 0) ? currentSelected : firstSelected,
+                                    currSelection = [];
+
+                                me.selected = currSelection = me.items.slice(start.rec.wuiIndex,end.rec.wuiIndex + 1);
+                                $('wui-selected').removeClass('wui-selected');
+                                currSelection.forEach(function(rec){
+                                    rec.el.addClass('wui-selected');
+                                });
+                            }
+
+                            me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                        }
+                    }
+
+                    function doubleClick(e){
+                        me.itemSelect(itm,true);
+                        me.el
+                            .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuidblclick'+ dn),[me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuidblclick'),[me, itm.el, itm.rec]);
+                             
+                        return false; // stops propagation & prevents default
+                    }
+
+                    return me.modifyItem(itm);
+                },
+    init:       function(){
+                    var me = this;
+
+                    if(!(me.name !== null && me.name.length !== 0))
+                        me.name = Wui.id('wui-data-list');
+
+                    if(!(me.id !== null && me.id.length !== 0))
+                        me.id = me.name;
+
+                    // Adds a document listener
+                    $(document).on('keyup',function(evnt){
+                        if(me.selected && me.selected[0] && (document.activeElement == me.selected[0].el[0])){
+                            // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
+                            if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
+                            if(evnt.keyCode == 38)  me.selectAjacent(-1);  // 38 = up
+                            if(evnt.keyCode == 40)  me.selectAjacent(1);   // 40 = down
+                        }
+                    });
+                },
+    itemSelect: function(itm, silent){
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                        
+                    me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
+                    itm.el.addClass('wui-selected').attr('tabindex',1).focus();
+                    me.selected = [itm];
+
+
+                    if(!me.multiSelect && !silent){
+                        me.el.trigger($.Event('wuiselect'+ dn), [me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                    }
+                    return itm;
+                },
+    itemDeselect:function(itm){
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
+
+                    itm.el.removeClass('wui-selected');
+                    me.selected = [];
+                    me.el.trigger($.Event('wuideselect' + dn),[me, itm.el, itm.rec])
+                        .trigger($.Event('wuichange' + dn), [me, itm.el, itm.rec, me.selected])
+                        .trigger($.Event('wuideselect'),[me, itm.el, itm.rec])
+                        .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                    return itm;
+                },
+    modifyItem: function(itm){ return itm.el; },
+    make:       function(){
+                    var me = this,
+                        holdingData = me.data || [],
+                        holder = $('<div>'), 
+                        dn = (me.name) ? '.' + me.name : '';
+                    
+                    // Clear out items list
+                    me.items = [];
+
+                    // Add items to me.items
+                    for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
+                        var rec = me.data = holdingData[i],
+                            itm = {el:Wui.Template.prototype.make.call(me, i), rec:rec};
+                            
+                        Array.prototype.push.call(me.items,itm);
+                        holder.append(me.createItem(itm));
+                    }
+                    
+                    // Clear out existing items and add new to the DOM
+                    me.clear();
+                    me.append(holder.children().unwrap());
+                    me.data = holdingData;
+                    
+                    // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
+                    // object has been manually run
+                    me.autoLoad = true;
+                    
+                    // Event hook and event
+                    me.afterMake();
+                    me.el.trigger($.Event('refresh'+ dn),[me,me.data])
+                        .trigger($.Event('refresh'),[me,me.data]);
+                    
+                    // Reset selected items if any
+                    me.resetSelect();
+                },
+    onRender:   function(){
+                    var me = this;
+
+                    // Loads data per the method appropriate for the object
+                    if(me.autoLoad){
+                        if(this.url === null)   me.make();
+                        else                    me.loadData();
+                    }
+
+                    
+                },
+    selectAjacent:function(num){
+                        var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();
+                        return me.selectByEl(selectAjc);
+                    },
+    selectByEl: function(el){
+                    var me = this, retVal = undefined;
+
+                    me.itemSelect(retVal = me.getItemByEl(el));
+                    me.scrollToCurrent();
+                    
+                    return retVal;
+                },
+    getItemByEl:function(el){
+                    var me = this, retVal = undefined;
+
+                    me.each(function(itm){ if(itm.el[0] == el[0]) retVal = itm; });
+                    
+                    return retVal;
+                },
+                
+    refresh:    function(){ this.onRender(); },
+    resetSelect:function(){
+                    var me = this,
+                        selList = me.copyArryRecs(me.selected);
+
+                    if(selList.length){
+                        // Clear current selection list after making a copy of previously selected items
+                        me.selected = [];
+
+                        selList.forEach(function(rec){
+                            Wui.O.prototype.each.call(me,function(itm){
+                                var sameRec = (me.identity) 
+                                        ? itm.rec[me.identity] === rec[me.identity] 
+                                        : JSON.stringify(itm.rec) === JSON.stringify(rec);
+                                
+                                if(sameRec){
+                                    if(me.multiSelect){
+                                        itm.el.addClass('wui-selected');
+                                        me.selected.push(itm, true);
+                                    }else{
+                                        me.itemSelect(itm);
+                                    }
+                                }
+                            });
+                        });
+
+                        me.scrollToCurrent();
+                    }
+                },
+    scrollToCurrent:function(){
+                        var me = this,
+                            el = me.elAlias || me.el,
+                            firstSelect = el.find('.wui-selected:first'),
+                            ofstP = firstSelect.offsetParent(),
+                            offset = (function(){ 
+                                var r = 0; 
+                                firstSelect.prevAll().each(function(){ r += $(this).outerHeight() - 0.55; }); 
+                                return  r; 
+                            })();
+                        ofstP.animate({scrollTop:offset },100);
+                    },
+    selectBy:   function(key,val){
+                    var me = this, retVal = undefined;
+                    me.each(function(itm){
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
+                            return retVal = me.itemSelect(itm);
+                    });
+                    me.scrollToCurrent();
+                    return retVal;
+                }
+});
 
 
 Wui.msg = function(msg, msgTitle, callback, content){

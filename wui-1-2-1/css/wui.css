@@ -11,7 +11,9 @@ body {background-color: #ccc; }
 .wui-pane p {margin:1em 0.5em; flex:none;}
 
 /****************************************   FONTS & COLORS   *****************************************/
-.wui-pane, .wui-pane *, .wui-form, .wui-lbl, .wui-lbl *, .wui-fe, .wui-fe *, .ui-datepicker, .wui-cal, .wui-combo-dd {
+.wui-pane, .wui-pane *, .wui-form, .wui-lbl, .wui-lbl *, .wui-fe, .wui-fe *, 
+.ui-datepicker, .wui-cal, .wui-combo-dd, .wui-cal-day {
+    font-family: 'Open Sans', sans-serif;
     font-size: 16px; 
     text-decoration: none;
     -moz-box-sizing:    border-box;
@@ -19,12 +21,13 @@ body {background-color: #ccc; }
     box-sizing:         border-box;
 }
 
-.wui-lbl > label, .wui-button { font-size: 0.9em; }
+.wui-lbl > label, .wui-button { font-size: 0.9em; } 
+.wui-checkbox label, .wui-radio label, .wui-fe input, .wui-fe textarea, .wui-editor { font-size: 0.8em; }
+.feedback, .wui-char-counter { font-size: 0.7em; }
 .wui-pane, .wui-form, .wui-button, .wui-fe input, .wui-fe textarea, .wui-editor { color:#4f4f4f; }
 
 /****************************************   PANE STYLES   *****************************************/
 .wui-pane {
-    font-family: 'Open Sans', sans-serif;
     padding:6px;
     background-color: #7F7F7F;
     position: relative;
@@ -228,6 +231,20 @@ button::-moz-focus-inner { border:0; }
 .wui-v-bar .wui-button, .wui-v-bar.top-to-bottom .wui-button:first-child { margin-bottom: 0.33em; bottom:0; }
 .wui-v-bar .wui-button:first-child { margin-bottom: 0; }
 
+/*********************   FIELD/BUTTON STYLES ***********************/
+.wui-button.field-btn, .wui-fe input[type=text] {height:26px;}
+.wui-button.field-btn {
+    line-height:26px; 
+    position: absolute; 
+    right:0; 
+    border-radius:0 4px 4px 0; 
+    top:0;
+    padding: 0;
+    margin: 0;
+}
+.wui-button.field-btn:hover, .wui-file-upload .wui-button:hover, .wui-browse-btn:hover {background-color:#ccc; border-color:#bbb;}
+.wui-button.field-btn:focus, .wui-file-upload .wui-button:focus, .wui-browse-btn:focus {box-shadow:0 0 3px #aaa inset;}
+
 
 /***********************************************   FORM   ***********************************************/
 .wui-form {
@@ -286,10 +303,9 @@ button::-moz-focus-inner { border:0; }
 .wui-fe input, .wui-fe textarea, .wui-editor { 
     padding:4px; 
     width:100%; 
-    border-radius:4px; 
-    font-size: 0.8em; 
+    border-radius:4px;
 }
-.wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-btn.field-btn {border-color:#bbb;}
+.wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-button.field-btn {border-color:#bbb;}
 .wui-fe input, .wui-fe textarea, .wui-editor, .button li label { background-color:#ddd; 
     border-width:1px; 
     border-style:solid; 
@@ -304,13 +320,132 @@ button::-moz-focus-inner { border:0; }
     max-height:100%; 
     max-width:100%; 
 }
-.wui-char-counter { 
-    font-size: 0.75em; 
-    position: absolute; 
-    right: 0.5em; 
-    top: 7px; 
+.wui-char-counter {  
+    position: absolute;
+    right: 0.5em;
+    top: 0;
+    line-height: 26px;
 }
 
+/* radio/checkbox */
+.wui-radio ul, .wui-checkbox ul {
+    list-style:none; 
+    display:block; 
+    margin:0 !important; 
+    padding:0;
+}
+.wui-radio li, .wui-checkbox li {padding-left: 2em; position: relative;}
+.wui-radio input, .wui-checkbox input {
+    position: absolute; 
+    left:4px;
+    top:7px;
+}
+.wui-radio input, .wui-checkbox input, .wui-radio ul label, .wui-checkbox ul label { width:auto; }
+
+.wui-radio ul.button, .wui-checkbox ul.button {
+    text-align: left; 
+    -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; user-select:none;
+}
+.wui-radio ul.button li, .wui-checkbox ul.button li {
+    display:inline-block; 
+    line-height: 26px; 
+    padding:0;
+}
+.wui-radio ul.button label, .wui-checkbox ul.button label {
+    display:inline-block; 
+    width:auto; 
+    margin:0; 
+    padding:0 0.5em;
+}
+    .button li > input {display:none;}
+    .button li > input:checked + label { 
+        background:rgba(0,0,0,0.3); 
+        box-shadow:inset 0 0 2px #777; 
+        border-color:#777; 
+        color:#222; 
+    }
+    .button li:first-child label {border-top-left-radius:4px; border-bottom-left-radius:4px;}
+    .button li:last-child label {border-top-right-radius:4px; border-bottom-right-radius:4px;}
+    
+    .button li label:focus { background-color: #fff; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; }
+    .button li > input:checked + label:focus { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) inset; background:rgba(0,0,0,0.5); }
+
+.wui-checkbox.button.checked { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
+
+/* combo */
+.wui-fe .has-dd {padding-right:27px;}
+.wui-combo {position: relative;}
+    .wui-combo-dd {
+        background:#fff; 
+        list-style:none; 
+        display:none; 
+        margin:0 !important; 
+        padding:0; 
+        position:absolute; 
+        max-height:300px; 
+        overflow:auto; 
+        border:1px #ccc solid; 
+        border-top:none; 
+        border-radius: 0 0 4px 4px;
+    }
+    .wui-combo-dd.wui-spinner { 
+        height:auto; 
+        width:auto; 
+        min-height: 26px; 
+        background-repeat: 
+        no-repeat; 
+        background-position: center center; 
+    }
+    .wui-inline-dd {right:0; top:98%; width:100%;}
+    .wui-combo-dd li { cursor:pointer; padding:2px 5px; margin:0 !important;  font-size:0.9em; }
+    .dd-wrapper, .wui-file {position:relative;}
+    .wui-button.field-btn.dd-switch { width:26px; }
+    .wui-combo input {padding-right:30px;}
+
+/* hyperlink */
+.wui-link-third {
+    display:inline-block; width:19%; margin-right:1%; 
+    -webkit-transition: all 0.33s linear; transition: all 0.33s linear;
+}
+.wui-link-third.wui-fe input, .wui-link-third > div {min-width:100%;}
+.wui-link-third.no-margin {margin-right:0;}
+.wui-link-third.wui-link-focus {display:inline-block; width:60%;}
+
+
+/* date picker / date range */
+.wui-date {}
+.wui-date input {padding-right: 26px;}
+.wui-date button {
+    border:0;
+    background: transparent;
+    position: absolute;
+    right:0.5em; 
+    top:1px;
+}
+.feedback { text-transform:uppercase; overflow:hidden; }
+.feedback a {text-transform:none; color: #1AF; }
+.feedback a, .feedback span {font-size:1em;}
+
+.wui-cal {position:absolute; background-color: #fff; padding:0.25em; font-size: 14px; box-shadow: 0 3px 5px rgba(0,0,0,0.7); text-transform: capitalize;}
+.wui-cal > table {  border-collapse: collapse; }
+.wui-cal-header {padding: 0.2em 0; position: relative; text-align: center;}
+    .wui-cal-prev, .wui-cal-next {width:12px; height: 12px; position: absolute; cursor: pointer;}
+        a.wui-cal-prev {left:2px; background-position:-162px 0;}
+        a.wui-cal-next {right:2px;background-position:-146px 0;}
+        a.wui-cal-prev:hover {left:2px; background-position:-162px -17px;}
+        a.wui-cal-next:hover {right:2px;background-position:-146px -17px;}
+.wui-cal-header-day td {font-size: 0.7em; text-transform: uppercase; text-align: center;}
+.wui-cal-day {
+    width:30px; 
+    text-align: right; 
+    padding:0.1em 0.25em 0.1em 0.1em; 
+    background-color: #ddd; 
+    display: inline-block; 
+    cursor: pointer;
+}
+.wui-cal-day:hover {background-color: #ccc;}
+.wui-cal-day.wui-cal-disabled {opacity:0.7; cursor: default; background-color: #eee;}
+.wui-cal-day.wui-cal-disabled:hover {background-color: #eee;}
 
 
 
@@ -356,7 +491,7 @@ button::-moz-focus-inner { border:0; }
     color:#ccc; 
 }
 .wui-fe .has-file[disabled=disabled] {background-color: #fff;}
-.wui-disabled .wui-cal-toggle, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn { display:none; }
+.wui-disabled .wui-cal-toggle, .wui-disabled.wui-combo .wui-button, .wui-disabled .wui-combo .wui-button { display:none; }
 .wui-form-err.wui-disabled.wui-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
 .wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
 .wui-disabled .button label { 
