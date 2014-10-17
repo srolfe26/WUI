@@ -176,7 +176,7 @@ body {background-color: #ccc; }
 .wui-pane .wui-pane .wui-pane.rbar.title .wui-pane { background-color: #D2D2D2; }
 
 /***************************************   WINDOW STYLES   ****************************************/
-.wui-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(133,100,0,.4);}
+.wui-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(133,100,70,.4);}
 
 .wui-window {
     margin:0 auto;
