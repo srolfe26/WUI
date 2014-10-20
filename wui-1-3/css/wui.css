@@ -7,11 +7,10 @@
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,600);
 
-body {background-color: #ccc; }
-.wui-pane p {margin:1em 0.5em; flex:none;}
+.w13-pane p {margin:1em 0.5em; flex:none;}
 
 /****************************************   FONTS & COLORS   *****************************************/
-.wui-pane, .wui-pane *, .wui-form, .wui-lbl, .wui-lbl *, .wui-fe, .wui-fe *, 
+.w13-pane, .w13-pane *, .w13-form, .w13-lbl, .w13-lbl *, .w13-fe, .w13-fe *, 
 .ui-datepicker, .wui-cal, .wui-combo-dd, .wui-cal-day {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px; 
@@ -21,20 +20,20 @@ body {background-color: #ccc; }
     box-sizing:         border-box;
 }
 
-.wui-lbl > label, .wui-button { font-size: 0.9em; } 
-.wui-checkbox label, .wui-radio label, .wui-fe input, .wui-fe textarea, .wui-editor { font-size: 0.8em; }
+.w13-lbl > label, .wui-button { font-size: 0.9em; } 
+.wui-checkbox label, .wui-radio label, .w13-fe input, .w13-fe textarea, .wui-editor { font-size: 0.8em; }
 .feedback, .wui-char-counter { font-size: 0.7em; }
-.wui-pane, .wui-form, .wui-button, .wui-fe input, .wui-fe textarea, .wui-editor { color:#4f4f4f; }
+.w13-pane, .w13-form, .wui-button, .w13-fe input, .w13-fe textarea, .wui-editor { color:#4f4f4f; }
 
 /****************************************   PANE STYLES   *****************************************/
-.wui-pane {
+.w13-pane {
     padding:6px;
     background-color: #7F7F7F;
     position: relative;
     overflow: hidden;
 }
 
-.wui-pane-content {
+.w13-pane-content {
     overflow: auto;
     background: #fff;
     width: 100%;
@@ -79,53 +78,53 @@ body {background-color: #ccc; }
 .wui-rbar { right:0; }
 
 
-.wui-pane-header, .wui-title {
+.w13-pane-header, .wui-title {
     top:0;
 }
 
-.wui-pane-footer {
+.w13-pane-footer {
     bottom:0;
 }
 
-.wui-pane.no-border {padding:0;}
-.wui-pane.tbar, .wui-pane.title { padding-top: 40px; }
-.wui-pane.bbar { padding-bottom: 40px; }
-.wui-pane.lbar { padding-left: 40px; }
-.wui-pane.rbar { padding-right: 40px; }
+.w13-pane.no-border {padding:0;}
+.w13-pane.tbar, .w13-pane.title { padding-top: 40px; }
+.w13-pane.bbar { padding-bottom: 40px; }
+.w13-pane.lbar { padding-left: 40px; }
+.w13-pane.rbar { padding-right: 40px; }
 
 
-.wui-pane.lbar > .wui-title, .wui-pane.rbar > .wui-title,
-.wui-pane.lbar > .wui-h-bar, .wui-pane.rbar > .wui-bbar {
+.w13-pane.lbar > .wui-title, .w13-pane.rbar > .wui-title,
+.w13-pane.lbar > .wui-h-bar, .w13-pane.rbar > .wui-bbar {
     background: #fff;
     color: #7F7F7F;
     width: calc(100% - 46px);
 }
-.wui-pane.lbar > .wui-title, .wui-pane.rbar > .wui-title,
-.wui-pane.lbar > .wui-tbar, .wui-pane.rbar > .wui-tbar { margin-top: 6px; }
+.w13-pane.lbar > .wui-title, .w13-pane.rbar > .wui-title,
+.w13-pane.lbar > .wui-tbar, .w13-pane.rbar > .wui-tbar { margin-top: 6px; }
 
-.wui-pane.lbar > .wui-bbar, .wui-pane.rbar > .wui-bbar { margin-bottom: 6px; }
+.w13-pane.lbar > .wui-bbar, .w13-pane.rbar > .wui-bbar { margin-bottom: 6px; }
 
-.wui-pane.lbar.title, 
-.wui-pane.rbar.title,
-.wui-pane.lbar.tbar, 
-.wui-pane.rbar.tbar { padding-top:46px; }
+.w13-pane.lbar.title, 
+.w13-pane.rbar.title,
+.w13-pane.lbar.tbar, 
+.w13-pane.rbar.tbar { padding-top:46px; }
 
-.wui-pane.lbar.bbar, 
-.wui-pane.rbar.bbar { padding-bottom:46px; }
+.w13-pane.lbar.bbar, 
+.w13-pane.rbar.bbar { padding-bottom:46px; }
 
-.wui-pane.lbar > .wui-title, .wui-pane.lbar > .wui-h-bar { left:40px; }
-.wui-pane.rbar > .wui-title, .wui-pane.rbar > .wui-h-bar { left: 6px; }
+.w13-pane.lbar > .wui-title, .w13-pane.lbar > .wui-h-bar { left:40px; }
+.w13-pane.rbar > .wui-title, .w13-pane.rbar > .wui-h-bar { left: 6px; }
 
-.wui-pane.rbar.lbar > .wui-title, .wui-pane.rbar.lbar > .wui-h-bar { left: 40px; width: calc(100% - 80px); }
-.wui-pane.rbar.tbar .wui-tbar { width: calc(100% - 6px); padding-right: 5px; }
-.wui-pane.rbar.lbar.tbar .wui-tbar { width: calc(100% - 40px); }
-.wui-pane.rbar.tbar .wui-rbar { height: calc(100% - 46px); top:auto; bottom:0; }
+.w13-pane.rbar.lbar > .wui-title, .w13-pane.rbar.lbar > .wui-h-bar { left: 40px; width: calc(100% - 80px); }
+.w13-pane.rbar.tbar .wui-tbar { width: calc(100% - 6px); padding-right: 5px; }
+.w13-pane.rbar.lbar.tbar .wui-tbar { width: calc(100% - 40px); }
+.w13-pane.rbar.tbar .wui-rbar { height: calc(100% - 46px); top:auto; bottom:0; }
 
 
-.wui-pane.lbar.title > .wui-pane-content, 
-.wui-pane.rbar.title > .wui-pane-content { background-color: #eee; }
+.w13-pane.lbar.title > .w13-pane-content, 
+.w13-pane.rbar.title > .w13-pane-content { background-color: #eee; }
 
-.wui-mask {
+.w13-mask {
     position:absolute; 
     top:0; 
     left:0; 
@@ -137,49 +136,49 @@ body {background-color: #ccc; }
     align-items: center;
 }
 
-.wui-mask > span { margin: 0 auto; }
+.w13-mask > span { margin: 0 auto; }
 
 /**************************************** NESTED LEVEL 2 ****************************************/
-.wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane {
+.w13-pane .w13-pane, .w13-pane .w13-pane .w13-pane .w13-pane {
     margin: 0;              /* REMOVE */
     width: 100%;            /* REMOVE */
     height: 100%;           /* REMOVE */
     background-color: #fff;
 }
 
-.wui-pane.lbar.title .wui-pane, 
-.wui-pane.rbar.title .wui-pane { background-color: #D2D2D2; }
+.w13-pane.lbar.title .w13-pane, 
+.w13-pane.rbar.title .w13-pane { background-color: #D2D2D2; }
 
-.wui-pane .wui-pane .wui-title { color: #505050; }
-.wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content { background-color: #eee; }
+.w13-pane .w13-pane .wui-title { color: #505050; }
+.w13-pane .w13-pane .w13-pane-content, .w13-pane .w13-pane .w13-pane .w13-pane .w13-pane-content { background-color: #eee; }
 
-.wui-pane.lbar.title .wui-pane .wui-pane-content, 
-.wui-pane.rbar.title .wui-pane .wui-pane-content { background-color: #fff; }
+.w13-pane.lbar.title .w13-pane .w13-pane-content, 
+.w13-pane.rbar.title .w13-pane .w13-pane-content { background-color: #fff; }
 
-.wui-pane.lbar.title .wui-pane.lbar.title .wui-pane-content, 
-.wui-pane.rbar.title .wui-pane.lbar.title .wui-pane-content,
-.wui-pane.lbar.title .wui-pane.rbar.title .wui-pane-content, 
-.wui-pane.rbar.title .wui-pane.rbar.title .wui-pane-content { background-color: #eee; }
+.w13-pane.lbar.title .w13-pane.lbar.title .w13-pane-content, 
+.w13-pane.rbar.title .w13-pane.lbar.title .w13-pane-content,
+.w13-pane.lbar.title .w13-pane.rbar.title .w13-pane-content, 
+.w13-pane.rbar.title .w13-pane.rbar.title .w13-pane-content { background-color: #eee; }
 
 /**************************************** NESTED LEVELS 3,5 ***************************************/
-.wui-pane .wui-pane .wui-pane, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane { 
+.w13-pane .w13-pane .w13-pane, .w13-pane .w13-pane .w13-pane .w13-pane .w13-pane { 
     margin: 0;              /* REMOVE */
     max-width: 100%;        /* REMOVE */
     max-height: 100%;       /* REMOVE */
     background-color: #D2D2D2; 
 }
-.wui-pane .wui-pane .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content { background-color: #fff; }
+.w13-pane .w13-pane .w13-pane .w13-pane-content, .w13-pane .w13-pane .w13-pane .w13-pane .w13-pane .w13-pane-content { background-color: #fff; }
 
-.wui-pane .wui-pane.lbar.title .wui-pane, 
-.wui-pane .wui-pane.rbar.title .wui-pane { background-color: #eee; }
+.w13-pane .w13-pane.lbar.title .w13-pane, 
+.w13-pane .w13-pane.rbar.title .w13-pane { background-color: #eee; }
 
-.wui-pane .wui-pane.lbar.title .wui-pane .wui-pane, 
-.wui-pane .wui-pane.rbar.title .wui-pane .wui-pane,
-.wui-pane .wui-pane .wui-pane.lbar.title .wui-pane, 
-.wui-pane .wui-pane .wui-pane.rbar.title .wui-pane { background-color: #D2D2D2; }
+.w13-pane .w13-pane.lbar.title .w13-pane .w13-pane, 
+.w13-pane .w13-pane.rbar.title .w13-pane .w13-pane,
+.w13-pane .w13-pane .w13-pane.lbar.title .w13-pane, 
+.w13-pane .w13-pane .w13-pane.rbar.title .w13-pane { background-color: #D2D2D2; }
 
 /***************************************   WINDOW STYLES   ****************************************/
-.wui-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(133,100,70,.4);}
+.w13-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(133,100,70,.4);}
 
 .wui-window {
     margin:0 auto;
@@ -233,7 +232,7 @@ button::-moz-focus-inner { border:0; }
 .wui-v-bar .wui-button:first-child { margin-bottom: 0; }
 
 /*********************   FIELD/BUTTON STYLES ***********************/
-.wui-button.field-btn, .wui-fe input[type=text] {height:26px;}
+.wui-button.field-btn, .w13-fe input[type=text] {height:26px;}
 .wui-button.field-btn {
     line-height:26px; 
     position: absolute; 
@@ -248,27 +247,27 @@ button::-moz-focus-inner { border:0; }
 
 
 /***********************************************   FORM   ***********************************************/
-.wui-form {
+.w13-form {
     padding:.5em;
     position:relative;
     text-align: left;
 }
 
 /* Enforce the meaning of these tags */
-.wui-form strong { font-weight:bold; }
-.wui-form em { font-style:italic; }
+.w13-form strong { font-weight:bold; }
+.w13-form em { font-style:italic; }
 
 /* labels */
-.wui-lbl {
+.w13-lbl {
     position:relative; 
     padding-top:26px; 
     margin:0.75em 0; 
     height:auto;
 }
 
-.wui-lbl:first-child {margin-top: 0;}
+.w13-lbl:first-child {margin-top: 0;}
 
-.wui-lbl > label {
+.w13-lbl > label {
     display:block; 
     font-weight:bold;
     position:absolute; 
@@ -277,16 +276,16 @@ button::-moz-focus-inner { border:0; }
     line-height:26px;
 }
 
-.wui-lbl.lbl-left { padding:0 0 0 200px; }
-.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { 
+.w13-lbl.lbl-left { padding:0 0 0 200px; }
+.w13-lbl.lbl-right > label, .w13-lbl.lbl-left > label { 
     margin-right:5px; 
     width:195px; 
     text-align:right;
 }
-.wui-lbl.lbl-left > label {padding-right: 5px;}
+.w13-lbl.lbl-left > label {padding-right: 5px;}
 
-.wui-lbl.lbl-right { padding:0 200px 0 0; }
-.wui-lbl.lbl-right > label { width:200px; 
+.w13-lbl.lbl-right { padding:0 200px 0 0; }
+.w13-lbl.lbl-right > label { width:200px; 
     padding-left:5px; 
     margin-right:0; 
     text-align:left; 
@@ -294,29 +293,29 @@ button::-moz-focus-inner { border:0; }
     right:0; 
 }
 
-.wui-lbl.lbl-bottom { padding:0 0 26px 0; }
-.wui-lbl.lbl-bottom > label { top:auto; bottom:0; }
+.w13-lbl.lbl-bottom { padding:0 0 26px 0; }
+.w13-lbl.lbl-bottom > label { top:auto; bottom:0; }
 
 /* general form element */
-.wui-fe {position:relative; text-align:left;}
+.w13-fe {position:relative; text-align:left;}
 
 /* textfield / textarea */
-.wui-fe input, .wui-fe textarea, .wui-editor { 
+.w13-fe input, .w13-fe textarea, .wui-editor { 
     padding:4px; 
     width:100%; 
     border-radius:4px;
 }
-.wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-button.field-btn {border-color:#bbb;}
-.wui-fe input, .wui-fe textarea, .wui-editor, .button li label { background-color:#ddd; 
+.w13-fe input, .w13-fe textarea, .wui-editor, .button li label, .wui-button.field-btn {border-color:#bbb;}
+.w13-fe input, .w13-fe textarea, .wui-editor, .button li label { background-color:#ddd; 
     border-width:1px; 
     border-style:solid; 
 }
-.wui-fe input:focus, .wui-fe textarea:focus, .wui-editor:focus, .button li label:focus { 
+.w13-fe input:focus, .w13-fe textarea:focus, .wui-editor:focus, .button li label:focus { 
     background-color:#eee; 
     border-color:#999; 
 }
-.wui-fe .empty { color:#777; }
-.wui-fe textarea { height:100%; 
+.w13-fe .empty { color:#777; }
+.w13-fe textarea { height:100%; 
     width:100%; 
     max-height:100%; 
     max-width:100%; 
@@ -374,7 +373,7 @@ button::-moz-focus-inner { border:0; }
 .wui-checkbox.button.checked { background:rgba(0,0,0,0.3); box-shadow:inset 0 0 2px #777; border-color:#777; }
 
 /* combo */
-.wui-fe .has-dd {padding-right:27px;}
+.w13-fe .has-dd {padding-right:27px;}
 .wui-combo {position: relative;}
     .wui-combo-dd {
         background:#fff; 
@@ -408,7 +407,7 @@ button::-moz-focus-inner { border:0; }
     display:inline-block; width:19%; margin-right:1%; 
     -webkit-transition: all 0.33s linear; transition: all 0.33s linear;
 }
-.wui-link-third.wui-fe input, .wui-link-third > div {min-width:100%;}
+.wui-link-third.w13-fe input, .wui-link-third > div {min-width:100%;}
 .wui-link-third.no-margin {margin-right:0;}
 .wui-link-third.wui-link-focus {display:inline-block; width:60%;}
 
@@ -451,7 +450,7 @@ button::-moz-focus-inner { border:0; }
 
 
 /****************************************   JHTMLArea WYSIWYG Styles   *****************************************/
-.wui-wysiwyg .wui-fe, .wui-wysiwyg.wui-fe {height: 100px; max-width: 100%; min-height:70px;}
+.wui-wysiwyg .w13-fe, .wui-wysiwyg.w13-fe {height: 100px; max-width: 100%; min-height:70px;}
 .wui-editor { height:100%; min-height: 70px; padding-bottom:28px;}
 
 .wui-wysiwyg .ui-resizable-e, .wui-wysiwyg .ui-resizable-s {display:none;}
@@ -483,18 +482,18 @@ button::-moz-focus-inner { border:0; }
 .wui-editor-tools .justifyright { background-position: -94px -16px;}
 .wui-editor-tools .html { background-position: -110px -16px;}
 
-.wui-wysiwyg .wui-mask {padding:0; background:rgba(255,255,255,0.6);}
+.wui-wysiwyg .w13-mask {padding:0; background:rgba(255,255,255,0.6);}
 
 /******************************************   disabled form styles   *******************************************/
-.wui-fe [disabled=disabled] { 
+.w13-fe [disabled=disabled] { 
     background-color:transparent; 
     border-color:#ccc; 
     color:#ccc; 
 }
-.wui-fe .has-file[disabled=disabled] {background-color: #fff;}
+.w13-fe .has-file[disabled=disabled] {background-color: #fff;}
 .wui-disabled .wui-cal-toggle, .wui-disabled.wui-combo .wui-button, .wui-disabled .wui-combo .wui-button { display:none; }
-.wui-form-err.wui-disabled.wui-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
-.wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
+.w13-form-err.wui-disabled.w13-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
+.w13-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
 .wui-disabled .button label { 
     background-color:transparent; 
     border-style: dotted; 
@@ -504,26 +503,26 @@ button::-moz-focus-inner { border:0; }
 
 
 /******************************************   validation styles TODO: AUDIT THESE!!!!   *******************************************/
-.wui-form-err, .wui-form-err.wui-fe {background-color:#ffa094;}
-.wui-form-err.wui-lbl{padding:26px 0.5em 0.5em 0.5em;}
-.wui-form-err.wui-lbl.lbl-left { padding: 0.5em 0.5em 0.5em 200px; }
-.wui-form-err.wui-lbl.lbl-right { padding:0.5em 200px 0.5em 0.5em; }
-.wui-form-err.wui-lbl.lbl-bottom { padding: 0.5em 0.5em 26px 0.5em; }
+.w13-form-err, .w13-form-err.w13-fe {background-color:#ffa094;}
+.w13-form-err.w13-lbl{padding:26px 0.5em 0.5em 0.5em;}
+.w13-form-err.w13-lbl.lbl-left { padding: 0.5em 0.5em 0.5em 200px; }
+.w13-form-err.w13-lbl.lbl-right { padding:0.5em 200px 0.5em 0.5em; }
+.w13-form-err.w13-lbl.lbl-bottom { padding: 0.5em 0.5em 26px 0.5em; }
 
-.wui-form-err.wui-fe, .wui-form-err input[type=text], 
-.wui-fe.wui-form-err > input[type=text], .wui-form-err textarea, 
-.wui-form-err .wui-btn.field-btn, 
-.wui-form-err .wui-fe input.has-file[type="text"][disabled],
-.wui-form-err .button li label, .wui-form-err .wui-btn.field-btn {border-color:#b0463b;}
+.w13-form-err.w13-fe, .w13-form-err input[type=text], 
+.w13-fe.w13-form-err > input[type=text], .w13-form-err textarea, 
+.w13-form-err .wui-btn.field-btn, 
+.w13-form-err .w13-fe input.has-file[type="text"][disabled],
+.w13-form-err .button li label, .w13-form-err .wui-btn.field-btn {border-color:#b0463b;}
 
-.wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a, .wui-err {color:#b0463b;}
-.wui-lbl.lbl-right.wui-form-err > label, .wui-lbl.lbl-left.wui-form-err > label { padding:0.5em 0;}
+.w13-form-err > label, .w13-form-err .feedback, .w13-form-err .feedback a, .wui-err {color:#b0463b;}
+.w13-lbl.lbl-right.w13-form-err > label, .w13-lbl.lbl-left.w13-form-err > label { padding:0.5em 0;}
 .wui-err { padding:1em; font-weight:bold; }
 
-.wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
-.wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text], .wui-form-err textarea {background-color:white; box-shadow: inset 0 0 5px #ff463b;}
-.wui-form-err .wui-btn.field-btn {border-left:none;}
-.wui-form-err .wui-fe input.has-file[type="text"][disabled] { background-color: #eee; }
+.w13-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
+.w13-form-err input[type=text], .w13-fe.w13-form-err > input[type=text], .w13-form-err textarea {background-color:white; box-shadow: inset 0 0 5px #ff463b;}
+.w13-form-err .wui-btn.field-btn {border-left:none;}
+.w13-form-err .w13-fe input.has-file[type="text"][disabled] { background-color: #eee; }
 
 
 /**********************************************   grid styles TODO: AUDIT THIS TOO!   ************************************************/
@@ -592,8 +591,8 @@ button::-moz-focus-inner { border:0; }
         width: 150px;
     }
     
-.wui-pane-content > .wg-loader {left:48%; top:45%;}
-.wui-pane-content > .wg-loader.hidden {left:0; top:0;}
+.w13-pane-content > .wg-loader {left:48%; top:45%;}
+.w13-pane-content > .wg-loader.hidden {left:0; top:0;}
 
 .grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
 .grid-body table {border-collapse:collapse;}

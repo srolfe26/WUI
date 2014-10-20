@@ -16,7 +16,7 @@ Wui.Form = function(args){
         labelPosition:  'top',
         labelSize:      null
     }, args, {
-        el:             $('<form>').addClass('wui-form'),
+        el:             $('<form>').addClass('w13-form'),
         errors:         [],
         formChanged:    false
     });
@@ -41,7 +41,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                         ascending
                     );
                 },
-    errCls:     'wui-form-err',
+    errCls:     'w13-form-err',
     getData:    function(){
                     if(this.validate()) { return this.getRawData(); }
                     else                { this.dispErrors(); return false; }
@@ -65,7 +65,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     var me = this;
 
                     if(typeof me.id === 'undefined' || me.id === null)
-                        me.id = Wui.id('wui-form');
+                        me.id = Wui.id('w13-form');
 
                     me.observer = new MutationSummary({
                         callback:   function(){
@@ -206,7 +206,7 @@ Wui.Label = function(args){
 Wui.Label.prototype = $.extend(new Wui.O(),{
     init:               function(){
                             var me = this;
-                            me.el = $('<div>').addClass('wui-lbl').append( 
+                            me.el = $('<div>').addClass('w13-lbl').append( 
                                 me.label = $('<label>',me.attr ? me.attr : {}).addClass(me.cls)
                             );
 
@@ -308,10 +308,10 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     var me = this;
 
                     me.value = me.hasOwnProperty('value') ? me.value : null;
-                    me.el = $('<div>').addClass('wui-fe');
+                    me.el = $('<div>').addClass('w13-fe');
 
                     if(!(me.name !== null && me.name.length !== 0))
-                        me.name = Wui.id('wui-form-field');
+                        me.name = Wui.id('w13-form-field');
 
                     if(!(me.id !== null && me.id.length !== 0) || !me.hasOwnProperty('id'))
                         me.id = me.name;
@@ -803,7 +803,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     
                     $.each(me.options,function(i,itm){
                         itm.name = me.name;
-                        if(i !== 0) itm.id = Wui.id('wui-form-multiple');
+                        if(i !== 0) itm.id = Wui.id('w13-form-multiple');
                         else        itm.id = me.id;
                         
                         ul.append(

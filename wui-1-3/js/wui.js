@@ -67,36 +67,18 @@ Wui.cssCheck = function(prop){
 
 
 Wui.fit = function(collection,dim){
+    console.log(collection);
+
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
-        var i           = 0,
-            fitCt       = 0,
-            parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
+        var parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
             parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
             dir         = (dim == 'width') ? 'row' : 'column';
 
         dim = (dir == 'row') ? 'width' : 'height';
 
         // Make the containing element flex
-        parentEl.css('display',Wui.cssCheck('flex')).css(Wui.cssCheck('flex-direction'),dir);
-
-        $.each(collection,function(i,itm){
-            if($.isNumeric(itm.fit) && itm.fit >= 0){
-                fitCt += itm.fit;           // Tally fit values
-                itm[dim] = -1;              // Set to -1 so that CSSByParam will not act on it
-            }else if(itm[dim]){
-                delete itm.fit;             // Ensure the item doesn't have a dimension and a fit specified
-            }else{
-                fitCt += (itm.fit = 1);     // Add a fit value to an item that doesn't have dimensions specified
-            }
-        });
-       
-        // If a collection becomes entirely fixed widths the flex will have a few problems
-        if(fitCt === 0){
-            var itm = collection[collection.length - 1];
-            fitCt += (itm.fit = 1);
-            itm[dim] = -1;
-        }
+        parentEl.css( 'display', Wui.cssCheck('flex') ).css( Wui.cssCheck('flex-direction'), dir );
        
         // Apply CSS Flex properties
         $.each(collection,function(i,itm){
@@ -107,9 +89,11 @@ Wui.fit = function(collection,dim){
                 $(itm.el).css(dim,itm[dim]);
                 $(itm.el).css(Wui.cssCheck('flex'),'');
             }
+
+            if(itm.cssByParam)  itm.cssByParam();
         });
     }else{
-        console.log('Improper collection specified', arguments);
+        console.log('Improper collection specified', arguments, arguments.callee.caller);
     }
 };
 
@@ -360,6 +344,45 @@ Wui.O.prototype = {
                     return myPosition;
                 },
 
+    init:       function(){
+                    var me = this;
+
+                    // Layout contents
+                    me.observer = new MutationSummary({
+                        callback:   function(){ 
+                                        // Perform layout for child elements
+                                        if(typeof me.parent === 'undefined'){
+                                            me.layout();
+                                        }
+                                    },
+                        queries:    [{ element: '*' }],
+                        rootNode:   me.el[0]
+                    });
+                },
+
+    layout:     function(afterLayout){
+                    var me = this, needFit = false;
+
+                    // Perform Wui.fit on items that need it
+                    me.each(function(itm){ if(itm.fit){ 
+                        needFit = true; return false;
+                    }});
+                    
+                    if((me.fitDimension || needFit) && me.items.length)
+                        Wui.fit(me.items, (me.fitDimension || undefined));
+
+                    // Perform layout on children
+                    me.each(function(itm){ 
+                        if(itm.layout)      itm.layout(); 
+                        if(itm.onRender)    itm.onRender();
+                        if(itm.afterRender) itm.afterRender();
+                    });
+                    
+                    // Performs actions passed in as parameters
+                    if(afterLayout && typeof afterLayout === 'function')
+                        afterLayout();
+                },
+
     place:      function(after){
                     var me = this;
                     
@@ -508,9 +531,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
     addMask:        function(target){
                         target = (target) ? target : this.container;
 
-                        if(target.children('wui-mask').length === 0)
+                        if(target.children('w13-mask').length === 0)
                             return this.mask = $('<div>')
-                                                .addClass('wui-mask')
+                                                .addClass('w13-mask')
                                                 .append(
                                                     $('<span>').html(this.maskHTML)
                                                 )
@@ -542,8 +565,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                     },
     init:           function(){
                         var me = this;
-                            el = me.el = $('<div>').addClass('wui-pane');
+                            el = me.el = $('<div>').addClass('w13-pane');
 
+                        Wui.O.prototype.init.apply(me,arguments);
 
                         if(!me.border)      
                             el.addClass('no-border');
@@ -551,7 +575,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         if(me.title !=null)
                             me.setTitle(me.title);
 
-                        el.append( me.elAlias = me.container = $('<div>').addClass('wui-pane-content') );
+                        el.append( me.elAlias = me.container = $('<div>').addClass('w13-pane-content') );
 
                         me.header = makeBar('tbar',{items: me.tbar});
                         me.footer = makeBar('bbar',{items: me.bbar});
@@ -608,7 +632,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         }
                     },
     removeMask:     function(){
-                        var me = this, mask = me.mask || me.el.find('.wui-mask');
+                        var me = this, mask = me.mask || me.el.find('.w13-mask');
                         
                         if(mask){
                             mask.remove();
@@ -696,7 +720,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
-                        me.modalEl = $('<div>').addClass('wui-overlay');
+                        me.modalEl = $('<div>').addClass('w13-overlay');
                         $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
                     }
                     
@@ -1135,9 +1159,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     if(me.autoLoad){
                         if(this.url === null)   me.make();
                         else                    me.loadData();
-                    }
-
-                    
+                    }                   
                 },
     selectAjacent:function(num){
                         var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();

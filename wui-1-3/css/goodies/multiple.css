@@ -2,15 +2,15 @@
     display: flex;
     flex-wrap: wrap;
 
-    /* From Wui.css line 138 .wui-fe input: */
+    /* From Wui.css line 138 .w13-fe input: */
     background-color: #ddd;
     border-style: solid;
     border-width: 1px;
 
-    /* From wui.css line 137 : .wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-btn.field-btn */
+    /* From wui.css line 137 : .w13-fe input, .w13-fe textarea, .wui-editor, .button li label, .wui-btn.field-btn */
     border-color: #bbb;
 
-    /* From wui.css line 136: .wui-fe input, .wui-fe textarea, .wui-editor */
+    /* From wui.css line 136: .w13-fe input, .w13-fe textarea, .wui-editor */
     border-radius: 4px;
     color: #444;
 }
@@ -24,7 +24,7 @@
 
 .wui-multiple select {display:none !important;}
 
-.wui-multiple > .wui-fe {
+.wui-multiple > .w13-fe {
     flex: 1;
     min-width: 120px;
 }

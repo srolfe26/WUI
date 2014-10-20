@@ -77,9 +77,9 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                         });
                         return retVal;
                     },
-    onRender:       function(){
-                        this.giveFocus(this.items[0]);
-                    }
+    // onRender:       function(){
+    //                     this.giveFocus(this.items[0]);
+    //                 }
 });
 
 
@@ -175,7 +175,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     if(me.hideHeader)    me.headingContainer.height(0);
                 },
     layout:     function(){
-                    Wui.O.prototype.layout.apply(this,arguments);
+                    var me = this; 
+
+                    Wui.O.prototype.layout.apply(me,arguments);
                     
                     if(this.fitToContent === true){
                         var me = this,
@@ -258,9 +260,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     // Store the real value of autoLoad, but set it to false so that the grid waits for the columns
                     // before loading data.
                     var me = this, al = me.autoLoad;
-                    me.autoLoad = false;
                     
-                    //Wui.Pane.prototype.onRender.call(this);
+                    me.autoLoad = false;
                     Wui.DataList.prototype.onRender.call(this);
                     
                     // Start with getting the columns - Many methods waterfall from here
@@ -282,7 +283,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     renderColumn:function(col,idx){
                     var me = this;
                     
-                    $.extend(col,{
+                    $.extend(col, new Wui.O({
                         dataType:   col.dataType || me.defaultDataType,
                         fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : -1 : col.fit,
                         cls:        col.cls || '',
@@ -301,21 +302,22 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     .append($('<div>').text(col.heading))
                                     .attr({unselectable:'on'})
                                     .addClass('wui-gc').addClass(col.cls)
-                    });
+                    }));
                     
                     if(col.sortable)    col.el.click(function(){ me.sortList(col); });
                     else                col.el.addClass('wui-no-sort');
 
                     //grids with single columns shouldn't have a resizable option
                     if(me.columns.length > 1 && !col.vertical && col.resizable){
-                        col.el.resizable({
-                            handles:    'e',
-                            start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
-                            stop:       function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
-                            resize:     function(event,ui){ 
-                                            col.width = ui.size.width; col.fit = -1;
-                                            Wui.fit(me.cols,'width');
-                                        }
+                        col.el.resizes({
+                            handles:        'e',
+                            anchored:       true,
+                            resizeStart:    function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
+                            afterResize:    function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
+                            duringResize:   function(c,w,h){ 
+                                                col.width = w; col.fit = -1;
+                                                Wui.fit(me.cols,'width');
+                                            }
                         });
                     }
                     

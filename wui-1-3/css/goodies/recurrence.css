@@ -1,15 +1,15 @@
 /* daterange */
 .date-fields {}
-    .date-fields .wui-fe {
+    .date-fields .w13-fe {
         width:49.5%; 
         display:inline-block; 
         float: right;
     }
-    .date-fields .wui-fe:first-child {float:none; margin-right: 1%;}
+    .date-fields .w13-fe:first-child {float:none; margin-right: 1%;}
 
 
 .wui-recurrence { padding-right: 124px; position: relative;}
-    .wui-recurrence > .wui-fe { margin-top: 0.5em; }
+    .wui-recurrence > .w13-fe { margin-top: 0.5em; }
 
 /* recurrence */
 .recur-feedback {

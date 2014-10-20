@@ -40,28 +40,33 @@
 // A simple resizable plugin for jQuery
 (function($) {
     $.fn.resizes = function(opt) {
-        var $win = $(this), startX, startY, startWidth, startHeight;
+        var $obj = $(this), startX, startY, startWidth, startHeight;
 
         opt = $.extend({
             anchored:   false,
             minWidth:   0,
             minHeight:  0,
-            afterResize:function(){}
+            resizeStart:null,
+            duringResize:null,
+            afterResize:null
         }, opt);
 
-        return $win.css('overflow','visible')
+        return $obj.css('overflow','visible')
         .mousedown(function(){
-            startWidth = $win.outerWidth();
-            startHeight = $win.outerHeight();
+            startWidth = $obj.outerWidth();
+            startHeight = $obj.outerHeight();
         })
         .append(
             $('<div>').addClass('resize-nub')
             .mousedown(function(e){
-                var startLeft = parseInt($win.css('left')),
-                    startTop = parseInt($win.css('top'));
+                var startLeft = parseInt($obj.css('left')),
+                    startTop = parseInt($obj.css('top'));
 
                 startX = e.clientX;
                 startY = e.clientY;
+
+                if(typeof opt.resizeStart == 'function')
+                    opt.resizeStart($obj);
 
                 $(document).off('mousemove.resizes');
                 $(document).on('mousemove.resizes', function(e2){
@@ -73,22 +78,25 @@
                                         if(newWidth < opt.minWidth){
                                             xDif = 0;
                                             newWidth = opt.minWidth;
-                                            return parseInt($win.css('left'));
+                                            return parseInt($obj.css('left'));
                                         }else{ return startLeft; }
                                     })(),
                         startT =    (function(){
                                         if(newHeight < opt.minHeight){
                                             yDif = 0;
                                             newHeight = opt.minHeight;
-                                            return parseInt($win.css('top'));
+                                            return parseInt($obj.css('top'));
                                         }else{ return startTop; }
                                     })();
 
-                    $win.css({
+                    if(typeof opt.duringResize == 'function')
+                        opt.duringResize($obj,newWidth,newHeight);
+
+                    $obj.css({
                         width:  newWidth,
                         height: newHeight,
-                        left:   opt.anchored ? parseInt($win.css('left')) : startL - xDif,
-                        top:    opt.anchored ? parseInt($win.css('top')) : startT - yDif
+                        left:   opt.anchored ? parseInt($obj.css('left')) : startL - xDif,
+                        top:    opt.anchored ? parseInt($obj.css('top')) : startT - yDif
                     });
 
                     deselect();
@@ -99,13 +107,13 @@
         .mouseup(mouseUp); // Additional mouseup for when the user lifts their mouse inside a window
 
         function mouseUp(){
-            var width = $win.outerWidth(),
-                height= $win.outerHeight();
+            var width = $obj.outerWidth(),
+                height= $obj.outerHeight();
 
             if(startWidth != width || startHeight != height){
                 $(document).off('mousemove.resizes');
                 if(typeof opt.afterResize == 'function')
-                    opt.afterResize($win,width,height);
+                    opt.afterResize($obj,width,height);
                 deselect();
             }
         }
