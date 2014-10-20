@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>File Upload - WUI 1.2</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../forms.js','Wui.FileBasic','HTML5 File Upload');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            // Add a text formItem onto the body
+            a = new Wui.FileBasic({ 
+                label:          'Upload File',
+                labelPosition:  'left',
+                required:       true,
+                appendTo:       $('#wui-doc-example')
+            });
+            a.place();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){    
+            // TESTING
+            ts = new Wui.ts();
+            
+            a.el.on('change',function(){console.log(arguments);});
+        }); // end document.ready        
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs">
+
+</body>
+</html>

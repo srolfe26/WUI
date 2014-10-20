@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Text Box - WUI 1.2</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+    
+    
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../forms.js','Wui.Text','Text Box');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            // Add a text formItem onto the body
+            a = new Wui.Text({ label:'Text Field', blankText:'Type Something', name:'textfield', attr:{name:'textfield'}, appendTo:    $('#wui-doc-example') });
+            a.place();
+        });
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){            
+            // TESTING
+            ts = new Wui.ts();
+            
+            var html5Placebolder = ('placeholder' in document.createElement('input'));
+            
+            ts.test("Get value on blank text field",function(){ return a.val() == null; });
+            ts.test("Set value to 'Set Text'",function(){ return a.val('Set Text')[0] == a.val(); });
+            ts.test("Change Blank Text",function(){return a.setBlankText('New Blank') == 'New Blank'; });
+            ts.test("Test 'valchange' listener",function(){
+                ts.pause();
+                // Listener for a change to the text object
+                $('[name=textfield]').on('valchange',function(event,itm,newVal){
+                    ts.resume();
+                    ts.test('Listener on \'valchange\' fired and passed correct values',function(){
+                        return ( newVal === 'Test Listener')
+                    });
+                });
+                a.val('Test Listener');
+                $('[name=textfield]').off('valchange');
+                return true;
+            },true);
+            ts.test("Blank out field",function(){ a.val(''); return a.val() === null; });
+            ts.test("The emptyCls property is only being added if the HTML 5 attribute placeholder is not supported",function(){ 
+                if(html5Placebolder){
+                    return !a.field.hasClass(a.emptyCls);
+                }else{
+                    return a.field.hasClass(a.emptyCls);
+                }
+            });
+            
+            ts.test("Set Disabled",function(){ a.disable(); return a.el.hasClass('wui-disabled'); });
+            ts.test("Change Blank Text",function(){return a.setBlankText('Test Complete') == 'Test Complete'});
+            ts.test("Set Enabled",function(){ a.enable(); return !a.el.hasClass('wui-diabled'); });
+            
+            if(!html5Placebolder)
+                ts.test("Despite blank text, field value is null",function(){ return a.val() == null; });
+        }); // end document.ready        
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

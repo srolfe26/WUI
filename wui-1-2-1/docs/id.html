@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title> - WUI 1.2</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+     
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../wui.js','Wui.id','Wui.id()');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        var a = Wui.id();  
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            ts = new Wui.ts();
+
+            ts.test('A unique id is returned.', function(){ return a; });
+        }); // end document.ready        
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

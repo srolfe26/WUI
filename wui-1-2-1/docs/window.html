@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Window</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../wui.js','Wui.Window','Wui.Window');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            
+            // Basic Window
+            var basic = new Wui.Button({
+                text:        'Basic Window',
+                appendTo:    $('#wui-doc-example'),
+                click:        function(){
+                                new Wui.Window({title:'Basic Window'});
+                            }
+            });
+            basic.place();
+            
+            // Modal Window
+            var modal = new Wui.Button({
+                text:        'Modal Window',
+                appendTo:    $('#wui-doc-example'),
+                click:        function(){
+                                new Wui.Window({title:'Modal Window', isModal:true});
+                            }
+            });
+            modal.place();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){    
+            // TESTING
+            // ts = new Wui.ts();
+            
+            //ts.test("Today",function(){ var today = new Date(); a.val('today'); return a.val().toString('yyyy-MM-dd') == today.toString('yyyy-MM-dd'); });
+        }); // end document.ready        
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

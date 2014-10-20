@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Percent to Pixels - WUI 1.2</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+     
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../wui.js','Wui.percentToPixels','Wui.percentToPixels()');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            var exampleArea = $('#wui-doc-example');
+
+            // Give the example area a border so changing its shape can be seen
+            exampleArea.css('border','1px dashed #fff');
+
+            // Resize the example area to 40% width, using percent to pixels
+            exampleArea.width(Wui.percentToPixels(exampleArea,40,'width'));
+            exampleArea.text('Now at 40% width.');
+        });  
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

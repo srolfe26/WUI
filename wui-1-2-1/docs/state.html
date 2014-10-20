@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI State Machine</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    <script type="text/javascript" src="../state.js"></script>
+    
+    <style type="text/css" class="wui-doc-code">
+        .state-man {width:224px; height:257px; background:url(../img/docs/state-man.gif) no-repeat 0 0; margin:0 auto;}
+        .state-man.one {background-position:0 0;}
+        .state-man.two {background-position:0 -257px;}
+        .state-man.three {background-position:0 -514px;}
+        .state-man.four {background-position:0 -771px;}
+    </style>
+    
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../state.js','Wui.stateMachine','State Machine');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            //create state machine
+            sm = new Wui.stateMachine();
+        });
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            /* TESTING SUITE
+            ts = new Wui.ts();
+            
+            // clear out hashes
+            sm.clearState();
+            
+            ts.test("test setup",function(){
+                var newState = [{view:'AdminView', params:{mode:'edit',wid:'11557'}}];
+                ts.pause();
+                
+                sm.addChangeMethod(function(state){
+                    ts.resume();
+                    ts.test("Set state with Object",function(){
+                        newState = {AdminView:{mode:'edit',wid:'11557'}};
+                        return sm.stringify(state) === sm.stringify(newState);
+                    });
+                });
+                sm.setState(newState);
+                return true;
+            }, true);
+            
+            ts.test("test setup",function(){
+                var newState = 'AdminView?mode=edit&wid=11557';
+                ts.pause();
+                
+                sm.addChangeMethod(function(state){
+                    ts.resume();
+                    ts.test("Set state with String",function(){
+                        newState = 'AdminView?mode=edit&wid=11557';
+                        return sm.stringify(state) === newState;
+                    });
+                });
+                sm.setState(newState);
+                return true;
+            }, true);
+            
+            ts.test("test setup",function(){
+                ts.pause();
+                
+                sm.addChangeMethod(function(state){
+                    ts.resume();
+                    ts.finalTests();
+                });
+                sm.clearState();
+                return true;
+            }, true);
+            
+            ts.finalTests = function(){
+                ts.test("Clear State",function(){
+                    return sm.stringify(sm.getState()) === '';
+                });
+                
+                ts.test("History length = 2",function(){
+                    // even though state was set three times, there are only 2 unique 
+                    // states, so the browser history two records back should be blank
+                    sm.turnOff();
+                    history.go(-2);
+                    return sm.stringify(sm.getState()) === '';
+                });
+                
+                ts.test("Show Animation",function(){
+                    $('#wui-doc-example').append($('<div>').addClass('state-man'));
+                    
+                    sm.addChangeMethod(function(state){
+                        ts.resume();
+                        $('.state-man').removeClass().addClass('state-man ' + sm.getParam('main','pic'));
+                    });
+                    
+                    ts.pause();
+                    sm.setState('main?pic=one');
+                    
+                    ts.pause();
+                    sm.setState('main?pic=two');
+                    
+                    ts.pause();
+                    sm.setState('main?pic=three');
+                    
+                    ts.pause();
+                    sm.setState('main?pic=four');
+                    
+                    return true;
+                });
+            };*/
+        }); // end document.ready        
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs"></body>
+</html>

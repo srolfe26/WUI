@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI Button - WUI 1.2</title>
+    
+    
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+        
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+
+    <script type="text/javascript" src="../docs/prism.js"></script>
+    <style type="text/css" class="wui-doc-code">
+        .wui-btn.test-page {height: 40px; line-height: 40px;}
+    </style>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../wui.js','Wui.Button','Button');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            a = new Wui.Button({
+                text:    'Test Button',
+                cls:    'test-page',
+                click:  function(){
+                    console.log("The button was clicked.");
+                },
+                appendTo:$('#wui-doc-example')
+            });
+            a.place();
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            ts = new Wui.ts();
+
+            ts.test('Set Button Text', function(){ a.setText('Test 1 Was Successful'); return a.el.text() == 'Test 1 Was Successful'; });
+            
+            ts.test('Disable the button', function(){ a.disable(); return a.disabled == true; });
+            
+            ts.test('Enable the button', function(){ a.enable(); return a.disabled == false; });
+            
+            //ts.test('Click event hook', function() { a.click( console.log("this is weird") ); });
+            
+           
+            
+        }); // end document.ready        
+    </script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

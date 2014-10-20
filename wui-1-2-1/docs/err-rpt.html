@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Wui.errRpt() - WUI 1.2</title>
+    
+    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="../jquery-mutation-ui-core.js"></script>
+    <script type="text/javascript" src="../wui.js"></script>
+    <script type="text/javascript" src="../forms.js"></script>
+    <script type="text/javascript" src="../grid.js"></script>
+    <script type="text/javascript" src="../docs/docs.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            Wui.docCode('../wui.js','Wui.errRpt','Wui.errRpt()');
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+
+            var anotherBtn = new Wui.Button({
+                text:       'Example Button',
+                click:      function(){
+                                console.log(anotherBtn);
+                            }
+            });
+
+            var confirm = new Wui.Button({
+                text:       'Click Here To Launch The Error Report Window',
+                appendTo:    $('#wui-doc-example'),
+                click:      function(){
+                                Wui.errRpt('Aw Snap! We made a mistake and this is why you are seeing this error.', 'Error', [anotherBtn], function(){ console.log(confirm)});
+                            }
+            });
+            confirm.place();
+        }); // end document.ready        
+    </script>
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // TESTING
+            ts = new Wui.ts();
+
+            
+            ts.test('Test msg is displayed',function() {
+                var msg = 'msg';
+                a = Wui.errRpt(msg, 'Title');
+                //console.log(a);
+                var ret = a.el.find('.wui-pane-content').text();
+                a.footer.items[0].click();
+                return ret==msg;
+            });
+            
+        }); // end document.ready        
+    </script>
+    <script type="text/javascript" src="../docs/prism.js"></script>
+</head>
+<body class="wui-docs">
+</body>
+</html>

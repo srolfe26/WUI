@@ -219,6 +219,7 @@ button::-moz-focus-inner { border:0; }
     overflow: hidden;
     position: relative;
     bottom:1px;
+    padding:0 0.5em;
 }
 .wui-button:active, .wui-button:hover, .wui-button:focus { background-color:#fff; }
 .wui-button:focus { border-color:#999; }
@@ -499,3 +500,142 @@ button::-moz-focus-inner { border:0; }
     border-style: dotted; 
     color: #999; 
 }
+.wui-disabled .button li > input:checked + label { color: #999; }
+
+
+/******************************************   validation styles TODO: AUDIT THESE!!!!   *******************************************/
+.wui-form-err, .wui-form-err.wui-fe {background-color:#ffa094;}
+.wui-form-err.wui-lbl{padding:26px 0.5em 0.5em 0.5em;}
+.wui-form-err.wui-lbl.lbl-left { padding: 0.5em 0.5em 0.5em 200px; }
+.wui-form-err.wui-lbl.lbl-right { padding:0.5em 200px 0.5em 0.5em; }
+.wui-form-err.wui-lbl.lbl-bottom { padding: 0.5em 0.5em 26px 0.5em; }
+
+.wui-form-err.wui-fe, .wui-form-err input[type=text], 
+.wui-fe.wui-form-err > input[type=text], .wui-form-err textarea, 
+.wui-form-err .wui-btn.field-btn, 
+.wui-form-err .wui-fe input.has-file[type="text"][disabled],
+.wui-form-err .button li label, .wui-form-err .wui-btn.field-btn {border-color:#b0463b;}
+
+.wui-form-err > label, .wui-form-err .feedback, .wui-form-err .feedback a, .wui-err {color:#b0463b;}
+.wui-lbl.lbl-right.wui-form-err > label, .wui-lbl.lbl-left.wui-form-err > label { padding:0.5em 0;}
+.wui-err { padding:1em; font-weight:bold; }
+
+.wui-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
+.wui-form-err input[type=text], .wui-fe.wui-form-err > input[type=text], .wui-form-err textarea {background-color:white; box-shadow: inset 0 0 5px #ff463b;}
+.wui-form-err .wui-btn.field-btn {border-left:none;}
+.wui-form-err .wui-fe input.has-file[type="text"][disabled] { background-color: #eee; }
+
+
+/**********************************************   grid styles TODO: AUDIT THIS TOO!   ************************************************/
+.wui-ghs {overflow:hidden; margin:-1px 0 0;}
+.wui-gh {width:100%; overflow:hidden; position: absolute; background-color:#555;}
+.wui-gh * {-moz-user-select:none; -webkit-user-select:none;}
+.wui-gh ul {margin:0; padding:0; min-width:100%; max-width:100%; width:100%; height:2em; overflow:hidden;}
+    .wui-gc {
+        background-color:#555; color:#fff; text-transform:uppercase; height: 100% !important;
+        font-weight:bold; padding:0.5em 41px 0.5em 0.5em; text-align:left; list-style: none; margin:0;
+        border-right:1px solid #fff; text-shadow: 0 0 3px rgba(0,0,0,0.4); position: relative; cursor: pointer;
+    }
+
+    /*** Hidden columns, not quite implemented in javascript ***/
+    .wui-gc.hidden, .grid-body td.hidden {
+        width: 0;
+        display: none;
+        padding: 0;
+    }
+    .wui-gc.hidden > div {display:none !important;}
+
+    .wui-gc.wui-no-sort, .wui-gc.wui-no-sort > div:first-child{padding-right:0;}
+
+    .wui-gc:last-child {  border-right:0; }
+    .wui-gc div:first-child {
+        bottom: 0.5em;
+        font-size: 0.9em;
+        overflow: hidden;
+        padding-right:41px;
+        max-width:    100%;
+        position: absolute;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .wui-gc.wui-no-sort.ui-resizable div:first-child { padding-right: 0; }
+    .has-vert-columns .wui-gh ul {height:150px;}
+    .has-vert-columns .wui-gc {height:150px;}
+    .wui-gc.vert-col {width:50px;}
+    .wui-gc.vert-col div:first-child {
+        bottom: auto;
+        height: 48px;
+        left: auto;
+        line-height: 51px;
+        padding: 0 0.25em 0 30px;
+        position: relative;
+        transform: rotate(-90deg);
+        transform-origin: 44% 158% 0;
+        -webkit-transform: rotate(-90deg);
+        -webkit-transform-origin: 44% 158% 0;
+        width: 150px; max-width:150px; min-width:150px;
+    }
+    .wui-gc .ui-resizable-handle.ui-resizable-e {
+        cursor: col-resize;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 10px;
+    }
+    .wui-gc div.vert-col {
+        height: 30px;
+        line-height: 30px;
+        padding-left: 30px;
+        transform: rotate(-90deg);
+        transform-origin: 45% 249% 0;
+        width: 150px;
+    }
+    
+.wui-pane-content > .wg-loader {left:48%; top:45%;}
+.wui-pane-content > .wg-loader.hidden {left:0; top:0;}
+
+.grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
+.grid-body table {border-collapse:collapse;}
+.grid-body table.wui-infinite-table {position: absolute; left:0; top:0;}
+    .grid-body td { background-position:center center; border-bottom:0; border:1px dotted #ccc; }
+        .grid-body tr:nth-child(2n) { background-color: #fff; }
+        .grid-body tr:nth-child(2n+1) { background-color: #eee; }
+            .grid-body td > div {width:100%; height:100%; padding:0.25em; position:relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+
+.wui-gc:after {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 1em 1em 1em 1em;
+    bottom: 0.3em;
+    color: #FFFFFF;
+    font-size: 0.8em;
+    padding: 0.2em 0.7em;
+    position: absolute;
+    right: 6px;
+    text-shadow: 0 0 2px #000000, 0 0 4px #000000;
+}
+.wui-gc.one.asc:after {content:"1 ↓";} .wui-gc.one.desc:after {content:"1 ↑";}
+.wui-gc.two.asc:after {content:"2 ↓";} .wui-gc.two.desc:after {content:"2 ↑";}
+.wui-gc.three.asc:after {content:"3 ↓";} .wui-gc.three.desc:after {content:"3 ↑";}
+.wui-gc.four.asc:after {content:"4 ↓";} .wui-gc.four.desc:after {content:"4 ↑";}
+.wui-gc.five.asc:after {content:"5 ↓";} .wui-gc.five.desc:after {content:"5 ↑";}
+
+.wui-paging-pad {position:relative; width:1px;}
+.wui-paging-pad table {position:absolute; left:0;}
+
+/********************* Selection & Hilighting Styles ***************************/
+.wui-selected td, .wui-selected {background-color:#038BE0;}
+    .wui-selected { color:#fff; }
+.wui-highlight { background-color:#fc0;}
+    .wui-selected.wui-highlight, .wui-selected .wui-highlight { background-color:#288D58; }
+
+.wui-selected a, .wui-selected a:visited {
+    color:#fff;
+    background-color: none;
+    text-decoration: underline;
+}
+
+
+
+
+

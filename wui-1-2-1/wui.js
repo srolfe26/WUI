@@ -747,6 +747,11 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                             me.el.css('z-index', maxZ);
                         }
                     }
+
+                    me.el.on('wuibtnclick','[name=window_close]',function(evnt,btn){
+                        me.close();
+                        evnt.stopPropagation();
+                    });
                 },
     resize:     function(resizeWidth, resizeHeight){
                     var me = this;
@@ -1229,28 +1234,37 @@ Wui.msg = function(msg, msgTitle, callback, content){
 
 Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
     var err = Wui.msg(errMsg,msgTitle,callback);
+
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
     err.container.find('.wui-msg').addClass('wui-err');
     err.resize();
+
     return err;
 };
 
 
 Wui.confirm = function(msg, msgTitle, callback, content){
     var cw = Wui.msg.apply(this,arguments);
+
     cw.doAnswer = function(ans){
         if(callback && typeof callback == 'function')    callback(ans);
         cw.answerRun = true;
         cw.close();
     };
     cw.onWinClose= function(){ return ((cw.answerRun !== true) ? false : cw.answerRun); };
-    cw.footer.splice(0,1,
-        new Wui.Button({text:'No', click:function(){ cw.doAnswer(false); }}),
-        new Wui.Button({text:'Yes', click:function(){ cw.doAnswer(true); }})
-    );
+
+    cw.footer.splice(0,1, new Wui.Button({ text:'No' }), new Wui.Button({ text:'Yes' }) );
+    cw.footer.el.on('wuibtnclick',function(evnt,btn){
+        if(btn.text == 'No')    cw.doAnswer(false);
+        else                    w.doAnswer(true);
+        evnt.stopPropagation();
+    });
+
     cw.header.splice(0,1);
+
     cw.resize();
+
     return cw;
 };
 

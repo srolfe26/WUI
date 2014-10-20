@@ -481,10 +481,8 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
                                             if($.isNumeric(me.maxChars) && me.counter === true){
                                                 me.append(me.charCounter = $('<div>').addClass('wui-char-counter'));
                                                 me.field.keyup(function(){
-                                                    
-                                                    console.log('counter',initVal,  me.value, me.val());
                                                     var initVal = (me.val()) ? me.maxChars - me.val().length : me.maxChars;
-                                                    console.log('counter',initVal,  me.value);
+                                                    
                                                     me.charCounter.text(initVal);
                                                     if(initVal >= 0)    me.charCounter.css('color','#333');
                                                     else                me.charCounter.css('color','#900');
@@ -648,7 +646,7 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                                             .mousedown(updateText)
                                             .blur(updateText)
 
-                                        (me.elAlias || me.el).resizes({
+                                        $(me.elAlias || me.el).resizes({
                                             anchored:   true,
                                             minWidth:   (me.elAlias || me.el).outerWidth(),
                                             minHeight:  (me.elAlias || me.el).outerHeight()
@@ -673,8 +671,8 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                         me.strike = $('<i class="fa fa-strikethrough">',{tabIndex:-1, title:'Strike-through'}),
                         me.link = $('<i class="fa fa-link">',{tabIndex:-1, title:'Link'}),
                         me.unlink = $('<i class="fa fa-unlink">',{tabIndex:-1, title:'Un-Link'}),
-                        me.ul = $('<i class="fa fa-list-ul">',{tabIndex:-1, title:'Unorderd List'}),
-                        me.ol = $('<i class="fa fa-list-ol">',{tabIndex:-1, title:'Ordered List'}),
+                        me.ol = $('<i class="fa fa-list-ul">',{tabIndex:-1, title:'Unorderd List'}),
+                        me.ul = $('<i class="fa fa-list-ol">',{tabIndex:-1, title:'Ordered List'}),
                         me.left = $('<i class="fa fa-align-left">',{tabIndex:-1, title:'Left Align'}),
                         me.center = $('<i class="fa fa-align-center">',{tabIndex:-1, title:'Center Align'}),
                         me.right = $('<i class="fa fa-align-right">',{tabIndex:-1, title:'Right Align'})
@@ -927,7 +925,8 @@ Wui.Combo = function(args){
         autoLoad:   false,
         ddCls:      '',
         emptyMsg:   'No Results.',
-        field:      $('<input>').attr({type:'text'}),
+        field:      $('<input>',{type:'text'}),
+        hiddenField:$('<input>',{type:'hidden'}),
         filterField:true,
         forceSelect:false,
         minKeys:    1,
@@ -959,6 +958,15 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     close:      function(){ 
                     this._open = false;
                     this.dd.hide(); 
+                },
+    applyAttr:  function(name,val){
+                    var validVal = (typeof val === 'string' || typeof val === 'number');
+                    if(validVal){
+                        if(name == 'id')        $(this.field).attr(name,val);
+                        else if(name == 'name') $(this.hiddenField).attr(name,val);
+                        else                    $(this.el).attr(name,val);
+                    }
+                    return validVal;
                 },
     hilightText:function(srchVal){
                     var me = this;
@@ -999,7 +1007,12 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     
 
                     // Place field elements
-                    me.append( me.wrapper = $('<div>').addClass('wui-combo').append(me.setListeners(me)) );
+                    me.append( 
+                        me.wrapper = $('<div>').addClass('wui-combo').append(
+                            me.hiddenField,
+                            me.setListeners(me)
+                        )
+                    );
                     $('body').append( me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls) );
 
                     // Listeners - These listeners must stop propagation or else they
@@ -1145,8 +1158,13 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     set:        function(){
                     var me = this;
 
-                    if(me.selected[0] && me.value != me.selected[0].rec)
+                    if(me.selected[0] && me.value != me.selected[0].rec){
                         me.val(me.selected[0].rec);
+
+                        if(typeof me.selected[0].rec != 'undefined')
+                            me.hiddenField.val(me.selected[0].rec[me.valueItem]);
+                    }
+                        
                     if(me._open)
                         me.close();
                 },
@@ -1158,7 +1176,10 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     return t.field.on({
                         keydown: function(evnt){
                             //clear the value if the user blanks out the field
-                            if(t.field.val().length === 0) t.value = null;
+                            if(t.field.val().length === 0){
+                                t.value = null;
+                                t.hiddenField.val('');
+                            }
 
                             switch(evnt.keyCode){
                                 case 40:    evnt.preventDefault(); move(1);     break;  // downkey
@@ -1227,6 +1248,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     if(sv === null){
                         me.clearSelect();
+                        me.hiddenField.val('');
                         return sv;
                     }else if(typeof sv == 'object'){
                         return me.selectBy(me.valueItem,sv[me.valueItem]);
@@ -1729,6 +1751,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                             //Returns a message to the user that the program doesn't understand them
                             if(genDate.toString() == 'Invalid Date'){
                                 me.displayDate(me.sarcasmArray[Wui.randNum(0,(me.sarcasmArray.length -1))]);
+                                me.hiddenField.val('');
                                 return;
                             }
                             
@@ -1977,7 +2000,7 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
             init:       function(){
                             var me = this;
 
-                            Wui.Window.prototype.apply(me,arguments);
+                            Wui.Window.prototype.init.apply(me,arguments);
 
                             me.footer.el.on('wuibtnclick',function(evnt,btn){
                                 if(btn.text == 'Cancel'){
