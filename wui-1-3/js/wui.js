@@ -1,29 +1,35 @@
-/*! Wui 1.2.1
+/*! Wui 1.3
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.2.1/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.3/license.html
  */
 
-// Make sure the WUI is defined
-var Wui = Wui || {
-    version: '1.2.1'
-};
+// Make sure the WUI is defined and doesn't conflict with other versions on the page
+var _wuiVar =   (function(){
+                    if(typeof Wui === 'undefined'){
+                        Wui = { version: '1.3' };
+                        return 'Wui';
+                    }else{
+                        _w = { version: '1.3' };
+                        return '_w';
+                    }
+                })();
 
 
-(function($,window) {
+(function($,window,Wui) {
 
 // AJAX error reporting and caching.
 $.ajaxSetup({ 
-    cache:      false,
-    error:      function(response){
-                    var err = null;
-                    
-                    try{        err = $.parseJSON( response.responseText ); }
-                    catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
-                    if(err !== null)
-                        Wui.errRpt(err.fatalError);
-                }
+    cache:  false,
+    error:  function(response){
+                var err = null;
+                
+                try{        err = $.parseJSON( response.responseText ); }
+                catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
+
+                if(err !== null) Wui.errRpt(err.fatalError);
+            }
 });
 
 
@@ -736,7 +742,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     
                     // Add window specific properties
                     me.windowEl = me.el
-                    .addClass('wui-window')
+                    .addClass('w13-window')
                     .css('z-index',Wui.maxZ())
                     .click(bringToFront);
                     
@@ -1291,4 +1297,4 @@ Wui.confirm = function(msg, msgTitle, callback, content){
 };
 
 
-}(jQuery,this));
+}(jQuery,this,window[_wuiVar]));

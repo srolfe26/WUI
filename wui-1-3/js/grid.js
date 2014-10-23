@@ -1,8 +1,8 @@
-/*! Wui 1.2.1
+/*! Wui 1.3
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.2/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.3/license.html
  */
 
 (function($,Wui) {
@@ -441,4 +441,4 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                 }
 });
 
-}(jQuery,Wui));
+}(jQuery,window[_wuiVar]));

@@ -1,8 +1,8 @@
-/*! Wui 1.2
+/*! Wui 1.3
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.2/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.3/license.html
  */
 
 (function($,Wui) {
@@ -1364,8 +1364,7 @@ Wui.Datetime = function(args){
 };
 
 // If date has already been extended, dont' attempt to extend it again
-if(Wui.dateExt !== true){
-    Wui.dateExt = true;
+if(typeof Date.CultureInfo === 'undefined'){
     $.extend(Date,{
         CultureInfo:            {
                                     name: "en-US",
@@ -2034,4 +2033,4 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
 };
 
 
-})(jQuery,Wui);
+})(jQuery,window[_wuiVar]);

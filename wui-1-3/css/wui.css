@@ -10,7 +10,7 @@
 .w13-pane p {margin:1em 0.5em; flex:none;}
 
 /****************************************   FONTS & COLORS   *****************************************/
-.w13-pane, .w13-pane *, .w13-form, .w13-lbl, .w13-lbl *, .w13-fe, .w13-fe *, 
+.w13-pane, .w13-pane *, .w13-form, .w13-lbl, .wui-button, .w13-lbl *, .w13-fe, .w13-fe *, 
 .ui-datepicker, .wui-cal, .wui-combo-dd, .wui-cal-day {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px; 
@@ -20,9 +20,9 @@
     box-sizing:         border-box;
 }
 
-.w13-lbl > label, .wui-button { font-size: 0.9em; } 
+.w13-lbl > label, .wui-button { font-size: 0.9rem; } 
 .wui-checkbox label, .wui-radio label, .w13-fe input, .w13-fe textarea, .wui-editor { font-size: 0.8em; }
-.feedback, .wui-char-counter { font-size: 0.7em; }
+.feedback, .wui-char-counter { font-size: 0.7rem; }
 .w13-pane, .w13-form, .wui-button, .w13-fe input, .w13-fe textarea, .wui-editor { color:#4f4f4f; }
 
 /****************************************   PANE STYLES   *****************************************/
@@ -180,7 +180,7 @@
 /***************************************   WINDOW STYLES   ****************************************/
 .w13-overlay {position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(133,100,70,.4);}
 
-.wui-window {
+.w13-window {
     margin:0 auto;
     position:fixed !important;
     box-shadow: 0 0 8px 2px rgba(133,100,0,.6), 0 0 1px 1px #aaa;
@@ -230,6 +230,8 @@ button::-moz-focus-inner { border:0; }
 
 .wui-v-bar .wui-button, .wui-v-bar.top-to-bottom .wui-button:first-child { margin-bottom: 0.33em; bottom:0; }
 .wui-v-bar .wui-button:first-child { margin-bottom: 0; }
+
+.wui-button[class*=fa- ]::before { font-family: FontAwesome; padding-right: 0.33em; }
 
 /*********************   FIELD/BUTTON STYLES ***********************/
 .wui-button.field-btn, .w13-fe input[type=text] {height:26px;}
@@ -419,7 +421,7 @@ button::-moz-focus-inner { border:0; }
     border:0;
     background: transparent;
     position: absolute;
-    right:0.5em; 
+    right:0; 
     top:1px;
 }
 .feedback { text-transform:uppercase; overflow:hidden; }

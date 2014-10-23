@@ -1,11 +1,11 @@
-﻿/*! Wui 1.2
+﻿/*! Wui 1.3
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static4.usurf.usu.edu/resources/wui-nextgen/wui-1-2/license.html
+ * https://static4.usurf.usu.edu/resources/wui-1.3/license.html
  */
 
-(function($) {
+(function($,Wui) {
     /** See Docs for Wui.Grid */
     Wui.InfiniteGrid = function(args){
         $.extend(this,{
@@ -304,4 +304,4 @@
                             }
                         }
     });
-}(jQuery));
+}(jQuery,window[_wuiVar]));
