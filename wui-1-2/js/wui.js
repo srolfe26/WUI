@@ -912,7 +912,7 @@ Wui.Data = function(args){
         url:            null,
         
         /** Whether the object is waiting for a remote response */
-        waiting:        false,
+        waiting:        undefined,
         
         /** Special configuration of the ajax method. Defaults are:
         
@@ -982,12 +982,13 @@ Wui.Data.prototype = {
                             var paramsOkay = me.setParams.apply(me,arguments),
                                 beforeLoad = me.beforeLoad.apply(me,arguments);
 
-                            if(paramsOkay !== false && beforeLoad !== false){
-                                me.waiting = true;
-                                return $.ajax(me.url,config);
-                            }
+                            if(paramsOkay !== false && beforeLoad !== false)
+                                return me.waiting = $.ajax(me.url,config);
+                            
+                            return $.Deferred().reject();
                         }else{
                             me.furtherRequests = arguments;
+                            return me.waiting;
                         }
                     },
     /**
@@ -1061,7 +1062,7 @@ Wui.Data.prototype = {
     */
     success:        function(r){
                         var me = this;
-                        me.waiting = false;
+                        me.waiting = undefined;
 
                         if(me.furtherRequests){
                             me.loadData.apply(me,me.furtherRequests);
@@ -1081,7 +1082,7 @@ Wui.Data.prototype = {
     
     /** Runs when loadData() fails. Clears the waiting flag and called the event hook onFailure. */
     failure:        function(e){
-                        this.waiting = false;
+                        this.waiting = undefined;
                         this.onFailure(e);
                     },
     

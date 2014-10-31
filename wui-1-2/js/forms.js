@@ -1364,6 +1364,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     me.elAlias = me.dd.empty().removeClass('wui-spinner');
                     Wui.DataList.prototype.make.apply(me,arguments);
+                    
                     if(me.data.length === 0)
                         me.elAlias.html(me.emptyMsg);
 

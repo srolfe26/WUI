@@ -66,16 +66,16 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 
                     if(typeof me.id === 'undefined' || me.id === null)
                         me.id = Wui.id('w13-form');
+                },
+    onRender:   function(){
+                    var me = this;
 
-                    me.observer = new MutationSummary({
-                        callback:   function(){
-                                        if(me.items === undefined) me.items = [];
-                                        me.each(function(itm,i){ me.items[i] = me.normFrmItem(itm); });
-                                        return Wui.O.prototype.place.apply(me,arguments);
-                                    },
-                        queries:    [{ element: '#' + me.id }]
-                    });
-                },   
+                    if(me.items === undefined) me.items = [];
+                    me.each(function(itm,i){ me.items[i] = me.normFrmItem(itm); });
+                    Wui.O.prototype.place.apply(me,arguments);
+                    
+                    return Wui.O.prototype.onRender.apply(me,arguments);
+                },
     normFrmItem:function(itm){
                     var me = this;
 
@@ -310,10 +310,10 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     me.value = me.hasOwnProperty('value') ? me.value : null;
                     me.el = $('<div>').addClass('w13-fe');
 
-                    if(!(me.name !== null && me.name.length !== 0))
+                    if(!(me.name && me.name.length !== 0))
                         me.name = Wui.id('w13-form-field');
 
-                    if(!(me.id !== null && me.id.length !== 0) || !me.hasOwnProperty('id'))
+                    if(!(me.id && me.id.length !== 0) || !me.hasOwnProperty('id'))
                         me.id = me.name;
                     
                     if(me.label && me.label.length > 0){
@@ -328,19 +328,19 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                         me.el = me.lbl.el.append(me.elAlias);
                     }
 
-                    me.observer = new MutationSummary({
-                        callback:   function(){
-                                        if(me.disabled)
-                                            me.disable();
-                                        if(typeof me.value != 'undefined' && me.value !== null)
-                                            me.val(me.value,false);
-                                        if(me.lbl)
-                                            me.lbl.adjustField();
-                                    },
-                        queries:    [{ element: '#' + me.id }]
-                    });
-
                     return me.el;
+                },
+    onRender:   function(){
+                    var me = this;
+
+                    if(me.disabled)
+                        me.disable();
+                    if(typeof me.value != 'undefined' && me.value !== null)
+                        me.val(me.value,false);
+                    if(me.lbl)
+                        me.lbl.adjustField();
+
+                    Wui.O.prototype.onRender.call(this);
                 },
     disable:    function(){
                     this.disabled = true;
@@ -474,25 +474,25 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
                         if(me.blankText && me.blankText.length)    me.setBlankText(me.blankText);
                         
                         me.append(Wui.Text.prototype.setListeners.call(me,me));
+                    },
+    onRender:       function(){
+                        var me = this;
 
-                        me.observer = new MutationSummary({
-                            callback:   function(){
-                                            // Add a character counter - must be done outside the character counter
-                                            if($.isNumeric(me.maxChars) && me.counter === true){
-                                                me.append(me.charCounter = $('<div>').addClass('wui-char-counter'));
-                                                me.field.keyup(function(){
-                                                    var initVal = (me.val()) ? me.maxChars - me.val().length : me.maxChars;
-                                                    
-                                                    me.charCounter.text(initVal);
-                                                    if(initVal >= 0)    me.charCounter.css('color','#333');
-                                                    else                me.charCounter.css('color','#900');
-                                                });
+                        Wui.FormField.prototype.onRender.call(me);
 
-                                                me.field.keyup();
-                                            }
-                                        },
-                            queries:    [{ element: '#' + me.id }]
-                        });
+                        // Add a character counter - must be done outside the character counter
+                        if($.isNumeric(me.maxChars) && me.counter === true){
+                            me.append(me.charCounter = $('<div>').addClass('wui-char-counter'));
+                            me.field.keyup(function(){
+                                var initVal = (me.val()) ? me.maxChars - me.val().length : me.maxChars;
+                                
+                                me.charCounter.text(initVal);
+                                if(initVal >= 0)    me.charCounter.css('color','#333');
+                                else                me.charCounter.css('color','#900');
+                            });
+
+                            me.field.keyup();
+                        }
                     },
     setBlankText:   function(bt){
                         var me = this;
@@ -1049,14 +1049,14 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                         me.ddSwitch.place();
                         me.ddSwitch.el.mousedown(function(){ me.isBlurring = false; });
                     }
+                },
+    onRender:   function(){
+                    var me = this;
 
-                    me.observer = new MutationSummary({
-                        callback:   function(){
-                                        if(me.autoLoad && me.url !== null)  me.loadData();
-                                        else if(me.url === null)            me.make();
-                                    },
-                        queries:    [{ element: '#' + me.id }]
-                    });
+                    if(me.autoLoad && me.url !== null)  me.loadData();
+                    else if(me.url === null)            me.make();
+
+                    Wui.FormField.prototype.onRender.call(me);
                 },
     itemSelect: function(itm, silent){
                     var me = this;
@@ -1615,6 +1615,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                             return false;
                         });
                     },
+    onRender:       Wui.FormField.prototype.onRender,
     num2Dec:        function (words){
                         var numberRepl = {  a:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,
                             thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,
@@ -1708,7 +1709,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                                 header = tbl.find('.wui-cal-header');
 
                             // Set up listeners
-                            header.append('<a class="wui-cal-prev">','<a class="wui-cal-next">');
+                            header.append('<a class="wui-cal-prev fa fa-caret-left">','<a class="wui-cal-next fa fa-caret-right">');
                             header.children('a').click(function(){
                                 var dir = $(this).hasClass('wui-cal-prev') ? -1 : 1,
                                     newDt = new Date(year, month + dir, 1);
@@ -1922,7 +1923,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         }
                         else{
                             this.fieldText('');
-                            console.log(arguments.callee.caller, this);
+                            this.hiddenField.val('');
                             this.outputFld.html('');
                             this.value = null;
                         }
@@ -2014,6 +2015,7 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
             items:      [inputFrm],
             cls:        'wui-input-window',
             width:      600,
+            height:     400,
             getVal:     function(){
                             var formData = inputFrm.getData();
                             if(formData){
@@ -2025,6 +2027,10 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
                                     Msg.closeOkay = true;
                                 }
                             }
+                        },
+            doClose:    function(){
+                            Msg.closeOkay = true;
+                            Msg.close();
                         },
             onWinClose: function(){ return ((Msg.closeOkay !== true) ? false : Msg.closeOkay); }
         });

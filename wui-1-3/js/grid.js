@@ -25,32 +25,38 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
     place:          function(){
                         var me = this;
                         
-                        me.el.addClass('wui-tabs');
+                        me.el.addClass('w13-tabs');
                         
-                        //adds the objects items if any
+                        //adds the object's items if any
                         if(me.items === undefined) me.items = [];
                         $.each(me.items,function(idx,itm){
-                            itm.tabCls =    'wui-tab ' +
+                            itm.el.addClass('w13-tab-panel');
+                            itm.tabCls =    'w13-tab ' +
                                             ((itm.tabCls) ? ' ' + itm.tabCls : '') +
                                             ((me.tabsLeft) ? ' left' : '');
                             
-                            if(itm.tabsHideHeader){
-                                //itm.el.css({borderTopWidth:itm.el.css('border-left-width')});
+                            if(itm.tabsHideHeader)
                                 itm.el.addClass('wui-hide-heading');
-                            }
                             
-                            me[me.tabsBottom ? 'footer' : 'header'].push(itm.tab = new Wui.Button({
-                                text:   itm.title || 'Tab ' + (parseInt(idx) + 1),
-                                click:  function(){ me.giveFocus(itm); },
-                                cls:    itm.tabCls
-                            }));
-                            //if(me.bbar.length !== 0) me.placeFooter();
+                            // Add buttons as tabs
+                            me[me.tabsBottom ? 'footer' : 'header'].push(
+                                itm.tab = new Wui.Button({
+                                    text:   itm.title || 'Tab ' + (parseInt(idx) + 1),
+                                    cls:    itm.tabCls,
+                                    pane:   itm
+                                })
+                            );
+                            
+                            // Add listeners for tab changes
+                            me[me.tabsBottom ? 'footer' : 'header'].el.on('wuibtnclick','.w13-tab',function(evnt,btn){
+                                me.giveFocus(btn.pane);
+                            });
                         });
                         
-                        return Wui.O.prototype.place.call(me, function(m){ $.each(m.items,function(i,itm){ itm.el.addClass('wui-tab-panel'); }); }); //.wrap($('<div>')
+                        return Wui.O.prototype.place.call(me); //.wrap($('<div>')
                     },
     giveFocus:      function(tab, supressEvent){
-                        var me = this, dn = (me.name) ? '.' + me.name : '';
+                        var me = this;
       
                         supressEvent = (supressEvent !== undefined) ? supressEvent : false;
                         
@@ -61,8 +67,7 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                             if(isActive){
                                 me.currentTab = itm;
                                 if(!supressEvent) 
-                                    me.el.trigger($.Event('tabchange'),[me, itm.tab, itm])
-                                        .trigger($.Event('tabchange' + dn),[me, itm.tab, itm]);
+                                    me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
                                 itm.layout();
                             }
                         });
@@ -77,9 +82,9 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                         });
                         return retVal;
                     },
-    // onRender:       function(){
-    //                     this.giveFocus(this.items[0]);
-    //                 }
+    onRender:       function(){
+                        this.giveFocus(this.items[0]);
+                    }
 });
 
 
@@ -159,11 +164,11 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     // Set up container
                     Wui.Pane.prototype.init.call(me);
-                    me.el.addClass('wui-grid');
+                    me.el.addClass('w13-grid');
 
                     // Add grid specific DOM elements and reset elAlias
-                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
                     me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh').appendTo(me.elAlias);
+                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
                     me.elAlias = me.tbl = me.tblContainer.children('table');
                     me.heading = me.headingContainer.children('ul');
                     
@@ -177,9 +182,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     layout:     function(){
                     var me = this; 
 
-                    Wui.O.prototype.layout.apply(me,arguments);
-                    
-                    if(this.fitToContent === true){
+                    Wui.O.prototype.layout.call(me);
+
+                    if(me.fitToContent === true){
                         var me = this,
                             toolBarsH = me.header.el.outerHeight() + me.footer.el.outerHeight(),
                             maxHeight = $.isNumeric(me.maxHeight) ? me.maxHeight : 0,
@@ -192,14 +197,18 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         totalHeight = (maxHeight > 0 && totalHeight + toolBarsH > maxHeight) ? maxHeight : totalHeight;
 
                         me.height = totalHeight + toolBarsH;
-                        Wui.O.prototype.layout.apply(me,arguments);
+                        me.cssByParam();
                     }
 
-                    this.posDataWin();
-                    if(this.cols.length) this.sizeCols();
+                    if(me.cols.length) me.sizeCols();
+
+                    if(me.parent){
+                        Wui.fit(me.parent.items, (me.parent.fitDimension || 'width'));
+                        me.el.parent().css('overflow','hidden');
+                    }
                 },
     loadData:   function(){
-                    this.setMaskHTML('Loading <span class="wui-spinner"></span>');
+                    this.maskHTML = 'Loading <i class="fa fa-cog fa-spin"></i>';
                     this.addMask();
                     return Wui.Data.prototype.loadData.apply(this,arguments);
                 },            
@@ -267,14 +276,6 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     // Start with getting the columns - Many methods waterfall from here
                     me.autoLoad = al;
                     return this.getColumns();
-                },
-    posDataWin: function(){
-                    var hh = this.headingContainer.height() - 1;
-                    this.tblContainer.css({height:this.container.height() - hh, top:hh});
-                },
-    configBar:  function(){
-                    Wui.Pane.prototype.configBar.apply(this,arguments);
-                    this.posDataWin();
                 },
     refresh:    function(){
                     if(this.url === null)   this.setData(this.data);
@@ -411,9 +412,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     sizeCols:   function (){
                     var me = this, 
                         hc = me.headingContainer,
-                        acctForScrollBar = me.tbl.find('tr:first').height() * me.total > me.tblContainer.height(),
+                        acctForScrollBar = me.tbl.find('tr:first').height() * (me.displayMax > 1 ? me.displayMax : me.total) > me.tblContainer.height(),
                         sbWid = acctForScrollBar ? Wui.scrollbarWidth() : 0;
-
                     hc.css('padding-right', sbWid);
                     Wui.fit(me.cols,'width');
 

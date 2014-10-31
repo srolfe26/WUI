@@ -97,12 +97,12 @@ button::-moz-focus-inner { border:0; }
 }
 .wui-btn:focus:hover { color:#111; }
 .wui-btn:focus:active { border-color:#777; }
-.wui-pane-bar .wui-btn {height:26px; line-height:26px;  margin: 7px 0.5em 0 0;}
+.wui-pane-bar .wui-btn {height:28px; line-height:24px;  margin: 6px 0.5em 0 0;}
 .wui-btn.disabled {background-color:transparent; opacity: 0.5;}
 .wui-btn.disabled:active, .wui-btn.disabled:hover {box-shadow: none; background-color:transparent;}
 
 /*********************   FIELD/BUTTON STYLES ***********************/
-.wui-btn.field-btn, .wui-fe input[type=text] {height:26px;}
+.wui-btn.field-btn, .wui-fe input[type=text] {height:27px;}
 .wui-btn.field-btn {line-height:26px; position: absolute; right:0; border-radius:0 4px 4px 0; top:0;}
 .wui-btn.field-btn:hover, .wui-file-upload .wui-btn:hover, .wui-browse-btn:hover {background-color:#ccc; border-color:#bbb;}
 .wui-btn.field-btn:focus, .wui-file-upload .wui-btn:focus, .wui-browse-btn:focus {box-shadow:0 0 3px #aaa inset;}

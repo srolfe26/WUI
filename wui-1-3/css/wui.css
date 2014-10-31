@@ -20,8 +20,8 @@
     box-sizing:         border-box;
 }
 
-.w13-lbl > label, .wui-button { font-size: 0.9rem; } 
-.wui-checkbox label, .wui-radio label, .w13-fe input, .w13-fe textarea, .wui-editor { font-size: 0.8em; }
+.w13-lbl > label, .wui-button, .wui-gc div:first-child { font-size: 0.9rem; } 
+.wui-checkbox label, .wui-radio label, .w13-fe input, .w13-fe textarea, .wui-editor, .wui-gc:after, .w13-grid .w13-pane-content * { font-size: 0.8rem; }
 .feedback, .wui-char-counter { font-size: 0.7rem; }
 .w13-pane, .w13-form, .wui-button, .w13-fe input, .w13-fe textarea, .wui-editor { color:#4f4f4f; }
 
@@ -58,6 +58,7 @@
     width: 100%;
     height: 40px;
     line-height: 40px;
+    overflow: hidden;
 }
 .wui-v-bar {
     top:0px;
@@ -78,11 +79,11 @@
 .wui-rbar { right:0; }
 
 
-.w13-pane-header, .wui-title {
+.wui-tbar, .wui-title {
     top:0;
 }
 
-.w13-pane-footer {
+.wui-bbar {
     bottom:0;
 }
 
@@ -139,6 +140,7 @@
 .w13-mask > span { margin: 0 auto; }
 
 /**************************************** NESTED LEVEL 2 ****************************************/
+.w13-pane .w13-pane { display:flex; }
 .w13-pane .w13-pane, .w13-pane .w13-pane .w13-pane .w13-pane {
     margin: 0;              /* REMOVE */
     width: 100%;            /* REMOVE */
@@ -188,8 +190,8 @@
 
 .resize-nub {
     position:absolute;
-    width: 6px;
-    height: 5px;
+    width: 10px;
+    height: 10px;
     right: -2px;
     bottom:-3px;
     cursor:nwse-resize;
@@ -202,7 +204,7 @@ button::-moz-focus-inner { border:0; }
     display:inline-block; 
     min-width: 30px;
     height: 30px;
-    line-height: 30px;
+    line-height: 28px;
     text-align: center; 
     background-color:#d9d9d9; 
     outline:0; 
@@ -231,7 +233,16 @@ button::-moz-focus-inner { border:0; }
 .wui-v-bar .wui-button, .wui-v-bar.top-to-bottom .wui-button:first-child { margin-bottom: 0.33em; bottom:0; }
 .wui-v-bar .wui-button:first-child { margin-bottom: 0; }
 
-.wui-button[class*=fa- ]::before { font-family: FontAwesome; padding-right: 0.33em; }
+.wui-button[class*=fa- ]::before { 
+    font-family: FontAwesome; 
+    padding-right: 0.33em; 
+    font-size:1rem;
+    margin-left: -0.25em;
+    text-shadow: 0 0 2px #fff;
+}
+
+
+.wui-v-bar .wui-button[class*=fa- ]::before {padding-right:0;}
 
 /*********************   FIELD/BUTTON STYLES ***********************/
 .wui-button.field-btn, .w13-fe input[type=text] {height:26px;}
@@ -421,21 +432,29 @@ button::-moz-focus-inner { border:0; }
     border:0;
     background: transparent;
     position: absolute;
-    right:0; 
-    top:1px;
+    right:0;
+    top:0;
+    width: 30px;
+    line-height: 26px;
 }
 .feedback { text-transform:uppercase; overflow:hidden; }
 .feedback a {text-transform:none; color: #1AF; }
 .feedback a, .feedback span {font-size:1em;}
 
-.wui-cal {position:absolute; background-color: #fff; padding:0.25em; font-size: 14px; box-shadow: 0 3px 5px rgba(0,0,0,0.7); text-transform: capitalize;}
+.wui-cal {
+    position:absolute; 
+    background-color: #fff; 
+    padding:0.25em; 
+    font-size: 14px; 
+    box-shadow: 0 3px 5px rgba(0,0,0,0.7); 
+    text-transform: capitalize;
+}
 .wui-cal > table {  border-collapse: collapse; }
 .wui-cal-header {padding: 0.2em 0; position: relative; text-align: center;}
     .wui-cal-prev, .wui-cal-next {width:12px; height: 12px; position: absolute; cursor: pointer;}
-        a.wui-cal-prev {left:2px; background-position:-162px 0;}
-        a.wui-cal-next {right:2px;background-position:-146px 0;}
-        a.wui-cal-prev:hover {left:2px; background-position:-162px -17px;}
-        a.wui-cal-next:hover {right:2px;background-position:-146px -17px;}
+        a.wui-cal-prev {left:2px; }
+        a.wui-cal-next {right:2px; }
+        a.wui-cal-next:hover, a.wui-cal-prev:hover { color: #038BE0; }
 .wui-cal-header-day td {font-size: 0.7em; text-transform: uppercase; text-align: center;}
 .wui-cal-day {
     width:30px; 
@@ -454,9 +473,6 @@ button::-moz-focus-inner { border:0; }
 /****************************************   JHTMLArea WYSIWYG Styles   *****************************************/
 .wui-wysiwyg .w13-fe, .wui-wysiwyg.w13-fe {height: 100px; max-width: 100%; min-height:70px;}
 .wui-editor { height:100%; min-height: 70px; padding-bottom:28px;}
-
-.wui-wysiwyg .ui-resizable-e, .wui-wysiwyg .ui-resizable-s {display:none;}
-.wui-wysiwyg .ui-resizable-se {bottom: 4px; cursor: se-resize; height: 12px; right: 4px;  width: 12px; background-position: -128px -77px;}
 
 .wui-editor-tools {
     position:absolute; bottom: 0; left: 0; width: 100%; height: 28px; border-top: 1px dashed #fff; padding: 1px 0.5em; opacity:0;
@@ -513,9 +529,9 @@ button::-moz-focus-inner { border:0; }
 
 .w13-form-err.w13-fe, .w13-form-err input[type=text], 
 .w13-fe.w13-form-err > input[type=text], .w13-form-err textarea, 
-.w13-form-err .wui-btn.field-btn, 
+.w13-form-err .wui-button.field-btn, 
 .w13-form-err .w13-fe input.has-file[type="text"][disabled],
-.w13-form-err .button li label, .w13-form-err .wui-btn.field-btn {border-color:#b0463b;}
+.w13-form-err .button li label, .w13-form-err .wui-button.field-btn {border-color:#b0463b;}
 
 .w13-form-err > label, .w13-form-err .feedback, .w13-form-err .feedback a, .wui-err {color:#b0463b;}
 .w13-lbl.lbl-right.w13-form-err > label, .w13-lbl.lbl-left.w13-form-err > label { padding:0.5em 0;}
@@ -523,19 +539,77 @@ button::-moz-focus-inner { border:0; }
 
 .w13-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
 .w13-form-err input[type=text], .w13-fe.w13-form-err > input[type=text], .w13-form-err textarea {background-color:white; box-shadow: inset 0 0 5px #ff463b;}
-.w13-form-err .wui-btn.field-btn {border-left:none;}
+.w13-form-err .wui-button.field-btn {border-left:none;}
 .w13-form-err .w13-fe input.has-file[type="text"][disabled] { background-color: #eee; }
 
 
+/**********************************************   tab  styles TODO: AUDIT THIS TOO!   ************************************************/
+.w13-pane .w13-pane.w13-tab-panel {
+    width:100%; 
+    height:100%;  
+    display:none; 
+    overflow: auto;
+}
+
+/* boudary styles */
+.wui-button:not(.w13-tab) + .wui-button.w13-tab { margin-left: 6px; }
+.wui-button.w13-tab + .wui-button:not(.w13-tab) { margin-right: 6px; }
+
+.w13-pane .w13-pane.w13-tab-panel.active {display:flex;}
+.wui-button.w13-tab.left {float:left;}
+.wui-bbar .wui-button.w13-tab {bottom: 1px; position:relative;}
+
+.w13-tab.w13-tab {
+    border:0; 
+    margin:0; 
+    height: calc(100% - 3px); 
+    background-color:transparent; 
+    color:inherit;
+}
+
+.w13-tabs .wui-tbar .w13-tab { margin-top: 4px; }
+.w13-tabs .wui-bbar .w13-tab { top: -4px; }
+
+.w13-tabs .wui-tbar .w13-tab.wui-button:hover { box-shadow: 0 -4px 4px rgba(0,0,0,.2) inset; }
+.w13-tabs .wui-bbar .w13-tab.wui-button:hover { box-shadow: 0 4px 4px rgba(0,0,0,.2) inset; }
+.w13-tabs .wui-h-bar .w13-tab.wui-button.selected:hover {box-shadow: none;}
+
+.w13-pane.w13-tab-panel.wui-hide-heading {padding-top:6px;}
+.w13-pane.w13-tab-panel.wui-hide-heading > .wui-title {display:none;}
+
+/*   nested pane tabs  */
+.w13-pane .w13-pane .wui-button.w13-tab.selected, .w13-pane .w13-pane .w13-pane .w13-pane .wui-button.w13-tab.selected  {background-color:#D2D2D2;}
+.w13-pane .wui-button.w13-tab.selected,
+.w13-pane .w13-pane .w13-pane .wui-button.w13-tab.selected,
+.w13-pane .w13-pane .w13-pane .w13-pane .w13-pane .wui-button.w13-tab.selected {background-color:#fff;  color:#555;}
+
+
 /**********************************************   grid styles TODO: AUDIT THIS TOO!   ************************************************/
+.w13-grid .w13-pane-content { display: flex;  flex-direction:column; }
 .wui-ghs {overflow:hidden; margin:-1px 0 0;}
-.wui-gh {width:100%; overflow:hidden; position: absolute; background-color:#555;}
+.wui-gh {width:100%; overflow:hidden; background-color:#555;}
 .wui-gh * {-moz-user-select:none; -webkit-user-select:none;}
-.wui-gh ul {margin:0; padding:0; min-width:100%; max-width:100%; width:100%; height:2em; overflow:hidden;}
+.wui-gh ul {
+    margin:0; 
+    padding:0; 
+    width:100%; 
+    height:26px; 
+    overflow:hidden;
+}
     .wui-gc {
-        background-color:#555; color:#fff; text-transform:uppercase; height: 100% !important;
-        font-weight:bold; padding:0.5em 41px 0.5em 0.5em; text-align:left; list-style: none; margin:0;
-        border-right:1px solid #fff; text-shadow: 0 0 3px rgba(0,0,0,0.4); position: relative; cursor: pointer;
+        background-color:#555; 
+        color:#fff; 
+        text-transform:uppercase; 
+        height: 100% !important;
+        font-weight:bold; 
+        padding:0 41px 0 0.33em; 
+        text-align:left; 
+        list-style: none; 
+        margin:0;
+        border-right:1px solid #fff; 
+        text-shadow: 0 0 3px rgba(0,0,0,0.4); 
+        position: relative; 
+        cursor: pointer;
     }
 
     /*** Hidden columns, not quite implemented in javascript ***/
@@ -550,14 +624,10 @@ button::-moz-focus-inner { border:0; }
 
     .wui-gc:last-child {  border-right:0; }
     .wui-gc div:first-child {
-        bottom: 0.5em;
-        font-size: 0.9em;
         overflow: hidden;
-        padding-right:41px;
-        max-width:    100%;
-        position: absolute;
         text-overflow: ellipsis;
         white-space: nowrap;
+        line-height: 26px;
     }
     .wui-gc.wui-no-sort.ui-resizable div:first-child { padding-right: 0; }
     .has-vert-columns .wui-gh ul {height:150px;}
@@ -576,12 +646,12 @@ button::-moz-focus-inner { border:0; }
         -webkit-transform-origin: 44% 158% 0;
         width: 150px; max-width:150px; min-width:150px;
     }
-    .wui-gc .ui-resizable-handle.ui-resizable-e {
+    .wui-gc .resize-nub {
         cursor: col-resize;
         height: 100%;
         position: absolute;
         right: 0;
-        top: 0;
+        bottom: 0;
         width: 10px;
     }
     .wui-gc div.vert-col {
@@ -592,28 +662,31 @@ button::-moz-focus-inner { border:0; }
         transform-origin: 45% 249% 0;
         width: 150px;
     }
-    
-.w13-pane-content > .wg-loader {left:48%; top:45%;}
-.w13-pane-content > .wg-loader.hidden {left:0; top:0;}
 
-.grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
+.grid-body {
+    width:100%; 
+    max-width: 100%; 
+    min-width: 100%; 
+    overflow:auto;
+    flex:1; 
+    color:#444;
+}
 .grid-body table {border-collapse:collapse;}
 .grid-body table.wui-infinite-table {position: absolute; left:0; top:0;}
     .grid-body td { background-position:center center; border-bottom:0; border:1px dotted #ccc; }
-        .grid-body tr:nth-child(2n) { background-color: #fff; }
-        .grid-body tr:nth-child(2n+1) { background-color: #eee; }
+        .grid-body tr:nth-child(n) { background-color: #fff; }
+        .grid-body tr:nth-child(2n) { background-color: #eee; }
             .grid-body td > div {width:100%; height:100%; padding:0.25em; position:relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
 .wui-gc:after {
     background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 1em 1em 1em 1em;
+    border-radius: 1em;
     bottom: 0.3em;
-    color: #FFFFFF;
-    font-size: 0.8em;
+    color: #fff;
     padding: 0.2em 0.7em;
     position: absolute;
     right: 6px;
-    text-shadow: 0 0 2px #000000, 0 0 4px #000000;
+    text-shadow: 0 0 2px #000, 0 0 4px #000;
 }
 .wui-gc.one.asc:after {content:"1 ↓";} .wui-gc.one.desc:after {content:"1 ↑";}
 .wui-gc.two.asc:after {content:"2 ↓";} .wui-gc.two.desc:after {content:"2 ↑";}

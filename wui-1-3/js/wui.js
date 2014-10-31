@@ -73,8 +73,6 @@ Wui.cssCheck = function(prop){
 
 
 Wui.fit = function(collection,dim){
-    console.log(collection);
-
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
         var parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
@@ -215,7 +213,10 @@ Wui.unwrapData = function(r){
 
 // Base WUI Object
 Wui.O = function(args){ $.extend(this, {
-    hidden: false
+    aftrRenderd:false,
+    hidden:     false,
+    items:      [],
+    rendered:   false
 },args); };
 Wui.O.prototype = {
     addToDOM:   function(obj, tgt, act){
@@ -241,9 +242,13 @@ Wui.O.prototype = {
 
                     if(obj.cssByParam)
                         obj.cssByParam();
+
+                    if(typeof obj.parent === 'undefined')
+                        obj.layout();
                     
                     return obj;
                 },
+    afterRender:function(){ this.aftrRenderd = true; },
     append:     function(obj){
                     var me = this, el = me.elAlias || me.el;
                     $.each(arguments,function(i,itm){
@@ -350,44 +355,30 @@ Wui.O.prototype = {
                     return myPosition;
                 },
 
-    init:       function(){
-                    var me = this;
-
-                    // Layout contents
-                    me.observer = new MutationSummary({
-                        callback:   function(){ 
-                                        // Perform layout for child elements
-                                        if(typeof me.parent === 'undefined'){
-                                            me.layout();
-                                        }
-                                    },
-                        queries:    [{ element: '*' }],
-                        rootNode:   me.el[0]
-                    });
-                },
+    init:       function(){},
 
     layout:     function(afterLayout){
                     var me = this, needFit = false;
 
                     // Perform Wui.fit on items that need it
-                    me.each(function(itm){ if(itm.fit){ 
-                        needFit = true; return false;
-                    }});
+                    me.each(function(itm){ if(itm.fit){ needFit = true; return false; }});
                     
                     if((me.fitDimension || needFit) && me.items.length)
                         Wui.fit(me.items, (me.fitDimension || undefined));
 
+                    if(!me.rendered)       me.onRender();
+
                     // Perform layout on children
-                    me.each(function(itm){ 
-                        if(itm.layout)      itm.layout(); 
-                        if(itm.onRender)    itm.onRender();
-                        if(itm.afterRender) itm.afterRender();
-                    });
+                    me.each(function(itm){ if(typeof itm.layout == 'function') itm.layout(); });
+
+                    if(!me.aftrRenderd)    me.afterRender();
                     
                     // Performs actions passed in as parameters
-                    if(afterLayout && typeof afterLayout === 'function')
+                    if(typeof afterLayout === 'function')
                         afterLayout();
                 },
+
+    onRender:   function(){ this.rendered = true; },
 
     place:      function(after){
                     var me = this;
@@ -547,6 +538,15 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         else
                             return null;
                     },
+    afterRender:    function(){
+                        var me = this;
+                        
+                        Wui.O.prototype.afterRender.call(me);
+                        if(me.parent){
+                            Wui.fit(me.parent.items, (me.parent.fitDimension || 'width'));
+                            me.el.parent().css('overflow','hidden');
+                        }
+                    },
     disable:        function(){
                         var me = this;
 
@@ -635,6 +635,13 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                 me.el.removeClass(bar);
                                 thisBar.el.remove();
                             }
+
+                            if(thisBar.el.hasClass('wui-v-bar')){
+                                thisBar.each(function(itm){
+                                    if(itm instanceof Wui.Button)
+                                        itm.el.attr('title',itm.text).html('').css;
+                                });
+                            }
                         }
                     },
     removeMask:     function(){
@@ -695,7 +702,7 @@ Wui.Window = function(args){
     },args);  
     this.init(); 
 };
-Wui.Window.prototype = $.extend(new Wui.Pane(),{
+Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
     close:      function(){ 
                     var me = this;
 
@@ -718,6 +725,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                 },
     fireResize: function(winEl,width,height){
                     var me = this;
+                    me.layout();
                     me.container.trigger($.Event('resize'),[me.container.width(), me.container.height(),me,width,height]);
                 },
     init:       function(){
@@ -763,13 +771,19 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 
                     // Put the window on the body
                     me.place();
+
+                    // Place an observer that will possibly resize a window that contains changeable content
+                    // me.observer = new MutationSummary({
+                    //     callback:   function(){ setTimeout(function(){ me.resize(); }, 300); },
+                    //     queries:    [{ characterData: true }],
+                    //     rootNode:   me.el[0]
+                    // });
                     
                     // Make the overlay the el so that when the window is closed it gets taken with it
                     if(me.isModal)    me.el = me.modalEl;
                     
                     me.onWinOpen(me);
                     me.windowEl.trigger($.Event('open'),[me]);
-                    me.resize();
 
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
@@ -782,6 +796,10 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                         me.close();
                         evnt.stopPropagation();
                     });
+                },
+    afterRender:function(){
+                    Wui.Pane.prototype.afterRender.call(this);
+                    this.resize();
                 },
     resize:     function(resizeWidth, resizeHeight){
                     var me = this;
@@ -799,17 +817,21 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                                             Wui.isPercent(me.height) ? Wui.percentToPixels(me.windowEl, me.height, 'height') : me.height;
 
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
-                    me.windowEl.css({ height: useHeight, width: (arguments.length) ? resizeWidth : undefined, });
-                    var posLeft =   (me.windowLeft) 
-                                        ? ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) 
-                                        : Math.floor((verge.viewportW() / 2) - (me.windowEl.width() / 2)),
-                        posTop =    (me.windowTop) 
-                                        ? ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) 
-                                        : Math.floor((verge.viewportH() / 2) - (useHeight / 2));
-                    me.windowEl.css({ top:posTop, left:posLeft });
+                    if(me.windowEl){
+                        me.windowEl.css({ height: useHeight, width: (arguments.length) ? resizeWidth : undefined, });
+                        var posLeft =   (me.windowLeft) 
+                                            ? ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) 
+                                            : Math.floor((verge.viewportW() / 2) - (me.windowEl.width() / 2)),
+                            posTop =    (me.windowTop) 
+                                            ? ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) 
+                                            : Math.floor((verge.viewportH() / 2) - (useHeight / 2));
+                        me.windowEl.css({ top:posTop, left:posLeft });
+
+                        me.fireResize();
+                        return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
+                    }
                     
-                    me.fireResize();
-                    return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
+                    return false;
                 },
     height:     300,   
     width:      400
@@ -976,7 +998,7 @@ Wui.DataList = function(args){
     }, args);
     this.init();
 };
-Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(), {
+Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     dataChanged:function(){ this.make(); },
     clearSelect:function(){
                     var me = this,
@@ -1125,41 +1147,43 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     modifyItem: function(itm){ return itm.el; },
     make:       function(){
                     var me = this,
-                        holdingData = me.data || [],
-                        holder = $('<div>'), 
-                        dn = (me.name) ? '.' + me.name : '';
+                        te = new Wui.Template({template: me.template}),
+                        maxI = (me.data.length > me.displayMax && me.displayMax > 0) ? me.displayMax : me.data.length;
                     
                     // Clear out items list
+                    me.clear();
                     me.items = [];
 
-                    // Add items to me.items
-                    for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
-                        var rec = me.data = holdingData[i],
-                            itm = {el:Wui.Template.prototype.make.call(me, i), rec:rec};
-                            
-                        Array.prototype.push.call(me.items,itm);
-                        holder.append(me.createItem(itm));
+                    function makeItems(i){
+                        setTimeout(function(){
+                            var rec = te.data = me.data[i],
+                                itm = {el:te.make(i), rec:rec};
+                                
+                            Array.prototype.push.call(me.items,itm);
+                            me.elAlias.append(me.createItem(itm));
+
+                            if(i + 1 == maxI){
+                                // Event hook and event
+                                me.afterMake();
+                                me.el.trigger($.Event('refresh'),[me,me.data]);
+
+                                // Reset selected items if any
+                                me.resetSelect();
+                            }
+                        },0);
                     }
-                    
-                    // Clear out existing items and add new to the DOM
-                    me.clear();
-                    me.append(holder.children().unwrap());
-                    me.data = holdingData;
+
+                    // Add items to me.items
+                    for(var i = 0; i < maxI; i++) makeItems(i);
                     
                     // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
                     // object has been manually run
                     me.autoLoad = true;
-                    
-                    // Event hook and event
-                    me.afterMake();
-                    me.el.trigger($.Event('refresh'+ dn),[me,me.data])
-                        .trigger($.Event('refresh'),[me,me.data]);
-                    
-                    // Reset selected items if any
-                    me.resetSelect();
                 },
     onRender:   function(){
                     var me = this;
+
+                    Wui.O.prototype.onRender.call(this);
 
                     // Loads data per the method appropriate for the object
                     if(me.autoLoad){
