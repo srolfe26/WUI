@@ -136,35 +136,48 @@
             // $(window).resize();
 
             tabs = new Wui.Tabs({
-                title:    'Sub-Tabs Example',
-                tbar:    [ new Wui.Button({text:'Button Test!'}) ],
-                items:    [
-                            
-                            new Wui.Tabs({
-                                title:            'Sub Tabs!',
-                                tabsHideHeader:    true,
-                                tabsBottom:     true,
-                                borderStyle:    {borderWidth:6},
-                                items:            [
-                                                    new Wui.Tabs({
-                                                        title:    'Sub 1',
-                                                        titleAlign:'center',
-                                                        tabsLeft:true,
-                                                        tbar:    [ new Wui.Button({text:'Button Test!'}) ],
-                                                        items:    [
-                                                                    new Wui.Pane({
-                                                                        title:    'Third 1',
-                                                                        tbar:    [ new Wui.Button({text:'Button Test!'}) ]
-                                                                    }),
-                                                                    new Wui.Pane({title: 'Third 2', tabsHideHeader:true, items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
-                                                                ]
-                                                    }),
-                                                    new Wui.Pane({title: 'Sub 2', items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
-                                                ]
-                            }),
-                            new Wui.Pane({}),
-                            new Wui.Pane({ items:[new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]})
-                        ]
+                title:          'Sub-Tabs Example',
+                rbar:           [ new Wui.Button({text:'Button Test!'}) ],
+                tabPosition:    'right bottom',
+                items:          [
+                                    new Wui.Tabs({
+                                        title:          'Sub Tabs!',
+                                        tabCls:         'fa-folder',
+                                        tabsHideHeader: true,
+                                        tabsBottom:     true,
+                                        items:          [
+                                                            new Wui.Tabs({
+                                                                title:      'Sub 1',
+                                                                name:       'sub 1',
+                                                                titleAlign: 'center',
+                                                                tabsLeft:   true,
+                                                                tbar:       [ new Wui.Button({text:'Button Test!'}) ],
+                                                                items:      [
+                                                                                new Wui.Pane({
+                                                                                    title:  'Third 1',
+                                                                                    tbar:   [ new Wui.Button({text:'Button Test!'}) ]
+                                                                                }),
+                                                                                new Wui.Pane({
+                                                                                    title: 'Third 2', 
+                                                                                    tabsHideHeader: true, 
+                                                                                    items: [new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]
+                                                                                })
+                                                                            ]
+                                                            }),
+                                                            new Wui.Pane({
+                                                                title:  'Sub 2', 
+                                                                items:  [new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})]
+                                                            })
+                                                        ]
+                                    }),
+                                    new Wui.Pane({
+                                        tabCls: 'fa-mobile'
+                                    }),
+                                    new Wui.Pane({ 
+                                        items:  [new Wui.O({el:$('<p>').text('The header on this pane is hidden.')})],
+                                        tabCls: 'fa-laptop'
+                                    })
+                                ]
             });
             tabs.place();
         });

@@ -113,11 +113,13 @@
 .w13-pane.lbar.bbar, 
 .w13-pane.rbar.bbar { padding-bottom:46px; }
 
+.wui-title ~ .wui-h-bar.wui-tbar {background-color: transparent;}
+
 .w13-pane.lbar > .wui-title, .w13-pane.lbar > .wui-h-bar { left:40px; }
 .w13-pane.rbar > .wui-title, .w13-pane.rbar > .wui-h-bar { left: 6px; }
 
 .w13-pane.rbar.lbar > .wui-title, .w13-pane.rbar.lbar > .wui-h-bar { left: 40px; width: calc(100% - 80px); }
-.w13-pane.rbar.tbar .wui-tbar { width: calc(100% - 6px); padding-right: 5px; }
+.w13-pane.rbar.tbar > .wui-tbar { width: calc(100% - 46px); }
 .w13-pane.rbar.lbar.tbar .wui-tbar { width: calc(100% - 40px); }
 .w13-pane.rbar.tbar .wui-rbar { height: calc(100% - 46px); top:auto; bottom:0; }
 
@@ -197,6 +199,10 @@
     cursor:nwse-resize;
 }
 
+.w13-window.rbar.tbar > .wui-tbar {
+    width: calc(100% - 6px);
+    padding-right: 5px;
+}
 
 /**********************************************   BUTTON - nested, disabled   **********************************************/
 button::-moz-focus-inner { border:0; }
@@ -552,27 +558,27 @@ button::-moz-focus-inner { border:0; }
 }
 
 /* boudary styles */
-.wui-button:not(.w13-tab) + .wui-button.w13-tab { margin-left: 6px; }
-.wui-button.w13-tab + .wui-button:not(.w13-tab) { margin-right: 6px; }
-
 .w13-pane .w13-pane.w13-tab-panel.active {display:flex;}
 .wui-button.w13-tab.left {float:left;}
 .wui-bbar .wui-button.w13-tab {bottom: 1px; position:relative;}
 
 .w13-tab.w13-tab {
     border:0; 
-    margin:0; 
-    height: calc(100% - 3px); 
     background-color:transparent; 
     color:inherit;
 }
+.wui-h-bar .w13-tab.w13-tab { height: calc(100% - 6px); margin:0; }
+.wui-v-bar .w13-tab.w13-tab { align-self: flex-start; width: calc(100% - 6px); }
 
-.w13-tabs .wui-tbar .w13-tab { margin-top: 4px; }
+.wui-h-bar .wui-button:not(.w13-tab) + .wui-button.w13-tab:not(.left) { margin-left: 6px; }
+.wui-h-bar .wui-button.w13-tab + .wui-button:not(.w13-tab) { margin-right: 6px; }
+
+.w13-tabs .wui-tbar .w13-tab { margin-top: 7px; }
 .w13-tabs .wui-bbar .w13-tab { top: -4px; }
 
-.w13-tabs .wui-tbar .w13-tab.wui-button:hover { box-shadow: 0 -4px 4px rgba(0,0,0,.2) inset; }
-.w13-tabs .wui-bbar .w13-tab.wui-button:hover { box-shadow: 0 4px 4px rgba(0,0,0,.2) inset; }
-.w13-tabs .wui-h-bar .w13-tab.wui-button.selected:hover {box-shadow: none;}
+.w13-tabs .wui-tbar .w13-tab:hover { box-shadow: 0 -4px 4px rgba(0,0,0,.2) inset; }
+.w13-tabs .wui-bbar .w13-tab:hover { box-shadow: 0 4px 4px rgba(0,0,0,.2) inset; }
+.w13-tabs .wui-h-bar .w13-tab.selected:hover {box-shadow: none;}
 
 .w13-pane.w13-tab-panel.wui-hide-heading {padding-top:6px;}
 .w13-pane.w13-tab-panel.wui-hide-heading > .wui-title {display:none;}

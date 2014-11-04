@@ -277,7 +277,7 @@ Wui.O.prototype = {
                 },
 
     cssByParam: function(){
-                    var me = this, el = me.el;
+                    var me = this, el = me.el, a;
 
                     me.argsByParam();
 
@@ -289,8 +289,14 @@ Wui.O.prototype = {
                     if($.isNumeric(me.width) && me.width >= 0)      el.css({width: me.width});
 
                     // calculate percentage based dimensions
-                    if(Wui.isPercent(me.width))  el.css({width:Wui.percentToPixels(el,me.width,'width')});
-                    if(Wui.isPercent(me.height)) el.css({height:Wui.percentToPixels(el,me.height,'height')});
+                    if(Wui.isPercent(me.width)){
+                        a = Wui.percentToPixels(el,me.width,'width');
+                        if(a != 0) el.css({width:a});
+                    }
+                    if(Wui.isPercent(me.height)){
+                        a = Wui.percentToPixels(el,me.height,'height');
+                        if(a != 0) el.css({height:a});
+                    }
                     
                     // hide an object based on its hidden value
                     if(me.hidden) el.css('display','none');
@@ -540,7 +546,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                     },
     afterRender:    function(){
                         var me = this;
-                        
+
                         Wui.O.prototype.afterRender.call(me);
                         if(me.parent){
                             Wui.fit(me.parent.items, (me.parent.fitDimension || 'width'));

@@ -15,21 +15,41 @@ Wui.Tabs = function(args){
         lbar:           [],
         rbar:           [],
         tabsHideHeader: null,
-        tabsBottom:     false,
-        tabsLeft:       false,
+        tabPosition:    'top right',
         tbar:           []
     },args); 
     this.init();
 };
 Wui.Tabs.prototype = $.extend(new Wui.Pane(),{    
     place:          function(){
-                        var me = this;
+                        function getBar(bar){
+                            switch(bar){
+                                case 'top':      return 'header';
+                                case 'bottom':   return 'footer';
+                                case 'left':     return 'leftbar';
+                                case 'right':    return 'rightbar';
+                            }
+                        }
+
+                        var me =        this,
+                            posArry =   (function(){
+                                            var retVal = me.tabPosition.split(' ');
+                                            
+                                            // Provides Wui 1.2 functionality
+                                            if(me.tabsBottom === true)  retVal[0] = 'bottom';
+                                            if(me.tabsLeft === true)    retVal[1] = 'left';
+                                            
+                                            return retVal;
+                                        })(),
+                            bar =       getBar(posArry[0]); 
+
+                        console.log(bar);
                         
                         me.el.addClass('w13-tabs');
                         
                         //adds the object's items if any
                         if(me.items === undefined) me.items = [];
-                        $.each(me.items,function(idx,itm){
+                        me.each(function(itm,idx){
                             itm.el.addClass('w13-tab-panel');
                             itm.tabCls =    'w13-tab ' +
                                             ((itm.tabCls) ? ' ' + itm.tabCls : '') +
@@ -39,36 +59,41 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                                 itm.el.addClass('wui-hide-heading');
                             
                             // Add buttons as tabs
-                            me[me.tabsBottom ? 'footer' : 'header'].push(
+                            me[bar].push(
                                 itm.tab = new Wui.Button({
                                     text:   itm.title || 'Tab ' + (parseInt(idx) + 1),
                                     cls:    itm.tabCls,
                                     pane:   itm
                                 })
                             );
-                            
-                            // Add listeners for tab changes
-                            me[me.tabsBottom ? 'footer' : 'header'].el.on('wuibtnclick','.w13-tab',function(evnt,btn){
-                                me.giveFocus(btn.pane);
-                            });
+                            // Adjust existing buttons
+                            if(!me.tabsLeft && me.items.length > 0 && me.items[0] instanceof Wui.Button){
+
+                            }
+                        });
+
+                        // Add listeners for tab changes
+                        me[bar].el.on('wuibtnclick','.w13-tab',function(evnt,btn){
+                            me.giveFocus(btn.pane);
                         });
                         
-                        return Wui.O.prototype.place.call(me); //.wrap($('<div>')
+                        return Wui.O.prototype.place.call(me);
                     },
     giveFocus:      function(tab, supressEvent){
                         var me = this;
       
                         supressEvent = (supressEvent !== undefined) ? supressEvent : false;
                         
-                        $.each(me.items,function(idx,itm){
+                        me.each(function(itm){
                             var isActive = itm === tab;
+                            
                             itm.tab.el.toggleClass('selected', isActive);
                             itm.el.toggleClass('active', isActive);
                             if(isActive){
                                 me.currentTab = itm;
+                                itm.layout();
                                 if(!supressEvent) 
                                     me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
-                                itm.layout();
                             }
                         });
                     },
