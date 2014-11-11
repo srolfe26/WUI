@@ -51,7 +51,7 @@ Wui.Multiple = function(args,combo){
 
     this.init(combo);
 }
-Wui.Multiple.prototype = $.extend(new Wui.DataList(), new Wui.FormField(), {
+Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
     init:           function(combo){
                         var me = this;
 
@@ -145,20 +145,20 @@ Wui.Multiple.prototype = $.extend(new Wui.DataList(), new Wui.FormField(), {
     setVal:         function(sv){
                         var me = this;
 
-                        me.data = [];
-                        me.make();
-                        
-                        // Space delimited strings of numbers are converterd to an array
-                        if(typeof sv === 'string')
-                            sv = sv.split(' ');
-
-                        // Single values are made an array of 1 element
-                        if(!$.isArray(sv)){
-                            var tmp = sv;
-                            sv = []; sv[0] = tmp;
-                        }
-
                         if(sv !== null && sv.length && sv.length > 0){
+                            me.data = [];
+                            me.make();
+                            
+                            // Space delimited strings of numbers are converterd to an array
+                            if(typeof sv === 'string')
+                                sv = sv.split(' ');
+
+                            // Single values are made an array of 1 element
+                            if(!$.isArray(sv)){
+                                var tmp = sv;
+                                sv = []; sv[0] = tmp;
+                            }
+
                             if(typeof sv[0] !== 'object')    me.loadComboVals(sv);
                             else                             me.setData(sv);
                         }
@@ -212,4 +212,4 @@ Wui.Multiple.prototype = $.extend(new Wui.DataList(), new Wui.FormField(), {
     clear:          function(){
                         this.combo.el.prevAll().remove();
                     }
-});
+} ));

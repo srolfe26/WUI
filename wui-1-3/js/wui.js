@@ -371,17 +371,20 @@ Wui.O.prototype = {
                     
                     if((me.fitDimension || needFit) && me.items.length)
                         Wui.fit(me.items, (me.fitDimension || undefined));
-
+                    
                     if(!me.rendered)       me.onRender();
 
-                    // Perform layout on children
-                    me.each(function(itm){ if(typeof itm.layout == 'function') itm.layout(); });
+                    me.layoutKids();
 
                     if(!me.aftrRenderd)    me.afterRender();
                     
                     // Performs actions passed in as parameters
                     if(typeof afterLayout === 'function')
                         afterLayout();
+                },
+
+    layoutKids: function(){
+                    this.each(function(itm){ if(typeof itm.layout == 'function') itm.layout(); });
                 },
 
     onRender:   function(){ this.rendered = true; },
@@ -412,6 +415,8 @@ Wui.O.prototype = {
                         if(arg.place)   arg.place();
                         else            me.addToDOM(arg);
                     });
+
+                    me.layoutKids();
 
                     return Array.prototype.push.apply(me.items,arguments);
                 },
@@ -451,6 +456,8 @@ Wui.O.prototype = {
                     }else if (numAdded !== 0){                          //items at the beginning/middle of the array
                         for(i = (idx + numAdded); i > 0; i--)         { me.items[i-1].parent = me; me.addToDOM(me.items[i-1],me.items[i].el,'before'); }
                     }
+
+                    me.layoutKids();
                     
                     return retVal;
                 }
@@ -1314,8 +1321,7 @@ Wui.confirm = function(msg, msgTitle, callback, content){
 
     cw.footer.splice(0,1, new Wui.Button({ text:'No' }), new Wui.Button({ text:'Yes' }) );
     cw.footer.el.on('wuibtnclick',function(evnt,btn){
-        if(btn.text == 'No')    cw.doAnswer(false);
-        else                    w.doAnswer(true);
+        cw.doAnswer((btn.text == 'No') ? false : true);
         evnt.stopPropagation();
     });
 

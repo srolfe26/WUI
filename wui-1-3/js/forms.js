@@ -1075,35 +1075,37 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     var me = this;
 
                     me.elAlias = me.dd.empty().removeClass('wui-spinner');
-                    Wui.DataList.prototype.make.apply(me,arguments);
+                    Wui.DataList.prototype.make.call(me);
                     if(me.data.length === 0)
                         me.elAlias.html(me.emptyMsg);
 
-                    me.dd.children()
-                    .off('click')
-                    .bind('touchstart',function(){ 
-                        me.itemSelect($(this).data('itm')); 
-                        me.isBlurring = false; 
-                    }).on({
-                        mouseenter: function(){ me.itemSelect($(this).data('itm')); },
-                        mousedown:  function(){ me.isBlurring = false; },
-                        click:      function(){ me.set(); me.field.focus(); }
-                    });
+                    setTimeout(function(){
+                        me.dd.children()
+                        .off('click')
+                        .bind('touchstart',function(){ 
+                            me.itemSelect($(this).data('itm')); 
+                            me.isBlurring = false; 
+                        }).on({
+                            mouseenter: function(){ me.itemSelect($(this).data('itm')); },
+                            mousedown:  function(){ me.isBlurring = false; },
+                            click:      function(){ me.set(); me.field.focus(); }
+                        });
 
-                    if(me.previous && me.previous.length && me.noSpecifiedTemplate)
-                        me.hilightText(me.previous);
+                        if(me.previous && me.previous.length && me.noSpecifiedTemplate)
+                            me.hilightText(me.previous);
 
-                    me.dd.on('mousedown',function(){ me.isBlurring = false; });
+                        me.dd.on('mousedown',function(){ me.isBlurring = false; });
 
-                    // Select a pre-applied value if it exists
-                    if(me.value && me.field.val().length === 0){
-                        var selectedItm = me.selectBy(me.valueItem, me.value);
-                        
-                        if(!selectedItm)    me.notFound(me.value);
-                        else                me.set();
-                    }
+                        // Select a pre-applied value if it exists
+                        if(me.value && me.field.val().length === 0){
+                            var selectedItm = me.selectBy(me.valueItem, me.value);
+                            
+                            if(!selectedItm)    me.notFound(me.value);
+                            else                me.set();
+                        }
 
-                    Wui.positionItem(me.field,me.dd);
+                        Wui.positionItem(me.field,me.dd);
+                    },0);
                 },
     modifyItem: function(itm){ return itm.el.data('itm',itm); },
     notFound:   function(){},
