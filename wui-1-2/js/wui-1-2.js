@@ -3703,12 +3703,9 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     // If a form is disabled, the field needs to be disabled too
                     if(!(itm.disabled && itm.disabled === true)) $.extend(itm,{disabled: me.disabled});
 
-                    if(itm.ftype && !(itm instanceof Wui.FormField)){
-                        // If a field has its labelPosition defined then leave it alone, otherwise use the form's value.
-                        if(!(itm.labelPosition)) $.extend(itm,{labelPosition: me.labelPosition});
-                        // If a field has its labelSize defined then leave it alone, otherwise use the form's value.
-                        if(!(itm.labelSize)) $.extend(itm,{labelSize: me.labelSize});
-                        
+                    if(!itm.hasOwnProperty('labelPosition')) $.extend(itm,{labelPosition: me.labelPosition});
+
+                    if(itm.ftype && !(itm instanceof Wui.FormField)){                        
                         var ft = itm.ftype.split('.');
 
                         switch (ft.length) {
@@ -3735,8 +3732,8 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     }else if(itm instanceof Wui.FormField){
                         // If a field has a label, make it match the format of the form.
                         if(itm.lbl){
-                            itm.lbl.setLabelPosition(me.labelPosition);
-                            itm.lbl.setLabelSize(me.labelSize);
+                            itm.lbl.setLabelPosition(itm.labelPosition || me.labelPosition);
+                            itm.lbl.setLabelSize(itm.labelSize || me.labelSize);
                         }
 
                         return itm;
@@ -3824,7 +3821,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     */
     setData:    function(data,fireEvents){
                     if(data){
-                                this.setData();
+                                this.setData(); // Clears the data on the form before setting it
                                 this.each(function(itm){ 
                                     if(data[itm.name]) 
                                         itm.val(data[itm.name],fireEvents);
@@ -4041,9 +4038,6 @@ Wui.FormField = function(args){
         /** An optional config that labels the field. */
         label:          null,
         
-        /** Defines the position of the label relative to the field, options are 'top', 'left', 'right' and 'bottom' */
-        labelPosition:  'top',
-        
         /** A special class to put on the label if desired */
         labelCls:       null,
 
@@ -4061,6 +4055,9 @@ Wui.FormField = function(args){
     },args);
 };
 Wui.FormField.prototype = $.extend(new Wui.O(),{
+    /** Defines the position of the label relative to the field, options are 'top', 'left', 'right' and 'bottom' */
+    labelPosition:  'top',
+
     /**
         @return The el of the object
         Runs immediately when the object is constructed. Wraps the field in a label if a label has been defined.

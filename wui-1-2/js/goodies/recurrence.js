@@ -5,26 +5,42 @@ Wui.DateRange = function(args){
             value:      {start_date: null, end_date: null},
             cls:        'date-fields',
             init:       function(){
+                            var stCls = 'start_dt' + Wui.id(), endCls = 'end_dt' + Wui.id(); 
+
                             me.endDate = new Wui.Datetime({
                                 blankText:  'End Date or # of Occurrences',
                                 dateOnly:   true,
-                                dispFormat: 'END DATE: ddd MM-dd-yyyy',
-                                valChange:  function(obj){
-                                                me.value.end_date = obj.value;
-                                            }
+                                cls:       endCls,
+                                dispFormat: 'END DATE: ddd MM-dd-yyyy'
                             });
                             me.items =  [
                                 me.startDate = new Wui.Datetime({
                                     blankText:  'Start Date',
                                     dateOnly:   true,
-                                    dispFormat: 'START DATE: ddd MM-dd-yyyy',
-                                    valChange:  function(obj){ 
-                                                    me.endDate.minDate = me.value.start_date = obj.value; 
-                                                }
+                                     cls:       stCls,
+                                    dispFormat: 'START DATE: ddd MM-dd-yyyy'
                                 }),
                                 me.endDate
                             ];
                             Wui.FormField.prototype.init.call(this);
+
+                            // Add Listeners for valchange and stop propagation
+                            me.el.on('valchange', '.'+endCls, function(evnt,f,newVal,oldVal){
+                                if(newVal != oldVal){
+                                    me.value.end_date = newVal;
+                                    me.setChanged();
+                                }
+
+                                evnt.stopPropagation();
+                            });
+                            me.el.on('valchange', '.'+stCls, function(evnt,f,newVal,oldVal){
+                                if(newVal != oldVal){
+                                    me.endDate.minDate = me.value.start_date = newVal;
+                                    me.setChanged();
+                                }
+
+                                evnt.stopPropagation();
+                            });
                         },
             setVal:     function(sv){
                             me.value = $.extend({}, sv);
