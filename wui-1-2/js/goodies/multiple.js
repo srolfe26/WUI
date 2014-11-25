@@ -161,6 +161,8 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
 
                             if(typeof sv[0] !== 'object')    me.loadComboVals(sv);
                             else                             me.setData(sv);
+                        }else{
+                            me.setData(null);
                         }
                     },
     loadComboVals:  function(sv){

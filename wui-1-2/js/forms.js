@@ -393,7 +393,7 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
     */
     setLabelSize:       function(size){
                             var me = this;
-                            size = $.isNumeric(size) ? size : me.labelSize;
+                                size = $.isNumeric(size) ? size : me.labelSize;
 
                             // Clear out and reset the size of el padding
                             me.el.css({
@@ -510,7 +510,13 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     me.el = $('<div>').addClass('wui-fe');
                     
                     if(me.label && me.label.length > 0){
-                        me.lbl = new Wui.Label({html:me.label, cls:me.labelCls, field:me, labelPosition:me.labelPosition, labelSize:me.labelSize});
+                        me.lbl = new Wui.Label({
+                            html:           me.label, 
+                            cls:            me.labelCls, 
+                            field:          me, 
+                            labelPosition:  me.labelPosition, 
+                            labelSize:      me.labelSize
+                        });
                         me.elAlias = me.el;
                         me.el = me.lbl.el.append(me.elAlias);
                     }
@@ -1405,12 +1411,19 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
     /** Loads data via the appropriate method when added to the DOM */
     afterRender:function(){
-                    Wui.FormField.prototype.onRender.apply(this,arguments);
+                    if(this.afterRendered !== true){
+                        Wui.FormField.prototype.onRender.apply(this,arguments);
 
-                    // Loads data per the method appropriate for the object
-                    if(this.autoLoad && this.url !== null)  this.loadData();
-                    else if(this.url === null)              this.make();
+                        // Loads data per the method appropriate for the object
+                        if(this.autoLoad && this.url !== null)  this.loadData();
+                        else if(this.url === null)              this.make();
+
+                        this.afterRendered = true;
+                    }
                 },
+
+    /** Override Wui.Datalist.onRender to make it do nothing */
+    onRender:   function(){},
 
     /** Opens the drop down */
     open:       function(){
@@ -2152,10 +2165,26 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     /** 
     @param {object}    t    A WUI object, namely this object
     @return    The field of the object.
-    Sets additional listeners on the text field, namely to process the date when it changes */
+    Sets additional listeners on the text field, namely to process the date when it changes 
+    Arrow keys can now be used to make the date transform up and down */
     setListeners:   function(t){
-                        return t.field.on('input', function(evnt){ t.processDate(); });
+                        if(t.listnersSet !== true){
+                            t.listnersSet = true;
+                            return t.field.on('input', function(){ t.processDate(); }).on('keyup',function(evnt){
+                                    if(evnt.keyCode == 40 || evnt.keyCode == 38){
+                                        var addVal = (t.value instanceof Date) ? (evnt.keyCode == 40) ? 1 : -1 : 0,
+                                            dt = (t.value instanceof Date) ? t.value : new Date();
+
+                                        t.value = dt.addDays(addVal);
+                                        t.displayDate();
+                                        t.field.val(t.value.toString(t.dtFormat));
+                                    }
+                            });
+                        }else{
+                            return t.field;
+                        }
                     },
+    listnersSet:    null,
     
     /** 
     @param {date}    minDt    A date that will become the lower bound for the field

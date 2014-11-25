@@ -911,9 +911,6 @@ Wui.Data = function(args){
         /** URL of the remote resource from which to obtain data. A null URL will assume a local data definition. */
         url:            null,
         
-        /** Whether the object is waiting for a remote response */
-        waiting:        undefined,
-        
         /** Special configuration of the ajax method. Defaults are:
         
             data:       me.params,
@@ -955,7 +952,7 @@ Wui.Data.prototype = {
                     },
     
     /**
-    Performs a remote call sensitive to whether it is already waiting for a response.
+    Performs a remote call and aborts previous requests
     Between loadData(), success() and setData() fires several event hooks in this order:
     
     1. setParams()
@@ -978,18 +975,21 @@ Wui.Data.prototype = {
                                 error:      function(e){ me.failure.call(me,e); },
                             },me.ajaxConfig);
                         
-                        if(!me.waiting){
-                            var paramsOkay = me.setParams.apply(me,arguments),
-                                beforeLoad = me.beforeLoad.apply(me,arguments);
+                        // abort the last request in case it takes longer to come back than the next one
+                        if(me.lastRequest && me.lastRequest.readyState != 4)
+                            me.lastRequest.abort();
 
-                            if(paramsOkay !== false && beforeLoad !== false)
-                                return me.waiting = $.ajax(me.url,config);
-                            
-                            return $.Deferred().reject();
-                        }else{
-                            me.furtherRequests = arguments;
-                            return me.waiting;
-                        }
+                        // Work in additional parameters that will change or stop the request
+                        var paramsOkay = me.setParams.apply(me,arguments),
+                            beforeLoad = me.beforeLoad.apply(me,arguments);
+
+                        // Perform request
+                        if(paramsOkay !== false && beforeLoad !== false)
+                            return me.lastRequest = $.ajax(me.url,config);
+                        
+                        // If there was no request made, return a rejected deferred to keep return
+                        // types consistent
+                        return $.Deferred().reject();
                     },
     /**
     @param {object} params    Params to be set
@@ -1051,27 +1051,15 @@ Wui.Data.prototype = {
     @param {object or array} r Response from the server in JSON format
     Runs when loadData() successfully completes a remote call.
     Gets data straight or gets it out of the dataContainer and totalContainer.
-    
-    Works in conjuction with loadData to limit requests on a particular resource
-    if there are additional parameters coming in by setting an undocumented
-    member variable named 'furtherRequests' which contains arguments previously
-    sent to loadData - if any. This mainly applies in the case of text searches
-    on a field. See loadData().
 
     Calls setData() passing the response and total.
     */
     success:        function(r){
-                        var me = this;
-                        me.waiting = undefined;
-
-                        if(me.furtherRequests){
-                            me.loadData.apply(me,me.furtherRequests);
-                            me.furtherRequests = undefined;
-                        }else{
-                            var unwrapped = Wui.unwrapData.call(me,r);
-                            me.onSuccess(r);
-                            me.setData(unwrapped.data, unwrapped.total);
-                        }
+                        var me = this,
+                            unwrapped = Wui.unwrapData.call(me,r);
+                        
+                        me.onSuccess(r);
+                        me.setData(unwrapped.data, unwrapped.total);
                     },
     
     /** @eventhook AllowS for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
@@ -1080,11 +1068,8 @@ Wui.Data.prototype = {
     /** @eventhook Allows for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
     onFailure:      function(){},
     
-    /** Runs when loadData() fails. Clears the waiting flag and called the event hook onFailure. */
-    failure:        function(e){
-                        this.waiting = undefined;
-                        this.onFailure(e);
-                    },
+    /** Runs when loadData() fails. */
+    failure:        function(e){ this.onFailure(e); },
     
     /** 
     @param {array} Data to be processed.
@@ -1427,21 +1412,25 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     onRender:   function(){
                     var me = this;
 
-                    // Loads data per the method appropriate for the object
-                    if(me.autoLoad){
-                        if(this.url === null)   me.make();
-                        else                    me.loadData();
-                    }
-
-                    // Adds a document listener
-                    $(document).on('keyup',function(evnt){
-                        if(me.selected && me.selected[0] && (document.activeElement == me.selected[0].el[0])){
-                            // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
-                            if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
-                            if(evnt.keyCode == 38)  me.selectAjacent(-1);  // 38 = up
-                            if(evnt.keyCode == 40)  me.selectAjacent(1);   // 40 = down
+                    if(me.onRendered !== true){
+                        // Loads data per the method appropriate for the object
+                        if(me.autoLoad){
+                            if(this.url === null)   me.make();
+                            else                    me.loadData();
                         }
-                    });
+
+                        // Adds a document listener
+                        $(document).on('keyup',function(evnt){
+                            if(me.selected && me.selected[0] && (document.activeElement == me.selected[0].el[0])){
+                                // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
+                                if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
+                                if(evnt.keyCode == 38)  me.selectAjacent(-1);  // 38 = up
+                                if(evnt.keyCode == 40)  me.selectAjacent(1);   // 40 = down
+                            }
+                        });
+
+                        me.onRendered = true;
+                    }
                 },
 
     /**
