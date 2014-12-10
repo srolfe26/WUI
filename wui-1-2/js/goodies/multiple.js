@@ -70,15 +70,7 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                                                             'selected="selected">{' +combo.titleItem+ '}</option>'
                                             }),
                             // Add the combo as a member of the multiple
-                            combo:          $.extend(combo,{
-                                                valChange:  function(obj){
-                                                                if(obj.value !== null){
-                                                                    me.push(obj.value);
-                                                                    obj.val(null);
-                                                                    obj.field.val('');
-                                                                }
-                                                            }
-                                            })
+                            combo:          combo
                         });
 
                         // Define a template for the tags - In a separate function so they
@@ -89,7 +81,17 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         Wui.FormField.prototype.init.apply(me,arguments);
 
                         // Put the items on the DOM
-                        (me.elAlias || me.el).addClass('wui-multiple').append( me.combo.el, me.selectEl );
+                        (me.elAlias || me.el).addClass('wui-multiple')
+                        .append( me.combo.el, me.selectEl )
+                        .on('valchange', function(evnt,obj){ 
+                            if(obj.value !== null){
+                                me.push(obj.value);
+                                obj.val(null);
+                                obj.field.val('');
+                            }
+
+                            evnt.stopPropagation();
+                        });
                     },
     defineTags:     function(){
                         this.template = 
@@ -100,23 +102,30 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                     },
     onRender:       function(){
                         var me = this;
-                        (me.elAlias || me.el).on('click','a',function(e){
-                            var wuiIndex = this.dataset.index;
-                            me.splice(wuiIndex,1);
-                        });
+                        
+                        if(me.hasOnRendered !== true){
+                            (me.elAlias || me.el).on('click','a',function(e){
+                                var wuiIndex = this.dataset.index;
+                                me.splice(wuiIndex,1);
+                            });
 
-                        me.combo.make();
+                            if(me.combo.autoLoad)   me.combo.loadData();
+                            else                    me.combo.make();
 
-                        if(me.combo.selectRecs)
-                            // If there are selected records, the last one will be added
-                            // by the data change event of the select
-                            for(var i = 0; i < me.combo.selectRecs.length - 1; i++)
-                                me.push(me.combo.selectRecs[i]);
+                            if(me.combo.selectRecs)
+                                // If there are selected records, the last one will be added
+                                // by the data change event of the select
+                                for(var i = 0; i < me.combo.selectRecs.length - 1; i++)
+                                    me.push(me.combo.selectRecs[i]);
+
+                            me.hasOnRendered = true;
+                        }
                     },
     dataChanged:    function (){ 
                         this.make();
 
-                        var me = this, 
+                        var me = this,
+                            oldVal = me.value,
                             i = 0, 
                             holder = $('<div>'),
                             holdingData = $.extend(true,[],me.data) || [];
@@ -129,9 +138,24 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         me.selectEl.empty().append(holder.children().unwrap());
                         me.value = me.data;
 
+                        me.el.trigger($.Event('valchange'), [me, me.value, oldVal, me.val()]);
                     },
-    push:           Wui.Data.prototype.push,
+    push:           function(){
+                        var me = this, actuallyPush = [];
+
+                        Array.prototype.forEach.call(arguments,function(push_item){
+                            var doPush = true;
+
+                            // Ensure there are not multiple values added in the multiple
+                            me.items.forEach(function(items_item){ if(push_item == items_item.rec) doPush = false; });
+                            if(doPush)
+                                actuallyPush.push(push_item);
+                        });
+
+                        Wui.Data.prototype.push.apply(this,actuallyPush);
+                    },
     splice:         Wui.Data.prototype.splice,
+    
     /** Returns only the simple value of an item */
     getVal:         function(){
                         var retArray = [];

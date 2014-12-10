@@ -975,17 +975,18 @@ Wui.Data.prototype = {
                                 error:      function(e){ me.failure.call(me,e); },
                             },me.ajaxConfig);
                         
-                        // abort the last request in case it takes longer to come back than the next one
-                        if(me.lastRequest && me.lastRequest.readyState != 4)
-                            me.lastRequest.abort();
-
                         // Work in additional parameters that will change or stop the request
                         var paramsOkay = me.setParams.apply(me,arguments),
                             beforeLoad = me.beforeLoad.apply(me,arguments);
 
                         // Perform request
-                        if(paramsOkay !== false && beforeLoad !== false)
+                        if(paramsOkay !== false && beforeLoad !== false){
+                            // abort the last request in case it takes longer to come back than the one we're going to call
+                            if(me.lastRequest && me.lastRequest.readyState != 4)
+                                me.lastRequest.abort();
+                            
                             return me.lastRequest = $.ajax(me.url,config);
+                        }
                         
                         // If there was no request made, return a rejected deferred to keep return
                         // types consistent
