@@ -139,7 +139,7 @@ Custom renderers can be applied to columns.  These renderers are defined as func
 either be defined in the column definition, or defined elsewhere in scope and simply named by
 a string. The rendering function is defined passed the following parameters as below:
 
-renderer: function(grid, cell, value, record, row, grid){}
+renderer: function(cell, value, record, row, grid){}
 
 Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
 descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
@@ -201,6 +201,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     this.removeMask();
                 },
     
+    closeSorter:function(){ this.dd.children('li').off('click').end().hide(); },
+
     /** 
     Recursive function for sorting on multiple columns @private
     @param {number}    depth    Depth of the recursive call
@@ -276,6 +278,23 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     // columns and sorting on multiple columns
                     me.cols = [];
                     me.sorters = [];
+
+                    // Add sorting menu
+                    $('body').append( 
+                        me.dd = $(
+                            '<ul>' +
+                                '<li>Ascending</li>' +
+                                '<li>Decending</li>' +
+                                '<li>No Sort</li>' +
+                            '<ul>'
+                        ).addClass('wui-sort-menu')
+                        .attr({ id: me.idCls = Wui.id() })
+                        .on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
+                    );
+                    // Clear the sorting menu when it loses focus
+                    $(document).on('click','*:not(#' +me.idCls+ ')',function(evnt){ 
+                        me.closeSorter();
+                    });
                     
                     // hide the header
                     if(me.hideHeader)    me.headingContainer.height(0);
@@ -432,8 +451,33 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     .addClass('wui-gc').addClass(col.cls)
                     });
                     
-                    if(col.sortable)    col.el.click(function(){ me.sortList(col); });
-                    else                col.el.addClass('wui-no-sort');
+                    if(col.sortable){
+                        col.el.on("contextmenu",function(e){
+                            e.preventDefault();
+                            Wui.positionItem($(this),me.dd);
+
+                            $('body').append(me.dd.width(100).show());
+                            Wui.positionItem($(this),me.dd);
+                            me.dd.children('li').on('click',function(){
+                                var options =   {
+                                                    'Ascending': function(){ me.mngSorters(col,'asc'); },
+                                                    'Decending': function(){ me.mngSorters(col,'desc'); },
+                                                    'No Sort': function(){ col.sortDir = 'desc'; me.mngSorters(col); },
+                                                };
+
+                                options[$(this).text()]();
+                                me.closeSorter();
+                                me.runSort();
+                            });
+                        });
+                        col.el.click(function(){ me.sortList(col); });
+                    }else{
+                        col.el.addClass('wui-no-sort');
+                    }
+                        
+
+                    // if(col.sortable)    col.el.click(function(){ me.sortList(col); });
+                    // else                
 
                     //grids with single columns shouldn't have a resizable option
                     if(me.columns.length > 1 && !col.vertical && col.resizable){
@@ -452,6 +496,18 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     // Append newly created el to the DOM
                     me.heading.append(col.el);
+                },
+
+    runSort:    function(){
+                    // Sort the list
+                    var me = this, listitems = me.items;
+                    listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+
+                    me.tbl.detach();
+                    // Place items and reset alternate coloring
+                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
+                    me.tbl.appendTo(me.tblContainer);
+                    me.sizeCols();
                 },
     
     /**
@@ -578,18 +634,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     */
     sortList:   function(col) {
                     var me = this;
-                    
                     me.mngSorters(col);
-                    
-                    // Sort the list
-                    var listitems = me.items;
-                    listitems.sort(function(a, b){ return me.doSort(0, a, b); });
-
-                    me.tbl.detach();
-                    // Place items and reset alternate coloring
-                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
-                    me.tbl.appendTo(me.tblContainer);
-                    me.sizeCols();
+                    me.runSort();
                 }
 });
 

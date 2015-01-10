@@ -241,15 +241,38 @@ Absolutely positions a child element, relative to its parent, such that it will
 be visible within the viewport and at the max z-index. Useful for dialogs and drop-downs.
 */
 Wui.positionItem = function(parent,child){
-    var ofst    = parent.offset(),
-        cHeight = child.outerHeight(),
-        cWidth  = child.outerWidth(),
-        plBelow = (ofst.top + parent.outerHeight() + cHeight < $.viewportH()),
-        plRight = (ofst.left + parent.outerWidth() - cWidth > 0); 
+    var ofst    =   parent.offset(),
+        cWidth  =   child.outerWidth(),
+        cHeight =   child.outerHeight(),
+        plBelow =   (function(){
+                        var retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
+
+                        if(!retVal && (ofst.top - cHeight < 0)){
+                            cHeight = ofst.top -5;
+                            retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
+                        }else{
+                            cHeight = '';
+                        }
+
+                        return retVal;
+                    })(),
+        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0),
+        fxdOrAbs =  (function(){
+                        var retVal = 'absolute';
+
+                        parent.add(parent.parents()).each(function(){
+                            if($(this).css('position') === 'fixed')
+                                retVal = 'fixed';
+                        });
+
+                        return retVal;
+                    })()
 
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
-        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - cHeight,
+        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
+        height:     cHeight,
+        position:   fxdOrAbs,
         zIndex:     Wui.maxZ()
     });
 };
@@ -991,17 +1014,18 @@ Wui.Data.prototype = {
                                 error:      function(e){ me.failure.call(me,e); },
                             },me.ajaxConfig);
                         
-                        // abort the last request in case it takes longer to come back than the next one
-                        if(me.lastRequest && me.lastRequest.readyState != 4)
-                            me.lastRequest.abort();
-
                         // Work in additional parameters that will change or stop the request
                         var paramsOkay = me.setParams.apply(me,arguments),
                             beforeLoad = me.beforeLoad.apply(me,arguments);
 
                         // Perform request
-                        if(paramsOkay !== false && beforeLoad !== false)
+                        if(paramsOkay !== false && beforeLoad !== false){
+                            // abort the last request in case it takes longer to come back than the one we're going to call
+                            if(me.lastRequest && me.lastRequest.readyState != 4)
+                                me.lastRequest.abort();
+                            
                             return me.lastRequest = $.ajax(me.url,config);
+                        }
                         
                         // If there was no request made, return a rejected deferred to keep return
                         // types consistent
@@ -1265,8 +1289,15 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Performs mutations and fires listeners when an item is selected @private
     */
     itemSelect: function(itm, silent){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
-                        
+                    var me = this, 
+                        dn = (me.name) ? '.' + me.name : ''
+                        old = [];
+                    
+                    if(me.selected.length > 0 && !me.multiSelect && !silent){
+                        var old = $.extend(true,[],me.selected);
+                        me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
+                    }
+
                     me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
                     itm.el.addClass('wui-selected').attr('tabindex',1).focus();
                     me.selected = [itm];
@@ -1289,6 +1320,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     */        
     itemDeselect:function(itm){
                     var me = this, dn = (me.name) ? '.' + me.name : '';
+
+                    if(me.selected.length > 0)
 
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
@@ -1606,8 +1639,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     me.el
                     .addClass('wui-btn')
                     .click(btnClick)
-                    .keydown(function(evnt){ if(evnt.keyCode == 13) return false; })
-                    .keyup(function(evnt){
+                    .keypress(function(evnt){
                         if(evnt.keyCode == 13 || evnt.keyCode == 32)
                             btnClick(evnt);
                         return false;
@@ -2021,12 +2053,14 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
                         me.modalEl = $('<div>').addClass('wui-overlay');
-                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
+                        $('body').append( 
+                            me.appendTo = me.modalEl.css('z-index',Wui.maxZ()).on('mousewheel',noScroll)
+                        );
                     }
                     
                     // Add close buttons where appropriate
-                    me.tbar.push(me.closeBtn = new Wui.Button({ click:function(){me.close(); }, text:'X'}));
-                    if(me.bbar.length === 0) me.bbar = [new Wui.Button({click:function(){me.close(); }, text:'Close'})];
+                    me.tbar.push(me.closeBtn = new Wui.Button({ click:function(){ me.close(); }, text:'X' }));
+                    if(me.bbar.length === 0) me.bbar = [new Wui.Button({ click:function(){ me.close(); }, text:'Close' })];
                     
                     // Calls the parent init function
                     Wui.Pane.prototype.init(me);
@@ -2035,7 +2069,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     me.windowEl = me.el
                     .addClass('wui-window')
                     .css('z-index',Wui.maxZ())
-                    .click(bringToFront);
+                    .click(bringToFront)
+                    .on('mousewheel',noScroll);
                     
                     // Add draggable
                     if(me.draggable === true)
@@ -2059,6 +2094,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     me.windowEl.trigger($.Event('open' + dn),[me])
                         .trigger($.Event('open'),[me]);
                     me.resize();
+
+                    function noScroll(evnt){ evnt.stopPropagation(); }
 
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
@@ -2115,9 +2152,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     /** Overrides Wui.O cssByParam and removes styles on modal windows */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
-                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }    // Remove CSS that accidentally gets applied to the modal cover
-                    if(this.windowEl)
-                        this.resize();                                              // Resize the window and center
+                    if(this.isModal)    this.modalEl.css({width:'', height:''});    // Remove CSS that accidentally gets applied to the modal cover
+                    if(this.windowEl)   this.resize();                              // Resize the window and center
                 },
 
     /** Set the height of the window */
@@ -2128,7 +2164,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 });
 
 
-/** Shows an message in a modal window
+/** Shows a message in a modal window
 @param {string}         msg         A message for the user
 @param {[string]}       msgTitle    Title for the window. Default is 'Message'
 @param {[function]}     callback    Function to perform when the message window closes - returning false will prevent the window from closing.
@@ -2343,7 +2379,7 @@ Custom renderers can be applied to columns.  These renderers are defined as func
 either be defined in the column definition, or defined elsewhere in scope and simply named by
 a string. The rendering function is defined passed the following parameters as below:
 
-renderer: function(grid, cell, value, record, row, grid){}
+renderer: function(cell, value, record, row, grid){}
 
 Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
 descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
@@ -2405,6 +2441,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     this.removeMask();
                 },
     
+    closeSorter:function(){ this.dd.children('li').off('click').end().hide(); },
+
     /** 
     Recursive function for sorting on multiple columns @private
     @param {number}    depth    Depth of the recursive call
@@ -2480,6 +2518,23 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     // columns and sorting on multiple columns
                     me.cols = [];
                     me.sorters = [];
+
+                    // Add sorting menu
+                    $('body').append( 
+                        me.dd = $(
+                            '<ul>' +
+                                '<li>Ascending</li>' +
+                                '<li>Decending</li>' +
+                                '<li>No Sort</li>' +
+                            '<ul>'
+                        ).addClass('wui-sort-menu')
+                        .attr({ id: me.idCls = Wui.id() })
+                        .on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
+                    );
+                    // Clear the sorting menu when it loses focus
+                    $(document).on('click','*:not(#' +me.idCls+ ')',function(evnt){ 
+                        me.closeSorter();
+                    });
                     
                     // hide the header
                     if(me.hideHeader)    me.headingContainer.height(0);
@@ -2636,8 +2691,33 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     .addClass('wui-gc').addClass(col.cls)
                     });
                     
-                    if(col.sortable)    col.el.click(function(){ me.sortList(col); });
-                    else                col.el.addClass('wui-no-sort');
+                    if(col.sortable){
+                        col.el.on("contextmenu",function(e){
+                            e.preventDefault();
+                            Wui.positionItem($(this),me.dd);
+
+                            $('body').append(me.dd.width(100).show());
+                            Wui.positionItem($(this),me.dd);
+                            me.dd.children('li').on('click',function(){
+                                var options =   {
+                                                    'Ascending': function(){ me.mngSorters(col,'asc'); },
+                                                    'Decending': function(){ me.mngSorters(col,'desc'); },
+                                                    'No Sort': function(){ col.sortDir = 'desc'; me.mngSorters(col); },
+                                                };
+
+                                options[$(this).text()]();
+                                me.closeSorter();
+                                me.runSort();
+                            });
+                        });
+                        col.el.click(function(){ me.sortList(col); });
+                    }else{
+                        col.el.addClass('wui-no-sort');
+                    }
+                        
+
+                    // if(col.sortable)    col.el.click(function(){ me.sortList(col); });
+                    // else                
 
                     //grids with single columns shouldn't have a resizable option
                     if(me.columns.length > 1 && !col.vertical && col.resizable){
@@ -2656,6 +2736,18 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     // Append newly created el to the DOM
                     me.heading.append(col.el);
+                },
+
+    runSort:    function(){
+                    // Sort the list
+                    var me = this, listitems = me.items;
+                    listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+
+                    me.tbl.detach();
+                    // Place items and reset alternate coloring
+                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
+                    me.tbl.appendTo(me.tblContainer);
+                    me.sizeCols();
                 },
     
     /**
@@ -2782,18 +2874,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     */
     sortList:   function(col) {
                     var me = this;
-                    
                     me.mngSorters(col);
-                    
-                    // Sort the list
-                    var listitems = me.items;
-                    listitems.sort(function(a, b){ return me.doSort(0, a, b); });
-
-                    me.tbl.detach();
-                    // Place items and reset alternate coloring
-                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
-                    me.tbl.appendTo(me.tblContainer);
-                    me.sizeCols();
+                    me.runSort();
                 }
 });
 
@@ -2960,7 +3042,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
         #param    {string}    dir    The direction of the sort
         Manages the sorters for the grid by keeping them in an array. 
         */
-        mngSorters:        function(col,dir){
+        mngSorters:     function(col,dir){
                             var me = this,
                                 i = 0,
                                 sortClasses = ['one','two','three','four','five'];
@@ -2977,7 +3059,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                         me.sorters.push(col);
                                 }else{
                                     if(col.sortDir){
-                                        if(col.sortDir == 'desc'){
+                                        if(col.sortDir.toLowerCase() == 'desc'){
                                             delete col.sortDir;
                                             col.el.removeClass().addClass('wui-gc').addClass(col.cls);
                                             
@@ -3008,7 +3090,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     me.alignPagingSort();
                             }
                                 
-                            $.each(me.sorters,function(i,itm){
+                            me.sorters.forEach(function(itm,i){
                                 itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir.toLowerCase()).addClass(itm.cls);
 
                                 if(me.isPaging)
@@ -3051,6 +3133,27 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             if(me.onSuccess !== newSuccess){me.onSuccess = newSuccess;}
                         },
 
+        runSort:    function(){
+                        var me = this;
+
+                        // If paging then do the sorting on the server
+                        if(me.isPaging === true){
+                            me.currPage = -1;
+                            me.tbl.scroll();
+                        }else{
+                            // Sort the list
+                            var listitems = me.items;
+                            listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+
+                            me.tbl.detach();
+                            // Place items and reset alternate coloring
+                            $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
+                            me.tbl.appendTo(me.tblContainer);
+                            me.sizeCols();
+                            me.resetSelect();
+                        }
+                    },
+
         /** Overrides Wui.DataList.scrollToCurrent to turn of scrolling on the infinite grid. */
         scrollToCurrent:function(){
                             if(!this.isPaging)
@@ -3076,34 +3179,6 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             if(!this.isPaging)
                                 this.sortList();
                             this.sizeCols();
-                        },
-
-        /**
-        @param    {object}    Column object associated with a particular column element
-        Sort the grid based on the values of one or more columns. If the grid is paging
-        then sort remotely.
-        */
-        sortList:       function(col) {
-                            var me = this;
-                            
-                            me.mngSorters(col);
-                            
-                            // If paging then do the sorting on the server
-                            if(me.isPaging === true){
-                                me.currPage = -1;
-                                me.tbl.scroll();
-                            }else{
-                                // Sort the list
-                                var listitems = me.items;
-                                listitems.sort(function(a, b){ return me.doSort(0, a, b); });
-
-                                me.tbl.detach();
-                                // Place items and reset alternate coloring
-                                $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
-                                me.tbl.appendTo(me.tblContainer);
-                                me.sizeCols();
-                                me.resetSelect();
-                            }
                         }
     });
 }(jQuery));
@@ -3697,6 +3772,8 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     if(itm.ftype && !(itm instanceof Wui.FormField)){                        
                         var ft = itm.ftype.split('.');
 
+                        itm.labelSize = itm.labelSize || me.labelSize;
+
                         switch (ft.length) {
                             case 1:
                                 if(window[ft[0]])   return new window[ft[0]](itm);
@@ -3721,6 +3798,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     }else if(itm instanceof Wui.FormField){
                         // If a field has a label, make it match the format of the form.
                         if(itm.lbl){
+                            itm.labelSize = itm.labelSize || me.labelSize;
                             itm.lbl.setLabelPosition(itm.labelPosition || me.labelPosition);
                             itm.lbl.setLabelSize(itm.labelSize || me.labelSize);
                         }
@@ -4079,17 +4157,18 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     /** Runs after the element has been placed on the DOM */
     afterRender:function(){ if(this.lbl)  this.lbl.adjustField(); },
 
-    /** Disables the field so the user cannot interact with it. */
+    /** Makes the field read-only so the user cannot edit the field, but can select the text. */
     disable:    function(){
                     this.disabled = true;
                     if(this.el && this.el.addClass)
-                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('readonly','true');
                 },
+                
     /** Enables the field so the user can interact with it. */
-    enable:        function(){
+    enable:     function(){
                     this.disabled = false;
                     if(this.el && this.el.addClass)
-                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
+                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[readonly]').removeAttr('readonly');
                 },
     
     /**
@@ -4648,9 +4727,23 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     me.append(ul);
                 },
     
+    /** Disables the field so the user cannot interact with it. */
+    disable:    function(){
+                    this.disabled = true;
+                    if(this.el && this.el.addClass)
+                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                },
+
     /** What to do when an individual element changes */
     elemChange:    function(elem){ this.val(elem.val()); },
     
+    /** Enables the field so the user can interact with it. */
+    enable:     function(){
+                    this.disabled = false;
+                    if(this.el && this.el.addClass)
+                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled]').removeAttr('disabled');
+                },
+
     /** If buttonStyle = true, the actual radio input is hidden  */
     onRender:   function(){
                     var me = this;
@@ -4857,7 +4950,9 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     // Place field elements
                     me.append( me.wrapper = $('<div>').addClass('wui-combo').append(me.setListeners(me)) );
-                    $('body').append( me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls) );
+                    $('body').append( 
+                        me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
+                    );
 
                     // Listeners - These listeners must stop propagation or else they
                     // will trigger events for their containing DataLists (like grids with
@@ -5958,7 +6053,7 @@ Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
             },
     validTest:function(v){ 
                 if(this.required) 
-                    return v.length !== 0;
+                    return (v !== null && v.length !== 0);
 
                 return true;
             },

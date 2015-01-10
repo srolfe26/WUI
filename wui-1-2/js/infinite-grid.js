@@ -158,7 +158,7 @@
         #param    {string}    dir    The direction of the sort
         Manages the sorters for the grid by keeping them in an array. 
         */
-        mngSorters:        function(col,dir){
+        mngSorters:     function(col,dir){
                             var me = this,
                                 i = 0,
                                 sortClasses = ['one','two','three','four','five'];
@@ -175,7 +175,7 @@
                                         me.sorters.push(col);
                                 }else{
                                     if(col.sortDir){
-                                        if(col.sortDir == 'desc'){
+                                        if(col.sortDir.toLowerCase() == 'desc'){
                                             delete col.sortDir;
                                             col.el.removeClass().addClass('wui-gc').addClass(col.cls);
                                             
@@ -206,7 +206,7 @@
                                     me.alignPagingSort();
                             }
                                 
-                            $.each(me.sorters,function(i,itm){
+                            me.sorters.forEach(function(itm,i){
                                 itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir.toLowerCase()).addClass(itm.cls);
 
                                 if(me.isPaging)
@@ -249,6 +249,27 @@
                             if(me.onSuccess !== newSuccess){me.onSuccess = newSuccess;}
                         },
 
+        runSort:    function(){
+                        var me = this;
+
+                        // If paging then do the sorting on the server
+                        if(me.isPaging === true){
+                            me.currPage = -1;
+                            me.tbl.scroll();
+                        }else{
+                            // Sort the list
+                            var listitems = me.items;
+                            listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+
+                            me.tbl.detach();
+                            // Place items and reset alternate coloring
+                            $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
+                            me.tbl.appendTo(me.tblContainer);
+                            me.sizeCols();
+                            me.resetSelect();
+                        }
+                    },
+
         /** Overrides Wui.DataList.scrollToCurrent to turn of scrolling on the infinite grid. */
         scrollToCurrent:function(){
                             if(!this.isPaging)
@@ -274,34 +295,6 @@
                             if(!this.isPaging)
                                 this.sortList();
                             this.sizeCols();
-                        },
-
-        /**
-        @param    {object}    Column object associated with a particular column element
-        Sort the grid based on the values of one or more columns. If the grid is paging
-        then sort remotely.
-        */
-        sortList:       function(col) {
-                            var me = this;
-                            
-                            me.mngSorters(col);
-                            
-                            // If paging then do the sorting on the server
-                            if(me.isPaging === true){
-                                me.currPage = -1;
-                                me.tbl.scroll();
-                            }else{
-                                // Sort the list
-                                var listitems = me.items;
-                                listitems.sort(function(a, b){ return me.doSort(0, a, b); });
-
-                                me.tbl.detach();
-                                // Place items and reset alternate coloring
-                                $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
-                                me.tbl.appendTo(me.tblContainer);
-                                me.sizeCols();
-                                me.resetSelect();
-                            }
                         }
     });
 }(jQuery));

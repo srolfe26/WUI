@@ -225,15 +225,38 @@ Absolutely positions a child element, relative to its parent, such that it will
 be visible within the viewport and at the max z-index. Useful for dialogs and drop-downs.
 */
 Wui.positionItem = function(parent,child){
-    var ofst    = parent.offset(),
-        cHeight = child.outerHeight(),
-        cWidth  = child.outerWidth(),
-        plBelow = (ofst.top + parent.outerHeight() + cHeight < $.viewportH()),
-        plRight = (ofst.left + parent.outerWidth() - cWidth > 0); 
+    var ofst    =   parent.offset(),
+        cWidth  =   child.outerWidth(),
+        cHeight =   child.outerHeight(),
+        plBelow =   (function(){
+                        var retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
+
+                        if(!retVal && (ofst.top - cHeight < 0)){
+                            cHeight = ofst.top -5;
+                            retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
+                        }else{
+                            cHeight = '';
+                        }
+
+                        return retVal;
+                    })(),
+        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0),
+        fxdOrAbs =  (function(){
+                        var retVal = 'absolute';
+
+                        parent.add(parent.parents()).each(function(){
+                            if($(this).css('position') === 'fixed')
+                                retVal = 'fixed';
+                        });
+
+                        return retVal;
+                    })()
 
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
-        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - cHeight,
+        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
+        height:     cHeight,
+        position:   fxdOrAbs,
         zIndex:     Wui.maxZ()
     });
 };
@@ -1250,8 +1273,15 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Performs mutations and fires listeners when an item is selected @private
     */
     itemSelect: function(itm, silent){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
-                        
+                    var me = this, 
+                        dn = (me.name) ? '.' + me.name : ''
+                        old = [];
+                    
+                    if(me.selected.length > 0 && !me.multiSelect && !silent){
+                        var old = $.extend(true,[],me.selected);
+                        me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
+                    }
+
                     me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
                     itm.el.addClass('wui-selected').attr('tabindex',1).focus();
                     me.selected = [itm];
@@ -1274,6 +1304,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     */        
     itemDeselect:function(itm){
                     var me = this, dn = (me.name) ? '.' + me.name : '';
+
+                    if(me.selected.length > 0)
 
                     itm.el.removeClass('wui-selected');
                     me.selected = [];
@@ -1591,8 +1623,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     me.el
                     .addClass('wui-btn')
                     .click(btnClick)
-                    .keydown(function(evnt){ if(evnt.keyCode == 13) return false; })
-                    .keyup(function(evnt){
+                    .keypress(function(evnt){
                         if(evnt.keyCode == 13 || evnt.keyCode == 32)
                             btnClick(evnt);
                         return false;
@@ -2006,12 +2037,14 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
                         me.modalEl = $('<div>').addClass('wui-overlay');
-                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
+                        $('body').append( 
+                            me.appendTo = me.modalEl.css('z-index',Wui.maxZ()).on('mousewheel',noScroll)
+                        );
                     }
                     
                     // Add close buttons where appropriate
-                    me.tbar.push(me.closeBtn = new Wui.Button({ click:function(){me.close(); }, text:'X'}));
-                    if(me.bbar.length === 0) me.bbar = [new Wui.Button({click:function(){me.close(); }, text:'Close'})];
+                    me.tbar.push(me.closeBtn = new Wui.Button({ click:function(){ me.close(); }, text:'X' }));
+                    if(me.bbar.length === 0) me.bbar = [new Wui.Button({ click:function(){ me.close(); }, text:'Close' })];
                     
                     // Calls the parent init function
                     Wui.Pane.prototype.init(me);
@@ -2020,7 +2053,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     me.windowEl = me.el
                     .addClass('wui-window')
                     .css('z-index',Wui.maxZ())
-                    .click(bringToFront);
+                    .click(bringToFront)
+                    .on('mousewheel',noScroll);
                     
                     // Add draggable
                     if(me.draggable === true)
@@ -2044,6 +2078,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
                     me.windowEl.trigger($.Event('open' + dn),[me])
                         .trigger($.Event('open'),[me]);
                     me.resize();
+
+                    function noScroll(evnt){ evnt.stopPropagation(); }
 
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
@@ -2100,9 +2136,8 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
     /** Overrides Wui.O cssByParam and removes styles on modal windows */
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
-                    if(this.isModal){ this.modalEl.css({width:'', height:''}); }    // Remove CSS that accidentally gets applied to the modal cover
-                    if(this.windowEl)
-                        this.resize();                                              // Resize the window and center
+                    if(this.isModal)    this.modalEl.css({width:'', height:''});    // Remove CSS that accidentally gets applied to the modal cover
+                    if(this.windowEl)   this.resize();                              // Resize the window and center
                 },
 
     /** Set the height of the window */
@@ -2113,7 +2148,7 @@ Wui.Window.prototype = $.extend(new Wui.Pane(),{
 });
 
 
-/** Shows an message in a modal window
+/** Shows a message in a modal window
 @param {string}         msg         A message for the user
 @param {[string]}       msgTitle    Title for the window. Default is 'Message'
 @param {[function]}     callback    Function to perform when the message window closes - returning false will prevent the window from closing.

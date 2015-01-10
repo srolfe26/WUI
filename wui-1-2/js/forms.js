@@ -150,6 +150,8 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     if(itm.ftype && !(itm instanceof Wui.FormField)){                        
                         var ft = itm.ftype.split('.');
 
+                        itm.labelSize = itm.labelSize || me.labelSize;
+
                         switch (ft.length) {
                             case 1:
                                 if(window[ft[0]])   return new window[ft[0]](itm);
@@ -174,6 +176,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     }else if(itm instanceof Wui.FormField){
                         // If a field has a label, make it match the format of the form.
                         if(itm.lbl){
+                            itm.labelSize = itm.labelSize || me.labelSize;
                             itm.lbl.setLabelPosition(itm.labelPosition || me.labelPosition);
                             itm.lbl.setLabelSize(itm.labelSize || me.labelSize);
                         }
@@ -532,17 +535,18 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     /** Runs after the element has been placed on the DOM */
     afterRender:function(){ if(this.lbl)  this.lbl.adjustField(); },
 
-    /** Disables the field so the user cannot interact with it. */
+    /** Makes the field read-only so the user cannot edit the field, but can select the text. */
     disable:    function(){
                     this.disabled = true;
                     if(this.el && this.el.addClass)
-                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('readonly','true');
                 },
+                
     /** Enables the field so the user can interact with it. */
-    enable:        function(){
+    enable:     function(){
                     this.disabled = false;
                     if(this.el && this.el.addClass)
-                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
+                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[readonly]').removeAttr('readonly');
                 },
     
     /**
@@ -1101,9 +1105,23 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     me.append(ul);
                 },
     
+    /** Disables the field so the user cannot interact with it. */
+    disable:    function(){
+                    this.disabled = true;
+                    if(this.el && this.el.addClass)
+                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                },
+
     /** What to do when an individual element changes */
     elemChange:    function(elem){ this.val(elem.val()); },
     
+    /** Enables the field so the user can interact with it. */
+    enable:     function(){
+                    this.disabled = false;
+                    if(this.el && this.el.addClass)
+                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled]').removeAttr('disabled');
+                },
+
     /** If buttonStyle = true, the actual radio input is hidden  */
     onRender:   function(){
                     var me = this;
@@ -1310,7 +1328,9 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     // Place field elements
                     me.append( me.wrapper = $('<div>').addClass('wui-combo').append(me.setListeners(me)) );
-                    $('body').append( me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls) );
+                    $('body').append( 
+                        me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
+                    );
 
                     // Listeners - These listeners must stop propagation or else they
                     // will trigger events for their containing DataLists (like grids with
@@ -2411,7 +2431,7 @@ Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
             },
     validTest:function(v){ 
                 if(this.required) 
-                    return v.length !== 0;
+                    return (v !== null && v.length !== 0);
 
                 return true;
             },
