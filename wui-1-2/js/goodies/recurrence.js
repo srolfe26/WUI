@@ -26,7 +26,7 @@ Wui.DateRange = function(args){
 
                             // Add Listeners for valchange and stop propagation
                             me.el.on('valchange', '.'+endCls, function(evnt,f,newVal,oldVal){
-                                if(newVal != oldVal){
+                                if(newVal !== oldVal){
                                     me.value.end_date = newVal;
                                     me.setChanged();
                                 }
@@ -34,7 +34,7 @@ Wui.DateRange = function(args){
                                 evnt.stopPropagation();
                             });
                             me.el.on('valchange', '.'+stCls, function(evnt,f,newVal,oldVal){
-                                if(newVal != oldVal){
+                                if(newVal !== oldVal){
                                     me.endDate.minDate = me.value.start_date = newVal;
                                     me.setChanged();
                                 }

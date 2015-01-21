@@ -39,17 +39,7 @@ var Wui = Wui || {
 (function($,window) {
 
 // AJAX error reporting and caching.
-$.ajaxSetup({ 
-    cache:      false,
-    error:      function(response){
-                    var err = null;
-                    
-                    try{        err = $.parseJSON( response.responseText ); }
-                    catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
-                    if(err !== null)
-                        Wui.errRpt(err.fatalError);
-                }
-});
+$.ajaxSetup({ cache: false });
 
 
 /**
@@ -994,8 +984,8 @@ Wui.Data.prototype = {
                             config = $.extend({
                                 data:       me.params,
                                 dataType:   'json',
-                                success:    function(r){ me.success.call(me,r); },
-                                error:      function(e){ me.failure.call(me,e); },
+                                success:    function(){ me.success.apply(me,arguments); },
+                                error:      function(){ me.failure.apply(me,arguments); },
                             },me.ajaxConfig);
                         
                         // Work in additional parameters that will change or stop the request
@@ -1776,7 +1766,16 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     configBar:      function(barName){
                         var me = this, bar = me[barName], isHeader = (barName == 'header'),
                             cssProp = (isHeader) ? 'Top' : 'Bottom',
-                            hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
+                            hasItems =  (function(){
+                                            var barItemNum = (isHeader && me.title !== null) ? 1 : 0;
+
+                                            bar.items.forEach(function(itm){
+                                                if(itm instanceof Wui.O)
+                                                    barItemNum++;
+                                            });
+
+                                            return barItemNum > 0;
+                                        })(),
                             pad = hasItems ? bar.el.css('height') : 0,
                             border = (hasItems) ? 0 : undefined;
 
@@ -1792,7 +1791,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                                 this.setTitleAlign();
                             }else{
                                 // Set focus to the bottom right most button in the pane
-                                if(!me.disabled)
+                                if(!me.disabled && bar.items[bar.items.length - 1].el)
                                     bar.items[bar.items.length - 1].el.focus();
                             }
                         }else{

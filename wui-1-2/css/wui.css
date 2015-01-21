@@ -305,10 +305,10 @@ button::-moz-focus-inner { border:0; }
 
 
 /******************************************   disabled form styles   *******************************************/
-.wui-fe [disabled=disabled] { background-color:transparent; border-color:#ccc; color:#ccc; }
-.wui-fe .has-file[disabled=disabled] {background-color: #fff;}
+.wui-fe [readonly] { background-color:transparent; border-color:#ccc; color:#ccc; }
+.wui-fe .has-file[readonly] {background-color: #fff;}
 .wui-disabled .wui-cal-toggle, .wui-disabled.wui-combo .wui-btn, .wui-disabled .wui-combo .wui-btn { display:none; }
-.wui-form-err.wui-disabled.wui-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
+.wui-form-err.wui-disabled.wui-fe [readonly] {border-color:#fff; color:#fdd;}
 .wui-lbl.wui-disabled > label { font-style: italic; font-weight: normal; }
 .wui-disabled .button label { background-color:transparent; border-style: dotted; color: #999; }
 
@@ -483,12 +483,16 @@ button::-moz-focus-inner { border:0; }
         .wui-pane .wui-pane  .wui-pane .wui-pane-content, .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane .wui-pane-content {background-color:#fff;}
 
 /**********************************************   Form Elements in TBar and BBar  **********************************************/
-.wui-pane-bar .wui-form {
+.wui-pane-bar .wui-form, .wui-pane-bar .wui-lbl, .wui-pane-bar .wui-fe, .wui-pane-bar .wui-fe ul li { font-size: 16px !important; }
+.wui-pane-bar .wui-form, .wui-pane-bar .wui-lbl {
     background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
     border: 0 none;
-    display: inline-block;
-    margin: 0; padding:0;
+    display: flex;
+    margin: 6px 4px; padding:0;
 }
+.wui-pane-bar .wui-form { float:right; }
+.wui-pane-bar .wui-form.wui-pbar-left { float:left; }
+.wui-pane-bar .wui-form .wui-btn {margin-top:0;}
 .wui-pane-bar .wui-fe, .wui-pane-bar .wui-lbl {line-height: 1;}
 .wui-pane-bar > .wui-fe, .wui-h-cntnt > .wui-fe {
     display: inline-block;
@@ -512,7 +516,7 @@ button::-moz-focus-inner { border:0; }
         padding:0 0.25em 0 0.5em; text-align:right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .wui-pane-bar .wui-lbl .wui-fe {width:100%;}
-.wui-pane-bar .wui-lbl.wui-pbar-left { margin-top: 0.45em; }
+.wui-pane-bar .wui-lbl.wui-pbar-left { margin-top: 6px; }
 
 /* For Hyperlink */
 .wui-pane-bar .wui-fe.wui-link-third { top: 0; margin-left: 0; float:none; }
@@ -520,8 +524,8 @@ button::-moz-focus-inner { border:0; }
 /* For Combo */
 .wui-pane-bar .wui-btn.field-btn {margin:0; border:1px solid #777; border-left:0; background-color:#ccc;}
 /* For Radio & Checkbox */
-.wui-pane-bar .wui-radio > label, .wui-pane-bar .wui-checkbox > label{top: 2px !important;}
-.wui-pane-bar ul.button {margin-top:0;}
+.wui-pane-bar .wui-radio ul, .wui-pane-bar .wui-checkbox ul { position:relative; top:5px; }
+.wui-pane-bar ul.button {margin-top:0; top:2px;}
 .wui-pane-bar .button li label {border-color:#777; background:#ccc; color:#555; font-size: 0.75em; height:26px; line-height: 22px;}
 .wui-pane-bar .button li > input:checked + label {border-color:#444; color:#eee; background-color:#555;}
 

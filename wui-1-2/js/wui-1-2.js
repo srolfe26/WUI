@@ -55,17 +55,7 @@ var Wui = Wui || {
 (function($,window) {
 
 // AJAX error reporting and caching.
-$.ajaxSetup({ 
-    cache:      false,
-    error:      function(response){
-                    var err = null;
-                    
-                    try{        err = $.parseJSON( response.responseText ); }
-                    catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
-                    if(err !== null)
-                        Wui.errRpt(err.fatalError);
-                }
-});
+$.ajaxSetup({ cache: false });
 
 
 /**
@@ -1010,8 +1000,8 @@ Wui.Data.prototype = {
                             config = $.extend({
                                 data:       me.params,
                                 dataType:   'json',
-                                success:    function(r){ me.success.call(me,r); },
-                                error:      function(e){ me.failure.call(me,e); },
+                                success:    function(){ me.success.apply(me,arguments); },
+                                error:      function(){ me.failure.apply(me,arguments); },
                             },me.ajaxConfig);
                         
                         // Work in additional parameters that will change or stop the request
@@ -1792,7 +1782,16 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
     configBar:      function(barName){
                         var me = this, bar = me[barName], isHeader = (barName == 'header'),
                             cssProp = (isHeader) ? 'Top' : 'Bottom',
-                            hasItems = bar.items.length > 0 || (isHeader && me.title !== null),
+                            hasItems =  (function(){
+                                            var barItemNum = (isHeader && me.title !== null) ? 1 : 0;
+
+                                            bar.items.forEach(function(itm){
+                                                if(itm instanceof Wui.O)
+                                                    barItemNum++;
+                                            });
+
+                                            return barItemNum > 0;
+                                        })(),
                             pad = hasItems ? bar.el.css('height') : 0,
                             border = (hasItems) ? 0 : undefined;
 
@@ -1808,7 +1807,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                                 this.setTitleAlign();
                             }else{
                                 // Set focus to the bottom right most button in the pane
-                                if(!me.disabled)
+                                if(!me.disabled && bar.items[bar.items.length - 1].el)
                                     bar.items[bar.items.length - 1].el.focus();
                             }
                         }else{
@@ -4161,14 +4160,14 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     disable:    function(){
                     this.disabled = true;
                     if(this.el && this.el.addClass)
-                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('readonly','true');
+                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr({readonly: true, tabIndex:-1});
                 },
                 
     /** Enables the field so the user can interact with it. */
     enable:     function(){
                     this.disabled = false;
                     if(this.el && this.el.addClass)
-                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[readonly]').removeAttr('readonly');
+                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[readonly]').removeAttr('readonly tabIndex');
                 },
     
     /**
@@ -4912,7 +4911,8 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     /** Closes the drop-down menu. */
     close:      function(){ 
                     this._open = false;
-                    this.dd.hide(); 
+                    this.dd.hide();
+                    $('body').css('overflow',this.bodyState);
                 },
 
     /** @param {string} srchVal    A search term
@@ -5078,7 +5078,11 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){ 
                         if(evnt.target !== me.field[0]) me.close(); 
                     });
-                    $('body').append(me.dd.width(width).show());
+
+                    // Scrolling within a dropdown causes crazy stuff to happen on the body,
+                    // so save the body overflow state and momentarily set it to be unscrollable.
+                    me.bodyState = $('body').css('overflow');
+                    $('body').append(me.dd.width(width).show()).css('overflow','hidden');
                     Wui.positionItem(me.field,me.dd);
                     me.scrollToCurrent();
                 },
@@ -5128,6 +5132,34 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     return me.selectByEl(itm);
                 },
 
+    /**
+    
+    @param    {string} key The data item to look for
+    @param    {string|number} val The value to look for
+    @return An object containing the dataList, row, and record, or undefined if there was no matching row.
+    Selects an item according to the key value pair to be found in a record. */
+    selectBy:   function(key,val){
+                    var me = this, retVal = undefined;
+                    me.each(function(itm){
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
+                            return retVal = me.itemSelect(itm);
+                    });
+                    return retVal;
+                },
+
+    /**
+    Overrides Wui.DataList selectByEl because the scrollToCurrent added weird scrolling on closed dropdowns
+    @param    {jQuery Object} el An object that will match an element in the DataList.
+    Selects the matching DataList item.
+    */
+    selectByEl: function(el){
+                    var me = this, retVal = undefined;
+
+                    me.itemSelect(retVal = me.getItemByEl(el));
+                    
+                    return retVal;
+                },
+
     /** Sets the value of the drop down to the value of the selected item */
     set:        function(){
                     var me = this;
@@ -5149,6 +5181,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     // t = the combo field
                     return t.field.on({
                         keydown: function(evnt){
+
                             //clear the value if the user blanks out the field
                             if(t.field.val().length === 0) t.value = null;
 
@@ -6040,7 +6073,15 @@ Wui.FileBasic = function(args) {
 };
 
 Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
-   init:    function(){
+    disable:function(){
+                    this.disabled = true;
+                    this.field.attr('disabled','true');
+            },
+    enable: function(){
+                    this.disabled = false;
+                    this.field.removeAttr('disabled');
+            },
+    init:   function(){
                 var me = this;
                 Wui.Text.prototype.init.call(me);
                 me.append(me.field);
@@ -6050,6 +6091,10 @@ Wui.FileBasic.prototype = $.extend(new Wui.Text(), {
 
                 if(me.accept && me.accept.length)
                     me.field.attr('accept', me.accept);
+
+                me.field.change(function(){
+                    me.field.trigger($.Event('filechanged'), [me, me.field[0].files]);
+                });
             },
     validTest:function(v){ 
                 if(this.required) 

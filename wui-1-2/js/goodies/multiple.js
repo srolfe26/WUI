@@ -83,6 +83,9 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         // Put the items on the DOM
                         (me.elAlias || me.el).addClass('wui-multiple')
                         .append( me.combo.el, me.selectEl )
+                        .on('click','a', function(){ 
+                            me.removeItems(this); 
+                        })
                         .on('valchange', function(evnt,obj){ 
                             if(obj.value !== null){
                                 me.push(obj.value);
@@ -100,15 +103,16 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                                 '<a data-index="{wuiIndex}" href="javascript:void(0);">x</a>' +
                             '</span>';
                     },
+    removeItems:    function(itm){
+                        var me = this;
+
+                        var wuiIndex = itm.dataset.index;
+                        me.splice(wuiIndex,1);
+                    },
     onRender:       function(){
                         var me = this;
                         
                         if(me.hasOnRendered !== true){
-                            (me.elAlias || me.el).on('click','a',function(e){
-                                var wuiIndex = this.dataset.index;
-                                me.splice(wuiIndex,1);
-                            });
-
                             if(me.combo.autoLoad)   me.combo.loadData();
                             else                    me.combo.make();
 
