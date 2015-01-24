@@ -309,7 +309,6 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             toolBarsH = me.header.el.outerHeight() + me.footer.el.outerHeight(),
                             maxHeight = $.isNumeric(me.maxHeight) ? me.maxHeight : 0,
                             totalHeight = me.headingContainer.outerHeight();
-
                         me.tblContainer.children().each(function(){
                             totalHeight += $(this).outerHeight();
                         });

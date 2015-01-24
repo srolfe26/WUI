@@ -509,6 +509,16 @@ Wui.O.prototype = {
                     return validVal;
                 },
     
+    argsByParam:function(){
+                    var me = this;
+
+                    me.applyAttr('id',me.id);
+                    me.applyAttr('name',me.name);
+                    me.applyAttr('tabindex',me.tabIndex);
+                    me.applyAttr('lang',me.lang);
+                    me.applyAttr('title',me.titleAttr);
+                },
+
     /**
     @param {object} item    A WUI Object, or if undefined, the object that this method is a member of.
     
@@ -521,11 +531,8 @@ Wui.O.prototype = {
                     m = m || this;
                     
                     if(m.el && m.el.addClass){
-                        if(m.applyAttr){
-                            m.applyAttr('id',m.id);
-                            m.applyAttr('name',m.name);
-                            m.applyAttr('tabindex',m.tabIndex);
-                        }
+                        if(m.argsByParam)
+                            m.argsByParam();
                         
                         // Add attributes if defined
                         try{ if(m.attr && typeof m.attr == 'object') m.el.attr(m.attr); }catch(e){ }
@@ -535,8 +542,14 @@ Wui.O.prototype = {
                         if($.isNumeric(m.width) && m.width >= 0)        m.el.css({width: m.width});
 
                         // calculate percentage based dimensions
-                        if(Wui.isPercent(m.width))  m.el.css({width:Wui.percentToPixels(m.el,m.width,'width')});
-                        if(Wui.isPercent(m.height)) m.el.css({height:Wui.percentToPixels(m.el,m.height,'height')});
+                        if(Wui.isPercent(m.width)){
+                            a = Wui.percentToPixels(m.el,m.width,'width');
+                            if(a != 0) m.el.css({width:a});
+                        }
+                        if(Wui.isPercent(m.height)){
+                            a = Wui.percentToPixels(m.el,m.height,'height');
+                            if(a != 0) m.el.css({height:a});
+                        }
                         
                         // hide an object based on its hidden value
                         if(m.hidden) m.el.css('display','none');
@@ -1228,6 +1241,8 @@ Wui.DataList = function(args){
 
         /** DOM element where all of the data templates will be appended. */
         el:             $('<div>'),
+
+        focusOnSelect:  true,
         
         /** Method that will run immediately when the object is constructed. */
         init:           function(){},
@@ -1273,9 +1288,12 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     }
 
                     me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
-                    itm.el.addClass('wui-selected').attr('tabindex',1).focus();
+                    itm.el.addClass('wui-selected').attr('tabindex',1)
+                    
+                    if(me.focusOnSelect)
+                        itm.el.focus();
+                    
                     me.selected = [itm];
-
 
                     if(!me.multiSelect && !silent){
                         me.el.trigger($.Event('wuiselect'+ dn), [me, itm.el, itm.rec])
@@ -1456,27 +1474,6 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     }
                 },
 
-    /**
-    @param    {number} num Direction to go to select an ajacent value [1,-1]
-    Selects the list item immediately before or after the currently selected item.
-    */
-    selectAjacent:  function(num){
-                        var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();
-                        return me.selectByEl(selectAjc);
-                    },
-
-    /**
-    @param    {jQuery Object} el An object that will match an element in the DataList.
-    Selects the matching DataList item.
-    */
-    selectByEl: function(el){
-                    var me = this, retVal = undefined;
-
-                    me.itemSelect(retVal = me.getItemByEl(el));
-                    me.scrollToCurrent();
-                    
-                    return retVal;
-                },
 
     /**
     @param    {jQuery Object} el An object that will match an element in the DataList.
@@ -1549,13 +1546,23 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                             firstSelect = el.find('.wui-selected:first'),
                             ofstP = firstSelect.offsetParent(),
                             offset = (function(){ 
-                                var r = 0; 
-                                firstSelect.prevAll().each(function(){ r += $(this).outerHeight() - 0.55; }); 
+                                var r = 0;
+
+                                firstSelect.prevAll().each(function(){ r += $(this).outerHeight(); });
+                                r -= ((me.elAlias || me.el).height()) / 2 - (firstSelect.outerHeight() / 2);
+
                                 return  r; 
                             })();
-                        ofstP.animate({scrollTop:offset },100);
+                        ofstP.animate( { scrollTop:offset }, 100 );
                     },
-                    
+    /**
+    @param    {number} num Direction to go to select an ajacent value [1,-1]
+    Selects the list item immediately before or after the currently selected item. */
+    selectAjacent:  function(num){
+                        var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();
+                        return me.selectByEl( selectAjc, false );
+                    },
+
     /**
     @param    {string} key The data item to look for
     @param    {string|number} val The value to look for
@@ -1568,6 +1575,21 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                             return retVal = me.itemSelect(itm);
                     });
                     me.scrollToCurrent();
+                    return retVal;
+                },
+                    
+    /**
+    @param    {jQuery Object}   el          An object that will match an element in the DataList.
+    @param    {boolean}         doScroll    Will prevent scrolling to the item if set to 'false'.
+    Selects the matching DataList item.*/
+    selectByEl: function(el, doScroll){
+                    var me = this, retVal = undefined;
+
+                    me.itemSelect(retVal = me.getItemByEl(el));
+                    
+                    if(doScroll !== false)
+                        me.scrollToCurrent();
+                    
                     return retVal;
                 }
 });
