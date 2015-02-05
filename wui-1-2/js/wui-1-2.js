@@ -1818,7 +1818,10 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             border = (hasItems) ? 0 : undefined;
 
                         // Still enforce borders for tabs
-                        if(me.parent && me.parent instanceof Wui.Tabs && ((isHeader && me.tabsHideHeader) || (me.tabsBottom && !hasItems))) border = 6;
+                        if( me.parent && me.parent instanceof Wui.Tabs ){
+                            if( (isHeader && me.tabsHideHeader && !me.parent.tabsBottom) || (me.tabsBottom && !hasItems) ) 
+                                border = 6;
+                        }
                         
                         me.sureEl.css('border' +cssProp+ 'Width', border).children('.wui-pane-wrap').css('padding' +cssProp, pad);
                         if(hasItems){
@@ -2848,12 +2851,16 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         }
                     }
                     
+                    return me.getSrcData();
+                },
+    getSrcData: function(){
+                    var me = this;
+
                     if(me.autoLoad){
                         if(me.url === null) me.setData(me.data);
                         else                return me.loadData();
                     }
                 },
-    
     setData:    function(){
                     var me = this, i = null, j = null;
 
@@ -2977,8 +2984,6 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     me.tbl.css({top:(me.params.start * me.rowHeight) + 'px'});
                                     me.sizeCols();
                                 }
-                            }else{
-                                me.make();
                             }
                         },
 
@@ -2993,6 +2998,18 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                     if(col.dataItem === itm.dataItem) me.mngSorters(col,itm.order);
                                 });
                             });
+                        },
+
+        getSrcData:     function(){
+                            var me = this;
+
+                            if(me.initLoaded !== true && me.data !== null){
+                                me.setParams(me.params);
+                                return me.setData(me.data);
+                                me.initLoaded = true;
+                            }else{
+                                return Wui.Grid.prototype.getSrcData.apply(me,arguments);
+                            }
                         },
 
         /** 
@@ -3035,9 +3052,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
         */
         make:           function(){
                             var me = this;
-
+                            me.addRows(me.data);
+                            
                             if(me.isPaging){
-                                me.addRows(me.data);
                                 me.rowHeight = me.tbl.find('tr:first').outerHeight();
                                 me.totalPages = Math.floor(me.total/me.paging.limit);
                                 me.alignPagingSort();
@@ -3046,7 +3063,6 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                 if(me.tblHSize)
                                     me.tblHSize.height(me.totalHeight);
                             }
-                            
 
                             // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
                             // object has been manually run
@@ -3331,19 +3347,24 @@ Wui.stateMachine.prototype = {
                     },
                     
     /**
-    @param    {string}        target    The view on which to set the parameter.
-    @param    {string}        key        The name of the parameter to set.
-    @param    {string|number}    value    The value of the parameter
+    @param    {string}          target      The view on which to set the parameter.
+    @param    {string|object}   key         The name of the parameter to set, or an object containing key/value pairs of multiple parameters.
+    @param    {string|number}   value       The value of the parameter of key is a string, or it's ignored if key is an object.
     @return The value passed in, or undefined if setting the parameter failed.
     Set a hash parameter within certain view.
     */
     setParam:        function(target,key,value){
-                        var state    = this.getState();
+                        var state = this.getState();
                             
                         for(var i in state){
                             if(state[i].view === target){
-                                state[i].params[key] = value;
+                                if(typeof key === 'string')
+                                    state[i].params[key] = value;
+                                else
+                                    $.extend(state[i].params,key);
+
                                 this.setState(state);
+                                
                                 return value;
                             }    
                         }
@@ -3919,10 +3940,16 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                 },
     
     /** Disable all form fields */
-    disable:    function(){ return this.each(function(itm){ itm.disable(); }, true); },
+    disable:    function(){ 
+                    this.disabled = true; 
+                    return this.each(function(itm){ itm.disable(); }, true); 
+                },
     
     /** Enable all form fields */
-    enable:     function(){ return this.each(function(itm){ itm.enable(); }, true); },
+    enable:     function(){ 
+                    this.disabled = false; 
+                    return this.each(function(itm){ itm.enable(); }, true); 
+                },
     
     /**
     @param {string} fieldname The name of the field to set a value on

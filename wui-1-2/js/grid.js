@@ -587,12 +587,16 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         }
                     }
                     
+                    return me.getSrcData();
+                },
+    getSrcData: function(){
+                    var me = this;
+
                     if(me.autoLoad){
                         if(me.url === null) me.setData(me.data);
                         else                return me.loadData();
                     }
                 },
-    
     setData:    function(){
                     var me = this, i = null, j = null;
 

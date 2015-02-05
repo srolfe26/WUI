@@ -1,5 +1,5 @@
 ﻿// Extract data from a table with headers
-function tableMonster(tableSelector){
+function tableDataExtract(tableSelector){
     var cols = [],
         rows = [];
     
@@ -20,7 +20,11 @@ function tableMonster(tableSelector){
                 obj = {};
             
             for(var i = 0; i < cols.length; i++){
-                obj[cols[i].dataItem] = $.trim(rw.children('td:eq(' + i +')').text());
+                try{
+                    obj[cols[i].dataItem] = JSON.parse($.trim(rw.children('td:eq(' + i +')').text()));
+                }catch(e){
+                    obj[cols[i].dataItem] = $.trim(rw.children('td:eq(' + i +')').text());
+                }   
             }
             rows.push(obj);
         });
@@ -29,18 +33,18 @@ function tableMonster(tableSelector){
     return {data:rows, columns:cols};
 }
 
-var selector = 'table.list-table',
-    a = new Wui.grid($.extend({
-        appendTo:   $(selector).parent(),
-                    // 10 accounts for margin
-        height:     Condor.vp.matchWindow - ($(selector).offset().top - $('#content').offset().top + 10),
-        borderStyle:{borderWidth:0}
-    },tableMonster(selector)));
-a.place(function(){
-    // Replace the table
-    $(selector).replaceWith(a.el);
-    Condor.vp.resize();
-});
-// fix CSS
-$('.wui-gh ul').css({margin:0});
-$('.wui-gc').css({color:'white', fontSize:'0.9em'});
+// var selector = 'table.list-table',
+//     a = new Wui.grid($.extend({
+//         appendTo:   $(selector).parent(),
+//                     // 10 accounts for margin
+//         height:     Condor.vp.matchWindow - ($(selector).offset().top - $('#content').offset().top + 10),
+//         borderStyle:{borderWidth:0}
+//     },tableMonster(selector)));
+// a.place(function(){
+//     // Replace the table
+//     $(selector).replaceWith(a.el);
+//     Condor.vp.resize();
+// });
+// // fix CSS
+// $('.wui-gh ul').css({margin:0});
+// $('.wui-gc').css({color:'white', fontSize:'0.9em'});

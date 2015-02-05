@@ -277,10 +277,16 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                 },
     
     /** Disable all form fields */
-    disable:    function(){ return this.each(function(itm){ itm.disable(); }, true); },
+    disable:    function(){ 
+                    this.disabled = true; 
+                    return this.each(function(itm){ itm.disable(); }, true); 
+                },
     
     /** Enable all form fields */
-    enable:     function(){ return this.each(function(itm){ itm.enable(); }, true); },
+    enable:     function(){ 
+                    this.disabled = false; 
+                    return this.each(function(itm){ itm.enable(); }, true); 
+                },
     
     /**
     @param {string} fieldname The name of the field to set a value on
@@ -2738,6 +2744,10 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
                                     Msg.closeOkay = true;
                                 }
                             }
+                        },
+            doClose:    function(){
+                            Msg.closeOkay = true;
+                            Msg.close();
                         },
             onWinClose: function(){ return ((Msg.closeOkay !== true) ? false : Msg.closeOkay); }
         });

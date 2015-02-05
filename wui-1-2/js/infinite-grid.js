@@ -73,8 +73,6 @@
                                     me.tbl.css({top:(me.params.start * me.rowHeight) + 'px'});
                                     me.sizeCols();
                                 }
-                            }else{
-                                me.make();
                             }
                         },
 
@@ -89,6 +87,18 @@
                                     if(col.dataItem === itm.dataItem) me.mngSorters(col,itm.order);
                                 });
                             });
+                        },
+
+        getSrcData:     function(){
+                            var me = this;
+
+                            if(me.initLoaded !== true && me.data !== null){
+                                me.setParams(me.params);
+                                return me.setData(me.data);
+                                me.initLoaded = true;
+                            }else{
+                                return Wui.Grid.prototype.getSrcData.apply(me,arguments);
+                            }
                         },
 
         /** 
@@ -131,9 +141,9 @@
         */
         make:           function(){
                             var me = this;
-
+                            me.addRows(me.data);
+                            
                             if(me.isPaging){
-                                me.addRows(me.data);
                                 me.rowHeight = me.tbl.find('tr:first').outerHeight();
                                 me.totalPages = Math.floor(me.total/me.paging.limit);
                                 me.alignPagingSort();
@@ -142,7 +152,6 @@
                                 if(me.tblHSize)
                                     me.tblHSize.height(me.totalHeight);
                             }
-                            
 
                             // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
                             // object has been manually run

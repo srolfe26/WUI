@@ -124,19 +124,24 @@ Wui.stateMachine.prototype = {
                     },
                     
     /**
-    @param    {string}        target    The view on which to set the parameter.
-    @param    {string}        key        The name of the parameter to set.
-    @param    {string|number}    value    The value of the parameter
+    @param    {string}          target      The view on which to set the parameter.
+    @param    {string|object}   key         The name of the parameter to set, or an object containing key/value pairs of multiple parameters.
+    @param    {string|number}   value       The value of the parameter of key is a string, or it's ignored if key is an object.
     @return The value passed in, or undefined if setting the parameter failed.
     Set a hash parameter within certain view.
     */
     setParam:        function(target,key,value){
-                        var state    = this.getState();
+                        var state = this.getState();
                             
                         for(var i in state){
                             if(state[i].view === target){
-                                state[i].params[key] = value;
+                                if(typeof key === 'string')
+                                    state[i].params[key] = value;
+                                else
+                                    $.extend(state[i].params,key);
+
                                 this.setState(state);
+                                
                                 return value;
                             }    
                         }

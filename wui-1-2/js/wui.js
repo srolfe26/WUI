@@ -1802,7 +1802,10 @@ Wui.Pane.prototype = $.extend(new Wui.O(),{
                             border = (hasItems) ? 0 : undefined;
 
                         // Still enforce borders for tabs
-                        if(me.parent && me.parent instanceof Wui.Tabs && ((isHeader && me.tabsHideHeader) || (me.tabsBottom && !hasItems))) border = 6;
+                        if( me.parent && me.parent instanceof Wui.Tabs ){
+                            if( (isHeader && me.tabsHideHeader && !me.parent.tabsBottom) || (me.tabsBottom && !hasItems) ) 
+                                border = 6;
+                        }
                         
                         me.sureEl.css('border' +cssProp+ 'Width', border).children('.wui-pane-wrap').css('padding' +cssProp, pad);
                         if(hasItems){
