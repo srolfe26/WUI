@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>WUI 1.2.1 Panes</title>
+
+<link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
+<!--         <link href="../css/font-awesome.min.css" rel="stylesheet"> -->
+
+
+    <style type="text/css">
+        
+    </style>
+
+    <script type="text/javascript" src="../js/jquery-2-1-1.js"></script>
+    <script type="text/javascript" src="../js/plugins.js"></script>
+    <script type="text/javascript" src="../js/wui.js"></script>
+<!--     <script type="text/javascript" src="../js/forms.js"></script>
+    <script type="text/javascript" src="../js/grid.js"></script>
+ -->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            pane = new Wui.Pane({
+                title:      'WUI is Normal',
+                height:     600,
+                // border:false,
+                titleAlign: 'center',
+                // disabled:    true,
+                tbar:       [
+                                new Wui.Button({
+                                    text:       'Blah',
+                                    titleAttr:  'Ha ha ha ha',
+                                    name:       'named_button'
+                                })
+                            ],
+                items:      [
+                                new Wui.Pane({
+                                    title:      'Level 2',
+                                    // border:false,
+                                    titleAlign: 'right',
+                                    bbar:       [
+                                                    new Wui.Button({
+                                                        text:       'Blah',
+                                                        titleAttr:  'Ha ha ha ha',
+                                                        name:       'named_button'
+                                                    })
+                                                ],
+                                    items:      [
+                                                    new Wui.Pane({
+                                                        title:      'Level 3',
+                                                        // border:     false,
+                                                        bbar:       [
+                                                                        new Wui.Button({
+                                                                            text:       'Blah',
+                                                                            titleAttr:  'Ha ha ha ha',
+                                                                            name:       'named_button'
+                                                                        })
+                                                                    ],
+                                                        items:      [
+                                                                        new Wui.Pane({
+                                                                            title:      'Level 4',
+                                                                            // border:     false,
+                                                                            tbar:       [
+                                                                                            new Wui.Button({
+                                                                                                text:       'Blah',
+                                                                                                titleAttr:  'Ha ha ha ha',
+                                                                                                name:       'named_button'
+                                                                                            })
+                                                                                        ],
+                                                                            items:      [
+                                                                                            new Wui.Pane({
+                                                                                                title:      'Level 5',
+                                                                                                // border:     false,
+                                                                                                tbar:       [
+                                                                                                                new Wui.Button({
+                                                                                                                    text:       'Blah',
+                                                                                                                    titleAttr:  'Ha ha ha ha',
+                                                                                                                    name:       'named_button'
+                                                                                                                })
+                                                                                                            ]
+                                                                                            })
+                                                                                        ]
+                                                                        })
+                                                                    ]
+                                                    })
+                                                ]
+                                })
+                            ]
+            });
+
+            pane.place();
+        });
+    </script>
+</head>
+<body>
+
+
+</body>
+</html>

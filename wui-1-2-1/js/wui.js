@@ -1,17 +1,17 @@
-/*! Wui 1.3
+/*! Wui 1.2.1
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.3/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2.1/license.html
  */
 
 // Make sure the WUI is defined and doesn't conflict with other versions on the page
 var _wuiVar = (function(){
     if(typeof Wui === 'undefined'){
-        Wui = { version: '1.3' };
+        Wui = { version: '1.2.1' };
         return 'Wui';
     }else{
-        _w = { version: '1.3' };
+        _w = { version: '1.2.1' };
         return '_w';
     }
 })();
@@ -222,15 +222,15 @@ Wui.O.prototype = {
     addToDOM:   function(obj, tgt, act){
                     // Take the target and action from the passed object first if defined, then default to passed arguments, 
                     // then to a default of $('body') and 'append'
-                    var target  = (obj.appendTo !== undefined) ? obj.appendTo :
-                                    (obj.prependTo !== undefined) ? obj.prependTo :
-                                        (tgt !== undefined && tgt !== null) ? tgt : 
-                                            (obj.parent !== undefined && obj.parent.elAlias !== undefined) ? obj.parent.elAlias :
-                                                (obj.parent !== undefined && obj.parent.el !== undefined) ? obj.parent.el : $('body'),
-                        action = (obj.appendTo !== undefined) ? 'append' : 
-                                    (obj.prependTo !== undefined) ? 'prepend' : 
-                                        (act !== undefined && target[act]) ? act : 'append';
-                    
+                    var target  = (typeof obj.appendTo != 'undefined') ? obj.appendTo :
+                                    (typeof obj.prependTo != 'undefined') ? obj.prependTo :
+                                        (typeof tgt != 'undefined' && tgt !== null) ? tgt : 
+                                            (obj.parent && typeof obj.parent.elAlias != 'undefined') ? obj.parent.elAlias :
+                                                (obj.parent && typeof obj.parent.el != 'undefined') ? obj.parent.el : $('body'),
+                        action = (typeof obj.appendTo != 'undefined') ? 'append' : 
+                                    (typeof obj.prependTo != 'undefined') ? 'prepend' : 
+                                        (typeof act != 'undefined' && target[act]) ? act : 'append';
+
                     // Try appending with WUI modifiers, else just append in good ol' jQuery fashion
                     try{
                       $(target)[action](obj.el);
@@ -255,20 +255,21 @@ Wui.O.prototype = {
                         el.append(itm);
                     });
                 },
-    applyAttr:  function(name,val){
-                    var validVal = (typeof val === 'string' || typeof val === 'number');
-                    if(validVal) $(this.el).attr(name,val);
-                    return validVal;
-                },
 
     argsByParam:function(){
-                    var me = this;
+                    var me = this,
+                        applyAttr = {},
+                        attrs = ['id', 'name', 'tabindex', 'lang', 'title'],
+                        wuiAttrs = ['id', 'name', 'tabIndex', 'lang', 'titleAttr'];
 
-                    me.applyAttr('id',me.id);
-                    me.applyAttr('name',me.name);
-                    me.applyAttr('tabindex',me.tabIndex);
-                    me.applyAttr('lang',me.lang);
-                    me.applyAttr('title',me.titleAttr);
+                    attrs.forEach(function(atr,idx){
+                        var attrVal = me[wuiAttrs[idx]];
+
+                        if((typeof attrVal == 'string' || typeof attrVal == 'number'))
+                            applyAttr[atr] = attrVal;
+                    });
+
+                    $(me.el).attr(applyAttr);
                 },
 
     clear:      function(){
@@ -277,7 +278,7 @@ Wui.O.prototype = {
                 },
 
     cssByParam: function(){
-                    var me = this, el = me.el, a;
+                    var me = this, el = me.el, a, cssParamObj = {};
 
                     me.argsByParam();
 
@@ -285,23 +286,23 @@ Wui.O.prototype = {
                     try{ if(me.attr && typeof me.attr == 'object')  el.attr(me.attr); }catch(e){ }
                         
                     // calculate dimensions
-                    if($.isNumeric(me.height) && me.height >= 0)    el.css({height: me.height});
-                    if($.isNumeric(me.width) && me.width >= 0)      el.css({width: me.width});
+                    if($.isNumeric(me.height) && me.height >= 0)    $.extend(cssParamObj,{height: me.height});
+                    if($.isNumeric(me.width) && me.width >= 0)      $.extend(cssParamObj,{width: me.width});
 
                     // calculate percentage based dimensions
                     if(Wui.isPercent(me.width)){
                         a = Wui.percentToPixels(el,me.width,'width');
-                        if(a != 0) el.css({width:a});
+                        if(a != 0) $.extend(cssParamObj,{width:a});
                     }
                     if(Wui.isPercent(me.height)){
                         a = Wui.percentToPixels(el,me.height,'height');
-                        if(a != 0) el.css({height:a});
+                        if(a != 0) $.extend(cssParamObj,{height:a});
                     }
                     
                     // hide an object based on its hidden value
-                    if(me.hidden) el.css('display','none');
+                    if(me.hidden) $.extend(cssParamObj,'display','none');
 
-                    return el.addClass(me.cls);
+                    return el.addClass(me.cls).css(cssParamObj);
                 },
 
     each:       function(f,ascending){
@@ -525,11 +526,8 @@ Wui.Pane = function(args){
         border:     true,
         disabled:   false,
         fitToContent:false,
-        height:     '100%',
-        lbar:       [],
         maskHTML:   'Empty',
         maxHeight:  null,
-        rbar:       [],
         tbar:       [],
         title:      null,
         titleAlign: 'left'
@@ -541,9 +539,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
     addMask:        function(target){
                         target = (target) ? target : this.container;
 
-                        if(target.children('w13-mask').length === 0)
+                        if(target.children('wui-mask').length === 0)
                             return this.mask = $('<div>')
-                                                .addClass('w13-mask')
+                                                .addClass('wui-mask')
                                                 .append(
                                                     $('<span>').html(this.maskHTML)
                                                 )
@@ -566,8 +564,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         me.addMask();
                         me.footer.each(function(itm){ if(itm.disable) itm.disable(); });
                         me.header.each(function(itm){ if(itm.disable) itm.disable(); });
-                        me.leftbar.each(function(itm){ if(itm.disable) itm.disable(); });
-                        me.rightbar.each(function(itm){ if(itm.disable) itm.disable(); });
 
                         return me.disabled = true;
                     },   
@@ -577,14 +573,12 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         me.removeMask();
                         me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
                         me.header.each(function(itm){ if(itm.enable) itm.enable(); });
-                        me.leftbar.each(function(itm){ if(itm.enable) itm.enable(); });
-                        me.rightbar.each(function(itm){ if(itm.enable) itm.enable(); });
 
                         return me.disabled = false;
                     },
     init:           function(){
                         var me = this;
-                            el = me.el = $('<div>').addClass('w13-pane');
+                            el = me.el = $('<div>').addClass('wui-pane');
 
                         Wui.O.prototype.init.apply(me,arguments);
 
@@ -594,27 +588,23 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         if(me.title !=null)
                             me.setTitle(me.title);
 
-                        el.append( me.elAlias = me.container = $('<div>').addClass('w13-pane-content') );
-
+                        // Add the header before the content so that tabbing between buttons/items in the header
+                        // and footer is logically top > bottom, left > right
                         me.header = makeBar('tbar',{items: me.tbar});
-                        me.footer = makeBar('bbar',{items: me.bbar});
-                        me.leftbar = makeBar('lbar',{items: me.lbar});
-                        me.rightbar = makeBar('rbar',{items: me.rbar});
-
                         configBar('tbar');
+
+                        el.append( me.elAlias = me.container = $('<div>').addClass('wui-pane-content') );
+
+                        me.footer = makeBar('bbar',{items: me.bbar});
                         configBar('bbar');
-                        configBar('lbar');
-                        configBar('rbar');
 
                         // If the pane is disabled then it disables it
                         if(me.disabled) me.disable();
 
                         function makeBar(bar,args){
-                            var barType = (bar == 'tbar' || bar == 'bbar') ? 'wui-h-bar' : 'wui-v-bar';
-
                             return new Wui.O($.extend({
                                 el:         $('<div>'),
-                                cls:        'wui-' + bar + ' ' + barType,
+                                cls:        'wui-' + bar + ' wui-h-bar',
                                 parent:     me,
                                 appendTo:   me.el,
                                 items:      [],
@@ -634,9 +624,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         function configBar(bar){
                             var bars = {
                                     tbar: 'header',
-                                    bbar: 'footer',
-                                    lbar: 'leftbar',
-                                    rbar: 'rightbar'
+                                    bbar: 'footer'
                                 },
                                 thisBar = me[bars[bar]],
                                 hasBar = me.el.hasClass(bar);
@@ -652,13 +640,13 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                             if(thisBar.el.hasClass('wui-v-bar')){
                                 thisBar.each(function(itm){
                                     if(itm instanceof Wui.Button)
-                                        itm.el.attr('title',itm.text).html('').css;
+                                        itm.el.attr('title',itm.text).html('');
                                 });
                             }
                         }
                     },
     removeMask:     function(){
-                        var me = this, mask = me.mask || me.el.find('.w13-mask');
+                        var me = this, mask = me.mask || me.el.find('.wui-mask');
                         
                         if(mask){
                             mask.remove();
@@ -673,7 +661,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                         if(t !== null){
                             if(!hasEl)
-                                me.el.append( me.titleEl = $('<div class="wui-title">') );
+                                me.el.prepend( me.titleEl = $('<div class="wui-title">') );
 
                             me.el.addClass('title');
                             me.setTitleAlign();
@@ -702,11 +690,9 @@ Wui.Window = function(args){
         border:     true,
         draggable:  true,
         isModal:    false,
-        lbar:       [],
         maskHTML:   'Loading <span class="wui-spinner"></span>',
         onWinClose: function(){},
         onWinOpen:  function(){},
-        rbar:       [],
         resizable:  true,
         tbar:       [],
         title:      'Window',
@@ -747,7 +733,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
-                        me.modalEl = $('<div>').addClass('w13-overlay');
+                        me.modalEl = $('<div>').addClass('wui-overlay');
                         $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
                     }
                     
@@ -763,7 +749,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     
                     // Add window specific properties
                     me.windowEl = me.el
-                    .addClass('w13-window')
+                    .addClass('wui-window')
                     .css('z-index',Wui.maxZ())
                     .click(bringToFront);
                     
@@ -831,14 +817,14 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
 
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
                     if(me.windowEl){
-                        me.windowEl.css({ height: useHeight, width: (arguments.length) ? resizeWidth : undefined, });
-                        var posLeft =   (me.windowLeft) 
+                        var cssParamObj = { height: useHeight, width: (arguments.length) ? resizeWidth : undefined },
+                            posLeft =   (me.windowLeft) 
                                             ? ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) 
                                             : Math.floor((verge.viewportW() / 2) - (me.windowEl.width() / 2)),
                             posTop =    (me.windowTop) 
                                             ? ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) 
                                             : Math.floor((verge.viewportH() / 2) - (useHeight / 2));
-                        me.windowEl.css({ top:posTop, left:posLeft });
+                        me.windowEl.css( $.extend(cssParamObj, { top:posTop, left:posLeft }) );
 
                         me.fireResize();
                         return {width:me.windowEl.outerWidth(), height:me.windowEl.outerHeight()};
