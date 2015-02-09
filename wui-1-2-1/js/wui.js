@@ -20,17 +20,7 @@ var _wuiVar = (function(){
 (function($,window,Wui) {
 
 // AJAX error reporting and caching.
-$.ajaxSetup({ 
-    cache:  false,
-    error:  function(response){
-                var err = null;
-                
-                try{        err = $.parseJSON( response.responseText ); }
-                catch(e){   err = {fatalError:'Aw Snap! There was a problem talking to the server.'}; }
-
-                if(err !== null) Wui.errRpt(err.fatalError);
-            }
-});
+$.ajaxSetup({ cache: false });
 
 
 Wui.cssCheck = function(prop){
@@ -388,7 +378,15 @@ Wui.O.prototype = {
                     this.each(function(itm){ if(typeof itm.layout == 'function') itm.layout(); });
                 },
 
-    onRender:   function(){ this.rendered = true; },
+    onRender:   function(){ 
+                    if(this.rendered !== true){
+                        if(this.items === undefined) this.items = [];
+                        this.items.forEach(function(itm){ 
+                            if(itm.onRender) setTimeout(function(){ itm.onRender(); },0);
+                        });
+                    }
+                    this.rendered = true; 
+                },
 
     place:      function(after){
                     var me = this;
@@ -644,6 +642,18 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                 });
                             }
                         }
+                    },
+    onRender:   function(){ 
+                        if(this.rendered !== true){
+                            if(this.items === undefined) this.items = [];
+                            this.items.forEach(function(itm){ 
+                                if(itm.onRender) setTimeout(function(){ itm.onRender(); },0);
+                            });
+
+                            if(this.header) this.header.onRender();
+                            if(this.footer) this.footer.onRender();
+                        }
+                        this.rendered = true; 
                     },
     removeMask:     function(){
                         var me = this, mask = me.mask || me.el.find('.wui-mask');
