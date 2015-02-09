@@ -65,9 +65,20 @@ Wui.cssCheck = function(prop){
 Wui.fit = function(collection,dim){
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
-        var parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
-            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
-            dir         = (dim == 'width') ? 'row' : 'column';
+        var parent      =   (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
+            parentEl    =   (parent.el) ? (parent.elAlias || parent.el) : parent,
+            dir         =   (function(){
+                                if(typeof dim == 'undefined'){
+                                    var d = parentEl.css('flex-direction');
+
+                                    if(typeof d !== 'undefined')
+                                        return d;
+                                    else
+                                        return 'row'
+                                }else{
+                                    return (dim == 'width') ? 'row' : 'column';
+                                }
+                            })()
 
         dim = (dir == 'row') ? 'width' : 'height';
 
@@ -78,13 +89,16 @@ Wui.fit = function(collection,dim){
         $.each(collection,function(i,itm){
             var css = {};
             if(itm.fit){
-                $(itm.el).css(Wui.cssCheck('flex'),itm.fit + ' auto');
+                css[Wui.cssCheck('flex-grow')] = itm.fit;
+                css[dim] = '';
             }else if(itm.cssByParam === undefined){
-                $(itm.el).css(dim,itm[dim]);
-                $(itm.el).css(Wui.cssCheck('flex'),'');
+                css[dim] = itm[dim];
+                css[Wui.cssCheck('flex-grow')] = '';
             }
 
-            if(itm.cssByParam)  itm.cssByParam();
+            $(itm.el).css(css);
+            if(itm.cssByParam)  
+                itm.cssByParam();
         });
     }else{
         console.log('Improper collection specified', arguments, arguments.callee.caller);
@@ -124,8 +138,7 @@ Wui.getKeys = function(obj){
 
 Wui.id = function(prefix){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
-    prefix = (prefix && prefix.length !== 0) ? prefix + '-' : 'wui-'
-    return prefix + Wui.idCounter++;
+    return ((prefix && prefix.length !== 0) ? prefix + '-' : 'wui-') + Wui.idCounter++;
 };
 
 
@@ -156,15 +169,38 @@ Wui.percentToPixels = function(el,percent,dim){
 
 
 Wui.positionItem = function(parent,child){
-    var ofst    = parent.offset(),
-        cHeight = child.outerHeight(),
-        cWidth  = child.outerWidth(),
-        plBelow = (ofst.top + parent.outerHeight() + cHeight < verge.viewportH()),
-        plRight = (ofst.left + parent.outerWidth() - cWidth > 0); 
+    var ofst    =   parent.offset(),
+        cWidth  =   child.outerWidth(),
+        cHeight =   child.outerHeight(),
+        plBelow =   (function(){
+                        var retVal = ofst.top + parent.outerHeight() + cHeight < verge.viewportH();
+
+                        if(!retVal && (ofst.top - cHeight < 0)){
+                            cHeight = ofst.top -5;
+                            retVal = ofst.top + parent.outerHeight() + cHeight < verge.viewportH();
+                        }else{
+                            cHeight = '';
+                        }
+
+                        return retVal;
+                    })(),
+        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0),
+        fxdOrAbs =  (function(){
+                        var retVal = 'absolute';
+
+                        parent.add(parent.parents()).each(function(){
+                            if($(this).css('position') === 'fixed')
+                                retVal = 'fixed';
+                        });
+
+                        return retVal;
+                    })();
 
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
-        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - cHeight,
+        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
+        height:     cHeight,
+        position:   fxdOrAbs,
         zIndex:     Wui.maxZ()
     });
 };
@@ -277,12 +313,12 @@ Wui.O.prototype = {
                         
                     // calculate dimensions
                     if($.isNumeric(me.height) && me.height >= 0)    $.extend(cssParamObj,{height: me.height});
-                    if($.isNumeric(me.width) && me.width >= 0)      $.extend(cssParamObj,{width: me.width});
+                    if($.isNumeric(me.width) && me.width >= 0)      $.extend(cssParamObj,{width: me.width, flex:'none'});
 
                     // calculate percentage based dimensions
                     if(Wui.isPercent(me.width)){
                         a = Wui.percentToPixels(el,me.width,'width');
-                        if(a != 0) $.extend(cssParamObj,{width:a});
+                        if(a != 0) $.extend(cssParamObj,{width:a, flex:'none'});
                     }
                     if(Wui.isPercent(me.height)){
                         a = Wui.percentToPixels(el,me.height,'height');
@@ -495,8 +531,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     me.el
                     .addClass('wui-button')
                     .click(btnClick)
-                    .keydown(function(evnt){ if(evnt.keyCode == 13) return false; })
-                    .keyup(function(evnt){
+                    .keypress(function(evnt){
                         if(evnt.keyCode == 13 || evnt.keyCode == 32)
                             btnClick(evnt);
                         return false;
@@ -624,22 +659,25 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                     tbar: 'header',
                                     bbar: 'footer'
                                 },
-                                thisBar = me[bars[bar]],
-                                hasBar = me.el.hasClass(bar);
+                                thisBar =   me[bars[bar]],
+                                hasBar =    me.el.hasClass(bar),
+                                hasItems =  (function(){
+                                                var barItemNum = 0;
 
-                            if(!hasBar && thisBar.items.length){
+                                                thisBar.items.forEach(function(itm){
+                                                    if(itm instanceof Wui.O)
+                                                        barItemNum++;
+                                                });
+
+                                                return barItemNum > 0;
+                                            })();
+
+                            if(!hasBar && hasItems){
                                 me.el.addClass(bar);
                                 thisBar.place();
-                            }else if (hasBar && thisBar.items.length === 0){
+                            }else if (hasBar && !hasItems){
                                 me.el.removeClass(bar);
                                 thisBar.el.remove();
-                            }
-
-                            if(thisBar.el.hasClass('wui-v-bar')){
-                                thisBar.each(function(itm){
-                                    if(itm instanceof Wui.Button)
-                                        itm.el.attr('title',itm.text).html('');
-                                });
                             }
                         }
                     },
@@ -652,6 +690,13 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                             if(this.header) this.header.onRender();
                             if(this.footer) this.footer.onRender();
+
+                            // After all of the work done by flexbox, Chrome has a lousy implementation that requires
+                            // setting the content explicitly with JS
+                            if(parseInt(this.container.height()) != this.el.height()){
+                                this.container.css('height', this.el.height());
+                                console.log(this.el.height());
+                            }
                         }
                         this.rendered = true; 
                     },
@@ -744,7 +789,9 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
                         me.modalEl = $('<div>').addClass('wui-overlay');
-                        $('body').append(me.appendTo = me.modalEl.css('z-index',Wui.maxZ()));
+                        $('body').append(
+                            me.appendTo = me.modalEl.css('z-index',Wui.maxZ()).on('mousewheel',noScroll)
+                        );
                     }
                     
                     // Add close buttons where appropriate
@@ -761,7 +808,8 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     me.windowEl = me.el
                     .addClass('wui-window')
                     .css('z-index',Wui.maxZ())
-                    .click(bringToFront);
+                    .click(bringToFront)
+                    .on('mousewheel',noScroll);
                     
                     // Add draggable
                     if(me.draggable === true)
@@ -780,19 +828,14 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
 
                     // Put the window on the body
                     me.place();
-
-                    // Place an observer that will possibly resize a window that contains changeable content
-                    // me.observer = new MutationSummary({
-                    //     callback:   function(){ setTimeout(function(){ me.resize(); }, 300); },
-                    //     queries:    [{ characterData: true }],
-                    //     rootNode:   me.el[0]
-                    // });
                     
                     // Make the overlay the el so that when the window is closed it gets taken with it
                     if(me.isModal)    me.el = me.modalEl;
                     
                     me.onWinOpen(me);
                     me.windowEl.trigger($.Event('open'),[me]);
+
+                    function noScroll(evnt){ evnt.stopPropagation(); }
 
                     function bringToFront(e){
                         var maxZ = Wui.maxZ();
@@ -848,55 +891,134 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
 
 
 
+/**
+ @event        datachanged    When the data changes (name, data object)
+ @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
+
+The WUI Data Object is for handling data whether remote or local. It will fire 
+namespacedevents that can be used by an application, and provides a uniform 
+framework for working with data.
+
+If data is remote, Wui.Data is an additional wrapper around the jQuery AJAX method 
+and provides for pre-processing data. Data can be pushed and spliced into/out of 
+the object and events will be fired accordingly.
+*/
 Wui.Data = function(args){
     $.extend(this,{
-        ajaxConfig:     {},
+        /** Array of data that will be stored in the object. Can be specified for the object or loaded remotely */
         data:           [],
+        
+        /** Name a key in the data that represents the identity field. */
         identity:       null,
+        
+        /** Name of the data object. Allows the object to be identified in the listeners, and namespaces events. */
         name:           null,
+        
+        /** Object containing keys that will be passed remotely */
         params:         {},
-        total:          0,
+        
+        /** URL of the remote resource from which to obtain data. A null URL will assume a local data definition. */
         url:            null,
-        waiting:        false
+        
+        /** Special configuration of the ajax method. Defaults are:
+        
+            data:       me.params,
+            dataType:   'json',
+            success:    function(r){ me.success.call(me,r); },
+            error:      function(e){ me.success.call(me,e); },
+        */
+        ajaxConfig:     {},
+        
+        /** The total number of records contained in the data object */
+        total:          0
     },args);
 };
 Wui.Data.prototype = {
+    /** An object in the remote response actually containing the data.
+    Best set modifying the prototype eg. Wui.Data.prototype.dataContainer = 'payload'; */
     dataContainer:  null,
+    /** An object in the remote response specifying the total number of records. Setting this
+    feature will overrride the Data object's counting the data. Best set modifying the prototype eg. Wui.Data.prototype.totalContainer = 'total'; */
     totalContainer: null,
     
+    /** 
+    @param {array}    newData    Array of the new data
+    @eventhook Used for when data is changed.
+    */
     dataChanged:    function(){},
     
+    /**
+    @param {function} fn A function that gets called for each item in the object's data array
+    
+    @return true
+    The passed in function gets called with two parameters the item, and the item's index.
+    */
     dataEach:       function(f){
                         for(var i = 0; i < this.data.length; i++)
                             if(f(this.data[i],i) === false)
                                 break;
                         return true;
                     },
+    
+    /**
+    Performs a remote call and aborts previous requests
+    Between loadData(), success() and setData() fires several event hooks in this order:
+    
+    1. setParams()
+    2. beforeLoad()
+    3. onSuccess()
+    4. beforeSet()
+    5. processData()
+    6. dataChanged()
+    -  'datachanged' event is fired
+    7. afterSet()
+    
+    Upon failure will fire onFailure()
+    */
     loadData:       function(){
                         var me = this,
                             config = $.extend({
                                 data:       me.params,
                                 dataType:   'json',
-                                success:    function(r){ me.success.call(me,r); },
-                                error:      function(e){ me.failure.call(me,e); },
+                                success:    function(){ me.success.apply(me,arguments); },
+                                error:      function(){ me.failure.apply(me,arguments); },
                             },me.ajaxConfig);
                         
-                        if(!me.waiting){
-                            var paramsOkay = me.setParams.apply(me,arguments),
-                                beforeLoad = me.beforeLoad.apply(me,arguments);
+                        // Work in additional parameters that will change or stop the request
+                        var paramsOkay = me.setParams.apply(me,arguments),
+                            beforeLoad = me.beforeLoad.apply(me,arguments);
 
-                            if(paramsOkay !== false && beforeLoad !== false){
-                                me.waiting = true;
-                                return $.ajax(me.url,config);
-                            }
-                        }else{
-                            me.furtherRequests = arguments;
+                        // Perform request
+                        if(paramsOkay !== false && beforeLoad !== false){
+                            // abort the last request in case it takes longer to come back than the one we're going to call
+                            if(me.lastRequest && me.lastRequest.readyState != 4)
+                                me.lastRequest.abort();
+                            
+                            return me.lastRequest = $.ajax(me.url,config);
                         }
+                        
+                        // If there was no request made, return a rejected deferred to keep return
+                        // types consistent
+                        return $.Deferred().reject();
                     },
+    /**
+    @param {object} params    Params to be set
+    @eventhook Can be used as is or overridden to run when parameters change.
+    Can be used as is to set parameters before an AJAX load, or it can also be used as an event hook and overridden.
+    This method is called from loadData with its arguments passed on, so arguments passed to load data will be sent here. 
+    See loadData(). If this function returns false, load data will not make a remote call.
+    */
     setParams:      function(params){
                         if(params && typeof params === 'object')
                             $.extend(this.params,params);
-                    },   
+                    },
+    
+    /**
+    @param {array} d Data to be set on the ojbect
+    @param {number} [t] Total number of records in the data set. If not specified setData will count the data set.
+    
+    Can be called to set data locally or called by loadData(). Fires a number of events and event hooks. See loadData().
+    */
     setData:        function(d,t){
                         var me = this;
                         
@@ -909,42 +1031,80 @@ Wui.Data.prototype = {
                         
                         me.fireDataChanged();
                     },
+
     fireDataChanged:function(){
                         var me = this, dn = (me.name || 'wui-data');
 
                         me.dataChanged(me.data);
-                        $(document).trigger($.Event('datachanged'),[dn, me]);
+                        $(document).trigger($.Event('datachanged.' + dn),[dn, me])
+                            .trigger($.Event('datachanged'),[dn, me]);
                         me.afterSet(me.data);
-                    }, 
+                    },
+    
+    /** @eventhook Event hook that will allow for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData().
+        If this function returns false, load data will not make a remote call. */
     beforeLoad:     function(){},
+    
+    /**
+    @param    {array}    data    The value of the data cofig of the current object
+    @eventhook  Fires after data is set. Meant to be overridden. See loadData().
+    */
     afterSet:       function(){},
+    
+    /**
+    @param {array} d Data to be set on the ojbect
+    @eventhook  Fires after the remote call but before data is set on the object. Meant to be overridden. See loadData().
+    */
     beforeSet:      function(){},
-    success:        function(r){
-                        var me = this;
-                        me.waiting = false;
+    
+    /**
+    @param {object or array} r Response from the server in JSON format
+    Runs when loadData() successfully completes a remote call.
+    Gets data straight or gets it out of the dataContainer and totalContainer.
 
-                        if(me.furtherRequests){
-                            me.loadData.apply(me,me.furtherRequests);
-                            me.furtherRequests = undefined;
-                        }else{
-                            var unwrapped = Wui.unwrapData.call(me,r);
-                            me.onSuccess(r);
-                            me.setData(unwrapped.data, unwrapped.total);
-                        }
+    Calls setData() passing the response and total.
+    */
+    success:        function(r){
+                        var me = this,
+                            unwrapped = Wui.unwrapData.call(me,r);
+                        
+                        me.onSuccess(r);
+                        me.setData(unwrapped.data, unwrapped.total);
                     },
+    
+    /** @eventhook AllowS for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
     onSuccess:      function(){},
+    
+    /** @eventhook Allows for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
     onFailure:      function(){},
-    failure:        function(e){
-                        this.waiting = false;
-                        this.onFailure(e);
-                    },
+    
+    /** Runs when loadData() fails. */
+    failure:        function(e){ this.onFailure(e); },
+    
+    /** 
+    @param {array} Data to be processed.
+    Allows for pre-processing of the data before it is taken into the data object. Meant to be overridden, otherwise will act as a pass-through. See loadData().*/
     processData:    function(response){ return response; },
+
+    /**
+    @param {object} [obj,...] One or more objects to be added to the end of the parent object's items array
+    @return The new length of the array 
+    Same as Array.push() but acting on the data array of the object.
+    */
     push:           function(){
                         var retVal = Array.prototype.push.apply(this.data,arguments);
                         this.total = this.data.length;
                         this.fireDataChanged();
                         return retVal;
                     },
+
+    /**
+    @param  {number}    idx         Position to start making changes in the items array.
+    @param  {number}    howMany     Number of elements to remove.
+    @param  {object}    [obj,...]   One or more objects to be added to the array at position idx
+    @return An array of the removed objects, or an empty array. 
+    Same as Array.splice() but acting on the data array of the object.
+    */
     splice:         function(){
                         var retVal = Array.prototype.splice.apply(this.data,arguments);
                         this.total = this.data.length;
@@ -954,10 +1114,44 @@ Wui.Data.prototype = {
 };
 
 
+/**The template engine is a simple way to create DOM elements based on data. A template string is provided that contains the
+template html with the variable interspersed surrounded by '{}'. For example, a simple data template to display a list
+of names may be: 
+
+'<li>{name}</li>'
+
+There are more complex operations that can be performed with a template. For example, suppose I had a set that contained
+the data name, address, gender, and age. I can operate programmatically on the data by using the form '{()}', where 
+everything inside the parenthesis is processed like a function. In essence, with the previously described data set, 
+'{('some code here')}' is equivalent to the following functions, where the values of each row are passed in:
+
+function(name, address, gender, age){
+    return 'some code here';
+};
+
+If I wanted to display this information in a table, but I didn't want to display the age if it was over 20. I also 
+wanted to append 'Mr.', or 'Ms.' depending on the gender.My template could take the following form:
+
+'<tr>' +
+    '<td>{( ((gender == "female") ? "Ms. " : "Mr. ") + name )}</td>' +
+    '<td>{( (parseInt(age) > 20) ? '-' : age )}</td>' +
+    '<td>{address}</td>' +
+'</tr>'
+@preserve_format
+*/
 Wui.Template = function(args){ $.extend(this,args); };
 Wui.Template.prototype = {
+    /** The HTML template that the data will fit into. Null value will cause an error to be thrown. Specification required. */
     template:   null,
+    
+    /** A single record to be applied to the template. Null value will cause an error to be thrown. Specification required.  */
     data:       null,
+    
+    /**
+    @param {number} [index] An optional number to make an index available to the record
+    @return A jQuery object containing the template paired with its data
+    Creates the template 
+    */
     make:       function(index){
                     var me = this;
                     if(me.data && me.template){
@@ -1127,7 +1321,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     });
                 },
     itemSelect: function(itm, silent){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                    var me = this, 
+                        dn = (me.name) ? '.' + me.name : ''
+                        old = [];
+                    
+                    if(me.selected.length > 0 && !me.multiSelect && !silent){
+                        var old = $.extend(true,[],me.selected);
+                        me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
+                    }
                         
                     me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
                     itm.el.addClass('wui-selected').attr('tabindex',1).focus();
@@ -1145,7 +1346,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     itemDeselect:function(itm){
                     var me = this, dn = (me.name) ? '.' + me.name : '';
 
-                    itm.el.removeClass('wui-selected');
+                    if(me.selected.length > 0)
+                        itm.el.removeClass('wui-selected');
+                    
                     me.selected = [];
                     me.el.trigger($.Event('wuideselect' + dn),[me, itm.el, itm.rec])
                         .trigger($.Event('wuichange' + dn), [me, itm.el, itm.rec, me.selected])
@@ -1192,13 +1395,16 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     onRender:   function(){
                     var me = this;
 
-                    Wui.O.prototype.onRender.call(this);
+                    if(me.rendered !== true){
+                        // Loads data per the method appropriate for the object
+                        if(me.autoLoad){
+                            if(this.url === null)   me.make();
+                            else                    me.loadData();
+                        }
 
-                    // Loads data per the method appropriate for the object
-                    if(me.autoLoad){
-                        if(this.url === null)   me.make();
-                        else                    me.loadData();
-                    }                   
+                        Wui.O.prototype.onRender.call(this);
+                    }
+                                       
                 },
     selectAjacent:function(num){
                         var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();

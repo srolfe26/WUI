@@ -76,6 +76,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     if(itm.ftype && !(itm instanceof Wui.FormField)){
                         var ft = itm.ftype.split('.');
 
+                        itm.labelPosition = itm.labelPosition || me.labelPosition;
                         itm.labelSize = itm.labelSize || me.labelSize;
                         
                         switch (ft.length) {
@@ -304,6 +305,13 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                         });
                         me.elAlias = me.el;
                         me.el = me.lbl.el.append(me.elAlias);
+
+                        // Expose label methods at the formField's level
+                        $.extend(me,{
+                            setLabel: function(){ me.lbl.setLabel.apply(me.lbl, arguments); },
+                            setLabelSize: function(){ me.lbl.setLabelSize.apply(me.lbl, arguments); },
+                            setLabelPosition: function(){ me.lbl.setLabelPosition.apply(me.lbl, arguments); }
+                        });
                     }
 
                     return me.el;
@@ -311,22 +319,24 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     onRender:   function(){
                     var me = this;
 
-                    if(me.disabled)
-                        me.disable();
-                    if(typeof me.value != 'undefined' && me.value !== null)
-                        me.val(me.value,false);
+                    if(me.rendered !== true){
+                        if(me.disabled)
+                            me.disable();
+                        if(typeof me.value != 'undefined' && me.value !== null)
+                            me.val(me.value,false);
 
-                    Wui.O.prototype.onRender.call(this);
+                        Wui.O.prototype.onRender.call(me);
+                    }
                 },
     disable:    function(){
                     this.disabled = true;
                     if(this.el && this.el.addClass)
-                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr({readonly: true, tabIndex:-1});
                 },
     enable:        function(){
                     this.disabled = false;
                     if(this.el && this.el.addClass)
-                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled=disabled]').removeAttr('disabled');
+                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[readonly]').removeAttr('readonly tabIndex');
                 },
     validate:   function(){
                     var me = this,
@@ -454,20 +464,22 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
     onRender:       function(){
                         var me = this;
 
-                        Wui.FormField.prototype.onRender.call(me);
+                        if(me.rendered !== true){
+                            Wui.FormField.prototype.onRender.call(me);
 
-                        // Add a character counter - must be done outside the character counter
-                        if($.isNumeric(me.maxChars) && me.counter === true){
-                            me.append(me.charCounter = $('<output>',{tabindex:-1, for:me.id}).addClass('wui-char-counter'));
-                            me.field.keyup(function(){
-                                var initVal = (me.val()) ? me.maxChars - me.val().length : me.maxChars;
-                                
-                                me.charCounter.text(initVal);
-                                if(initVal >= 0)    me.charCounter.css('color','#333');
-                                else                me.charCounter.css('color','#900');
-                            });
+                            // Add a character counter - must be done outside the character counter
+                            if($.isNumeric(me.maxChars) && me.counter === true){
+                                me.append(me.charCounter = $('<output>',{tabindex:-1, for:me.id}).addClass('wui-char-counter'));
+                                me.field.keyup(function(){
+                                    var initVal = (me.val()) ? me.maxChars - me.val().length : me.maxChars;
+                                    
+                                    me.charCounter.text(initVal);
+                                    if(initVal >= 0)    me.charCounter.css('color','#333');
+                                    else                me.charCounter.css('color','#900');
+                                });
 
-                            me.field.keyup();
+                                me.field.keyup();
+                            }
                         }
                     },
     setBlankText:   function(bt){
@@ -923,7 +935,7 @@ Wui.Combo = function(args){
 Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     close:      function(){ 
                     this._open = false;
-                    this.dd.hide(); 
+                    this.dd.css('display','none');
                 },
     applyAttr:  function(name,val){
                     var validVal = (typeof val === 'string' || typeof val === 'number');
@@ -1016,13 +1028,15 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                         me.ddSwitch.el.mousedown(function(){ me.isBlurring = false; });
                     }
                 },
+    /** Override Wui.Datalist.onRender to make it do nothing */
     onRender:   function(){
-                    var me = this;
+                    if(this.rendered !== true){
+                        // Loads data per the method appropriate for the object
+                        if(this.autoLoad && this.url !== null)  this.loadData();
+                        else if(this.url === null)              this.make();
 
-                    if(me.autoLoad && me.url !== null)  me.loadData();
-                    else if(me.url === null)            me.make();
-
-                    Wui.FormField.prototype.onRender.call(me);
+                        Wui.FormField.prototype.onRender.apply(this,arguments);
+                    }
                 },
     itemSelect: function(itm, silent){
                     var me = this;
@@ -1069,8 +1083,6 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                             if(!selectedItm)    me.notFound(me.value);
                             else                me.set();
                         }
-
-                        Wui.positionItem(me.field,me.dd);
                     },0);
                 },
     modifyItem: function(itm){ return itm.el.data('itm',itm); },
@@ -1085,7 +1097,8 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){ 
                         if(evnt.target !== me.field[0]) me.close(); 
                     });
-                    $('body').append(me.dd.width(width).show());
+                    $('body').append(me.dd.css({width:width, display:'block'}));
+
                     Wui.positionItem(me.field,me.dd);
                     me.scrollToCurrent();
                 },
@@ -1122,6 +1135,21 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                         itm = me.selected.length ? me.selected[0].el[fn](selector+':first') : container.children(selector+theEnd);
 
                     return me.selectByEl(itm);
+                },
+    selectBy:   function(key,val){
+                    var me = this, retVal = undefined;
+                    me.each(function(itm){
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
+                            return retVal = me.itemSelect(itm);
+                    });
+                    return retVal;
+                },
+    selectByEl: function(el){
+                    var me = this, retVal = undefined;
+
+                    me.itemSelect(retVal = me.getItemByEl(el));
+                    
+                    return retVal;
                 },
     set:        function(){
                     var me = this;
