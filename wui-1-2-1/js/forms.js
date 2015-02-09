@@ -1,8 +1,8 @@
-/*! Wui 1.3
+/*! Wui 1.2.1
  * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation
  *
  * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.3/license.html
+ * https://static.usurf.usu.edu/resources/wui-1.2.1/license.html
  */
 
 (function($,Wui) {
@@ -67,16 +67,6 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     if(typeof me.id === 'undefined' || me.id === null)
                         me.id = Wui.id('wui-form');
                 },
-    onRender:   function(){
-                    var me = this;
-
-                    if(!me.rendered){
-                        if(me.items === undefined) me.items = [];
-                        me.each(function(itm,i){ me.items[i] = me.normFrmItem(itm); });
-                        Wui.O.prototype.onRender.call(me);
-                        return Wui.O.prototype.place.apply(me,arguments);
-                    }
-                },
     normFrmItem:function(itm){
                     var me = this;
 
@@ -84,13 +74,10 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     if(!(itm.disabled && itm.disabled === true)) $.extend(itm,{disabled: me.disabled});
 
                     if(itm.ftype && !(itm instanceof Wui.FormField)){
-                        // If a field has its labelPosition defined then leave it alone, otherwise use the form's value.
-                        if(!(itm.labelPosition)) $.extend(itm,{labelPosition: me.labelPosition});
-                        // If a field has its labelSize defined then leave it alone, otherwise use the form's value.
-                        if(!(itm.labelSize)) $.extend(itm,{labelSize: me.labelSize});
-                        
                         var ft = itm.ftype.split('.');
 
+                        itm.labelSize = itm.labelSize || me.labelSize;
+                        
                         switch (ft.length) {
                             case 1:
                                 if(window[ft[0]])   return new window[ft[0]](itm);
@@ -110,18 +97,29 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                             break;
                             default:
                                 throw('Object type ' +itm.ftype+ ' is not defined.');
+                            break;
                         }
                     }else if(itm instanceof Wui.FormField){
                         // If a field has a label, make it match the format of the form.
                         if(itm.lbl){
-                            itm.lbl.setLabelPosition(me.labelPosition);
-                            itm.lbl.setLabelSize(me.labelSize);
+                            itm.labelSize = itm.labelSize || me.labelSize;
+                            itm.lbl.setLabelPosition(itm.labelPosition || me.labelPosition);
+                            itm.lbl.setLabelSize(itm.labelSize || me.labelSize);
                         }
-
                         return itm;
                     }else{
                         return itm;
                     }
+                },
+    place:      function(){
+                    var me = this;
+
+                    if(me.items === undefined) me.items = [];
+                    me.each(function(itm,i){ 
+                        itm = me.items[i] = me.normFrmItem(itm);
+                        if(itm.onRender) setTimeout(function(){ itm.onRender(); },0);
+                    });
+                    return Wui.O.prototype.place.apply(me,arguments);
                 },
     push:       function(){
                     var me = this, itms = [];
@@ -164,8 +162,14 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     else    {    this.each(function(itm){ itm.val(null,fireEvents); }, true); }
                     this.formChange(false);
                 },
-    disable:    function(){ return this.each(function(itm){ itm.disable(); }, true); },
-    enable:     function(){ return this.each(function(itm){ itm.enable(); }, true); },
+    disable:    function(){ 
+                    this.disabled = true; 
+                    return this.each(function(itm){ itm.disable(); }, true); 
+                },
+    enable:     function(){ 
+                    this.disabled = false; 
+                    return this.each(function(itm){ itm.enable(); }, true); 
+                },
     setField:   function(fieldname, v){
                     this.each(function(itm){ if(itm.name == fieldname) itm.val(v); }, true);
                 },
@@ -222,56 +226,29 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             this.label.html(this.html = newLabel);
                             return this.label.html();
                         },
-    verifyPosition:     function(pos){
-                            if(pos && (pos = pos.toLowerCase()) && $.inArray(pos,['top', 'left', 'bottom', 'right']) >= 0)
-                                return pos;
-                            else
-                                return this.labelPosition;
-                        },
     setLabelSize:       function(size){
-                            var me = this;
+                            var me = this,
+                                dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width',
+                                altDim = (dimension == 'height') ? 'width' : 'height',
+                                cssObj = {};
+
                             size = $.isNumeric(size) ? size : me.labelSize;
 
-                            // Clear out and reset the size of el padding
-                            me.el.css({
-                                paddingLeft:    '',
-                                paddingRight:   '',
-                                paddingTop:     '',
-                                paddingBottom:  ''
-                            });
-                            // Clear out and reset the size of the label
-                            me.label.css({
-                                width:          '',
-                                height:         '',
-                                marginLeft:     '',
-                                marginRight:    ''
-                            });
+                            cssObj[dimension] = size;
+                            cssObj[altDim] = '';
+                            me.label.css(cssObj);
 
-                            if($.isNumeric(size)){
-                                var dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
-                                
-                                me.el.css('padding-' + me.labelPosition, size);
-
-                                me.label.css(dimension, size);
-                                if(me.field)
-                                    me.field.labelSize = me.labelSize = size;
-                            }
-
-                            me.adjustField();
-                        },
-    adjustField:        function(){
-                            var me = this, dimension = ($.inArray(me.labelPosition,['top','bottom']) >= 0) ? 'height' : 'width';
-                            if(me.field && dimension == 'width' && me.label.outerHeight() > me.field.el.height()){
-                                me.field.el.css('min-height', me.label.outerHeight());
-                            }
+                            if(me.field)
+                                me.field.labelSize = me.labelSize = size;
                         },
 
-    setLabelPosition:   function(position){
-                            var me = this;
+    setLabelPosition:   function(pos){
+                            var me = this,
+                            position = (pos && (pos = pos.toLowerCase()) && $.inArray(pos,['top', 'left', 'bottom', 'right']) >= 0) ? pos : me.labelPosition;
 
-                            position = me.verifyPosition(position);
                             me.el.removeClass('lbl-' + me.labelPosition).addClass('lbl-' + position);
-                            if(me.field)    me.field.labelPosition = position;
+                            if(me.field)
+                                me.field.labelPosition = position;
                             
                             me.labelPosition = position;
                             me.setLabelSize();
@@ -338,8 +315,6 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                         me.disable();
                     if(typeof me.value != 'undefined' && me.value !== null)
                         me.val(me.value,false);
-                    if(me.lbl)
-                        me.lbl.adjustField();
 
                     Wui.O.prototype.onRender.call(this);
                 },
@@ -536,15 +511,8 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
                 },
     cssByParam: function(){
                     Wui.O.prototype.cssByParam.apply(this,arguments);
-                    var lblVert = (this.lbl && $.inArray(this.lbl.labelPosition,['top','bottom']) >= 0) ? this.lbl.label.outerHeight() : 0;
-                    this.el.css({
-                        height:     '',
-                        minHeight:  (this.height)
-                    });
-                    this.field.css({
-                        height:     '',
-                        minHeight:  (this.height - lblVert)
-                    }); 
+                    this.field.css({ height: this.height });
+                    this.el.css({ height: '' });
                 }
 });
 
@@ -570,6 +538,11 @@ Wui.Wysiwyg = function(args){
     this.init();
 };
 Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
+    cssByParam: function(){
+                    Wui.O.prototype.cssByParam.apply(this,arguments);
+                    this.field.css({ height: this.height });
+                    this.el.css({ height: '' });
+                },
     init:       function(){
                     var me = this,
                         iframeId = Wui.id();
@@ -804,8 +777,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     
                     $.each(me.options,function(i,itm){
                         itm.name = me.name;
-                        if(i !== 0) itm.id = Wui.id('wui-form-multiple');
-                        else        itm.id = me.id;
+                        itm.id = Wui.id('wui-form-multiple');
                         
                         ul.append(
                             tplEngine.make(tplEngine.data = itm)
@@ -834,13 +806,6 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     me.append(ul);
                 },
     elemChange: function(elem){ this.val(elem.val()); },
-    // onRender:   function(){
-    //                 var me = this;
-    //                 me.el.find('input').each(function(){
-    //                     $(this).css({ margin:'0 5px 0' + ((me.buttonStyle ? -1 : 0) * (5 + $(this).outerWidth())) + 'px' });
-    //                 });
-    //                 Wui.FormField.prototype.onRender.call(me);
-    //             },
     getVal:     function(){ return this.value; },
     setChanged: function(oldVal){
                     var me = this;
@@ -1297,18 +1262,23 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                     var me = this;
                     
                     me.items = [
-                        me.urlField = new Wui.Text({cls:'wui-link-third wui-link-focus', blankText:'URL', linkData:'uri'}),
-                        me.titleField = new Wui.Text({cls:'wui-link-third', blankText:'Display Text', linkData:'title'}),
-                        me.targetField = new Wui.Combo({
-                            cls:'wui-link-third no-margin', valueItem: 'target', titleItem:'name', blankText:'Target', keepInline:true,
-                            data:[{target:'_self', name:'Opens In Same Window'}, {target:'_blank', name:'Opens In New Window/Tab'}], linkData:'target'
+                        me.urlField     = new Wui.Text({ cls:'wui-link-focus', blankText:'URL', linkData:'uri' }),
+                        me.titleField   = new Wui.Text({ blankText:'Display Text', linkData:'title'}),
+                        me.targetField  = new Wui.Combo({
+                            valueItem:  'target', 
+                            titleItem:  'name', 
+                            blankText:  'Target', 
+                            keepInline: true,
+                            data:       [{target:'_self', name:'Opens In Same Window'}, {target:'_blank', name:'Opens In New Window/Tab'}], 
+                            linkData:   'target',
+                            cls:        'no-margin'
                         })
                     ];
                     
                     Wui.FormField.prototype.init.call(me);
-                    me.value = { target:'_self', title:null, uri:null };
+                    me.value = { target: '_self', title: null, uri: null };
                     
-                    me.el.append(me.elAlias = $('<div>').addClass('wui-hyperlink'));
+                    (me.elAlias || me.el).addClass('wui-hyperlink');
                     
                     //additional listeners and initial value for target
                     me.setListeners(me.urlField,me.titleField,me.targetField);
@@ -1576,6 +1546,8 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
 
                         Wui.Text.prototype.init.call(me);
 
+                        me.el.addClass('wui-datetime');
+
                         // Limit field to dates only if specified
                         if(me.dateOnly){
                             if(!me.hasOwnProperty('dispFormat')) me.dispFormat = 'ddd MM-dd-yyyy';
@@ -1656,10 +1628,9 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         return finalNum;
                     },
     makeCalendar:   function(dt,onSelect,controlVal){
-                        controlVal = this.validDate(controlVal) ? controlVal : this.value;
-
                         var me = this,
                             today = new Date(),
+                            controlVal = this.validDate(controlVal) ? controlVal : this.value,
                             calDate = dt || (me.validDate(controlVal) ? controlVal : today),
                             dn = (me.name) ? '.' + me.name : '',
                             calendar = $('<div>').addClass('wui-cal');
@@ -1769,7 +1740,21 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         }
                     },
     setListeners:   function(t){
-                        return t.field.on('input', function(){ t.processDate(); });
+                        if(t.listnersSet !== true){
+                            t.listnersSet = true;
+                            return t.field.on('input', function(){ t.processDate(); }).on('keyup',function(evnt){
+                                if(evnt.keyCode == 40 || evnt.keyCode == 38){
+                                    var addVal = (t.value instanceof Date) ? (evnt.keyCode == 40) ? 1 : -1 : 0,
+                                        dt = (t.value instanceof Date) ? t.value : new Date();
+                                    
+                                    t.value = dt.addDays(addVal);
+                                    t.displayDate();
+                                    t.field.val(t.value.toString(t.dtFormat));
+                                }
+                            });
+                        }else{
+                            return t.field;
+                        }
                     },
     setMinDate:     function(minDt){ 
                         var me = this;
@@ -1941,9 +1926,21 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
 });
 
 
+/**
+@author Dan Perry (dan.perry@usurf.usu.edu)
+An HTML5 file tool than can upload files via ajax.
+To upload files via AJAX successfully, the form data must be processed with Wui.forAjaxFileUpload().
+See the documentation of Wui.forAjaxFileUpload() for more information.
+
+Because File can upload via AJAX, it doesn't require the tight server coupling that
+Wui.File() does, and thus doesn't have to be extended to be immediately useful.
+*/
 Wui.File = function(args) {
     $.extend(this,{
+        /** Sets the accept attribute on the html element */
         accept:     null,
+
+        /** When set to true, allows the user to select multiple files to upload */
         multiple:   false,
         field:      $('<input>').attr({type:'file'})
     },args);
@@ -1951,6 +1948,14 @@ Wui.File = function(args) {
 };
 
 Wui.File.prototype = $.extend(new Wui.Text(), {
+    disable:function(){
+                    this.disabled = true;
+                    this.field.attr('disabled','true');
+            },
+    enable: function(){
+                    this.disabled = false;
+                    this.field.removeAttr('disabled');
+            },
     init:   function(){
                 var me = this;
                 Wui.Text.prototype.init.call(me);
@@ -1961,10 +1966,14 @@ Wui.File.prototype = $.extend(new Wui.Text(), {
 
                 if(me.accept && me.accept.length)
                     me.field.attr('accept', me.accept);
+
+                me.field.change(function(){
+                    me.field.trigger($.Event('filechanged'), [me, me.field[0].files]);
+                });
             },
     validTest:function(v){ 
                 if(this.required) 
-                    return v.length !== 0;
+                    return (v !== null && v.length !== 0);
 
                 return true;
             },

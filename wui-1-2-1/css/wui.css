@@ -10,7 +10,7 @@
 /****************************************   FONTS & COLORS   *****************************************/
 .wui-pane, .wui-pane *, .wui-form, .wui-lbl, .wui-button, .wui-lbl *, .wui-fe, .wui-fe *, 
 .ui-datepicker, .wui-cal, .wui-combo-dd, .wui-cal-day {
-    font-family: 'Open Sans', sans-serif;
+    font-family: Arial, Helvetica, Verdana, sans-serif;
     font-size: 14px; 
     text-decoration: none;
     -moz-box-sizing:    border-box;
@@ -19,7 +19,7 @@
 }
 
 .wui-lbl > label, .wui-button, .wui-gc div:first-child { font-size: 0.9rem; } 
-.wui-checkbox label, .wui-radio label, .wui-fe input, .wui-fe textarea, .wui-editor, .wui-gc:after, .wui-grid .wui-pane-content * { font-size: 0.8rem; }
+.wui-checkbox ul label, .wui-radio ul label, .wui-fe input, .wui-fe textarea, .wui-editor, .wui-gc:after, .wui-grid .wui-pane-content * { font-size: 0.8rem; }
 .feedback, .wui-char-counter { font-size: 0.7rem; }
 .wui-pane, .wui-form, .wui-button, .wui-fe input, .wui-fe textarea, .wui-editor { color:#4f4f4f; }
 
@@ -28,15 +28,14 @@
     padding:6px;
     background-color: #7F7F7F;
     position: relative;
-    overflow: hidden;
     box-shadow: inset 0px -2px 10px rgba(50,50,50,0.33);
+    display: flex;
 }
 
 .wui-pane-content {
     overflow: auto;
     background: #fff;
-    width: 100%;
-    height: 100%;
+    flex: 1;
     position: relative;
 }
 
@@ -189,45 +188,35 @@ button::-moz-focus-inner { border:0; }
 
 /* labels */
 .wui-lbl {
-    position:relative; 
-    padding-top:26px; 
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
     margin:0.75em 0; 
     height:auto;
 }
-
-.wui-lbl:first-child {margin-top: 0;}
+.wui-lbl .wui-fe { flex: 1; }
 
 .wui-lbl > label {
     display:block; 
     font-weight:bold;
-    position:absolute; 
-    left:0; 
-    top:0; 
+    width: 100%;
     line-height:26px;
 }
 
-.wui-lbl.lbl-left { padding:0 0 0 200px; }
-.wui-lbl.lbl-right > label, .wui-lbl.lbl-left > label { 
-    margin-right:5px; 
-    width:195px; 
-    text-align:right;
+.wui-lbl.lbl-left > label { 
+    width:200px; 
+    padding-right: 5px;
+    text-align: right; 
 }
-.wui-lbl.lbl-left > label {padding-right: 5px;}
-
-.wui-lbl.lbl-right { padding:0 200px 0 0; }
-.wui-lbl.lbl-right > label { width:200px; 
-    padding-left:5px; 
-    margin-right:0; 
-    text-align:left; 
-    left:auto; 
-    right:0; 
+.wui-lbl.lbl-right > label {
+    order: 2;
+    padding-left: 5px;
+    width: 200px;
 }
-
-.wui-lbl.lbl-bottom { padding:0 0 26px 0; }
-.wui-lbl.lbl-bottom > label { top:auto; bottom:0; }
+.wui-lbl.lbl-bottom > label { order:2; }
 
 /* general form element */
-.wui-fe {position:relative; text-align:left;}
+.wui-fe { position:relative; text-align:left; }
 
 /* textfield / textarea */
 .wui-fe input, .wui-fe textarea, .wui-editor { 
@@ -235,8 +224,9 @@ button::-moz-focus-inner { border:0; }
     width:100%; 
     border-radius:4px;
 }
-.wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-button.field-btn {border-color:#bbb;}
-.wui-fe input, .wui-fe textarea, .wui-editor, .button li label { background-color:#ddd; 
+.wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-button.field-btn { border-color:#bbb; }
+.wui-fe input, .wui-fe textarea, .wui-editor, .button li label { 
+    background-color:#ddd; 
     border-width:1px; 
     border-style:solid; 
 }
@@ -245,7 +235,8 @@ button::-moz-focus-inner { border:0; }
     border-color:#999; 
 }
 .wui-fe .empty { color:#777; }
-.wui-fe textarea { height:100%; 
+.wui-fe textarea { 
+    height:100%; 
     width:100%; 
     max-height:100%; 
     max-width:100%; 
@@ -265,11 +256,7 @@ button::-moz-focus-inner { border:0; }
     padding:0;
 }
 .wui-radio li, .wui-checkbox li {padding-left: 2em; position: relative;}
-.wui-radio input, .wui-checkbox input {
-    position: absolute; 
-    left:4px;
-    top:7px;
-}
+.wui-radio input, .wui-checkbox input { position: absolute; left:4px; }
 .wui-radio input, .wui-checkbox input, .wui-radio ul label, .wui-checkbox ul label { width:auto; }
 
 .wui-radio ul.button, .wui-checkbox ul.button {
@@ -333,13 +320,11 @@ button::-moz-focus-inner { border:0; }
     .wui-combo input {padding-right:30px;}
 
 /* hyperlink */
-.wui-link-third {
-    display:inline-block; width:19%; margin-right:1%; 
-    -webkit-transition: all 0.33s linear; transition: all 0.33s linear;
-}
-.wui-link-third.wui-fe input, .wui-link-third > div {min-width:100%;}
-.wui-link-third.no-margin {margin-right:0;}
-.wui-link-third.wui-link-focus {display:inline-block; width:60%;}
+.wui-hyperlink { display:flex; }
+.wui-hyperlink > .wui-fe { flex:1; margin-right: 0.5em; }
+.wui-hyperlink .wui-fe.no-margin { margin-right: 0; }
+.wui-hyperlink > .wui-fe:last-child {margin-right:0;}
+.wui-hyperlink .wui-link-focus { width:60%; flex:none; }
 
 
 /* date picker / date range */
@@ -388,7 +373,7 @@ button::-moz-focus-inner { border:0; }
 
 
 /****************************************   JHTMLArea WYSIWYG Styles   *****************************************/
-.wui-wysiwyg .wui-fe, .wui-wysiwyg.wui-fe {height: 100px; max-width: 100%; min-height:70px;}
+.wui-wysiwyg .wui-fe, .wui-wysiwyg.wui-fe { max-width: 100%; min-height:70px; }
 .wui-editor { height:100%; min-height: 70px; padding-bottom:28px;}
 
 .wui-editor-tools {
@@ -435,3 +420,40 @@ button::-moz-focus-inner { border:0; }
     color: #999; 
 }
 .wui-disabled .button li > input:checked + label { color: #999; }
+
+
+/**************************************   Form Elements in TBar and BBar  **************************************/
+.wui-h-bar .wui-form {
+    align-items: center;
+    display: flex;
+    flex: 1 1 0;
+    padding: 0;
+}
+
+.wui-h-bar .wui-lbl { flex: 1 1 0; margin:0; }
+.wui-h-bar .wui-lbl > label { width: auto; height: auto; padding:0 5px; }
+
+/* For Radio & Checkbox */
+.wui-h-bar .wui-radio ul, .wui-h-bar .wui-checkbox ul { display: flex; line-height: 26px; }
+.wui-h-bar .wui-radio input, .wui-h-bar .wui-checkbox input { top:4px; }
+
+.wui-h-bar .wui-datetime input[type="text"] {
+    border: 0 none;
+    box-shadow: 0 8px #ddd;
+    height: 18px;
+    margin-bottom: 9px;
+    position: relative;
+    text-transform: uppercase;
+    top: 1px;
+}
+.wui-h-bar .wui-datetime input:focus { box-shadow: 0 8px #eee; }
+.wui-h-bar .wui-datetime .feedback {
+    bottom: 0;
+    color: #999;
+    font-size: 0.6rem;
+    left: 4px;
+    position: absolute;
+}
+
+
+
