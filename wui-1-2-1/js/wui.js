@@ -78,17 +78,22 @@ Wui.fit = function(collection,dim){
                                 }else{
                                     return (dim == 'width') ? 'row' : 'column';
                                 }
-                            })()
+                            })(),
+            fitCount    =   0;
 
         dim = (dir == 'row') ? 'width' : 'height';
+
+        // Make sure the container is filled properly
+        collection.forEach(function(itm){ if(itm.fit >= 0) fitCount += itm.fit; });
+        if(fitCount < 1) collection[collection.length - 1].fit = 1;
 
         // Make the containing element flex
         parentEl.css( 'display', Wui.cssCheck('flex') ).css( Wui.cssCheck('flex-direction'), dir );
        
         // Apply CSS Flex properties
-        $.each(collection,function(i,itm){
+        collection.forEach(function(itm,i){
             var css = {};
-            if(itm.fit){
+            if(itm.fit >= 0){
                 css[Wui.cssCheck('flex-grow')] = itm.fit;
                 css[dim] = '';
             }else if(itm.cssByParam === undefined){

@@ -27,7 +27,6 @@
                 attr:       {style:'margin-top:1em;'},
                 tbar:       [
                                 new Wui.Form({
-                                    labelPosition:'left',
                                     items:  [
                                                 {ftype:'Wui.Toggle', opt1:'Hey', opt2:'Hi', name:'hide_me', value:'Hi', width:70, toggleHeight:22 },
                                                 {ftype:'Wui.Hidden', label:'Hey Strangers!', name:'hide_me', value:'asdf'},
@@ -60,14 +59,12 @@
                             ],
                 bbar:       [
                                 new Wui.Form({
-                                    labelPosition:'left',
                                     items:  [
                                                 {ftype:'Wui.Checkbox', label:'Single Checkbox', name:'checkey', width:150},
                                                 new Wui.Checkbox({
                                                         label:          'Your favorite colors:',
                                                         name:           'colors',
                                                         buttonStyle:    true,
-                                                        labelPosition:  'left',
                                                         value:          ["orange", "green"],
                                                         options:        [
                                                                             {val:'red', title:'Red'},
@@ -108,7 +105,7 @@
 
             // Form within a pane
             bars2 = new Wui.Pane({
-                height:     300,
+                height:     320,
                 attr:       {style:'margin-top:1em;'},
                 tbar:       [
                                 new Wui.Text({
@@ -166,7 +163,6 @@
                                                         label:          'Your favorite colors:',
                                                         name:           'colors',
                                                         buttonStyle:    true,
-                                                        labelPosition:  'left',
                                                         value:          ["orange", "green"],
                                                         options:        [
                                                                             {val:'red', title:'Red'},
@@ -180,6 +176,7 @@
                                                 new Wui.Radio({
                                                         label:          'Vegetables',
                                                         name:           'veggies',
+                                                        labelPosition:  'top',
                                                         value:          2,
                                                         options:        [
                                                                             {val:0, title:'Tomatoes'},
@@ -206,7 +203,6 @@
                                         label:          'Your favorite colors:',
                                         name:           'colors',
                                         buttonStyle:    true,
-                                        labelPosition:  'left',
                                         value:          ["orange", "green"],
                                         options:        [
                                                             {val:'red', title:'Red'},
@@ -275,7 +271,6 @@
                                     label:          'Your favorite colors:',
                                     name:           'colors',
                                     buttonStyle:    true,
-                                    labelPosition:  'left',
                                     value:          ["orange", "green"],
                                     options:        [
                                                         {val:'red', title:'Red'},
@@ -310,81 +305,6 @@
                         ]
             });
             form.place();
-
-            // Form within a pane
-            // pane = new Wui.Pane({
-            //     height:     400,
-            //     items:      [
-            //                     new Wui.Form({
-            //                         labelPosition:'left',
-            //                         items:  [
-            //                                     {ftype:'Wui.Hidden', label:'Hey Strangers!', name:'hide_me', value:'asdf'},
-            //                                     {
-            //                                         ftype:'Wui.Text', 
-            //                                         label:'Hey Stranger', 
-            //                                         name:'hoo_ha', 
-            //                                         counter:true, 
-            //                                         maxChars:40, 
-            //                                         value:'Stephen Nielsen is the coolest person ever.'
-            //                                     },
-            //                                     {ftype:'Wui.Textarea', label:'Goob', name:'goober', height:150},
-            //                                     {
-            //                                         ftype:'Wui.Combo',
-            //                                         name:'asdf',
-            //                                         label:'Combo!!',
-            //                                         valueItem: 'id',
-            //                                         titleItem: 'name',
-            //                                         data:   [
-            //                                                     {id:'1', name:'Steve'},
-            //                                                     {id:'2', name:'Dave'},
-            //                                                     {id:'3', name:'Ben'},
-            //                                                     {id:'4', name:'Clint'}
-            //                                                 ]
-            //                                     },
-            //                                     {ftype:'Wui.Link', label:'Link', name:'linc'},
-            //                                     {ftype:'Wui.Datetime', label:'DateTime', name:'dt', dtFormat:'yyyy-MM-dd HH:mm:ss', value:'today'},
-            //                                     {ftype:'Wui.Checkbox', label:'Single Checkbox', name:'checkey'},
-            //                                     new Wui.Checkbox({
-            //                                             label:          'Your favorite colors:',
-            //                                             name:           'colors',
-            //                                             buttonStyle:    true,
-            //                                             labelPosition:  'left',
-            //                                             value:          ["orange", "green"],
-            //                                             options:        [
-            //                                                                 {val:'red', title:'Red'},
-            //                                                                 {val:'orange', title:'Orange'},
-            //                                                                 {val:'yellow', title:'Yellow'},
-            //                                                                 {val:'green', title:'Green'},
-            //                                                                 {val:'blue', title:'Blue'},
-            //                                                                 {val:'purple', title:'Purple'}
-            //                                                             ]
-            //                                         }),
-            //                                     new Wui.Radio({
-            //                                             label:          'Vegetables',
-            //                                             name:           'veggies',
-            //                                             value:          2,
-            //                                             options:        [
-            //                                                                 {val:0, title:'Tomatoes'},
-            //                                                                 {val:1, title:'Celery'},
-            //                                                                 {val:2, title:'Cucumber'},
-            //                                                                 {val:3, title:'Carrots'}
-            //                                                             ]
-            //                                         }),
-            //                                     new Wui.Radio({
-            //                                             label:          'Best Lord Of The Rings Movie',
-            //                                             name:           'lotr',
-            //                                             buttonStyle:    true,
-            //                                             options:        [
-            //                                                                 {val:1, title:'Fellowship of the Ring'},
-            //                                                                 {val:2, title:'Two Towers'},
-            //                                                                 {val:3, title:'Return of the King'}
-            //                                                             ]
-            //                                         })
-            //                                 ]
-            //                     })
-            //                 ]
-            // });
-            // pane.place();
         });
     </script>
 </head>

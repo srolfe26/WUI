@@ -103,9 +103,9 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     }else if(itm instanceof Wui.FormField){
                         // If a field has a label, make it match the format of the form.
                         if(itm.lbl){
-                            itm.labelSize = itm.labelSize || me.labelSize;
-                            itm.lbl.setLabelPosition(itm.labelPosition || me.labelPosition);
-                            itm.lbl.setLabelSize(itm.labelSize || me.labelSize);
+                            itm.labelSize = me.labelSize;
+                            // setLabelPosition calls setLabelSize and uses the item's labelSize that we just set.
+                            itm.lbl.setLabelPosition( me.labelPosition );
                         }
                         return itm;
                     }else{
@@ -248,6 +248,7 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             position = (pos && (pos = pos.toLowerCase()) && $.inArray(pos,['top', 'left', 'bottom', 'right']) >= 0) ? pos : me.labelPosition;
 
                             me.el.removeClass('lbl-' + me.labelPosition).addClass('lbl-' + position);
+                            
                             if(me.field)
                                 me.field.labelPosition = position;
                             
@@ -294,7 +295,7 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
 
                     if(!(me.id && me.id.length !== 0) || !me.hasOwnProperty('id'))
                         me.id = me.name;
-                    
+
                     if(me.label && me.label.length > 0){
                         me.lbl = new Wui.Label({
                             html:           me.label, 

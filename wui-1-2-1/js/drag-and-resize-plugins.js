@@ -52,7 +52,8 @@
             afterResize:null
         }, opt);
 
-        var resizeCls = (opt.direction == 'se') ? 'resize-nub' : 'resize-bar';
+        var isSE = (opt.direction == 'se'),
+            resizeCls = isSE ? 'resize-nub' : 'resize-bar';
 
         return $obj.css('overflow','visible')
         .mousedown(function(){
@@ -61,12 +62,15 @@
         })
         .append(
             $('<div>').addClass(resizeCls)
+            .click(function(evnt){ evnt.stopPropagation(); })
             .mousedown(function(e){
                 var startLeft = parseInt($obj.css('left')),
                     startTop = parseInt($obj.css('top'));
 
                 startX = e.clientX;
                 startY = e.clientY;
+
+                $obj.addClass('wui-resizing').css({ flex:'', width:$obj.css('width'), height:$obj.css('height') });
 
                 if(typeof opt.resizeStart == 'function')
                     opt.resizeStart($obj);
@@ -76,7 +80,7 @@
                     var xDif =      e2.clientX - startX,
                         yDif =      e2.clientY - startY,
                         newWidth =  startWidth + xDif * (opt.anchored ? 1 : 2),
-                        newHeight = startHeight + yDif * (opt.anchored ? 1 : 2),
+                        newHeight = isSE ? startHeight + yDif * (opt.anchored ? 1 : 2) : $obj.css('height'),
                         startL =    (function(){
                                         if(newWidth < opt.minWidth){
                                             xDif = 0;
@@ -112,6 +116,8 @@
         function mouseUp(){
             var width = $obj.outerWidth(),
                 height= $obj.outerHeight();
+
+            $obj.removeClass('wui-resizing');
 
             if(startWidth != width || startHeight != height){
                 $(document).off('mousemove.resizes');
