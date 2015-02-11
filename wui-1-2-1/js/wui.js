@@ -1374,7 +1374,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                                 itm = {el:te.make(i), rec:rec};
                                 
                             Array.prototype.push.call(me.items,itm);
-                            me.elAlias.append(me.createItem(itm));
+                            (me.elAlias || me.el).append(me.createItem(itm));
 
                             if(i + 1 == maxI){
                                 // Event hook and event
