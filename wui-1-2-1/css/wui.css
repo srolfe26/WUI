@@ -646,18 +646,13 @@ button::-moz-focus-inner { border:0; }
 
 
 
-/*** Hidden columns, not quite implemented in javascript ***/
- /*  
-    
-.wui-pane-content > .wg-loader {left:48%; top:45%;}
-.wui-pane-content > .wg-loader.hidden {left:0; top:0;}
-
-.grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}
-.grid-body table {border-collapse:collapse;}
+/*** Infinite Grid Styles ***/
+/*.grid-body {width:100%; max-width: 100%; min-width: 100%; border-top:1px solid #fff; overflow:auto; position: absolute; background:#fff; color:#444;}*/
+.wui-infinite-grid .grid-body { 
+    overflow: auto;
+    position: relative;
+}
 .grid-body table.wui-infinite-table {position: absolute; left:0; top:0;}
 
 .wui-paging-pad {position:relative; width:1px;}
 .wui-paging-pad table {position:absolute; left:0;}
-*/
-
-

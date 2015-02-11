@@ -66,7 +66,7 @@
         afterSet:        function(retData){
                             var me = this;
                             
-                            if(me.isPaging && me.tbl.children().length > 0){
+                            if(me.tbl.children().length > 0){
                                 if(me.total > me.data.length){
                                     me.addRows(retData);
                                     me.rowHeight = me.tbl.find('tr:first').outerHeight();
@@ -101,6 +101,24 @@
                             }
                         },
 
+        setGridVars:    function(){
+                            var me = this;
+                            
+                            // Define object internal variables
+                            me.tblContainer = $('<div><div>&nbsp;</div><table></table></div>').addClass('grid-body');
+                            me.tbl = me.tblContainer.children('table').addClass('wui-infinite-table');
+                            me.tblHSize = me.tblContainer.children('div').addClass('wui-ghs');
+                            me.heading = $('<div>').addClass('wui-gh').appendTo(me.elAlias);
+                            me.sorters = [];
+                            me.renderers = [];
+                            me.originalSort = me.paging.sort || null;
+                            
+                            //Add listeners to table for paging
+                            me.tblContainer.scroll(function(){ me.pagingScroll(); });
+                            
+                            me.elAlias.append(me.tblContainer,me.heading);
+                        },
+
         /** 
         Method that will run immediately when the object is constructed. Creates necessary 
         DOM elements for the grid. Establishes whether the grid is remote or local, paging
@@ -108,31 +126,8 @@
         init:            function(){
                             var me = this;
                                 
-                            Wui.Pane.prototype.init.call(me);
-                            me.el.addClass('wui-grid wui-infinite-grid');
-                            
-                            // Define object internal variables
-                            me.tblContainer = $('<div><div>&nbsp;</div><table></table></div>').addClass('grid-body');
-                            me.headingContainer = $('<div><ul></ul></div>').addClass('wui-gh');
-                            me.tbl = me.tblContainer.children('table').addClass('wui-infinite-table');
-                            me.tblHSize = me.tblContainer.children('div').addClass('wui-ghs');
-                            me.heading = me.headingContainer.children('ul');
-                            me.sorters = [];
-                            me.renderers = [];
-                            me.originalSort = me.paging.sort || null;
-                            
-                            //Add listeners to table
-                            me.tblContainer.scroll(function(){
-                                // paging scrolling
-                                if(me.isPaging) me.pagingScroll();
-
-                                me.headingContainer.scrollLeft($(this).scrollLeft());
-                            });
-                            
-                            me.elAlias.append(me.tblContainer,me.headingContainer);
-                            
-                            if(me.hideHeader)
-                                me.headingContainer.height(0);
+                            Wui.Grid.prototype.init.call(this);
+                            this.el.addClass('wui-infinite-grid');
                         },
 
         /** 
@@ -143,15 +138,13 @@
                             var me = this;
                             me.addRows(me.data);
                             
-                            if(me.isPaging){
-                                me.rowHeight = me.tbl.find('tr:first').outerHeight();
-                                me.totalPages = Math.floor(me.total/me.paging.limit);
-                                me.alignPagingSort();
-                                me.totalHeight = me.total * me.rowHeight;
+                            me.rowHeight = me.tbl.find('tr:first').outerHeight();
+                            me.totalPages = Math.floor(me.total/me.paging.limit);
+                            me.alignPagingSort();
+                            me.totalHeight = me.total * me.rowHeight;
 
-                                if(me.tblHSize)
-                                    me.tblHSize.height(me.totalHeight);
-                            }
+                            if(me.tblHSize)
+                                me.tblHSize.height(me.totalHeight);
 
                             // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
                             // object has been manually run
@@ -208,18 +201,15 @@
                             }
 
                             // Add/remove classes to indicate to the user what is being sorted and take care of paging
-                            if(me.isPaging){
-                                me.paging.sort = [];
+                            me.paging.sort = [];
                                 
-                                if(me.sorters.length === 0)
-                                    me.alignPagingSort();
-                            }
+                            if(me.sorters.length === 0)
+                                me.alignPagingSort();
                                 
                             me.sorters.forEach(function(itm,i){
                                 itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir.toLowerCase()).addClass(itm.cls);
 
-                                if(me.isPaging)
-                                    me.paging.sort.push({dataItem:itm.dataItem, order:itm.sortDir});
+                                me.paging.sort.push({dataItem:itm.dataItem, order:itm.sortDir});
                             });
                         },
 
@@ -262,47 +252,27 @@
                         var me = this;
 
                         // If paging then do the sorting on the server
-                        if(me.isPaging === true){
-                            me.currPage = -1;
-                            me.tbl.scroll();
-                        }else{
-                            // Sort the list
-                            var listitems = me.items;
-                            listitems.sort(function(a, b){ return me.doSort(0, a, b); });
-
-                            me.tbl.detach();
-                            // Place items and reset alternate coloring
-                            $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
-                            me.tbl.appendTo(me.tblContainer);
-                            me.sizeCols();
-                            me.resetSelect();
-                        }
+                        me.currPage = -1;
+                        me.tbl.scroll();
                     },
 
         /** Overrides Wui.DataList.scrollToCurrent to turn of scrolling on the infinite grid. */
-        scrollToCurrent:function(){
-                            if(!this.isPaging)
-                                Wui.DataList.prototype.scrollToCurrent.apply(this,arguments);
-                        },
+        scrollToCurrent:function(){},
 
         /** Overrides Wui.Data.setParams and allows for adding the infinite scroll parameters. */
         setParams:  function(){
                     var me = this;
-                    
-                    if(me.paging !== null && typeof me.paging === 'object'){
-                        me.isPaging = true;
-                        $.extend(me.params,{limit:me.paging.limit, start: me.paging.start, sort:JSON.stringify(me.paging.sort)});
 
-                        if(typeof arguments[0] === 'object' && typeof arguments[0]['start'] === 'undefined')
-                            $.extend(arguments[0],{start:0});
-                    }
+                    $.extend(me.params,{limit:me.paging.limit, start: me.paging.start, sort:JSON.stringify(me.paging.sort)});
+
+                    if(typeof arguments[0] === 'object' && typeof arguments[0]['start'] === 'undefined')
+                        $.extend(arguments[0],{start:0});
+
                     return Wui.Data.prototype.setParams.apply(me,arguments);
                 },
 
         setData:        function(){
                             Wui.DataList.prototype.setData.apply(this,arguments);
-                            if(!this.isPaging)
-                                this.sortList();
                             this.sizeCols();
                         }
     });

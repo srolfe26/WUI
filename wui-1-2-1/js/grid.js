@@ -260,7 +260,17 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         //throw('There are no columns defined for this WUI Grid.');
                     }    
                 },
-    
+    setGridVars:function(){
+                    var me = this;
+
+                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
+                    me.heading = $('<div>').addClass('wui-gh').appendTo(me.elAlias);
+                    me.elAlias = me.tbl = me.tblContainer.children('table');
+
+                    // columns and sorting on multiple columns
+                    me.cols = [];
+                    me.sorters = [];
+                },
     /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
     init:       function(){
                     var me = this;
@@ -270,14 +280,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     me.el.addClass('wui-grid');
 
                     // Add grid specific DOM elements and reset elAlias
-                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
-                    me.heading = $('<div>').addClass('wui-gh').appendTo(me.elAlias);
-                    me.elAlias = me.tbl = me.tblContainer.children('table');
+                    me.setGridVars();
                     
-                    // columns and sorting on multiple columns
-                    me.cols = [];
-                    me.sorters = [];
-
                     // Add sorting menu
                     $('body').append( 
                         me.dd = $(

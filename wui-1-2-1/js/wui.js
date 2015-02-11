@@ -100,10 +100,12 @@ Wui.fit = function(collection,dim){
                 css[dim] = itm[dim];
                 css[Wui.cssCheck('flex-grow')] = '';
             }
+            
+            // Use extend the object returned by cssByParam so that we don't call $.css() too much
+            if(itm.cssByParam)  
+                $.extend(css,itm.cssByParam(true));
 
             $(itm.el).css(css);
-            if(itm.cssByParam)  
-                itm.cssByParam();
         });
     }else{
         console.log('Improper collection specified', arguments, arguments.callee.caller);
@@ -273,9 +275,6 @@ Wui.O.prototype = {
 
                     if(obj.cssByParam)
                         obj.cssByParam();
-
-                    if(typeof obj.parent === 'undefined')
-                        obj.layout();
                     
                     return obj;
                 },
@@ -308,10 +307,13 @@ Wui.O.prototype = {
                     el.children().remove();
                 },
 
-    cssByParam: function(){
+    cssByParam: function(returnObj){
                     var me = this, el = me.el, a, cssParamObj = {};
 
                     me.argsByParam();
+
+                    // Layout items
+                    if(typeof me.parent === 'undefined') me.layout();
 
                     // Add attributes if defined
                     try{ if(me.attr && typeof me.attr == 'object')  el.attr(me.attr); }catch(e){ }
@@ -333,7 +335,8 @@ Wui.O.prototype = {
                     // hide an object based on its hidden value
                     if(me.hidden) $.extend(cssParamObj,'display','none');
 
-                    return el.addClass(me.cls).css(cssParamObj);
+                    if(returnObj === true)  return cssParamObj;
+                    else                    return ( ($.isEmptyObject(cssParamObj)) ? el.addClass(me.cls) : el.addClass(me.cls).css(cssParamObj) );
                 },
 
     each:       function(f,ascending){
