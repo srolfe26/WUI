@@ -320,10 +320,12 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
 
                     if(this.cols.length) this.sizeCols();
                 },
+
+    layoutKids: function(){},
                     
     /** Overrides DataList.loadData(), to add the load mask */   
     loadData:   function(){
-                    this.MaskHTML = 'Loading <span class="wui-spinner"></span>';
+                    this.maskHTML = 'Loading <i class="fa fa-spinner fa-spin"></i>';
                     this.addMask();
                     return Wui.Data.prototype.loadData.apply(this,arguments);
                 },            

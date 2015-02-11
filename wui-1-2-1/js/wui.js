@@ -168,7 +168,7 @@ Wui.maxZ = function(){
 Wui.percentToPixels = function(el,percent,dim){
     var parent = el.parent(),
         useWindow = (parent[0] === $(window)[0] || parent[0] === $('html')[0] || parent[0] === $('body')[0]),
-        parentSize = (useWindow) ? ((dim == 'height') ? verge.viewportH() : verge.viewportW()) : parent[dim]();
+        parentSize = (useWindow) ? ((dim == 'height') ? $.viewportH() : $.viewportW()) : parent[dim]();
     return Math.floor((parseFloat(percent) / 100) * parentSize);
 };
 
@@ -178,11 +178,11 @@ Wui.positionItem = function(parent,child){
         cWidth  =   child.outerWidth(),
         cHeight =   child.outerHeight(),
         plBelow =   (function(){
-                        var retVal = ofst.top + parent.outerHeight() + cHeight < verge.viewportH();
+                        var retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
 
                         if(!retVal && (ofst.top - cHeight < 0)){
                             cHeight = ofst.top -5;
-                            retVal = ofst.top + parent.outerHeight() + cHeight < verge.viewportH();
+                            retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
                         }else{
                             cHeight = '';
                         }
@@ -399,7 +399,7 @@ Wui.O.prototype = {
                     var me = this, needFit = false;
 
                     // Perform Wui.fit on items that need it
-                    me.each(function(itm){ if(itm.fit){ needFit = true; return false; }});
+                    me.items.forEach(function(itm){ if(itm.fit){ needFit = true; return false; }});
                     
                     if((me.fitDimension || needFit) && me.items.length)
                         Wui.fit(me.items, (me.fitDimension || undefined));
@@ -416,7 +416,7 @@ Wui.O.prototype = {
                 },
 
     layoutKids: function(){
-                    this.each(function(itm){ if(typeof itm.layout == 'function') itm.layout(); });
+                    this.items.forEach(function(itm){ if(itm.layout) itm.layout(); });
                 },
 
     onRender:   function(){ 
@@ -431,11 +431,11 @@ Wui.O.prototype = {
 
     place:      function(after){
                     var me = this;
-                    
+
                     // Adds the objects items if any
                     if(me.items === undefined) me.items = [];
 
-                    me.each(function(itm){ 
+                    me.items.forEach(function(itm){ 
                         itm.parent = me;
                         if(itm.place)    itm.place();
                         else             me.addToDOM(itm);
@@ -544,7 +544,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     .html(me.text)
                     .attr({title:me.toolTip, tabindex:me.tabIndex});
                     
-                    if(me.disabled)    me.disable();
+                    // if(me.disabled)    me.disable();
                     
                     function btnClick(e){
                         if(!me.disabled)
@@ -600,8 +600,8 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         var me = this;
 
                         me.addMask();
-                        me.footer.each(function(itm){ if(itm.disable) itm.disable(); });
-                        me.header.each(function(itm){ if(itm.disable) itm.disable(); });
+                        me.footer.items.forEach(function(itm){ if(itm.disable) itm.disable(); });
+                        me.header.items.forEach(function(itm){ if(itm.disable) itm.disable(); });
 
                         return me.disabled = true;
                     },   
@@ -609,8 +609,8 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         var me = this;
 
                         me.removeMask();
-                        me.footer.each(function(itm){ if(itm.enable) itm.enable(); });
-                        me.header.each(function(itm){ if(itm.enable) itm.enable(); });
+                        me.footer.items.forEach(function(itm){ if(itm.enable) itm.enable(); });
+                        me.header.items.forEach(function(itm){ if(itm.enable) itm.enable(); });
 
                         return me.disabled = false;
                     },
@@ -698,20 +698,14 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                             // After all of the work done by flexbox, Chrome has a lousy implementation that requires
                             // setting the content explicitly with JS
-                            if(parseInt(this.container.height()) != this.el.height()){
+                            if(parseInt(this.container.height()) != this.el.height())
                                 this.container.css('height', this.el.height());
-                                console.log(this.el.height());
-                            }
                         }
                         this.rendered = true; 
                     },
     removeMask:     function(){
-                        var me = this, mask = me.mask || me.el.find('.wui-mask');
-                        
-                        if(mask){
-                            mask.remove();
-                            me.mask = undefined;
-                        }
+                        this.el.find('.wui-mask').fadeOut(500, function(){ $(this).remove(); });
+                        this.mask = undefined;
                     },
     setTitle:       function(t){ 
                         var me = this,
@@ -869,7 +863,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                         headHeight = (me.header && $.isNumeric(me.header.el.outerHeight())) ? me.header.el.outerHeight() : 0,
                         footHeight = (me.footer && $.isNumeric(me.footer.el.outerHeight())) ? me.footer.el.outerHeight() : 0,
                         headersHeight = headHeight + footHeight,
-                        useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= verge.viewportH()) ? (verge.viewportH() - 10) : 
+                        useHeight = (arguments.length) ? resizeHeight : (totalHeight + headersHeight >= $.viewportH()) ? ($.viewportH() - 10) : 
                                         (containerHeight <= totalHeight && !me.hasOwnProperty('height')) ? totalHeight + headersHeight : 
                                             Wui.isPercent(me.height) ? Wui.percentToPixels(me.windowEl, me.height, 'height') : me.height;
 
@@ -878,10 +872,10 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                         var cssParamObj = { height: useHeight, width: (arguments.length) ? resizeWidth : undefined },
                             posLeft =   (me.windowLeft) 
                                             ? ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) 
-                                            : Math.floor((verge.viewportW() / 2) - (me.windowEl.width() / 2)),
+                                            : Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)),
                             posTop =    (me.windowTop) 
                                             ? ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) 
-                                            : Math.floor((verge.viewportH() / 2) - (useHeight / 2));
+                                            : Math.floor(($.viewportH() / 2) - (useHeight / 2));
                         me.windowEl.css( $.extend(cssParamObj, { top:posTop, left:posLeft }) );
 
                         me.fireResize();
@@ -1426,7 +1420,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     getItemByEl:function(el){
                     var me = this, retVal = undefined;
 
-                    me.each(function(itm){ if(itm.el[0] == el[0]) retVal = itm; });
+                    me.items.forEach(function(itm){ if(itm.el[0] == el[0]) retVal = itm; });
                     
                     return retVal;
                 },
@@ -1474,7 +1468,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     },
     selectBy:   function(key,val){
                     var me = this, retVal = undefined;
-                    me.each(function(itm){
+                    me.items.forEach(function(itm){
                         if(itm.rec[key] !== undefined && itm.rec[key] == val)
                             return retVal = me.itemSelect(itm);
                     });
