@@ -154,8 +154,8 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     setGridVars:function(){
                     var me = this;
 
-                    me.tblContainer = $('<div><table></table></div>').addClass('grid-body').appendTo(me.elAlias);
-                    me.heading = $('<div>').addClass('wui-gh').appendTo(me.elAlias);
+                    me.tblContainer = $('<div><table></table></div>').addClass('w121-grid-body').appendTo(me.elAlias);
+                    me.heading = $('<div>').addClass('w121-gh').appendTo(me.elAlias);
                     me.elAlias = me.tbl = me.tblContainer.children('table');
 
                     // columns and sorting on multiple columns
@@ -168,7 +168,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     // Set up container
                     Wui.Pane.prototype.init.call(me);
-                    me.el.addClass('wui-grid');
+                    me.el.addClass('w121-grid');
 
                     // Add grid specific DOM elements and reset elAlias
                     me.setGridVars();
@@ -181,7 +181,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                                 '<li>Decending</li>' +
                                 '<li>No Sort</li>' +
                             '<ul>'
-                        ).addClass('wui-sort-menu')
+                        ).addClass('w121-sort-menu')
                         .attr({ id: me.idCls = Wui.id() })
                         .on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
                     );
@@ -247,7 +247,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             if(col.sortDir){
                                 if(col.sortDir == 'desc'){
                                     delete col.sortDir;
-                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                    col.el.removeClass().addClass('w121-gc').addClass(col.cls);
                                     
                                     for(var i = me.sorters.length; i > 0; i--)
                                         if(me.sorters[i - 1].el == col.el)
@@ -258,7 +258,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             }else{
                                 // Can't sort on more than 5 columns
                                 if(me.sorters.length > 5){
-                                    col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                    col.el.removeClass().addClass('w121-gc').addClass(col.cls);
                                     return false;
                                 }
                                 
@@ -269,7 +269,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     }
 
                     $.each(me.sorters,function(i,itm){
-                        itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
+                        itm.el.removeClass().addClass('w121-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
                     });
                 },
     
@@ -334,7 +334,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         width:      col.width === undefined ? 0 : col.width,
                         el:         $('<div>').append($('<div>').text(col.heading))
                                         .attr({unselectable:'on'})
-                                        .addClass('wui-gc ' + col.cls)
+                                        .addClass('w121-gc ' + col.cls)
                     });
                     
                     col.el.css({
@@ -363,7 +363,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         });
                         col.el.click(function(){ me.sortList(col); });
                     }else{
-                        col.el.addClass('wui-no-sort');
+                        col.el.addClass('w121-no-sort');
                     }             
 
                     //grids with single columns shouldn't have a resizable option

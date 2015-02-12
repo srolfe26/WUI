@@ -145,7 +145,7 @@ Wui.getKeys = function(obj){
 
 Wui.id = function(prefix){
     if(Wui.idCounter === undefined) Wui.idCounter = 0;
-    return ((prefix && prefix.length !== 0) ? prefix + '-' : 'wui-') + Wui.idCounter++;
+    return ((prefix && prefix.length !== 0) ? prefix + '-' : 'w121-') + Wui.idCounter++;
 };
 
 
@@ -424,11 +424,14 @@ Wui.O.prototype = {
 
     onRender:   function(){ 
                     if(this.rendered !== true){
-                        if(this.items === undefined) this.items = [];
+                        if(this.items === undefined) 
+                            this.items = [];
+
                         this.items.forEach(function(itm){ 
                             if(itm.onRender) setTimeout(function(){ itm.onRender(); },0);
                         });
                     }
+                    
                     this.rendered = true; 
                 },
 
@@ -537,7 +540,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     var me = this;
                     
                     me.el
-                    .addClass('wui-button')
+                    .addClass('w121-button')
                     .click(btnClick)
                     .keypress(function(evnt){
                         if(evnt.keyCode == 13 || evnt.keyCode == 32)
@@ -580,9 +583,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
     addMask:        function(target){
                         target = (target) ? target : this.container;
 
-                        if(target.children('wui-mask').length === 0)
+                        if(target.children('w121-mask').length === 0)
                             return this.mask = $('<div>')
-                                                .addClass('wui-mask')
+                                                .addClass('w121-mask')
                                                 .append(
                                                     $('<span>').html(this.maskHTML)
                                                 )
@@ -619,7 +622,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                     },
     init:           function(){
                         var me = this;
-                            el = me.el = $('<div>').addClass('wui-pane');
+                            el = me.el = $('<div>').addClass('w121-pane');
 
                         Wui.O.prototype.init.apply(me,arguments);
 
@@ -634,7 +637,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         me.header = makeBar('tbar',{items: me.tbar});
                         configBar('tbar');
 
-                        el.append( me.elAlias = me.container = $('<div>').addClass('wui-pane-content') );
+                        el.append( me.elAlias = me.container = $('<div>').addClass('w121-pane-content') );
 
                         me.footer = makeBar('bbar',{items: me.bbar});
                         configBar('bbar');
@@ -645,7 +648,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         function makeBar(bar,args){
                             return new Wui.O($.extend({
                                 el:         $('<div>'),
-                                cls:        'wui-' + bar + ' wui-h-bar',
+                                cls:        'w121-' + bar + ' w121-h-bar',
                                 parent:     me,
                                 appendTo:   me.el,
                                 items:      [],
@@ -690,24 +693,28 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         }
                     },
     onRender:   function(){ 
-                        if(this.rendered !== true){
-                            if(this.items === undefined) this.items = [];
-                            this.items.forEach(function(itm){ 
+                        var me = this;
+
+                        if(me.rendered !== true){
+                            if(me.items === undefined) me.items = [];
+                            me.items.forEach(function(itm){ 
                                 if(itm.onRender) setTimeout(function(){ itm.onRender(); },0);
                             });
 
-                            if(this.header) this.header.onRender();
-                            if(this.footer) this.footer.onRender();
+                            if(me.header) me.header.onRender();
+                            if(me.footer) me.footer.onRender();
 
                             // After all of the work done by flexbox, Chrome has a lousy implementation that requires
                             // setting the content explicitly with JS
-                            if(parseInt(this.container.height()) != this.el.height())
-                                this.container.css('height', this.el.height());
+                            setTimeout(function(){
+                                if(parseInt(me.container.height()) != me.el.height())
+                                me.container.css('height', me.el.height());
+                            },0);
                         }
                         this.rendered = true; 
                     },
     removeMask:     function(){
-                        this.el.find('.wui-mask').fadeOut(500, function(){ $(this).remove(); });
+                        this.el.find('.w121-mask').fadeOut(500, function(){ $(this).remove(); });
                         this.mask = undefined;
                     },
     setTitle:       function(t){ 
@@ -718,7 +725,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                         if(t !== null){
                             if(!hasEl)
-                                me.el.prepend( me.titleEl = $('<div class="wui-title">') );
+                                me.el.prepend( me.titleEl = $('<div class="w121-title">') );
 
                             me.el.addClass('title');
                             me.setTitleAlign();
@@ -747,7 +754,7 @@ Wui.Window = function(args){
         border:     true,
         draggable:  true,
         isModal:    false,
-        maskHTML:   'Loading <span class="wui-spinner"></span>',
+        maskHTML:   'Loading <span class="w121-spinner"></span>',
         onWinClose: function(){},
         onWinOpen:  function(){},
         resizable:  true,
@@ -790,7 +797,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
-                        me.modalEl = $('<div>').addClass('wui-overlay');
+                        me.modalEl = $('<div>').addClass('w121-overlay');
                         $('body').append(
                             me.appendTo = me.modalEl.css('z-index',Wui.maxZ()).on('mousewheel',noScroll)
                         );
@@ -808,7 +815,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     
                     // Add window specific properties
                     me.windowEl = me.el
-                    .addClass('wui-window')
+                    .addClass('w121-window')
                     .css('z-index',Wui.maxZ())
                     .click(bringToFront)
                     .on('mousewheel',noScroll);
@@ -1035,7 +1042,7 @@ Wui.Data.prototype = {
                     },
 
     fireDataChanged:function(){
-                        var me = this, dn = (me.name || 'wui-data');
+                        var me = this, dn = (me.name || 'w121-data');
 
                         me.dataChanged(me.data);
                         $(document).trigger($.Event('datachanged.' + dn),[dn, me])
@@ -1210,7 +1217,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         dn = (me.name) ? '.' + me.name : '',
                         el = me.elAlias || me.el;
 
-                    el.find('.wui-selected').removeClass('wui-selected');
+                    el.find('.w121-selected').removeClass('w121-selected');
                     me.selected = [];
                     me.el.trigger($.Event('wuichange' + dn), [me, me.el, {}, me.selected])
                         .trigger($.Event('wuichange'), [me, me.el, {}, me.selected]);
@@ -1261,17 +1268,17 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                             if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
                             else                                                    me.itemSelect(itm);     //change selection
                         }else{
-                            var alreadySelected = $(row).hasClass('wui-selected');
+                            var alreadySelected = $(row).hasClass('w121-selected');
                             
                             if(!e.shiftKey){
                                 // WHEN THE CTRL KEY IS HELD SELECT/DESELECT INDIVIDUAL ITEMS
-                                $(row).toggleClass('wui-selected',!alreadySelected);
+                                $(row).toggleClass('w121-selected',!alreadySelected);
 
                                 if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                                 else                me.selected.push(itm);
                             }else{
                                 // WHEN THE SHIFT KEY IS HELD - SELECT ALL ITEMS BETWEEN TWO POINTS
-                                var firstSelected = me.selectByEl(me.el.find('tr.wui-selected:first')),
+                                var firstSelected = me.selectByEl(me.el.find('tr.w121-selected:first')),
                                     currentSelected = me.getItemByEl($(row)),
                                     dir = (firstSelected.rec.wuiIndex < currentSelected.rec.wuiIndex) ? 1 : -1,
                                     start = (dir > 0) ? firstSelected : currentSelected,
@@ -1279,9 +1286,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                                     currSelection = [];
 
                                 me.selected = currSelection = me.items.slice(start.rec.wuiIndex,end.rec.wuiIndex + 1);
-                                $('wui-selected').removeClass('wui-selected');
+                                $('w121-selected').removeClass('w121-selected');
                                 currSelection.forEach(function(rec){
-                                    rec.el.addClass('wui-selected');
+                                    rec.el.addClass('w121-selected');
                                 });
                             }
 
@@ -1307,7 +1314,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     var me = this;
 
                     if(!(me.name !== null && me.name.length !== 0))
-                        me.name = Wui.id('wui-data-list');
+                        me.name = Wui.id('w121-data-list');
 
                     if(!(me.id !== null && me.id.length !== 0))
                         me.id = me.name;
@@ -1332,8 +1339,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
                     }
                         
-                    me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
-                    itm.el.addClass('wui-selected').attr('tabindex',1).focus();
+                    me.el.find('.w121-selected').removeClass('w121-selected').removeAttr('tabindex');
+                    itm.el.addClass('w121-selected').attr('tabindex',1).focus();
                     me.selected = [itm];
 
 
@@ -1349,7 +1356,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     var me = this, dn = (me.name) ? '.' + me.name : '';
 
                     if(me.selected.length > 0)
-                        itm.el.removeClass('wui-selected');
+                        itm.el.removeClass('w121-selected');
                     
                     me.selected = [];
                     me.el.trigger($.Event('wuideselect' + dn),[me, itm.el, itm.rec])
@@ -1445,7 +1452,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                                 
                                 if(sameRec){
                                     if(me.multiSelect){
-                                        itm.el.addClass('wui-selected');
+                                        itm.el.addClass('w121-selected');
                                         me.selected.push(itm, true);
                                     }else{
                                         me.itemSelect(itm);
@@ -1460,7 +1467,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     scrollToCurrent:function(){
                         var me = this,
                             el = me.elAlias || me.el,
-                            firstSelect = el.find('.wui-selected:first'),
+                            firstSelect = el.find('.w121-selected:first'),
                             ofstP = firstSelect.offsetParent(),
                             offset = (function(){ 
                                 var r = 0; 
@@ -1482,7 +1489,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
 
 Wui.msg = function(msg, msgTitle, callback, content){
-    var cntnt = [new Wui.O({el: $('<div>').addClass('wui-msg').html(msg) })];
+    var cntnt = [new Wui.O({el: $('<div>').addClass('w121-msg').html(msg) })];
     
     if(typeof content !== 'undefined'){
         if(typeof content.push == 'function')   cntnt.push.apply(cntnt,content);
@@ -1506,7 +1513,7 @@ Wui.errRpt = function(errMsg, msgTitle, buttons, callback){
 
     if($.isArray(buttons))
         err.footer.push.apply(err.footer,buttons);
-    err.container.find('.wui-msg').addClass('wui-err');
+    err.container.find('.w121-msg').addClass('w121-err');
     err.resize();
 
     return err;

@@ -16,7 +16,7 @@ Wui.Form = function(args){
         labelPosition:  'top',
         labelSize:      null
     }, args, {
-        el:             $('<form>').addClass('wui-form'),
+        el:             $('<form>').addClass('w121-form'),
         errors:         [],
         formChanged:    false
     });
@@ -41,7 +41,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                         ascending
                     );
                 },
-    errCls:     'wui-form-err',
+    errCls:     'w121-form-err',
     getData:    function(){
                     if(this.validate()) { return this.getRawData(); }
                     else                { this.dispErrors(); return false; }
@@ -65,7 +65,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     var me = this;
 
                     if(typeof me.id === 'undefined' || me.id === null)
-                        me.id = Wui.id('wui-form');
+                        me.id = Wui.id('w121-form');
                 },
     normFrmItem:function(itm){
                     var me = this;
@@ -78,6 +78,8 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 
                         itm.labelPosition = itm.labelPosition || me.labelPosition;
                         itm.labelSize = itm.labelSize || me.labelSize;
+
+                        if(ft[0] == 'Wui')  ft[0] = _wuiVar;
                         
                         switch (ft.length) {
                             case 1:
@@ -195,7 +197,7 @@ Wui.Note = function(args){
     this.init();
 };
 Wui.Note.prototype = $.extend(new Wui.O(),{
-    init:   function(){ this.el = $('<div>').html(this.html).addClass('wui-note'); }
+    init:   function(){ this.el = $('<div>').html(this.html).addClass('w121-note'); }
 });
 
 
@@ -212,7 +214,7 @@ Wui.Label = function(args){
 Wui.Label.prototype = $.extend(new Wui.O(),{
     init:               function(){
                             var me = this;
-                            me.el = $('<div>').addClass('wui-lbl').append( 
+                            me.el = $('<div>').addClass('w121-lbl').append( 
                                 me.label = $('<label>',me.attr ? me.attr : {}).addClass(me.cls)
                             );
 
@@ -288,10 +290,10 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     var me = this;
 
                     me.value = me.hasOwnProperty('value') ? me.value : null;
-                    me.el = $('<div>').addClass('wui-fe');
+                    me.el = $('<div>').addClass('w121-fe');
 
                     if(!(me.name && me.name.length !== 0))
-                        me.name = Wui.id('wui-form-field');
+                        me.name = Wui.id('w121-form-field');
 
                     if(!(me.id && me.id.length !== 0) || !me.hasOwnProperty('id'))
                         me.id = me.name;
@@ -332,12 +334,12 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     disable:    function(){
                     this.disabled = true;
                     if(this.el && this.el.addClass)
-                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr({readonly: true, tabIndex:-1});
+                        this.el.addClass('w121-disabled').find('input,textarea,iframe').attr({readonly: true, tabIndex:-1});
                 },
     enable:        function(){
                     this.disabled = false;
                     if(this.el && this.el.addClass)
-                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[readonly]').removeAttr('readonly tabIndex');
+                        this.el.removeClass('w121-disabled').find('.w121-disabled,*[readonly]').removeAttr('readonly tabIndex');
                 },
     validate:   function(){
                     var me = this,
@@ -470,7 +472,7 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
 
                             // Add a character counter - must be done outside the character counter
                             if($.isNumeric(me.maxChars) && me.counter === true){
-                                me.append(me.charCounter = $('<output>',{tabindex:-1, for:me.id}).addClass('wui-char-counter'));
+                                me.append(me.charCounter = $('<output>',{tabindex:-1, for:me.id}).addClass('w121-char-counter'));
                                 me.field.keyup(function(){
                                     var initVal = (me.val()) ? me.maxChars - me.val().length : me.maxChars;
                                     
@@ -644,11 +646,11 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
 
                     Wui.FormField.prototype.init.call(me);
 
-                    me.el.addClass('wui-wysiwyg');
+                    me.el.addClass('w121-wysiwyg');
                     me.append(
                         me.field = $('<textarea>',{tabIndex:-1}).hide(),
-                        me.iframe = $('<iframe>',{id:iframeId}).addClass('wui-editor'),
-                        me.tools = $('<div>').addClass('wui-editor-tools')
+                        me.iframe = $('<iframe>',{id:iframeId}).addClass('w121-editor'),
+                        me.tools = $('<div>').addClass('w121-editor-tools')
                     );
 
                     me.tools.append(
@@ -767,7 +769,7 @@ Wui.Radio = function(args){
         buttonStyle:false,
         
         /** A default name that should be overridden */
-        name:       'wui-radio',
+        name:       'w121-radio',
         
         /** An array of options to populate the radion/button group */
         options:    [],
@@ -782,7 +784,7 @@ Wui.Radio = function(args){
 Wui.Radio.prototype = $.extend(new Wui.FormField(),{
     init:       function(){
                     Wui.FormField.prototype.init.call(this);
-                    this.el.addClass('wui-radio');
+                    this.el.addClass('w121-radio');
                     
                     var me = this,
                         tplEngine = new Wui.Template({ template:this.template }),
@@ -790,7 +792,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     
                     $.each(me.options,function(i,itm){
                         itm.name = me.name;
-                        itm.id = Wui.id('wui-form-multiple');
+                        itm.id = Wui.id('w121-form-multiple');
                         
                         ul.append(
                             tplEngine.make(tplEngine.data = itm)
@@ -843,7 +845,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
 
 Wui.Checkbox = function(args){ 
     $.extend(this,{
-        name:       'wui-checkbox',
+        name:       'w121-checkbox',
         template:   '<li><input type="checkbox" id="{id}" value="{val}" name="{name}" /><label for="{id}">{title}</label></li>'
     },args);
 this.init(); };
@@ -863,7 +865,7 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
                     if(me.options.length === 0) me.options.push({val:1,title:''});
                     
                     Wui.Radio.prototype.init.call(me);
-                    me.el.removeClass('wui-radio').addClass('wui-checkbox');
+                    me.el.removeClass('w121-radio').addClass('w121-checkbox');
                     
                     //steal label if there is only one option
                     if(me.options.length == 1){
@@ -960,12 +962,12 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                         function hilightText(obj){ 
                             return clearHilight(obj).html( 
                                 obj.text().replace( new RegExp(srchVal,"ig"), function(m){ 
-                                    return "<span class='wui-highlight'>" +m+ "</span>";
+                                    return "<span class='w121-highlight'>" +m+ "</span>";
                                 }) 
                             );
                         }
                         function clearHilight(obj){ 
-                            return obj.find('.wui-highlight').each(function(){ 
+                            return obj.find('.w121-highlight').each(function(){ 
                                 $(this).replaceWith($(this).html()); 
                             }).end(); 
                         }
@@ -978,7 +980,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     // Set up object
                     Wui.FormField.prototype.init.call(me);
-                    me.el.addClass('wui-combo ' + (me.idCls = Wui.id()));
+                    me.el.addClass('w121-combo ' + (me.idCls = Wui.id()));
                     me._open = false;
                     me.identity = me.valueItem;
                     if(typeof me.blankText !== 'undefined')
@@ -987,12 +989,12 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     // Place field elements
                     me.append( 
-                        me.wrapper = $('<div>').addClass('wui-combo').append(
+                        me.wrapper = $('<div>').addClass('w121-combo').append(
                             me.hiddenField,
                             me.setListeners(me)
                         )
                     );
-                    $('body').append( me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls) );
+                    $('body').append( me.dd = $('<ul>').addClass('w121-combo-dd ' + me.ddCls) );
 
                     // Listeners - These listeners must stop propagation or else they
                     // will trigger events for their containing DataLists (like grids with
@@ -1042,8 +1044,8 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     itemSelect: function(itm, silent){
                     var me = this;
 
-                    me.dd.find('.wui-selected').removeClass('wui-selected');
-                    itm.el.addClass('wui-selected');
+                    me.dd.find('.w121-selected').removeClass('w121-selected');
+                    itm.el.addClass('w121-selected');
                     me.selected = [itm];
                     
                     if(!me.multiSelect && !silent){
@@ -1055,7 +1057,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     make:       function(){
                     var me = this;
 
-                    me.elAlias = me.dd.empty().removeClass('wui-spinner');
+                    me.elAlias = me.dd.empty().removeClass('w121-spinner');
                     Wui.DataList.prototype.make.call(me);
                     if(me.data.length === 0)
                         me.elAlias.html(me.emptyMsg);
@@ -1118,7 +1120,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                                     me.val(null);
 
                                 // me.open();
-                                me.dd.addClass('wui-spinner');
+                                me.dd.addClass('w121-spinner');
 
                                 var srchParams = {};
                                 srchParams[me.searchArgName] = srchVal;
@@ -1291,7 +1293,7 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                     var me = this;
                     
                     me.items = [
-                        me.urlField     = new Wui.Text({ cls:'wui-link-focus', blankText:'URL', linkData:'uri' }),
+                        me.urlField     = new Wui.Text({ cls:'w121-link-focus', blankText:'URL', linkData:'uri' }),
                         me.titleField   = new Wui.Text({ blankText:'Display Text', linkData:'title'}),
                         me.targetField  = new Wui.Combo({
                             valueItem:  'target', 
@@ -1307,7 +1309,7 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                     Wui.FormField.prototype.init.call(me);
                     me.value = { target: '_self', title: null, uri: null };
                     
-                    (me.elAlias || me.el).addClass('wui-hyperlink');
+                    (me.elAlias || me.el).addClass('w121-hyperlink');
                     
                     //additional listeners and initial value for target
                     me.setListeners(me.urlField,me.titleField,me.targetField);
@@ -1333,8 +1335,8 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                             me.buildOutput.call(me);
                         })
                         .on('focus',null, itm, function(e){
-                            $.each(flds,function(i,field){ field.el.removeClass('wui-link-focus'); });
-                            e.data.el.addClass('wui-link-focus');
+                            $.each(flds,function(i,field){ field.el.removeClass('w121-link-focus'); });
+                            e.data.el.addClass('w121-link-focus');
                         });
                     });
                 },       
@@ -1575,7 +1577,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
 
                         Wui.Text.prototype.init.call(me);
 
-                        me.el.addClass('wui-datetime');
+                        me.el.addClass('w121-datetime');
 
                         // Limit field to dates only if specified
                         if(me.dateOnly){
@@ -1585,7 +1587,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
 
                         // Add datepicker
                         me.append(
-                            $('<div>').addClass('wui-date').append( 
+                            $('<div>').addClass('w121-date').append( 
                                 me.hiddenField, 
                                 me.setListeners(me), 
                                 me.outputFld = $('<output>',{tabindex:-1, for:me.id}).addClass('feedback'),
@@ -1607,7 +1609,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
 
                                 // Clear the calendar when the user moves away from it
                                 $(document).one('click',function(){
-                                    $('.wui-cal').remove(); me.calendar = undefined;
+                                    $('.w121-cal').remove(); me.calendar = undefined;
                                 });
 
                                 // Position calendar to ensure it will be seen
@@ -1662,7 +1664,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                             controlVal = this.validDate(controlVal) ? controlVal : this.value,
                             calDate = dt || (me.validDate(controlVal) ? controlVal : today),
                             dn = (me.name) ? '.' + me.name : '',
-                            calendar = $('<div>').addClass('wui-cal');
+                            calendar = $('<div>').addClass('w121-cal');
 
                         calendar.append(genHTML(calDate));
                         // Fire event for other controls to respond to calendar reflow
@@ -1679,11 +1681,11 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                                 startingDay = firstDay.getDay(),
                                 monthLength = genDt.getDaysInMonth(),
                                 monthName = me.months[month],
-                                html = '<table wui-month="' +month+ '" wui-year="' +year+ '">';
+                                html = '<table w121-month="' +month+ '" w121-year="' +year+ '">';
                             
                             // Generate Header
-                            html += '<tr><th colspan="7"><div class="wui-cal-header">' + monthName + "&nbsp;" + year + '</div></th></tr>';
-                            html += '<tr class="wui-cal-header-day">';
+                            html += '<tr><th colspan="7"><div class="w121-cal-header">' + monthName + "&nbsp;" + year + '</div></th></tr>';
+                            html += '<tr class="w121-cal-header-day">';
                             for (i = 0; i <= 6; i++)
                                 html += '<td>' +me.shortDays[i].substring(0,2)+ '</td>';
                             html += '</tr><tr>';
@@ -1696,9 +1698,9 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                                     html += '<td>';
                                     if (day <= monthLength && (i > 0 || j >= startingDay)){
                                         var dayDt = new Date(year,month,day),
-                                            disableCls = ((me.minDate && dayDt < me.minDate) || me.maxDate && dayDt > me.maxDate) ? ' wui-cal-disabled' : '';
+                                            disableCls = ((me.minDate && dayDt < me.minDate) || me.maxDate && dayDt > me.maxDate) ? ' w121-cal-disabled' : '';
                                         
-                                        html += '<a class="wui-cal-day' +disableCls+ '">' +(day++)+ '</a>';
+                                        html += '<a class="w121-cal-day' +disableCls+ '">' +(day++)+ '</a>';
                                     }
                                     html += '</td>';
                                 }
@@ -1709,12 +1711,12 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                             html += '</tr></table>';
 
                             var tbl = $(html),
-                                header = tbl.find('.wui-cal-header');
+                                header = tbl.find('.w121-cal-header');
 
                             // Set up listeners
-                            header.append('<a class="wui-cal-prev fa fa-caret-left">','<a class="wui-cal-next fa fa-caret-right">');
+                            header.append('<a class="w121-cal-prev fa fa-caret-left">','<a class="w121-cal-next fa fa-caret-right">');
                             header.children('a').click(function(){
-                                var dir = $(this).hasClass('wui-cal-prev') ? -1 : 1,
+                                var dir = $(this).hasClass('w121-cal-prev') ? -1 : 1,
                                     newDt = new Date(year, month + dir, 1);
 
                                 calendar.empty().append(genHTML(newDt));
@@ -1723,17 +1725,17 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                             });
                             
                             if(controlVal && controlVal.getMonth && controlVal.getMonth() == month && controlVal.getFullYear() == year)
-                                tbl.find('a:contains(' +selectDy+ '):first').addClass('wui-selected');
+                                tbl.find('a:contains(' +selectDy+ '):first').addClass('w121-selected');
                             
                             if(today.getMonth() == month && today.getFullYear() == year)
-                                tbl.find('a:contains(' +today.getDate()+ '):first').addClass('wui-highlight');
+                                tbl.find('a:contains(' +today.getDate()+ '):first').addClass('w121-highlight');
 
-                            tbl.find('td a:not(.wui-cal-disabled)').click(function(){
+                            tbl.find('td a:not(.w121-cal-disabled)').click(function(){
                                 var dt = $(this),
                                     day = parseInt(dt.text()),
-                                    info = dt.parents('[wui-month]'),
-                                    month = parseInt(info.attr('wui-month')),
-                                    year = parseInt(info.attr('wui-year'));
+                                    info = dt.parents('[w121-month]'),
+                                    month = parseInt(info.attr('w121-month')),
+                                    year = parseInt(info.attr('w121-year'));
 
                                 onSelect(year,month,day);
 
@@ -2029,11 +2031,11 @@ Wui.Toggle = function(args){
     },args,{
         field:  $('<input>').attr({type:'hidden'}),
 
-        toggler:$('<div class="wui-toggle-outer">' + 
-                       '<div class="wui-toggler">' + 
-                           '<div class="wui-opt-1"></div>' + 
-                           '<div class="wui-toggle-btn">&nbsp;</div>' + 
-                           '<div class="wui-opt-2"></div>' + 
+        toggler:$('<div class="w121-toggle-outer">' + 
+                       '<div class="w121-toggler">' + 
+                           '<div class="w121-opt-1"></div>' + 
+                           '<div class="w121-toggle-btn">&nbsp;</div>' + 
+                           '<div class="w121-opt-2"></div>' + 
                        '</div>' + 
                 '</div>')
     }); 
@@ -2053,21 +2055,21 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                         me.append(Wui.Toggle.prototype.setListeners.call(me,me));
 
                         // Init Field
-                        me.toggler.find('.wui-opt-1').html(me.opt1);
-                        me.toggler.find('.wui-opt-2').html(me.opt2);
+                        me.toggler.find('.w121-opt-1').html(me.opt1);
+                        me.toggler.find('.w121-opt-2').html(me.opt2);
                         me.val(me.opt1);
 
                         // Add Class and set CSS to desired dimensions
-                        (me.elAlias || me.el).addClass('wui-toggle');
-                        me.el.find('.wui-toggle-outer').height(th - 2).width(me.toggleWidth);
-                        me.el.find('.wui-toggle-outer, .wui-toggle-btn').css('border-radius', me.borderRadius);
-                        me.el.find('.wui-toggle-btn').height(th - 2).width(th - 2).css('left','calc(50% - ' + (th - 2) + 'px)');
-                        me.el.find('.wui-opt-1, .wui-opt-2').css('line-height',(th - 2) + 'px');
-                        me.el.find('.wui-opt-1').css({
+                        (me.elAlias || me.el).addClass('w121-toggle');
+                        me.el.find('.w121-toggle-outer').height(th - 2).width(me.toggleWidth);
+                        me.el.find('.w121-toggle-outer, .w121-toggle-btn').css('border-radius', me.borderRadius);
+                        me.el.find('.w121-toggle-btn').height(th - 2).width(th - 2).css('left','calc(50% - ' + (th - 2) + 'px)');
+                        me.el.find('.w121-opt-1, .w121-opt-2').css('line-height',(th - 2) + 'px');
+                        me.el.find('.w121-opt-1').css({
                             'text-indent':      -(th - me.borderRadius) + (me.borderRadius ? 0 : 2),
                             'background-color': me.opt1Color
                         });
-                        me.el.find('.wui-opt-2').css({
+                        me.el.find('.w121-opt-2').css({
                             'text-indent':      th - me.borderRadius - (me.borderRadius ? 0 : 2),
                             'background-color': me.opt2Color
                         });
@@ -2078,7 +2080,7 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                         
                         t.toggler.click(function(){
                             me.val( (me.value == me.opt1) ? me.opt2 : me.opt1 );
-                            me.el.find('.wui-toggle-btn').css('left','calc(50% - ' + ((me.toggleHeight - 2) * ((me.value == me.opt1) ? 1 : 0)) + 'px)');
+                            me.el.find('.w121-toggle-btn').css('left','calc(50% - ' + ((me.toggleHeight - 2) * ((me.value == me.opt1) ? 1 : 0)) + 'px)');
                         });
                         
                         if(this.setListeners !== Wui.Toggle.prototype.setListeners) this.setListeners(this);
@@ -2088,7 +2090,7 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                          var me = this;
 
                          me.value = sv;
-                         me.toggler[ (me.value == me.opt2) ? 'addClass' : 'removeClass' ]('wui-toggle-alt');
+                         me.toggler[ (me.value == me.opt2) ? 'addClass' : 'removeClass' ]('w121-toggle-alt');
                          me.field.val( me.value ? me.value : '' );
                     }
 });
@@ -2122,17 +2124,14 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
                             Wui.Window.prototype.init.apply(me,arguments);
 
                             me.footer.el.on('wuibtnclick',function(evnt,btn){
-                                if(btn.text == 'Cancel'){
-                                    me.closeOkay = true; me.close();
-                                }else{
-                                    me.getVal();
-                                }
+                                if(btn.text == 'Cancel')    me.doClose();
+                                else                        me.getVal();
                                 evnt.stopPropagation();
                             });
                         },
             isModal:    true,
             items:      [inputFrm],
-            cls:        'wui-input-window',
+            cls:        'w121-input-window',
             width:      600,
             height:     400,
             getVal:     function(){

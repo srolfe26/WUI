@@ -1,3 +1,5 @@
+// This file gets minified and put into plugins
+
 
 (function($) {
     $.fn.drags = function(opt) {
@@ -70,7 +72,7 @@
                 startX = e.clientX;
                 startY = e.clientY;
 
-                $obj.addClass('wui-resizing').css({ flex:'', width:$obj.css('width'), height:$obj.css('height') });
+                $obj.addClass('w121-resizing').css({ flex:'', width:$obj.css('width'), height:$obj.css('height') });
 
                 if(typeof opt.resizeStart == 'function')
                     opt.resizeStart($obj);
@@ -117,7 +119,7 @@
             var width = $obj.outerWidth(),
                 height= $obj.outerHeight();
 
-            $obj.removeClass('wui-resizing');
+            $obj.removeClass('w121-resizing');
 
             if(startWidth != width || startHeight != height){
                 $(document).off('mousemove.resizes');

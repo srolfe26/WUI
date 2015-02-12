@@ -41,35 +41,31 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                             bar =       getBar(posArry[0]); 
 
                         
-                        me.el.addClass('wui-tabs');
+                        me.el.addClass('w121-tabs');
                         
                         //adds the object's items if any
                         if(me.items === undefined) me.items = [];
                         me.each(function(itm,idx){
-                            itm.el.addClass('wui-tab-panel');
-                            itm.tabCls =    'wui-tab ' +
-                                            ((itm.tabCls) ? ' ' + itm.tabCls : '') +
-                                            ((me.tabsLeft) ? ' left' : '');
+                            itm.el.addClass('w121-tab-panel');
+                            itm.tabCls =    'w121-tab ' + ((itm.tabCls) ? ' ' + itm.tabCls : '');
                             
                             if(itm.tabsHideHeader)
-                                itm.el.addClass('wui-hide-heading');
+                                itm.el.addClass('w121-hide-heading');
                             
                             // Add buttons as tabs
                             me[bar].push(
                                 itm.tab = new Wui.Button({
                                     text:   itm.title || 'Tab ' + (parseInt(idx) + 1),
                                     cls:    itm.tabCls,
+                                    tabIndex:1,
                                     pane:   itm
                                 })
                             );
-                            // Adjust existing buttons
-                            if(!me.tabsLeft && me.items.length > 0 && me.items[0] instanceof Wui.Button){
-
-                            }
+                            me[bar].el.addClass((me.tabsLeft) ? ' left' : '');
                         });
 
                         // Add listeners for tab changes
-                        me[bar].el.on('wuibtnclick','.wui-tab',function(evnt,btn){
+                        me[bar].el.on('wuibtnclick','.w121-tab',function(evnt,btn){
                             me.giveFocus(btn.pane);
                         });
                         

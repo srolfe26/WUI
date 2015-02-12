@@ -107,10 +107,10 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                         var me = this;
                         
                         // Define object internal variables
-                        me.tblContainer = $('<div><div>&nbsp;</div><table></table></div>').addClass('grid-body');
-                        me.tbl = me.tblContainer.children('table').addClass('wui-infinite-table');
-                        me.tblHSize = me.tblContainer.children('div').addClass('wui-ghs');
-                        me.heading = $('<div>').addClass('wui-gh').appendTo(me.elAlias);
+                        me.tblContainer = $('<div><div>&nbsp;</div><table></table></div>').addClass('w121-grid-body');
+                        me.tbl = me.tblContainer.children('table').addClass('w121-infinite-table');
+                        me.tblHSize = me.tblContainer.children('div').addClass('w121-ghs');
+                        me.heading = $('<div>').addClass('w121-gh').appendTo(me.elAlias);
                         me.sorters = [];
                         me.renderers = [];
                         me.originalSort = me.paging.sort || null;
@@ -129,7 +129,7 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                         var me = this;
                             
                         Wui.Grid.prototype.init.call(this);
-                        this.el.addClass('wui-infinite-grid');
+                        this.el.addClass('w121-infinite-grid');
                     },
 
     /** 
@@ -139,7 +139,6 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
     make:           function(){
                         var me = this;
                         me.addRows(me.data);
-                        
                         me.rowHeight = me.tbl.find('tr:first').outerHeight();
                         me.totalPages = Math.floor(me.total/me.paging.limit);
                         me.alignPagingSort();
@@ -181,7 +180,7 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                                 if(col.sortDir){
                                     if(col.sortDir.toLowerCase() == 'desc'){
                                         delete col.sortDir;
-                                        col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                        col.el.removeClass().addClass('w121-gc').addClass(col.cls);
                                         
                                         for(i = me.sorters.length; i > 0; i--)
                                             if(me.sorters[i - 1].el == col.el)
@@ -192,7 +191,7 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                                 }else{
                                     // Can't sort on more than 5 columns
                                     if(me.sorters.length > 5){
-                                        col.el.removeClass().addClass('wui-gc').addClass(col.cls);
+                                        col.el.removeClass().addClass('w121-gc').addClass(col.cls);
                                         return false;
                                     }
                                     
@@ -209,7 +208,7 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                             me.alignPagingSort();
                             
                         me.sorters.forEach(function(itm,i){
-                            itm.el.removeClass().addClass('wui-gc ' + sortClasses[i] + ' ' + itm.sortDir.toLowerCase()).addClass(itm.cls);
+                            itm.el.removeClass().addClass('w121-gc ' + sortClasses[i] + ' ' + itm.sortDir.toLowerCase()).addClass(itm.cls);
 
                             me.paging.sort.push({dataItem:itm.dataItem, order:itm.sortDir});
                         });

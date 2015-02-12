@@ -1,10 +1,7 @@
-/*! Wui 1.2.1
- * Copyright (c) 2014 Stephen Rolfe Nielsen - Utah State University Research Foundation 
- *
- * @license MIT
- * https://static.usurf.usu.edu/resources/wui-1.2.1/license.html
- */
 /************************* DATE RANGE OBJECT ****************************/
+(function($,Wui) {
+
+    
 Wui.DateRange = function(args){
     var me = this,
         params = $.extend({
@@ -635,3 +632,6 @@ Wui.Recurrence.prototype = $.extend(new Wui.Text(),{
                         return this.valIsOK || false;
                     }
 });
+
+
+})(jQuery,window[_wuiVar]);
