@@ -706,10 +706,11 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
                             // After all of the work done by flexbox, Chrome has a lousy implementation that requires
                             // setting the content explicitly with JS
-                            setTimeout(function(){
-                                if(parseInt(me.container.height()) != me.el.height())
-                                me.container.css('height', me.el.height());
-                            },0);
+                            if(!(me instanceof Wui.Window))
+                                setTimeout(function(){
+                                    if(parseInt(me.container.height()) != me.el.height())
+                                    me.container.css('height', me.el.height());
+                                },0);
                         }
                         this.rendered = true; 
                     },
@@ -834,6 +835,12 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                             minHeight:  me.minHeight || 200,
                             afterResize:function(){ me.fireResize.apply(me,arguments); }
                         });
+
+                    // Listener for the close buttons
+                    me.el.on('wuibtnclick','[name=window_close]',function(evnt){
+                        me.close();
+                        evnt.stopPropagation();
+                    });
 
                     // Put the window on the body
                     me.place();
@@ -1101,7 +1108,7 @@ Wui.Data.prototype = {
     Same as Array.push() but acting on the data array of the object.
     */
     push:           function(){
-                        var retVal = Array.prototype.push.apply(this.data,arguments);
+                        var retVal = Array.prototype.push.apply(this.data || (this.data = []), arguments);
                         this.total = this.data.length;
                         this.fireDataChanged();
                         return retVal;
@@ -1115,7 +1122,7 @@ Wui.Data.prototype = {
     Same as Array.splice() but acting on the data array of the object.
     */
     splice:         function(){
-                        var retVal = Array.prototype.splice.apply(this.data,arguments);
+                        var retVal = Array.prototype.splice.apply(this.data || (this.data = []), arguments);
                         this.total = this.data.length;
                         this.fireDataChanged();
                         return retVal;
