@@ -544,6 +544,12 @@ Wui.Button = function(args){
     this.init();
 };
 Wui.Button.prototype = $.extend(new Wui.O(),{
+    /** 
+        @deprecated I REALLY want to get rid of this. Click actions should be defined in the controller!
+        @eventhook Event hook for the button click. 
+    */
+    click:      function(){},
+
     disable:    function(){
                     this.disabled = true;
                     this.el
@@ -577,9 +583,13 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     // if(me.disabled)    me.disable();
                     
                     function btnClick(){
-                        if(!me.disabled)
-                            me.el.trigger($.Event('wuibtnclick'),[me]);
-
+                        if(!me.disabled){
+                            Array.prototype.push.call(arguments,me);
+                            me.click.apply(me,arguments);
+                            
+                            me.el.trigger($.Event('wuibtnclick.' + me.id),[me])
+                                .trigger($.Event('wuibtnclick'),[me]);
+                        }
                         return false;
                     }
                 },
