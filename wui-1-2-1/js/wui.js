@@ -74,7 +74,7 @@ Wui.fit = function(collection,dim){
                                     if(typeof d !== 'undefined')
                                         return d;
                                     else
-                                        return 'row'
+                                        return 'row';
                                 }else{
                                     return (dim == 'width') ? 'row' : 'column';
                                 }
@@ -91,7 +91,7 @@ Wui.fit = function(collection,dim){
         parentEl.css( 'display', Wui.cssCheck('flex') ).css( Wui.cssCheck('flex-direction'), dir );
        
         // Apply CSS Flex properties
-        collection.forEach(function(itm,i){
+        collection.forEach(function(itm){
             var css = {};
             if(itm.fit >= 0){
                 css[Wui.cssCheck('flex-grow')] = itm.fit;
@@ -118,7 +118,7 @@ Wui.forAjaxFileUpload = function(obj,addIndex){
 
     // Adds all of the keys in obj to formData
     for (a in obj) {
-        if(obj[a] instanceof FileList) {
+        if(obj[a] instanceof window.FileList) {
             if(obj[a].length > 1 || addIndex){
                 for(x = 0; x < obj[a].length; x++)
                     formData.append(a+'_'+x,obj[a][x]);
@@ -255,51 +255,60 @@ Wui.O.prototype = {
     addToDOM:   function(obj, tgt, act){
                     // Take the target and action from the passed object first if defined, then default to passed arguments, 
                     // then to a default of $('body') and 'append'
-                    var target  = (typeof obj.appendTo != 'undefined') ? obj.appendTo :
-                                    (typeof obj.prependTo != 'undefined') ? obj.prependTo :
-                                        (typeof tgt != 'undefined' && tgt !== null) ? tgt : 
+                    var target  = (obj.appendTo && typeof obj.appendTo !== 'function') ? obj.appendTo :
+                                    (obj.prependTo && typeof obj.prependTo !== 'function') ? obj.prependTo :
+                                        (tgt) ? tgt : 
                                             (obj.parent && typeof obj.parent.elAlias != 'undefined') ? obj.parent.elAlias :
                                                 (obj.parent && typeof obj.parent.el != 'undefined') ? obj.parent.el : $('body'),
-                        action = (typeof obj.appendTo != 'undefined') ? 'append' : 
-                                    (typeof obj.prependTo != 'undefined') ? 'prepend' : 
+                        action = (obj.appendTo && typeof obj.appendTo !== 'function') ? 'append' : 
+                                    (obj.prependTo && typeof obj.prependTo !== 'function') ? 'prepend' : 
                                         (typeof act != 'undefined' && target[act]) ? act : 'append';
 
-                    // Try appending with WUI modifiers, else just append in good ol' jQuery fashion
+                    // Try appending with WUI modifiers, else just append in good ol' jQuery fashion                      
                     try{
-                      $(target)[action](obj.el);
-                    }catch(e){
-                        try{
-                            $(target)[action](obj);
-                        }catch(e){}
-                    }
+                      if(typeof obj.el !== 'undefined') $(target)[action](obj.el);
+                      else                              $(target)[action](obj);
+                    }catch(e){}
 
                     if(obj.cssByParam)
                         obj.cssByParam();
                     
                     return obj;
                 },
+
     afterRender:function(){ this.aftrRenderd = true; },
-    append:     function(obj){
+
+    append:     function(){
                     var me = this, el = me.elAlias || me.el;
-                    $.each(arguments,function(i,itm){
-                        el.append(itm);
-                    });
+
+                    $.each(arguments,function(){ el.append(arguments[1]); });
                 },
 
-    argsByParam:function(){
+    argsByParam:function(altAttr, altTarget){
                     var me = this,
                         applyAttr = {},
+                        applyAltAttr = {},
                         attrs = ['id', 'name', 'tabindex', 'lang', 'title'],
                         wuiAttrs = ['id', 'name', 'tabIndex', 'lang', 'titleAttr'];
 
                     attrs.forEach(function(atr,idx){
                         var attrVal = me[wuiAttrs[idx]];
 
-                        if((typeof attrVal == 'string' || typeof attrVal == 'number'))
-                            applyAttr[atr] = attrVal;
+                        if((typeof attrVal == 'string' || typeof attrVal == 'number')){
+                            if(altTarget && altAttr instanceof Array){
+                                if($.inArray(atr,altAttr) > -1) applyAltAttr[atr] = attrVal;
+                                else                            applyAttr[atr] = attrVal;
+                            }else{
+                                applyAttr[atr] = attrVal;
+                            }
+                        }
+                            
                     });
 
                     $(me.el).attr(applyAttr);
+
+                    if(altTarget)
+                        altTarget.attr(applyAltAttr);
                 },
 
     clear:      function(){
@@ -325,11 +334,11 @@ Wui.O.prototype = {
                     // calculate percentage based dimensions
                     if(Wui.isPercent(me.width)){
                         a = Wui.percentToPixels(el,me.width,'width');
-                        if(a != 0) $.extend(cssParamObj,{width:a, flex:'none'});
+                        if(a !== 0) $.extend(cssParamObj,{width:a, flex:'none'});
                     }
                     if(Wui.isPercent(me.height)){
                         a = Wui.percentToPixels(el,me.height,'height');
-                        if(a != 0) $.extend(cssParamObj,{height:a});
+                        if(a !== 0) $.extend(cssParamObj,{height:a});
                     }
                     
                     // hide an object based on its hidden value
@@ -380,15 +389,16 @@ Wui.O.prototype = {
                     }
                 },
 
-    hide:       function(speed, callback){ 
-                    this.el.hide();
-                    if(typeof callback == 'function')
-                        callback();
+    hide:       function(){ 
+                    this.el.css('display','none');
+                    if(typeof arguments[1] == 'function')
+                        arguments[1]();
+
                     return this.el;
                 },
 
     index:       function(){ 
-                    var me = this, myPosition = undefined;
+                    var me = this, myPosition;
                     if(me.parent){
                         // Get my position within the parental array
                         me.parent.each(function(itm,idx){ if(itm === me) myPosition = idx; });
@@ -396,30 +406,27 @@ Wui.O.prototype = {
                     return myPosition;
                 },
 
-    init:       function(){},
+    init:       function(){ this.items = (this.items !== undefined) ? this.items : []; },
 
     layout:     function(afterLayout){
-                    var me = this, needFit = false;
+                    var me = this, needFit = false, i = 0;
 
-                    // Perform Wui.fit on items that need it
-                    me.items.forEach(function(itm){ if(itm.fit){ needFit = true; return false; }});
-                    
-                    if((me.fitDimension || needFit) && me.items.length)
-                        Wui.fit(me.items, (me.fitDimension || undefined));
-                    
                     if(!me.rendered)       me.onRender();
 
-                    me.layoutKids();
+                    // Perform Wui.fit on items that need it
+                    for(i; i < me.items.length; i++) { 
+                        if(me.items[i].fit)     needFit = true;
+                        if(me.items[i].layout)  me.items[i].layout();
+                    }
+                    
+                    if(me.items.length && (me.fitDimension || needFit))
+                        Wui.fit(me.items, (me.fitDimension || undefined));
 
                     if(!me.aftrRenderd)    me.afterRender();
                     
                     // Performs actions passed in as parameters
                     if(typeof afterLayout === 'function')
                         afterLayout();
-                },
-
-    layoutKids: function(){
-                    this.items.forEach(function(itm){ if(itm.layout) itm.layout(); });
                 },
 
     onRender:   function(){ 
@@ -436,10 +443,7 @@ Wui.O.prototype = {
                 },
 
     place:      function(after){
-                    var me = this;
-
-                    // Adds the objects items if any
-                    if(me.items === undefined) me.items = [];
+                    var me = this, retVal;
 
                     me.items.forEach(function(itm){ 
                         itm.parent = me;
@@ -448,21 +452,25 @@ Wui.O.prototype = {
                     });
                     
                     // Puts the object on the DOM
-                    return me.addToDOM(me);
+                    retVal = me.addToDOM(me);
+
+                    // perform operations on the object after its placed on the DOM but before onRender
+                    if(after && typeof after == 'function')    after(me);
+
+                    return retVal;
                 },
 
     push:       function(){
                     var me = this;
                     
-                    if(me.items === undefined) me.items = [];
-                    
-                    $.each(arguments,function(i,arg){
+                    Array.prototype.forEach.call(arguments,function(arg){
                         arg.parent = me;
+
                         if(arg.place)   arg.place();
                         else            me.addToDOM(arg);
-                    });
 
-                    me.layoutKids();
+                        if(arg.layout)  arg.layout();
+                    });
 
                     return Array.prototype.push.apply(me.items,arguments);
                 },
@@ -472,10 +480,10 @@ Wui.O.prototype = {
                     else            this.el.remove();
                 },
 
-    show:       function(speed, callback){ 
+    show:       function(){ 
                     this.el.show();
-                    if(typeof callback == 'function')
-                        callback();
+                    if(typeof arguments[1] == 'function')
+                        arguments[1]();
                     return this.el;
                 },
 
@@ -483,28 +491,42 @@ Wui.O.prototype = {
                     var me = this,
                         el = me.elAlias || me.el;
                         idx = parseInt(idx);
-
-                    if(me.items === undefined) me.items = [];
                     
-                    //remove specified elements
+                    // remove specified elements
                     for(var i = idx; i < (idx + howMany); i++)
-                        if(me.items[i] && me.items[i].el) me.items[i].el.remove();
+                        if(me.items[i])
+                            (me.items[i].el || me.items[i]).remove();
                     
                     //standard splice functionality on array and calcs
-                    var retVal      = Array.prototype.splice.apply(me.items, arguments),
-                        numAdded    = arguments.length - 2;
-                        
-                    //append any additional el's in proper order
-                    if(me.items.length == numAdded){                    //items ended up replacing the array
-                        for(i = 0; i < me.items.length; i++)          { me.items[i].parent = me; me.addToDOM(me.items[i],el);  }
-                    }else if(me.items[(idx + numAdded)] === undefined){ //meaning the new items were inserted at the end of the array
-                        for(i = idx; i < me.items.length; i++)        { me.items[i].parent = me; me.addToDOM(me.items[i],me.items[i-1].el,'after'); }
-                    }else if (numAdded !== 0){                          //items at the beginning/middle of the array
-                        for(i = (idx + numAdded); i > 0; i--)         { me.items[i-1].parent = me; me.addToDOM(me.items[i-1],me.items[i].el,'before'); }
-                    }
+                    var onEnd       =   idx >= me.items.length,
+                        retVal      =   Array.prototype.splice.apply(me.items, arguments),
+                        addedItms   =   (function(args){
+                                            var added = [];
 
-                    me.layoutKids();
-                    
+                                            for(var i = 2; i < args.length; i++)
+                                                added.push(args[i]);
+
+                                            return added;
+                                        })(arguments),
+                        after       =   (idx !== 0 && !onEnd) ? me.items[idx -1].el || me.items[idx -1] : undefined;
+
+                    addedItms.forEach(function(itm){
+                        itm.parent = me;
+
+                        // Append differently depending on position in the splice
+                        if( idx === 0 && after === undefined ){
+                            me.addToDOM( itm, el, 'prepend' );
+                            after = itm.el || itm;
+                        }else if( onEnd ){
+                            me.addToDOM( itm, el, 'append' );
+                        }else{
+                            me.addToDOM( itm, after, 'after' );
+                            after = itm.el || itm;
+                        }
+
+                        if(itm.layout)  itm.layout();
+                    });
+
                     return retVal;
                 }
 };
@@ -539,6 +561,8 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
     init:       function(){ 
                     var me = this;
                     
+                    Wui.O.prototype.init.call(me);
+
                     me.el
                     .addClass('w121-button')
                     .click(btnClick)
@@ -552,7 +576,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     
                     // if(me.disabled)    me.disable();
                     
-                    function btnClick(e){
+                    function btnClick(){
                         if(!me.disabled)
                             me.el.trigger($.Event('wuibtnclick'),[me]);
 
@@ -584,12 +608,13 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         target = (target) ? target : this.container;
 
                         if(target.children('w121-mask').length === 0)
-                            return this.mask = $('<div>')
-                                                .addClass('w121-mask')
-                                                .append(
-                                                    $('<span>').html(this.maskHTML)
-                                                )
-                                                .appendTo(target);
+                            return (this.mask = $('<div>')
+                                        .addClass('w121-mask')
+                                        .append(
+                                            $('<span>').html(this.maskHTML)
+                                        )
+                                        .appendTo(target)
+                                    );
                         else
                             return null;
                     },
@@ -609,7 +634,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         me.footer.items.forEach(function(itm){ if(itm.disable) itm.disable(); });
                         me.header.items.forEach(function(itm){ if(itm.disable) itm.disable(); });
 
-                        return me.disabled = true;
+                        return (me.disabled = true);
                     },   
     enable:         function(){
                         var me = this;
@@ -618,18 +643,17 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         me.footer.items.forEach(function(itm){ if(itm.enable) itm.enable(); });
                         me.header.items.forEach(function(itm){ if(itm.enable) itm.enable(); });
 
-                        return me.disabled = false;
+                        return (me.disabled = false);
                     },
     init:           function(){
-                        var me = this;
-                            el = me.el = $('<div>').addClass('w121-pane');
-
-                        Wui.O.prototype.init.apply(me,arguments);
+                        var me = this, el = me.el = $('<div>').addClass('w121-pane');
+                    
+                        Wui.O.prototype.init.call(me);
 
                         if(!me.border)      
                             el.addClass('no-border');
 
-                        if(me.title !=null)
+                        if(me.title !== null)
                             me.setTitle(me.title);
 
                         // Add the header before the content so that tabbing between buttons/items in the header
@@ -651,7 +675,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                 cls:        'w121-' + bar + ' w121-h-bar',
                                 parent:     me,
                                 appendTo:   me.el,
-                                items:      [],
                                 splice:     function(){ 
                                                 var retVar = Wui.O.prototype.splice.apply(this,arguments);
                                                 configBar(bar);
@@ -790,7 +813,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
     fireResize: function(winEl,width,height){
                     var me = this;
                     me.layout();
-                    me.container.trigger($.Event('resize'),[me.container.width(), me.container.height(),me,width,height]);
+                    me.container.trigger( $.Event('resize'), [me.container.width(), me.container.height(), me, width, height, winEl] );
                 },
     init:       function(){
                     var me = this;
@@ -809,17 +832,17 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                         me.closeBtn = new Wui.Button({ text:'X', name:'window_close' })
                     );
                     if(me.bbar.length === 0) 
-                        me.bbar = [new Wui.Button({ text:'Close', name:'window_close' })];
+                        me.bbar = [ new Wui.Button({ text:'Close', name:'window_close' }) ];
                     
                     // Calls the parent init function
                     Wui.Pane.prototype.init.apply(me,arguments);
                     
                     // Add window specific properties
                     me.windowEl = me.el
-                    .addClass('w121-window')
-                    .css('z-index',Wui.maxZ())
-                    .click(bringToFront)
-                    .on('mousewheel',noScroll);
+                        .addClass('w121-window')
+                        .css('z-index',Wui.maxZ())
+                        .click(bringToFront)
+                        .on('mousewheel',noScroll);
                     
                     // Add draggable
                     if(me.draggable === true)
@@ -849,18 +872,18 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     if(me.isModal)    me.el = me.modalEl;
                     
                     me.onWinOpen(me);
-                    me.windowEl.trigger($.Event('open'),[me]);
+                    me.windowEl.trigger( $.Event('open'), [me] );
 
                     function noScroll(evnt){ evnt.stopPropagation(); }
 
-                    function bringToFront(e){
+                    function bringToFront(){
                         var maxZ = Wui.maxZ();
                         if(parseInt((me.el.css('z-index')) || 1) <= maxZ){
                             me.el.css('z-index', maxZ);
                         }
                     }
 
-                    me.el.on('wuibtnclick','[name=window_close]',function(evnt,btn){
+                    me.el.on('wuibtnclick','[name=window_close]',function(evnt){
                         me.close();
                         evnt.stopPropagation();
                     });
@@ -887,12 +910,12 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     // Size and center the window according to arguments passed and sizing relative to the viewport.
                     if(me.windowEl){
                         var cssParamObj = { height: useHeight, width: (arguments.length) ? resizeWidth : undefined },
-                            posLeft =   (me.windowLeft) 
-                                            ? ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) 
-                                            : Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)),
-                            posTop =    (me.windowTop) 
-                                            ? ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) 
-                                            : Math.floor(($.viewportH() / 2) - (useHeight / 2));
+                            posLeft =   (me.windowLeft) ?
+                                            ($.isNumeric(me.windowLeft) ? me.windowLeft : Wui.percentToPixels($('html'), me.windowLeft, 'width')) :
+                                            Math.floor(($.viewportW() / 2) - (me.windowEl.width() / 2)),
+                            posTop =    (me.windowTop) ? 
+                                            ($.isNumeric(me.windowTop) ? me.windowTop : Wui.percentToPixels($('html'), me.windowTop, 'height')) :
+                                            Math.floor(($.viewportH() / 2) - (useHeight / 2));
                         me.windowEl.css( $.extend(cssParamObj, { top:posTop, left:posLeft }) );
 
                         me.fireResize();
@@ -1010,7 +1033,7 @@ Wui.Data.prototype = {
                             if(me.lastRequest && me.lastRequest.readyState != 4)
                                 me.lastRequest.abort();
                             
-                            return me.lastRequest = $.ajax(me.url,config);
+                            return (me.lastRequest = $.ajax(me.url,config));
                         }
                         
                         // If there was no request made, return a rejected deferred to keep return
@@ -1178,10 +1201,13 @@ Wui.Template.prototype = {
                         return $(
                             tplCopy
                             // replaces straight values
-                            .replace(/\{(\w*)\}/g,function(m,key){return (me.data[key] !== undefined) ? me.data[key] : "";})
+                            .replace(/\{(\w*)\}/g,function(){
+                                var key = arguments[1];
+                                return (me.data[key] !== undefined) ? me.data[key] : "";
+                            })
                             // accounts for complex expressions
-                            .replace(/\{\((.*?)\)\}/g,function(m,fn){
-                                var keys = Wui.getKeys(me.data), vals = [], i = 0;
+                            .replace(/\{\((.*?)\)\}/g,function(){
+                                var fn = arguments[1], keys = Wui.getKeys(me.data), vals = [], i = 0;
                                 
                                 // Removes any key values that may start with a number and ruin the engine
                                 for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
@@ -1206,16 +1232,26 @@ Wui.Template.prototype = {
 
 
 Wui.DataList = function(args){
-    $.extend(this, {
+    var me = this;
+
+    $.extend(me, {
         afterMake:      function(){},
         autoLoad:       true,
         displayMax:     -1,
         el:             $('<div>'),
-        init:           function(){},
+        focusOnSelect:  true,
+        interactive:    true,
+        keyActions:     {
+                            '13':   function(){ me.selected[0].el.click(); me.selected[0].el.click(); },
+                            '32':   function(){ me.selected[0].el.click(); me.selected[0].el.click(); },
+                            '38':   function(){ me.selectAjacent(-1); },
+                            '40':   function(){ me.selectAjacent(1); }
+                        },
         multiSelect:    false,
         selected:       []
     }, args);
-    this.init();
+
+    me.init();
 };
 Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     dataChanged:function(){ this.make(); },
@@ -1242,121 +1278,102 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                     return newArry;
                 },
+
+    /** @deprecated Preserved only for legacy */
     createItem: function(itm){
+                    return this.modifyItem(itm);
+                },
+
+    click:      function(e,row){
                     var me = this,
-                        clicks = 0,
-                        timer = null, 
-                        dn = (me.name) ? '.' + me.name : '';
-                    
-                    itm.el.on("click", function(e){
-                        var retVal = null;
-                        var row = this;
+                        itm = me.getItemByEl(row);
+
+                    // Determine the # of selected items before the change
+                    if(!me.multiSelect || !(e.metaKey || e.ctrlKey || e.shiftKey)){
+                        if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
+                        else                                                    me.itemSelect(itm);     //change selection
+                    }else{
+                        var alreadySelected = $(row).hasClass('w121-selected');
                         
-                        clicks++;  //count clicks
-                        if(clicks === 1) {
-                            timer = setTimeout(function() {
-                                retVal = singleClick(e,row);
-                                clicks = 0;             //after action performed, reset counter
-                            }, 350);
-                        } else {
-                            clearTimeout(timer);    //prevent single-click action
-                            retVal = doubleClick(e,row);
-                            clicks = 0;             //after action performed, reset counter
-                        }
-                        return retVal;
-                    })
-                    .on("dblclick", function(e){
-                        e.preventDefault();  //cancel system double-click event
-                    });
+                        if(!e.shiftKey){
+                            // WHEN THE CTRL KEY IS HELD SELECT/DESELECT INDIVIDUAL ITEMS
+                            $(row).toggleClass('w121-selected',!alreadySelected);
 
-                    function singleClick(e,row){
-                        // Determine the # of selected items before the change
-                        if(!me.multiSelect || !(e.metaKey || e.ctrlKey || e.shiftKey)){
-                            if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
-                            else                                                    me.itemSelect(itm);     //change selection
+                            if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
+                            else                me.selected.push(itm);
                         }else{
-                            var alreadySelected = $(row).hasClass('w121-selected');
-                            
-                            if(!e.shiftKey){
-                                // WHEN THE CTRL KEY IS HELD SELECT/DESELECT INDIVIDUAL ITEMS
-                                $(row).toggleClass('w121-selected',!alreadySelected);
+                            // WHEN THE SHIFT KEY IS HELD - SELECT ALL ITEMS BETWEEN TWO POINTS
+                            var firstSelected = me.selectByEl(me.el.find('tr.w121-selected:first')),
+                                currentSelected = me.getItemByEl($(row)),
+                                dir = (firstSelected.rec.wuiIndex < currentSelected.rec.wuiIndex) ? 1 : -1,
+                                start = (dir > 0) ? firstSelected : currentSelected,
+                                end = (dir > 0) ? currentSelected : firstSelected,
+                                currSelection = [];
 
-                                if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
-                                else                me.selected.push(itm);
-                            }else{
-                                // WHEN THE SHIFT KEY IS HELD - SELECT ALL ITEMS BETWEEN TWO POINTS
-                                var firstSelected = me.selectByEl(me.el.find('tr.w121-selected:first')),
-                                    currentSelected = me.getItemByEl($(row)),
-                                    dir = (firstSelected.rec.wuiIndex < currentSelected.rec.wuiIndex) ? 1 : -1,
-                                    start = (dir > 0) ? firstSelected : currentSelected,
-                                    end = (dir > 0) ? currentSelected : firstSelected,
-                                    currSelection = [];
-
-                                me.selected = currSelection = me.items.slice(start.rec.wuiIndex,end.rec.wuiIndex + 1);
-                                $('w121-selected').removeClass('w121-selected');
-                                currSelection.forEach(function(rec){
-                                    rec.el.addClass('w121-selected');
-                                });
-                            }
-
-                            me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
-                                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                            me.selected = currSelection = me.items.slice(start.rec.wuiIndex,end.rec.wuiIndex + 1);
+                            $('w121-selected').removeClass('w121-selected');
+                            currSelection.forEach(function(rec){
+                                rec.el.addClass('w121-selected');
+                            });
                         }
-                    }
 
-                    function doubleClick(e){
-                        me.itemSelect(itm,true);
-                        me.el
-                            .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuidblclick'+ dn),[me, itm.el, itm.rec])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuidblclick'),[me, itm.el, itm.rec]);
-                             
-                        return false; // stops propagation & prevents default
+                        me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     }
+                },
+    dblClick:   function(){
+                    var me = this,
+                        itm = me.getItemByEl(arguments[1]);
 
-                    return me.modifyItem(itm);
+                    me.itemSelect(itm,true);
+                    me.el
+                        .trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
+                        .trigger($.Event('wuidblclick'+ me.id),[me, itm.el, itm.rec])
+                        .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected])
+                        .trigger($.Event('wuidblclick'),[me, itm.el, itm.rec]);
+                         
+                    return false; // stops propagation & prevents default
                 },
     init:       function(){
                     var me = this;
+                    
+                    Wui.O.prototype.init.call(me);
 
-                    if(!(me.name !== null && me.name.length !== 0))
-                        me.name = Wui.id('w121-data-list');
+                    // Every DataList has a name and id, for listener and reference purposes.
+                    if(!(me.name && me.name.length !== 0))  me.name = Wui.id('w121-data-list');
+                    if(!(me.id && me.id.length !== 0))      me.id = me.name;
 
-                    if(!(me.id !== null && me.id.length !== 0))
-                        me.id = me.name;
-
-                    // Adds a document listener
                     $(document).on('keyup',function(evnt){
-                        if(me.selected && me.selected[0] && (document.activeElement == me.selected[0].el[0])){
-                            // Simulate a double click if enter or spacebar are pressed on a currently selected/focused item
-                            if(evnt.keyCode == 13 || evnt.keyCode == 32){ me.selected[0].el.click(); me.selected[0].el.click(); }
-                            if(evnt.keyCode == 38)  me.selectAjacent(-1);  // 38 = up
-                            if(evnt.keyCode == 40)  me.selectAjacent(1);   // 40 = down
-                        }
+                        if( me.selected && me.selected[0] && document.activeElement == me.selected[0].el[0] && me.keyActions.hasOwnProperty(evnt.keyCode) )
+                            me.keyActions[evnt.keyCode]();
                     });
                 },
     itemSelect: function(itm, silent){
-                    var me = this, 
-                        dn = (me.name) ? '.' + me.name : ''
-                        old = [];
+                    var me = this, old = [], dn = (me.name) ? '.' + me.name : '';
                     
-                    if(me.selected.length > 0 && !me.multiSelect && !silent){
-                        var old = $.extend(true,[],me.selected);
-                        me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
-                    }
+                    if(itm){
+                        if(me.selected.length > 0 && !me.multiSelect && !silent){
+                            old = $.extend(true,[],me.selected);
+                            me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
+                        }
+                            
+                        me.el.find('.w121-selected').removeClass('w121-selected').removeAttr('tabindex');
+                        itm.el.addClass('w121-selected').attr('tabindex',1);
+
+                        if(me.focusOnSelect)
+                            itm.el.focus();
                         
-                    me.el.find('.w121-selected').removeClass('w121-selected').removeAttr('tabindex');
-                    itm.el.addClass('w121-selected').attr('tabindex',1).focus();
-                    me.selected = [itm];
+                        me.selected = [itm];
+                        me.el.addClass('w121-has-selected');
 
-
-                    if(!me.multiSelect && !silent){
-                        me.el.trigger($.Event('wuiselect'+ dn), [me, itm.el, itm.rec])
-                            .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                        if(!me.multiSelect && !silent){
+                            me.el.trigger($.Event('wuiselect'+ dn), [me, itm.el, itm.rec])
+                                .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                                .trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
+                                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                        }
                     }
+                    
                     return itm;
                 },
     itemDeselect:function(itm){
@@ -1366,6 +1383,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         itm.el.removeClass('w121-selected');
                     
                     me.selected = [];
+                    me.el.removeClass('w121-has-selected');
+
                     me.el.trigger($.Event('wuideselect' + dn),[me, itm.el, itm.rec])
                         .trigger($.Event('wuichange' + dn), [me, itm.el, itm.rec, me.selected])
                         .trigger($.Event('wuideselect'),[me, itm.el, itm.rec])
@@ -1376,33 +1395,60 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     make:       function(){
                     var me = this,
                         te = new Wui.Template({template: me.template}),
-                        maxI = (me.data.length > me.displayMax && me.displayMax > 0) ? me.displayMax : me.data.length;
+                        maxI = (me.data.length > me.displayMax && me.displayMax > 0) ? me.displayMax : me.data.length,
+                        els = [];
                     
                     // Clear out items list
                     me.clear();
                     me.items = [];
 
                     function makeItems(i){
-                        setTimeout(function(){
-                            var rec = te.data = me.data[i],
-                                itm = {el:te.make(i), rec:rec};
-                                
-                            Array.prototype.push.call(me.items,itm);
-                            (me.elAlias || me.el).append(me.createItem(itm));
+                        var rec = te.data = me.data[i],
+                            itmEl = te.make(i),
+                            itm = {el:itmEl, rec:rec};
+                        
+                        els.push(itmEl);
+                        me.items.push(itm);
 
-                            if(i + 1 == maxI){
-                                // Event hook and event
-                                me.afterMake();
-                                me.el.trigger($.Event('refresh'),[me,me.data]);
+                        (me.elAlias || me.el).append(me.createItem(itm));
 
-                                // Reset selected items if any
-                                me.resetSelect();
-                            }
-                        },0);
+                        if(i + 1 == maxI){
+                            // Event hook and event
+                            me.afterMake();
+                            me.el.trigger($.Event('refresh'),[me,me.data]);
+
+                            // Reset selected items if any
+                            me.resetSelect();
+                        }
                     }
 
                     // Add items to me.items
                     for(var i = 0; i < maxI; i++) makeItems(i);
+
+                    if(me.interactive){
+                        els.forEach(function(el){
+                            var clicks = 0, timer = null;
+
+                            el.on('click', function(e){
+                                var retVal = null;
+                                var row = this;
+                                
+                                clicks++;  //count clicks
+                                if(clicks === 1) {
+                                    timer = setTimeout(function() {
+                                        retVal = me.click(e,row);
+                                        clicks = 0;             //after action performed, reset counter
+                                    }, 350);
+                                } else {
+                                    clearTimeout(timer);    //prevent single-click action
+                                    retVal = me.dblClick(e,row);
+                                    clicks = 0;             //after action performed, reset counter
+                                }
+                                return retVal;
+                            })
+                            .on('dblclick', function(e){ e.preventDefault(); }); //cancel system double-click event
+                        });
+                    }
                     
                     // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
                     // object has been manually run
@@ -1427,7 +1473,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         return me.selectByEl(selectAjc);
                     },
     selectByEl: function(el){
-                    var me = this, retVal = undefined;
+                    var me = this, retVal;
 
                     me.itemSelect(retVal = me.getItemByEl(el));
                     me.scrollToCurrent();
@@ -1435,13 +1481,20 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     return retVal;
                 },
     getItemByEl:function(el){
-                    var me = this, retVal = undefined;
+                    var me = this, i = 0, retVal;
 
-                    me.items.forEach(function(itm){ if(itm.el[0] == el[0]) retVal = itm; });
+                    // Unwrap object form jQuery
+                    el = el[0] || el;
+
+                    for(i; i < me.items.length; i++){
+                        if( me.items[i].el[0] == el ){
+                            retVal = me.items[i];
+                            break;
+                        }
+                    }
                     
                     return retVal;
                 },
-                
     refresh:    function(){ this.onRender(); },
     resetSelect:function(){
                     var me = this,
@@ -1453,9 +1506,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                         selList.forEach(function(rec){
                             Wui.O.prototype.each.call(me,function(itm){
-                                var sameRec = (me.identity) 
-                                        ? itm.rec[me.identity] === rec[me.identity] 
-                                        : JSON.stringify(itm.rec) === JSON.stringify(rec);
+                                var sameRec = (me.identity) ?
+                                        itm.rec[me.identity] === rec[me.identity] :
+                                        JSON.stringify(itm.rec) === JSON.stringify(rec);
                                 
                                 if(sameRec){
                                     if(me.multiSelect){
@@ -1481,15 +1534,18 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                                 firstSelect.prevAll().each(function(){ r += $(this).outerHeight() - 0.55; }); 
                                 return  r; 
                             })();
-                        ofstP.animate({scrollTop:offset },100);
+
+                        ofstP.animate({ scrollTop:offset }, 100);
                     },
     selectBy:   function(key,val){
-                    var me = this, retVal = undefined;
+                    var me = this, retVal;
+
                     me.items.forEach(function(itm){
                         if(itm.rec[key] !== undefined && itm.rec[key] == val)
-                            return retVal = me.itemSelect(itm);
+                            return (retVal = me.itemSelect(itm));
                     });
                     me.scrollToCurrent();
+
                     return retVal;
                 }
 });

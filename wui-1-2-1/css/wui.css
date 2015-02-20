@@ -51,16 +51,20 @@
     color: #fff;
     position: absolute;
     left: 0;
-    padding:0 6px;
+    padding:0 5px; /* The 5px is 1 pixel off from the 6px border width because all h-bar items have a 1px left & right margin */
     width: 100%;
     height: 34px;
     align-items: center;
     display: flex;
     overflow: hidden;
 }
-.w121-pbar-left { margin-right: auto; }
 .w121-h-bar { justify-content: flex-end; }
+    .w121-h-bar-left { order:-1; }
+    .w121-h-bar > * { margin: 0 1px; }
+    .w121-h-bar .w121-h-bar-spacer { margin-right: auto; }
+
 .w121-title.right ~ .w121-tbar { justify-content: flex-start; }
+.w121-title.right ~ .w121-tbar.w121-h-bar .w121-h-bar-spacer { margin-left: auto; margin-right: inherit; }
 
 .w121-tbar, .w121-title { top:0; }
 .w121-bbar { bottom:0; }
@@ -624,7 +628,11 @@ button::-moz-focus-inner { border:0; }
     background:#fff; 
     color:#444; 
 }
-.w121-pane .w121-grid-body table { border-collapse:collapse; }
+.w121-pane .w121-grid-body table { 
+    border-collapse:collapse;
+    width: 100%; 
+    table-layout: fixed;
+}
     .w121-pane .w121-grid-body tr { outline: none; }
     .w121-pane .w121-grid-body tr:nth-child(2n+1) { background-color: #fff; }
     .w121-pane .w121-grid-body tr:nth-child(2n) { background-color: #eee; }

@@ -41,7 +41,7 @@ Columns can be resized by dragging the heading borders left and right. Columns c
 extend beyond the width of the grid frame, but when sized smaller will pop back into position.
 */
 Wui.Grid = function(args){
-    $.extend(this,{
+    return new Wui.DataList($.extend(this,{
         /** Array of items that will be added to the footer. */
         bbar:           [],
         
@@ -82,10 +82,9 @@ Wui.Grid = function(args){
         
         /** An array of items that will be added to the header */
         tbar:           []
-    },args); 
-    this.init();
+    },args));
 };
-Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
+Wui.Grid.prototype = $.extend(new Wui.Pane(), {
     /** Overrides DataList.afterMake(), sizes the columns and enables the grid @eventhook */
     afterMake:  function(){
                     this.layout();
@@ -168,6 +167,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     
                     // Set up container
                     Wui.Pane.prototype.init.call(me);
+                    Wui.DataList.prototype.init.call(me);
                     me.el.addClass('w121-grid');
 
                     // Add grid specific DOM elements and reset elAlias
@@ -186,7 +186,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                         .on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
                     );
                     // Clear the sorting menu when it loses focus
-                    $(document).on('click','*:not(#' +me.idCls+ ')',function(evnt){ 
+                    $(document).on('click','*:not(#' +me.idCls+ ')',function(){ 
                         me.closeSorter();
                     });
                     
@@ -277,8 +277,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
     modifyItem: function(itm){
                     var me = this;
                     // Perform renderers (if any)
-                    $.each(me.renderers,function(idx, r){
-                        var cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
+                    $.each(me.renderers,function(){
+                        var r = arguments[1],
+                            cell = itm.el.children(':eq(' +r.index+ ')').children('div'),
                             val = itm.rec[r.dataItem];
                         
                         cell.empty().append(r.renderer.call(null, cell, val, itm.rec, itm.el, me));
@@ -374,9 +375,9 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                             minHeight:      0,
                             direction:      'e',
                             resizeStart:    function(){ me.tempLayout = me.layout; me.layout = function(){}; },
-                            afterResize:    function(obj,width){ me.sizeCols(); me.layout = me.tempLayout; },
-                            duringResize:   function(obj,width){ 
-                                                col.width = width; col.fit = -1;
+                            afterResize:    function(){ me.sizeCols(); me.layout = me.tempLayout; },
+                            duringResize:   function(){ 
+                                                $.extend(col, { width: arguments[1], fit:-1 });
                                                 Wui.fit(me.cols,'width');
                                             }
                         });
@@ -395,7 +396,7 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
 
                     me.tbl.detach();
                     // Place items and reset alternate coloring
-                    $.each(listitems, function(idx, row) { row.el.appendTo(me.tbl); });
+                    listitems.forEach(function(row){ row.el.appendTo(me.tbl); });
                     me.tbl.appendTo(me.tblContainer);
                     me.sizeCols();
                 },
@@ -513,11 +514,11 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     hc.css('padding-right', sbWid);
 
                     for(var i = 0; i < me.cols.length; i++)
-                        me.tbl.find('td:eq(' +i+ ')').css({ width: me.cols[i].el.innerWidth() - 2 });
+                        me.tbl.find('td:eq(' +i+ ')').css({ width: (me.cols[i].el.innerWidth() / me.tbl.width()).toFixed(2) + '%' });
 
                     // Necessary to define in javascript because webkit won't use the style
                     // until the width of the table has been defined.
-                    me.tbl.css({width: hc.width(), tableLayout: 'fixed'});
+                    // me.tbl.css({width: hc.width(), tableLayout: 'fixed'});
                 },
                     
     /**
