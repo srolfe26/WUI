@@ -586,7 +586,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                         if(!me.disabled){
                             Array.prototype.push.call(arguments,me);
                             me.click.apply(me,arguments);
-                            
+
                             me.el.trigger($.Event('wuibtnclick.' + me.id),[me])
                                 .trigger($.Event('wuibtnclick'),[me]);
                         }
@@ -1403,10 +1403,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                 },
     modifyItem: function(itm){ return itm.el; },
     make:       function(){
+                    if(typeof this.data.length === 'undefined')
+                        return false;
+
                     var me = this,
                         te = new Wui.Template({template: me.template}),
                         maxI = (me.data.length > me.displayMax && me.displayMax > 0) ? me.displayMax : me.data.length,
-                        els = [];
+                        els = [],
+                        i = 0;
                     
                     // Clear out items list
                     me.clear();
@@ -1421,19 +1425,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         me.items.push(itm);
 
                         (me.elAlias || me.el).append(me.createItem(itm));
-
-                        if(i + 1 == maxI){
-                            // Event hook and event
-                            me.afterMake();
-                            me.el.trigger($.Event('refresh'),[me,me.data]);
-
-                            // Reset selected items if any
-                            me.resetSelect();
-                        }
                     }
 
                     // Add items to me.items
-                    for(var i = 0; i < maxI; i++) makeItems(i);
+                    for(i; i < maxI; i++) makeItems(i);
 
                     if(me.interactive){
                         els.forEach(function(el){
@@ -1459,6 +1454,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                             .on('dblclick', function(e){ e.preventDefault(); }); //cancel system double-click event
                         });
                     }
+
+                    // Fire event hook and listeners regardless of whether anything was made
+                    me.afterMake();
+                    me.el.trigger($.Event('refresh'),[me,me.data]);
+                    me.resetSelect();
                     
                     // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
                     // object has been manually run
@@ -1470,13 +1470,12 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     if(me.rendered !== true){
                         // Loads data per the method appropriate for the object
                         if(me.autoLoad){
-                            if(this.url === null)   me.make();
-                            else                    me.loadData();
+                            if(me.data.length !== 0)        me.setData(me.data);
+                            else if(this.url === null)      me.loadData();
                         }
 
                         Wui.O.prototype.onRender.call(this);
-                    }
-                                       
+                    }                 
                 },
     selectAjacent:function(num){
                         var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();
