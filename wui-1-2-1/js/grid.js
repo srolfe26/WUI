@@ -203,7 +203,8 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                             toolBarsH = me.header.el.outerHeight() + me.footer.el.outerHeight(),
                             maxHeight = $.isNumeric(me.maxHeight) ? me.maxHeight : 0,
                             totalHeight = me.heading.outerHeight();
-                        me.tblContainer.children().each(function(){
+                        
+                        me.tbl.children().each(function(){
                             totalHeight += $(this).outerHeight();
                         });
 
@@ -294,7 +295,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     var me = this, al = me.autoLoad;
                     me.autoLoad = false;
                     
-                    //Wui.Pane.prototype.onRender.call(this);
+                    Wui.Pane.prototype.onRender.call(this);
                     Wui.DataList.prototype.onRender.call(this);
                     
                     // Start with getting the columns - Many methods waterfall from here
@@ -483,10 +484,10 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                 },
     getSrcData: function(){
                     var me = this;
-
+                    
                     if(me.autoLoad){
-                        if(me.url === null) me.setData(me.data);
-                        else                return me.loadData();
+                        if(me.data.length !== 0)        me.setData(me.data);
+                        else if(this.url !== null)      me.loadData();
                     }
                 },
     setData:    function(){

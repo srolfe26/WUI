@@ -11,13 +11,19 @@ var _wuiVar = (function(){
         Wui = { version: '1.2.1' };
         return 'Wui';
     }else{
-        _w = { version: '1.2.1' };
+        _w = function(){
+            console.log(arguments);
+        }
+        _w.prototype = { version: '1.2.1' };
         return '_w';
     }
 })();
 
 
 (function($,window,Wui) {
+
+// Set up a dictionary from which to look up items by their element
+Wui.dict = [];
 
 // AJAX error reporting and caching.
 $.ajaxSetup({ cache: false });
@@ -296,8 +302,12 @@ Wui.O.prototype = {
 
                         if((typeof attrVal == 'string' || typeof attrVal == 'number')){
                             if(altTarget && altAttr instanceof Array){
-                                if($.inArray(atr,altAttr) > -1) applyAltAttr[atr] = attrVal;
-                                else                            applyAttr[atr] = attrVal;
+                                if(atr == 'id' && $.inArray(atr,altAttr) > -1){
+                                    applyAltAttr[atr] = attrVal;
+                                }else{
+                                    applyAttr[atr] = attrVal;
+                                    if($.inArray(atr,altAttr) > -1) applyAltAttr[atr] = attrVal;
+                                }
                             }else{
                                 applyAttr[atr] = attrVal;
                             }
@@ -406,7 +416,12 @@ Wui.O.prototype = {
                     return myPosition;
                 },
 
-    init:       function(){ this.items = (this.items !== undefined) ? this.items : []; },
+    init:       function(){ 
+                    if( typeof this.el !== 'undefined' && this.el[0] && $.inArray(this.el[0], Wui.dict) < 0 )
+                        Wui.dict.push(this.el[0]);
+
+                    this.items = (this.items !== undefined) ? this.items : []; 
+                },
 
     layout:     function(afterLayout){
                     var me = this, needFit = false, i = 0;
@@ -729,7 +744,6 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         var me = this;
 
                         if(me.rendered !== true){
-                            if(me.items === undefined) me.items = [];
                             me.items.forEach(function(itm){ 
                                 if(itm.onRender) setTimeout(function(){ itm.onRender(); },0);
                             });
@@ -1218,12 +1232,18 @@ Wui.Template.prototype = {
                             // accounts for complex expressions
                             .replace(/\{\((.*?)\)\}/g,function(){
                                 var fn = arguments[1], keys = Wui.getKeys(me.data), vals = [], i = 0;
+
+                                // Adds the full record to be available from the datalist
+                                keys.push('wuiRecord');
                                 
                                 // Removes any key values that may start with a number and ruin the engine
                                 for(i = keys.length - 1; i >= 0; i--)   if(keys[i].match(/\b\d+/g)) keys.splice(i,1);
 
                                 // fill arrays of keys and their values and make sure they are in the same order
                                 for(i = 0; i < keys.length; i++)        vals.push(me.data[keys[i]]);
+
+                                // // Adds the full record to be available from the datalist
+                                vals.push(me.data);
                                 
                                 // add the passed in conditional as the body of the function created below
                                 keys.push("return " + fn);
@@ -1430,6 +1450,20 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     // Add items to me.items
                     for(i; i < maxI; i++) makeItems(i);
 
+                    me.clickListener(els);
+
+                    // Fire event hook and listeners regardless of whether anything was made
+                    me.afterMake();
+                    me.el.trigger($.Event('refresh'),[me,me.data]);
+                    me.resetSelect();
+                    
+                    // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
+                    // object has been manually run
+                    me.autoLoad = true;
+                },
+    clickListener:function(els){
+                    var me = this;
+
                     if(me.interactive){
                         els.forEach(function(el){
                             var clicks = 0, timer = null;
@@ -1454,15 +1488,6 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                             .on('dblclick', function(e){ e.preventDefault(); }); //cancel system double-click event
                         });
                     }
-
-                    // Fire event hook and listeners regardless of whether anything was made
-                    me.afterMake();
-                    me.el.trigger($.Event('refresh'),[me,me.data]);
-                    me.resetSelect();
-                    
-                    // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
-                    // object has been manually run
-                    me.autoLoad = true;
                 },
     onRender:   function(){
                     var me = this;
@@ -1471,11 +1496,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         // Loads data per the method appropriate for the object
                         if(me.autoLoad){
                             if(me.data.length !== 0)        me.setData(me.data);
-                            else if(this.url === null)      me.loadData();
+                            else if(this.url !== null)      me.loadData();
                         }
 
                         Wui.O.prototype.onRender.call(this);
-                    }                 
+                    }
                 },
     selectAjacent:function(num){
                         var me = this, selectAjc = me.selected[0].el[(num > 0) ? 'next' : 'prev']();
@@ -1558,6 +1583,109 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     return retVal;
                 }
 });
+
+
+/** The Long Poll object provides a way to poll a remote resource at a given interval.
+This is similar to listening on a socket, but is rather repeatedly polling a resource via AJAX.
+Long polling is useful for checking on the status of an item, or reloading data that 
+changes in real-time while the user has the page on the screen.
+
+The example source is the best way to understand how to use this resource.
+If you have a javascript console available, watching the console while this page is loaded
+will give you a demonstration if what is happening.
+
+The WUI Long Poll has a self-decaying retry feature: In the case that the resource is unavailable,
+rather than continuing to poll at a constant interval, the poll will slow its polling by a factor of the
+waitFactor config, until it eventually stops trying. If the resource returns, the poll will revert to
+its initial interval.
+
+ @event     pollStart     Fires before polling starts (event, Wui.longPoll)
+ @event     pollSuccess   Fires When the poll recieves a successful response. Includes remote data. (event, Wui.longPoll, data)
+ @event     pollError     Fires when $.ajax() has an error in the request. (event, Wui.longPoll, err)
+ @event     pollStopped   Fires after polling has stopped. Stopping polling doesn't trigger until the startup of the next poll. (event, Wui.longPoll)
+ @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
+*/
+Wui.LongPoll = function(args){
+    $.extend(this,{
+        /** The time in milliseconds between each polling. The ajax timeout parameter will also be set to this value so that the server will not be pestered faster than it can respond to a given request. */
+        pollTime:   1000,
+
+        /** A multiple of pollTime at which polling retries will cease. */
+        maxRetry:   120,
+
+        /** When a poll fails, retries will increase in length by this factor until 'maxRetry' has been reached. */
+        waitFactor: 2,
+
+        /** The URL of the resource to poll. */
+        url:        null,
+
+        /** Parameters to pass to the resource specified in URL. */
+        params:     null,
+
+        /** The name of the longPoll (useful to identifying its responses in the event that there are multiple polls on the same page), defaults to the result of Wui.id(). */
+        name:       null,
+
+        /** Setting to pass to the jQuery AJAX function. Settings defined in the poll method already will be overridden. */
+        ajaxParams: {}
+    },args);
+    this.init();
+};
+Wui.LongPoll.prototype = {
+    /** Set up the polling interval and gives the object a name if none is specified. */
+    init:       function(){
+                    var me = this;
+                    me.originalPollTime = me.pollTime;
+                    me.naturalPollTime = me.pollTime + 1;
+                    me.name = (me.name) ? me.name : Wui.id();
+                    me.start();
+                },
+
+    /** Polls a resource and sends events on success, failure, and if/when polling stops. */
+    poll:       function(){
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                    setTimeout(function() { 
+                        $.ajax($.extend(me.ajaxParams, { 
+                            url:        me.url,
+                            data:       me.params,
+                            beforeSend: function(jqXHR){
+                                            if(me.pollTime > me.originalPollTime * me.maxRetry){
+                                                jqXHR.abort();
+                                                $(window).trigger($.Event('pollStopped'+ dn),[me])
+                                                    .trigger($.Event('pollStopped'),[me]);
+                                                return false;
+                                            }
+                                        },
+                            success:    function(data) { 
+                                            me.pollTime = me.naturalPollTime;
+                                            $(window).trigger($.Event('pollSuccess' + dn),[me, data])
+                                                .trigger($.Event('pollSuccess'),[me, data]);
+                                        },
+                            complete:   function(){ me.poll(); },
+                            timeout:    me.pollTime,
+                            error:      function(err){ 
+                                            // This allows the poll to retry once at the original poll time before increasing 
+                                            // by a factor of waitFactor
+                                            me.pollTime = (me.pollTime == me.naturalPollTime) ? me.originalPollTime 
+                                                : me.pollTime * me.waitFactor;
+                                            $(window).trigger($.Event('pollError' + dn),[me, err])
+                                                .trigger($.Event('pollError'),[me, err]);
+                                        }
+                        })); 
+                    }, me.pollTime);
+                },
+
+    /** Stops the poll engine at just before the beginning of the next poll attempt. */
+    stop:       function(){ this.pollTime = this.pollTime * this.maxRetry + 1; },
+
+    /** Resumes polling instantly. */
+    start:      function(){
+                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                    me.pollTime = me.naturalPollTime;
+                    $(window).trigger($.Event('pollStart' + dn),[me])
+                        .trigger($.Event('pollStart'),[me]);
+                    me.poll();
+                }
+};
 
 
 Wui.msg = function(msg, msgTitle, callback, content){

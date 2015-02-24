@@ -40,6 +40,7 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
     addRows:        function(source){
                         var me = this,
                         holdingData = source || [],
+                        els = [],
                         holder = $('<div>');
                 
                         // Clear out items list
@@ -52,7 +53,10 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                                 
                             Array.prototype.push.call(me.items,itm);
                             holder.append(me.createItem(itm));
+                            els.push(itm.el);
                         }
+
+                        me.clickListener(els);
                 
                         // Clear out existing items and add new to the DOM
                         me.tbl.empty();
