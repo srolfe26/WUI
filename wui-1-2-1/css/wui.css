@@ -140,9 +140,8 @@
 button::-moz-focus-inner { border:0; }
 .w121-button {
     display:inline-block; 
-    min-width: 30px;
+    min-width: 10px;
     height: 26px;
-    line-height: 26px;
     text-align: center; 
     background-color:#d9d9d9; 
     outline:0; 
@@ -168,9 +167,8 @@ button::-moz-focus-inner { border:0; }
 
 .w121-button[class*=fa- ]::before { 
     font-family: FontAwesome; 
-    padding-right: 0.33em; 
+    padding-right: 0.33em;
     font-size:1rem;
-    margin-left: -0.25em;
     text-shadow: 0 0 2px #fff;
 }
 
@@ -241,12 +239,12 @@ button::-moz-focus-inner { border:0; }
 }
 .w121-fe input, .w121-fe textarea, .w121-editor, .button li label, .w121-button.field-btn { border-color:#bbb; }
 .w121-fe input, .w121-fe textarea, .w121-editor, .button li label { 
-    background-color:#ddd; 
+    background-color:#efefef; 
     border-width:1px; 
     border-style:solid; 
 }
 .w121-fe input:focus, .w121-fe textarea:focus, .w121-editor:focus, .button li label:focus { 
-    background-color:#eee; 
+    background-color:#fff; 
     border-color:#999; 
 }
 .w121-fe .empty { color:#777; }
@@ -475,7 +473,7 @@ button::-moz-focus-inner { border:0; }
 .w121-disabled .button li > input:checked + label { color: #999; }
 
 
-/**************************************   Form Elements in TBar and BBar  **************************************/
+/**************************************   Form Elements in Header & Footer  **************************************/
 .w121-h-bar .w121-form {
     align-items: center;
     display: flex;
@@ -499,18 +497,22 @@ button::-moz-focus-inner { border:0; }
 .w121-h-bar .w121-radio ul, .w121-h-bar .w121-checkbox ul { display: flex; line-height: 26px; }
 .w121-h-bar .w121-radio input, .w121-h-bar .w121-checkbox input { top:4px; }
 
+/* Datetime */
+.w121-h-bar .w121-datetime {
+    border-radius: 4px;
+    border: 1px solid #bbb;
+}
 .w121-h-bar .w121-datetime input[type="text"] {
     border: 0 none;
-    box-shadow: 0 8px #ddd;
+    box-shadow: 0 9px #eee;
     height: 18px;
     margin-bottom: 9px;
     position: relative;
     text-transform: uppercase;
-    top: 1px;
     outline:0;
     padding: 0 30px 0 0.25em;
 }
-.w121-h-bar .w121-datetime input:focus { box-shadow: 0 8px #eee; }
+.w121-h-bar .w121-datetime input:focus { box-shadow: 0 8px #fff; }
 .w121-h-bar .w121-datetime .feedback {
     bottom: 0;
     color: #999;
@@ -559,6 +561,10 @@ button::-moz-focus-inner { border:0; }
     -moz-user-select:none; 
     -webkit-user-select:none;
 }
+
+.w121-gc:last-child                 { border-right: 0; }
+.has-scrollbar .w121-gc:last-child  { border-right:1px solid #fff; }
+
 .w121-gc > :first-child { 
     overflow: hidden;
     text-overflow: ellipsis;

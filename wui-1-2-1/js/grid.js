@@ -91,7 +91,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     this.removeMask();
                 },
     
-    closeSorter:function(){ this.dd.children('li').off('click').end().hide(); },
+    closeSorter:function(){ this.dd.children('li').off('click').end().css('display','none'); },
 
     /** 
     Recursive function for sorting on multiple columns @private
@@ -349,7 +349,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                             e.preventDefault();
                             Wui.positionItem($(this),me.dd);
 
-                            $('body').append(me.dd.width(100).show());
+                            $('body').append(me.dd.width(100).css('display','block'));
                             Wui.positionItem($(this),me.dd);
                             me.dd.children('li').on('click',function(){
                                 var options =   {
@@ -482,14 +482,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     
                     return me.getSrcData();
                 },
-    getSrcData: function(){
-                    var me = this;
-                    
-                    if(me.autoLoad){
-                        if(me.data.length !== 0)        me.setData(me.data);
-                        else if(this.url !== null)      me.loadData();
-                    }
-                },
     setData:    function(){
                     var me = this, i = null, j = null;
 
@@ -513,13 +505,10 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                         sbWid = acctForScrollBar ? Wui.scrollbarWidth() : 0;
 
                     hc.css('padding-right', sbWid);
+                    hc[ (sbWid === 0) ? 'addClass' : 'removeClass' ]('has-scrollbar');
 
                     for(var i = 0; i < me.cols.length; i++)
                         me.tbl.find('td:eq(' +i+ ')').css({ width: (me.cols[i].el.innerWidth() / me.tbl.width()).toFixed(2) + '%' });
-
-                    // Necessary to define in javascript because webkit won't use the style
-                    // until the width of the table has been defined.
-                    // me.tbl.css({width: hc.width(), tableLayout: 'fixed'});
                 },
                     
     /**

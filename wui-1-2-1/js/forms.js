@@ -14,9 +14,10 @@ Wui.Form = function(args){
     $.extend(this,{
         disabled:       false,
         labelPosition:  'top',
-        labelSize:      null
+        labelSize:      null,
+        HTMLSubmit:     false,
     }, args, {
-        el:             $('<form>').addClass('w121-form'),
+        el:             $('<form>'),
         errors:         [],
         formChanged:    false
     });
@@ -28,11 +29,14 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 
     dispErrors: function(){
                     var msg = '';
-                    for(var e = 0; e < this.errors.length; e++) msg += this.errors[e] + '<br/>';
+
+                    for(var i = 0; i < this.errors.length; i++) 
+                        msg += this.errors[i] + '<br/>';
+
                     Wui.errRpt(msg,'Form Errors');
                 },
 
-    each:       function(f, blockNote,ascending){
+    each:       function( f, blockNote, ascending ){
                     return Wui.O.prototype.each.call(
                         this,
                         function(itm,i){
@@ -65,6 +69,12 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     var me = this;
                     
                     Wui.O.prototype.init.call(me);
+
+                    me.el.addClass('w121-form').on('submit', function(e){
+                        // Prevent the form from submitting unless configured to do so
+                        if(!HTMLSubmit)
+                            e.preventDefault();
+                    });
 
                     if(typeof me.id === 'undefined' || me.id === null)
                         me.id = Wui.id('w121-form');
@@ -179,15 +189,22 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
     setField:   function(fieldname, v){
                     this.each(function(itm){ if(itm.name == fieldname) itm.val(v); }, true);
                 },
-    throwError: function(err){this.errors.push(err); return false;},
+    throwError: function(err){
+                    this.errors.push(err); 
+                    return false;
+                },
     validate:   function(){
                     var me = this;
+
                     me.errors = [];
-                    me.each(function(itm){ 
+
+                    me.each(function(itm){
                         if(typeof itm.el.toggleClass !== 'undefined')
-                            itm.el.toggleClass(me.errCls,!itm.validate());
+                            itm.el.toggleClass( me.errCls, !itm.validate() );
                     }, true);
+
                     this.formChange(false);
+
                     return (me.errors.length === 0);
                 }
 });
@@ -413,8 +430,8 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                     me.valChange(me, me.value, oldVal);
                     
                     // Calls listeners for valchange
-                    me.field.trigger($.Event('valchange'), [me, me.value, oldVal, me.val()])
-                        .trigger($.Event('hiddenchange'), [me, me.value, oldVal, me.val()]); // To preserve legacy
+                    if(me.field)    me.field.trigger($.Event('valchange'), [me, me.value, oldVal, me.val()])
+                    else            $(document).trigger($.Event('hiddenchange'), [me, me.value, oldVal, me.val()]); // To preserve legacy
                 },
     getVal:     function(){
                     return this.value;
@@ -1555,11 +1572,11 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         if(me.value === '' || (!me.value)) { return null; }
                         
                         //validation for min and max
-                        if(me.minDate && me.value < me.minDate)         me.outputFld.html(me.value.toString(me.dtFormat) + ' is before the min date.');
+                        if(me.minDate && me.value < me.minDate)         me.outputFld.html(me.toString() + ' is before the min date.');
                         else if (me.maxDate && me.value > me.maxDate)   me.outputFld.html(me.maxDate.toString(me.dtFormat) + ' is past the max date.');
-                        else                                            me.outputFld.html(me.value.toString(me.dispFormat));
+                        else                                            me.outputFld.html(me.toString(me.dispFormat));
                         
-                        return  me.value.toString(me.dtFormat);
+                        return  me.toString();
                     },
     getM:           function(num){
                         var magnitude = 0;
@@ -1940,6 +1957,9 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                             this.outputFld.html('');
                             this.value = null;
                         }
+                    },
+    toString:       function(format){
+                        return this.value.toString(format || this.dtFormat) || '';
                     },
     validDate:      function(dt){
                         if (dt === null || typeof dt === 'undefined')  return false;

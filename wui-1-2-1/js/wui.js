@@ -8,13 +8,48 @@
 // Make sure the WUI is defined and doesn't conflict with other versions on the page
 var _wuiVar = (function(){
     if(typeof Wui === 'undefined'){
-        Wui = { version: '1.2.1' };
+        Wui = function(selector){
+            var nodes   =   (selector instanceof jQuery) ? 
+                                selector : (typeof selector === 'string') ?
+                                    $(selector) : [selector],
+                matches =   Wui.dict.filter(function ( obj ) { 
+                                return $.inArray( obj.el, nodes ) > -1; 
+                            }),
+                retVal  =   (function(m){
+                                var justItms = [];
+                                
+                                m.forEach(function( obj ){ justItms.push(obj.itm); });
+
+                                return justItms;
+                            })(matches);
+
+            return retVal;
+        };
+
+        Wui.prototype = { version: '1.2.1' };
+
         return 'Wui';
     }else{
-        _w = function(){
-            console.log(arguments);
-        }
+        _w = function(selector){
+            var nodes   =   (selector instanceof jQuery) ? 
+                                selector : (typeof selector === 'string') ?
+                                    $(selector) : [selector],
+                matches =   _w.dict.filter(function ( obj ) { 
+                                return $.inArray( obj.el, nodes ) > -1; 
+                            }),
+                retVal  =   (function(m){
+                                var justItms = [];
+                                
+                                m.forEach(function( obj ){ justItms.push(obj.itm); });
+
+                                return justItms;
+                            })(matches);
+
+            return retVal;
+        };
+
         _w.prototype = { version: '1.2.1' };
+
         return '_w';
     }
 })();
@@ -285,9 +320,18 @@ Wui.O.prototype = {
     afterRender:function(){ this.aftrRenderd = true; },
 
     append:     function(){
-                    var me = this, el = me.elAlias || me.el;
+                    var el =    (this.elAlias || this.el);
+                        args =  (function(args){
+                                    var retVal = [];
 
-                    $.each(arguments,function(){ el.append(arguments[1]); });
+                                    Array.prototype.forEach.call(args,function(itm){
+                                        retVal.push( itm.el || itm );
+                                    });
+
+                                    return retVal;
+                                })(arguments);
+
+                    el.append.apply(el,args);
                 },
 
     argsByParam:function(altAttr, altTarget){
@@ -417,10 +461,22 @@ Wui.O.prototype = {
                 },
 
     init:       function(){ 
-                    if( typeof this.el !== 'undefined' && this.el[0] && $.inArray(this.el[0], Wui.dict) < 0 )
-                        Wui.dict.push(this.el[0]);
+                    var me = this;
+                    
+                    if( 
+                        typeof me.el !== 'undefined' && 
+                        me.el[0] && 
+                        Wui.dict.filter(function ( obj ) { 
+                            return obj.el === me.el[0]; 
+                        })[0] === undefined
+                    ) {
+                        Wui.dict.push({
+                            itm:    me, 
+                            el:     me.el[0]
+                        });
+                    }
 
-                    this.items = (this.items !== undefined) ? this.items : []; 
+                    me.items = (me.items !== undefined) ? me.items : []; 
                 },
 
     layout:     function(afterLayout){
@@ -568,16 +624,16 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
     disable:    function(){
                     this.disabled = true;
                     this.el
-                    .toggleClass('disabled',this.disabled)
-                    .attr('disabled',true)
-                    .removeAttr('tabindex');
+                        .addClass('disabled')
+                        .attr('disabled',true)
+                        .removeAttr('tabindex');
                 },
     enable:     function(){
                     this.disabled = false;
                     this.el
-                    .toggleClass('disabled',this.disabled)
-                    .removeAttr('disabled')
-                    .attr({tabindex:this.tabIndex});
+                        .removeClass('disabled')
+                        .removeAttr('disabled')
+                        .attr({tabindex:this.tabIndex});
                 },
     init:       function(){ 
                     var me = this;
@@ -585,7 +641,7 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                     Wui.O.prototype.init.call(me);
 
                     me.el
-                    .addClass('w121-button')
+                    .addClass('w121-button' + ((me.disabled) ? ' disabled' : '') )
                     .click(btnClick)
                     .keypress(function(evnt){
                         if(evnt.keyCode == 13 || evnt.keyCode == 32)
@@ -758,8 +814,9 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                     if(parseInt(me.container.height()) != me.el.height())
                                     me.container.css('height', me.el.height());
                                 },0);
-                        }
-                        this.rendered = true; 
+
+                            Wui.O.prototype.onRender.call(me);
+                        } 
                     },
     removeMask:     function(){
                         this.el.find('.w121-mask').fadeOut(500, function(){ $(this).remove(); });
@@ -1060,8 +1117,7 @@ Wui.Data.prototype = {
                             return (me.lastRequest = $.ajax(me.url,config));
                         }
                         
-                        // If there was no request made, return a rejected deferred to keep return
-                        // types consistent
+                        // If there was no request made, return a rejected deferred to keep return types consistent
                         return $.Deferred().reject();
                     },
     /**
@@ -1490,16 +1546,24 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     }
                 },
     onRender:   function(){
-                    var me = this;
-
-                    if(me.rendered !== true){
-                        // Loads data per the method appropriate for the object
-                        if(me.autoLoad){
-                            if(me.data.length !== 0)        me.setData(me.data);
-                            else if(this.url !== null)      me.loadData();
-                        }
-
+                    if(this.rendered !== true){
+                        this.getSrcData();
                         Wui.O.prototype.onRender.call(this);
+                    }
+                },
+    getSrcData: function(){
+                    var me = this;
+                    
+                    if(me.initLoaded !== true && me.data && me.data !== []){
+                        me.setParams(me.params);
+                        me.initLoaded = true;
+
+                        return me.setData(me.data);
+                    }else{
+                        if(me.autoLoad){
+                            if(this.url !== null)   return me.loadData();
+                            else                    return me.setData(me.data);
+                        }
                     }
                 },
     selectAjacent:function(num){

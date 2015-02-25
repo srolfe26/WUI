@@ -1,11 +1,6 @@
 /* daterange */
-.date-fields {}
-    .date-fields .wui-fe {
-        width:49.5%; 
-        display:inline-block; 
-        float: right;
-    }
-    .date-fields .wui-fe:first-child {float:none; margin-right: 1%;}
+.w121-date-fields.w121-fe, .w121-date-fields > .w121-fe { display:flex; }
+.w121-date-fields .w121-datetime:first-child { margin-right: 4px; }
 
 
 .wui-recurrence { padding-right: 124px; position: relative;}

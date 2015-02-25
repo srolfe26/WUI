@@ -95,18 +95,6 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                         });
                     },
 
-    getSrcData:     function(){
-                        var me = this;
-
-                        if(me.initLoaded !== true && me.data !== null){
-                            me.setParams(me.params);
-                            return me.setData(me.data);
-                            me.initLoaded = true;
-                        }else{
-                            return Wui.Grid.prototype.getSrcData.apply(me,arguments);
-                        }
-                    },
-
     setGridVars:    function(){
                         var me = this;
                         

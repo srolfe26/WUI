@@ -6,44 +6,49 @@ Wui.DateRange = function(args){
     var me = this,
         params = $.extend({
             value:      {start_date: null, end_date: null},
-            cls:        'date-fields',
             init:       function(){
-                            var stCls = 'start_dt' + Wui.id(), endCls = 'end_dt' + Wui.id(); 
+                            var stCls = Wui.id('start-dt'), endCls = Wui.id('end-dt'); 
 
-                            me.endDate = new Wui.Datetime({
-                                blankText:  'End Date or # of Occurrences',
-                                dateOnly:   true,
-                                cls:       endCls,
-                                dispFormat: 'END DATE: ddd MM-dd-yyyy'
-                            });
-                            me.items =  [
+
+                            Wui.FormField.prototype.init.call(this);
+                            
+                            me.append( 
                                 me.startDate = new Wui.Datetime({
                                     blankText:  'Start Date',
                                     dateOnly:   true,
-                                     cls:       stCls,
+                                    name:       stCls,
                                     dispFormat: 'START DATE: ddd MM-dd-yyyy'
                                 }),
-                                me.endDate
-                            ];
-                            Wui.FormField.prototype.init.call(this);
+                                me.endDate = new Wui.Datetime({
+                                    blankText:  'End Date or # of Occurrences',
+                                    dateOnly:   true,
+                                    name:       endCls,
+                                    dispFormat: 'END DATE: ddd MM-dd-yyyy'
+                                }),
+                                me.field = $('<input>',{ type:'hidden' })
+                            );
+                            me.el.addClass('w121-date-fields');
 
                             // Add Listeners for valchange and stop propagation
-                            me.el.on('valchange', '.'+endCls, function(evnt,f,newVal,oldVal){
+                            me.el.on('valchange', '[name='+endCls+']', function(evnt,f,newVal,oldVal){
+                            evnt.stopPropagation();
                                 if(newVal !== oldVal){
                                     me.value.end_date = newVal;
-                                    me.setChanged();
+                                    fieldsChange();
                                 }
-
-                                evnt.stopPropagation();
                             });
                             me.el.on('valchange', '.'+stCls, function(evnt,f,newVal,oldVal){
+                                evnt.stopPropagation();
                                 if(newVal !== oldVal){
                                     me.endDate.minDate = me.value.start_date = newVal;
-                                    me.setChanged();
+                                    fieldsChange();
                                 }
-
-                                evnt.stopPropagation();
                             });
+
+                            function fieldsChange(){
+                                me.field.val(me.startDate.toString() + ' - ' + me.endDate.toString());
+                                me.setChanged();
+                            }
                         },
             setVal:     function(sv){
                             me.value = $.extend({}, sv);
@@ -63,7 +68,9 @@ Wui.DateRange = function(args){
                             return retVal;
                         }
         },args);
-    $.extend(me,new Wui.FormField(params));  
+
+    $.extend(me,new Wui.FormField(params));
+
     me.init();
 };
 Wui.DateRange.prototype = new Wui.FormField();
