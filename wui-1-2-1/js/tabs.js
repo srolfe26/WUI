@@ -16,7 +16,8 @@ Wui.Tabs = function(args){
         tabsHideHeader: null,
         tabPosition:    'top right',
         tbar:           []
-    },args); 
+    },args);
+
     this.init();
 };
 Wui.Tabs.prototype = $.extend(new Wui.Pane(),{    
@@ -65,8 +66,8 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                         });
 
                         // Add listeners for tab changes
-                        me[bar].el.on('wuibtnclick','.w121-tab',function(evnt,btn){
-                            me.giveFocus(btn.pane);
+                        me[bar].el.on('wuibtnclick','.w121-tab',function(){
+                            me.giveFocus(arguments[1].pane);
                         });
                         
                         return Wui.O.prototype.place.call(me);
@@ -83,24 +84,29 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                             itm.el.toggleClass('active', isActive);
                             if(isActive){
                                 me.currentTab = itm;
-                                setTimeout(function(){ itm.layout(); },0);
+                                setTimeout(function(){ itm.cssByParam(); itm.layout(); },0);
                                 if(!supressEvent) 
                                     me.el.trigger($.Event('tabchange'),[me, itm.tab, itm]);
                             }
                         });
                     },
     selectTabByText:function(txt, supressEvent){
-                        var me = this, retVal = undefined;
-                        $.each(me.items,function(idx,itm){
+                        var me = this, retVal;
+
+                        me.items.forEach(function(itm){
                             if($.trim(itm.tab.el.text()).toLowerCase() === $.trim(txt).toLowerCase().replace(/_/g,' ')){
                                 me.giveFocus(itm, supressEvent);
                                 retVal = itm;
                             }
                         });
+
                         return retVal;
                     },
     onRender:       function(){
-                        this.giveFocus(this.items[0]);
+                        if(this.rendered !== true){
+                            this.giveFocus(this.items[0]);
+                            Wui.Pane.prototype.onRender.call(this);
+                        }
                     }
 });
 

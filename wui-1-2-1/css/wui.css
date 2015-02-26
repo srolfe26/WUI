@@ -536,6 +536,28 @@ button::-moz-focus-inner { border:0; }
     text-decoration: underline;
 }
 
+/******************************************   validation styles   *******************************************/
+.w121-form-err.w121-lbl { padding: 0.5em; background-color:#ffa094; }
+
+.w121-form-err.w121-fe, .w121-form-err input[type=text], 
+.w121-fe.w121-form-err > input[type=text], .w121-form-err textarea, 
+.w121-form-err .w121-button.field-btn, 
+.w121-form-err .w121-fe input.has-file[type="text"][disabled],
+.w121-form-err .button li label, .w121-form-err .w121-button.field-btn { border-color:rgba(237,64,56,0.6); }
+
+.w121-form-err .w121-fe input:focus, .w121-form-err .w121-fe textarea:focus, .w121-form-err .w121-editor:focus { outline:0; }
+
+.w121-form-err > label, .w121-form-err .feedback, .w121-form-err .feedback a, .w121-err {color:#b0463b;}
+.w121-err { padding:1em; font-weight:bold; }
+
+.w121-form-err .feedback {background: none; bottom: -0.2em; left: -45%; top: auto !important; width: 100%; padding:0;}
+
+.w121-form-err input[type=text], .w121-fe.w121-form-err > input[type=text], 
+.w121-form-err textarea, .w121-form-err .w121-button.field-btn { box-shadow: inset 0 0 5px 3px rgba(237,64,56,0.5); }
+
+.w121-form-err .w121-button.field-btn { border-left:none; }
+.w121-form-err .w121-fe input.has-file[type="text"][disabled] { background-color: #eee; }
+
 /**********************************************   grid styles   ************************************************/
 .w121-pane.w121-grid .w121-pane-content { display:flex; flex-direction:column-reverse; }
 
