@@ -51,6 +51,19 @@
 </head>
 <body>
     <a target="_blank" href="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2/">Wui Docs</a>
-    <p>Steve is working on the WUI right now. Contact him if you're trying to demo on here :-)</p>
+    <a target="_blank" href="https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2-1/demo_util/demo.html">https://static.usurf.usu.edu/resources/wui-nextgen/wui-1-2-1/demo_util/demo.html</a>
+
+<pre><code>
+Wui.demo.grid = new Wui.Grid({
+    url:        '/resources/wui-nextgen/wui-1-2/docs/data.txt',
+    border:     false,
+    columns:    [
+                    {heading:'Date', dataItem:'date', dataType:'date', fit:1},
+                    {heading:'Check Number', dataItem:'check_number', dataType:'numeric'},
+                    {heading:'Description', dataItem:'description', fit:7},
+                    {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
+                ],
+});
+</code></pre>
 </body>
 </html>

@@ -5478,7 +5478,6 @@ if(Wui.dateExt !== true){
                                     amDesignator: "AM",
                                     pmDesignator: "PM"
                                 },
-        
         isLeapYear:             function(year) {
                                     return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
                                 },
@@ -5500,6 +5499,14 @@ if(Wui.dateExt !== true){
                                 }
     });
     $.extend(Date.prototype,{
+        getDayOfYear:   function(){
+                            var start = new Date(this.getFullYear(), 0, 0),
+                                diff = this - start,
+                                oneDay = 1000 * 60 * 60 * 24,
+                                day = Math.floor(diff / oneDay) - 1; // -1 to make it zero based
+
+                            return day;
+                        },
         getDaysInMonth: function() {
                             return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
                         },
@@ -6407,6 +6414,10 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
                                     Msg.closeOkay = true;
                                 }
                             }
+                        },
+            doClose:    function(){
+                            Msg.closeOkay = true;
+                            Msg.close();
                         },
             onWinClose: function(){ return ((Msg.closeOkay !== true) ? false : Msg.closeOkay); }
         });

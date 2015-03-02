@@ -207,10 +207,11 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                         me.tbl.children().each(function(){
                             totalHeight += $(this).outerHeight();
                         });
-
                         totalHeight = (maxHeight > 0 && totalHeight + toolBarsH > maxHeight) ? maxHeight : totalHeight;
 
-                        me.height = totalHeight + toolBarsH;
+                        me.el.height(me.height = totalHeight + toolBarsH);
+                        me.container.height(me.height + 1);
+
                         Wui.O.prototype.layout.apply(me,arguments);
                     }
 

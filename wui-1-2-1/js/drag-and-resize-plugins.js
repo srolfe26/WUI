@@ -1,5 +1,19 @@
 // This file gets minified and put into plugins
 
+(function($) {
+    $.getMaxZ = function(){
+        var bodyElems = $('body *'),
+            useElems = bodyElems.length < 2500 ? bodyElems : $('body > *, [style*="z-index"]'),
+            topZ =  Math.max.apply(null, 
+                        $.map(useElems, function(e) {
+                            if ($(e).css('position') != 'static')
+                                return parseInt($(e).css('z-index')) || 0;
+                        })
+                    );
+        return ($.isNumeric(topZ) ? topZ : 0) + 1;
+    }
+})(jQuery);
+
 
 (function($) {
     $.fn.drags = function(opt) {
@@ -20,7 +34,7 @@
                 pos_y = $drag.offset().top + drg_h - e.pageY,
                 pos_x = $drag.offset().left + drg_w - e.pageX;
 
-            $drag.css('z-index', 1000).parents().on("mousemove", function(e) {
+            $drag.css('z-index', $.getMaxZ()).parents().on("mousemove", function(e) {
                 $('.draggable').offset({
                     top:e.pageY + pos_y - drg_h,
                     left:e.pageX + pos_x - drg_w

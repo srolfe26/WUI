@@ -72,7 +72,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
 
                     me.el.addClass('w121-form').on('submit', function(e){
                         // Prevent the form from submitting unless configured to do so
-                        if(!HTMLSubmit)
+                        if(!me.HTMLSubmit)
                             e.preventDefault();
                     });
 
@@ -1262,14 +1262,18 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     me.value = sv;
 
+                    function selectObj(selectWith){
+                        var val = me.selectBy(me.valueItem,selectWith);
+                        me.value = (val) ? val.rec : null;
+                        return me.value;
+                    }
+
                     if(sv === null){
                         me.clearSelect();
                         me.hiddenField.val('');
                         return sv;
-                    }else if(typeof sv == 'object'){
-                        return me.selectBy(me.valueItem,sv[me.valueItem]);
                     }else{
-                        return me.selectBy(me.valueItem,sv);
+                        return selectObj( (typeof sv == 'object') ? sv[me.valueItem] : sv );
                     }
                 },
     getVal:     function(){
@@ -1422,6 +1426,14 @@ if(typeof Date.CultureInfo === 'undefined'){
                                 }
     });
     $.extend(Date.prototype,{
+        getDayOfYear:   function(){
+                            var start = new Date(this.getFullYear(), 0, 0),
+                                diff = this - start,
+                                oneDay = 1000 * 60 * 60 * 24,
+                                day = Math.floor(diff / oneDay) - 1; // -1 to make it zero based
+
+                            return day;
+                        },
         getDaysInMonth: function() {
                             return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
                         },
@@ -1806,7 +1818,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                     },
     translateDate:  function(ds){
                         var me          = this,
-                            now         = new Date(),
+                            Date         = new Date(),
                             dateReg     = /\d{1,2}\/\d{1,2}\/\d{2,4}/,
                             ifDateReg   = /([a|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|and,\d,\s,-]+)\s((millisecond|second|minute|hour|day|week|month|year)+[s]*)\s(from|after|before|previous to)+\s(.+)$/,
                             intvF       = ifDateReg.exec(ds.toLowerCase());

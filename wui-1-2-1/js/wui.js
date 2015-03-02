@@ -194,18 +194,8 @@ Wui.isPercent = function(){
     return (arguments[0] && arguments[0].indexOf && arguments[0].indexOf('%') != -1);
 };
 
-
-Wui.maxZ = function(){
-    var bodyElems = $('body *'),
-        useElems = bodyElems.length < 2500 ? bodyElems : $('body > *, [style*="z-index"]'),
-        topZ =  Math.max.apply(null, 
-                    $.map(useElems, function(e) {
-                        if ($(e).css('position') != 'static')
-                            return parseInt($(e).css('z-index')) || 0;
-                    })
-                );
-    return ($.isNumeric(topZ) ? topZ : 0) + 1;
-};
+/* getMaxZ() is a plugin defined in plugins.js */
+Wui.maxZ = function(){ return $.getMaxZ() };
 
 
 Wui.percentToPixels = function(el,percent,dim){
@@ -287,10 +277,10 @@ Wui.unwrapData = function(r){
 
 // Base WUI Object
 Wui.O = function(args){ $.extend(this, {
-    aftrRenderd:false,
-    hidden:     false,
-    items:      [],
-    rendered:   false
+    afterRendered:  false,
+    hidden:         false,
+    items:          [],
+    rendered:       false
 },args); };
 Wui.O.prototype = {
     addToDOM:   function(obj, tgt, act){
@@ -317,7 +307,7 @@ Wui.O.prototype = {
                     return obj;
                 },
 
-    afterRender:function(){ this.aftrRenderd = true; },
+    afterRender:function(){ this.afterRendered = true; },
 
     append:     function(){
                     var el =    (this.elAlias || this.el);
@@ -493,7 +483,7 @@ Wui.O.prototype = {
                     if(me.items.length && (me.fitDimension || needFit))
                         Wui.fit(me.items, (me.fitDimension || undefined));
 
-                    if(!me.aftrRenderd)    me.afterRender();
+                    if(!me.afterRendered)    me.afterRender();
                     
                     // Performs actions passed in as parameters
                     if(typeof afterLayout === 'function')
@@ -702,10 +692,18 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
     afterRender:    function(){
                         var me = this;
 
-                        Wui.O.prototype.afterRender.call(me);
-                        if(me.parent){
-                            Wui.fit(me.parent.items, (me.parent.fitDimension || 'width'));
-                            me.el.parent().css('overflow','hidden');
+                        if(me.afterRendered !== true){
+                            Wui.O.prototype.afterRender.call(me);
+                            if(me.parent){
+                                Wui.fit(me.parent.items, (me.parent.fitDimension || 'width'));
+                                me.el.parent().css('overflow','hidden');
+                            }
+
+                            // Set focus to the bottom right most button in the pane
+                            setTimeout(function(){
+                                if(!me.disabled && me.footer.items.length && me.footer.items[me.footer.items.length - 1].el)
+                                    me.footer.items[me.footer.items.length - 1].el.focus();
+                            },30);
                         }
                     },
     disable:        function(){
@@ -727,7 +725,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                         return (me.disabled = false);
                     },
     init:           function(){
-                        var me = this, el = me.el = $('<div>').addClass('w121-pane');
+                        var me = this, el = me.el = me.surePane = $('<div>').addClass('w121-pane');
                     
                         Wui.O.prototype.init.call(me);
 
@@ -775,7 +773,7 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                     bbar: 'footer'
                                 },
                                 thisBar =   me[bars[bar]],
-                                hasBar =    me.el.hasClass(bar),
+                                hasBar =    me.surePane.hasClass(bar),
                                 hasItems =  (function(){
                                                 var barItemNum = 0;
 
@@ -788,10 +786,10 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                                             })();
 
                             if(!hasBar && hasItems){
-                                me.el.addClass(bar);
+                                me.surePane.addClass(bar);
                                 thisBar.place();
                             }else if (hasBar && !hasItems){
-                                me.el.removeClass(bar);
+                                me.surePane.removeClass(bar);
                                 thisBar.el.remove();
                             }
                         }
@@ -807,16 +805,20 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                             if(me.header) me.header.onRender();
                             if(me.footer) me.footer.onRender();
 
-                            // After all of the work done by flexbox, Chrome has a lousy implementation that requires
-                            // setting the content explicitly with JS
-                            if(!(me instanceof Wui.Window))
-                                setTimeout(function(){
-                                    if(parseInt(me.container.height()) != me.el.height())
-                                    me.container.css('height', me.el.height());
-                                },0);
-
                             Wui.O.prototype.onRender.call(me);
                         } 
+                    },
+    cssByParam:     function(returnObj){
+                        var me = this;
+
+                        Wui.O.prototype.cssByParam.apply(me,arguments);
+
+                        // After all of the work done by flexbox, Chrome has a lousy implementation that requires
+                        // setting the content explicitly with JS
+                        setTimeout(function(){
+                            if(me.el.parents('[style*="column"]').length && parseInt(me.container.height()) != me.el.height())
+                                me.container.css('height', me.el.height());
+                        },0);
                     },
     removeMask:     function(){
                         this.el.find('.w121-mask').fadeOut(500, function(){ $(this).remove(); });
@@ -855,18 +857,19 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
 
 Wui.Window = function(args){ 
     $.extend(this,{
-        bbar:       [],
-        border:     true,
-        draggable:  true,
-        isModal:    false,
-        maskHTML:   'Loading <span class="w121-spinner"></span>',
-        onWinClose: function(){},
-        onWinOpen:  function(){},
-        resizable:  true,
-        tbar:       [],
-        title:      'Window',
-        windowLeft: null,
-        windowTop:  null
+        bbar:           [],
+        border:         true,
+        closeWithModal: false,
+        draggable:      true,
+        isModal:        false,
+        maskHTML:       'Loading <span class="w121-spinner"></span>',
+        onWinClose:     function(){},
+        onWinOpen:      function(){},
+        resizable:      true,
+        tbar:           [],
+        title:          'Window',
+        windowLeft:     null,
+        windowTop:      null
     },args);  
     this.init(); 
 };
@@ -904,7 +907,13 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     if(me.isModal){
                         me.modalEl = $('<div>').addClass('w121-overlay');
                         $('body').append(
-                            me.appendTo = me.modalEl.css('z-index',Wui.maxZ()).on('mousewheel',noScroll)
+                            me.appendTo = me.modalEl
+                                .css('z-index',Wui.maxZ())
+                                .on('mousewheel',noScroll)
+                                .click(function(e){
+                                    if(me.closeWithModal && e.target === me.modalEl[0])
+                                        me.close();
+                                })
                         );
                     }
                     
@@ -970,8 +979,10 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     });
                 },
     afterRender:function(){
-                    Wui.Pane.prototype.afterRender.call(this);
-                    this.resize();
+                    if(this.afterRendered !== true){
+                        Wui.Pane.prototype.afterRender.call(this);
+                        this.resize();
+                    }
                 },
     resize:     function(resizeWidth, resizeHeight){
                     var me = this;
@@ -1327,12 +1338,6 @@ Wui.DataList = function(args){
         el:             $('<div>'),
         focusOnSelect:  true,
         interactive:    true,
-        keyActions:     {
-                            '13':   function(){ me.selected[0].el.click(); me.selected[0].el.click(); },
-                            '32':   function(){ me.selected[0].el.click(); me.selected[0].el.click(); },
-                            '38':   function(){ me.selectAjacent(-1); },
-                            '40':   function(){ me.selectAjacent(1); }
-                        },
         multiSelect:    false,
         selected:       []
     }, args);
@@ -1431,7 +1436,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                     $(document).on('keyup',function(evnt){
                         if( me.selected && me.selected[0] && document.activeElement == me.selected[0].el[0] && me.keyActions.hasOwnProperty(evnt.keyCode) )
-                            me.keyActions[evnt.keyCode]();
+                            me.keyActions[evnt.keyCode].call(me);
                     });
                 },
     itemSelect: function(itm, silent){
@@ -1477,9 +1482,15 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     return itm;
                 },
+    keyActions: {
+                    '13':   function(){ var me = this; me.selected[0].el.click(); me.selected[0].el.click(); },
+                    '32':   function(){ var me = this; me.selected[0].el.click(); me.selected[0].el.click(); },
+                    '38':   function(){ var me = this; me.selectAjacent(-1); },
+                    '40':   function(){ var me = this; me.selectAjacent(1); }
+                },
     modifyItem: function(itm){ return itm.el; },
     make:       function(){
-                    if(typeof this.data.length === 'undefined')
+                    if(!(this.data instanceof Array))
                         return false;
 
                     var me = this,
@@ -1554,7 +1565,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     getSrcData: function(){
                     var me = this;
                     
-                    if(me.initLoaded !== true && me.data && me.data !== []){
+                    if(me.initLoaded !== true && (me.data instanceof Array) && me.data.length > 0){
                         me.setParams(me.params);
                         me.initLoaded = true;
 
@@ -1593,7 +1604,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     
                     return retVal;
                 },
-    refresh:    function(){ this.onRender(); },
+    refresh:    function(){ this.loadData(); },
     resetSelect:function(){
                     var me = this,
                         selList = me.copyArryRecs(me.selected);
