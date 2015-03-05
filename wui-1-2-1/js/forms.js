@@ -17,7 +17,7 @@ Wui.Form = function(args){
         labelSize:      null,
         HTMLSubmit:     false,
     }, args, {
-        el:             $('<form>'),
+        el:             $('<div>'),
         errors:         [],
         formChanged:    false
     });
@@ -217,7 +217,8 @@ Wui.Note = function(args){
     this.init();
 };
 Wui.Note.prototype = $.extend(new Wui.O(),{
-    init:   function(){ this.el = $('<div>').html(this.html).addClass('w121-note'); }
+    init:   function(){ this.el = $('<div>').html(this.html).addClass('w121-note'); },
+    setHTML:function(html){ this.el.html(html); }
 });
 
 
@@ -841,7 +842,22 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     // Append to DOM
                     me.append(ul);
                 },
-    elemChange: function(elem){ this.val(elem.val()); },
+    /** Disables the field so the user cannot interact with it. */
+    disable:    function(){
+                    this.disabled = true;
+                    if(this.el && this.el.addClass)
+                        this.el.addClass('w121-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                },
+
+    /** What to do when an individual element changes */
+    elemChange:    function(elem){ this.val(elem.val()); },
+    
+    /** Enables the field so the user can interact with it. */
+    enable:     function(){
+                    this.disabled = false;
+                    if(this.el && this.el.addClass)
+                        this.el.removeClass('w121-disabled').find('.w121-disabled,*[disabled]').removeAttr('disabled');
+                },
     getVal:     function(){ return this.value; },
     setChanged: function(oldVal){
                     var me = this;
@@ -1164,21 +1180,14 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     return retVal;
                 },
-    selectByEl: function(el){
-                    var me = this, retVal;
-
-                    me.itemSelect(retVal = me.getItemByEl(el));
-                    
-                    return retVal;
-                },
     set:        function(){
-                    var me = this;
+                    var me = this, sel = me.selected[0];
 
-                    if(me.selected[0] && me.value != me.selected[0].rec){
-                        me.val(me.selected[0].rec);
+                    if(sel && me.value != sel.rec){
+                        me.val(sel.rec);
 
-                        if(typeof me.selected[0].rec != 'undefined')
-                            me.hiddenField.val(me.selected[0].rec[me.valueItem]);
+                        if(sel.rec)
+                            me.hiddenField.val(sel.rec[me.valueItem]);
                     }
                         
                     if(me._open)
@@ -1191,6 +1200,8 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     // t = the combo field
                     return t.field.on({
                         keydown: function(evnt){
+                            evnt.stopPropagation();
+
                             //clear the value if the user blanks out the field
                             if(t.field.val().length === 0){
                                 t.value = null;
@@ -1198,24 +1209,27 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                             }
 
                             switch(evnt.keyCode){
-                                case 40:    evnt.preventDefault(); move(1);     break;  // downkey
-                                case 38:    evnt.preventDefault(); move(-1);    break;  // upkey
-                                case 9:     t.set();                            break;  //tab
-                                case 27:                                                // escape
-                                    evnt.preventDefault(); 
+                                case 40:    move(1);                break;  // downkey
+                                case 38:    move(-1);               break;  // upkey
+                                case 9:     t.set();                break;  // tab
+                                case 13:    evnt.preventDefault();  break;  // enter
+                                case 27:                                    // escape
                                     t.field.val(t.previous);
                                     t.close();
                                 break;
                             }
-                            
+                        },
+                        keypress:function(evnt){
                             evnt.stopPropagation();
+                            if(evnt.keyCode == 13)  // enter
+                                evnt.preventDefault();
                         },
                         keyup: function(evnt){
-                            if(evnt.keyCode == 13){  // enter
-                                evnt.preventDefault(); 
-                                t.set();
-                            }
                             evnt.stopPropagation();
+                            if(evnt.keyCode == 13){  // enter
+                                t.set();
+                                evnt.preventDefault();
+                            }
                         },
                         input: function(){
                             if(!t._open) t.open();
@@ -1264,7 +1278,13 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     function selectObj(selectWith){
                         var val = me.selectBy(me.valueItem,selectWith);
-                        me.value = (val) ? val.rec : null;
+                        if(typeof val != 'undefined'){
+                            me.value = val.rec;
+                            me.hiddenField.val(val.rec[me.valueItem]);
+                        }else{
+                            me.value = sv;
+                            me.hiddenField.val( (typeof sv == 'number' || typeof sv == 'string') ? sv : '' );
+                        }
                         return me.value;
                     }
 
@@ -1818,7 +1838,7 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                     },
     translateDate:  function(ds){
                         var me          = this,
-                            Date         = new Date(),
+                            now         = new Date(),
                             dateReg     = /\d{1,2}\/\d{1,2}\/\d{2,4}/,
                             ifDateReg   = /([a|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|and,\d,\s,-]+)\s((millisecond|second|minute|hour|day|week|month|year)+[s]*)\s(from|after|before|previous to)+\s(.+)$/,
                             intvF       = ifDateReg.exec(ds.toLowerCase());
@@ -2006,12 +2026,16 @@ Wui.File = function(args) {
 
 Wui.File.prototype = $.extend(new Wui.Text(), {
     disable:function(){
-                    this.disabled = true;
-                    this.field.attr('disabled','true');
+                this.disabled = true;
+                if(this.el && this.el.addClass)
+                    this.el.addClass('w121-disabled').find('input,textarea,iframe').attr('disabled','disabled');
             },
+    
+    /** Enables the field so the user can interact with it. */
     enable: function(){
-                    this.disabled = false;
-                    this.field.removeAttr('disabled');
+                this.disabled = false;
+                if(this.el && this.el.addClass)
+                    this.el.removeClass('w121-disabled').find('.w121-disabled,*[disabled]').removeAttr('disabled');
             },
     init:   function(){
                 var me = this;
@@ -2089,8 +2113,10 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                         (me.elAlias || me.el).addClass('w121-toggle');
                         me.el.find('.w121-toggle-outer').height(th - 2).width(me.toggleWidth);
                         me.el.find('.w121-toggle-outer, .w121-toggle-btn').css('border-radius', me.borderRadius);
-                        me.el.find('.w121-toggle-btn').height(th - 2).width(th - 2).css('left','calc(50% - ' + (th - 2) + 'px)');
-                        me.el.find('.w121-opt-1, .w121-opt-2').css('line-height',(th - 2) + 'px');
+                        me.el.find('.w121-toggle-btn').css({
+                            width:  th - 4,
+                            left:   'calc(50% - ' + (th - 4) + 'px)'
+                        });
                         me.el.find('.w121-opt-1').css({
                             'text-indent':      -(th - me.borderRadius) + (me.borderRadius ? 0 : 2),
                             'background-color': me.opt1Color
@@ -2106,7 +2132,7 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                         
                         t.toggler.click(function(){
                             me.val( (me.value == me.opt1) ? me.opt2 : me.opt1 );
-                            me.el.find('.w121-toggle-btn').css('left','calc(50% - ' + ((me.toggleHeight - 2) * ((me.value == me.opt1) ? 1 : 0)) + 'px)');
+                            me.el.find('.w121-toggle-btn').css('left','calc(50% - ' + ((me.toggleHeight - 4) * ((me.value == me.opt1) ? 1 : 0)) + 'px)');
                         });
                         
                         if(this.setListeners !== Wui.Toggle.prototype.setListeners) this.setListeners(this);

@@ -21,7 +21,7 @@
 .w121-lbl > label, .w121-button, .w121-gc { font-size: 0.9rem; } 
 .w121-checkbox ul label, .w121-radio ul label, .w121-fe input, .w121-fe textarea, .w121-editor, .w121-gc:after, .w121-grid .w121-pane-content * { font-size: 0.8rem; }
 .feedback, .w121-char-counter { font-size: 0.7rem; }
-.w121-pane, .w121-form, .w121-button, .w121-fe input, .w121-fe textarea, .w121-editor { color:#4f4f4f; }
+.w121-pane, .w121-button, .w121-fe input, .w121-fe textarea, .w121-editor { color:#4f4f4f; }
 
 /****************************************   PANE STYLES   *****************************************/
 .w121-pane {
@@ -237,6 +237,7 @@ button::-moz-focus-inner { border:0; }
     width:100%; 
     border-radius:4px;
 }
+.w121-fe input[type="file"] { padding: 0; }
 .w121-fe input, .w121-fe textarea, .w121-editor, .button li label, .w121-button.field-btn { border-color:#bbb; }
 .w121-fe input, .w121-fe textarea, .w121-editor, .button li label { 
     background-color:#efefef; 
@@ -401,6 +402,9 @@ button::-moz-focus-inner { border:0; }
     .w121-opt-1, .w121-opt-2 {
         text-shadow: 0 0 3px rgba(0,0,0,0.6); 
         flex:1;
+        display:flex;
+        align-items:center;
+        justify-content:center;
         color:  #fff;
         box-shadow:inset 0 0 5px rgba(0,0,0,0.6); 
         text-align:center;
@@ -410,7 +414,8 @@ button::-moz-focus-inner { border:0; }
 .w121-toggle-btn {
     background-color:#ccc; 
     position:absolute; 
-    top:0; 
+    top:0;
+    height:100%;
     box-shadow:0 0 5px rgba(0, 0, 0, 0.4), inset 0 -5px 10px rgba(255,255,255,0.8);
 }
 
@@ -462,7 +467,7 @@ button::-moz-focus-inner { border:0; }
     color:#ccc; 
 }
 .w121-fe .has-file[disabled=disabled] {background-color: #fff;}
-.w121-disabled .w121-cal-toggle, .w121-disabled.w121-combo .w121-button, .w121-disabled .w121-combo .w121-button { display:none; }
+.w121-disabled button, .w121-disabled output { display:none; }
 .w121-form-err.w121-disabled.w121-fe [disabled=disabled] {border-color:#fff; color:#fdd;}
 .w121-lbl.w121-disabled > label { font-style: italic; font-weight: normal; }
 .w121-disabled .button label { 
@@ -472,6 +477,10 @@ button::-moz-focus-inner { border:0; }
 }
 .w121-disabled .button li > input:checked + label { color: #999; }
 
+.w121-disabled input:-moz-placeholder { opacity: 0; }
+.w121-disabled input::-moz-placeholder { opacity: 0; }
+.w121-disabled input:-ms-input-placeholder { opacity: 0; }
+.w121-disabled input::-webkit-input-placeholder { opacity: 0; }
 
 /**************************************   Form Elements in Header & Footer  **************************************/
 .w121-h-bar .w121-form {
@@ -495,7 +504,7 @@ button::-moz-focus-inner { border:0; }
 
 /* For Radio & Checkbox */
 .w121-h-bar .w121-radio ul, .w121-h-bar .w121-checkbox ul { display: flex; line-height: 26px; }
-.w121-h-bar .w121-radio input, .w121-h-bar .w121-checkbox input { top:4px; }
+.w121-h-bar .w121-radio input, .w121-h-bar .w121-checkbox input { top:7px; left:7px; }
 
 /* Datetime */
 .w121-h-bar .w121-datetime {

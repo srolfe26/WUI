@@ -1,51 +1,54 @@
-.wui-multiple {
+.w121-multiple {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
 
-    /* From Wui.css line 138 .wui-fe input: */
-    background-color: #ddd;
+    /* From Wui.css line 138 .w121-fe input: */
+    background-color: #eee;
     border-style: solid;
     border-width: 1px;
 
-    /* From wui.css line 137 : .wui-fe input, .wui-fe textarea, .wui-editor, .button li label, .wui-btn.field-btn */
+    /* From wui.css line 137 : .w121-fe input, .w121-fe textarea, .w121-editor, .button li label, .w121-btn.field-btn */
     border-color: #bbb;
 
-    /* From wui.css line 136: .wui-fe input, .wui-fe textarea, .wui-editor */
+    /* From wui.css line 136: .w121-fe input, .w121-fe textarea, .w121-editor */
     border-radius: 4px;
     color: #444;
 }
 
-.wui-multiple input, .wui-multiple input:focus {
+.w121-multiple.has-focus { background-color: #fff; }
+
+.w121-multiple input, .w121-multiple input:focus {
     outline: none;
     -webkit-appearance: none;
     background-color: transparent;
     border:none;
 }
 
-.wui-multiple select {display:none !important;}
+.w121-multiple select {display:none !important;}
 
-.wui-multiple > .wui-fe {
+.w121-multiple > .w121-fe {
     flex: 1;
     min-width: 120px;
 }
-.wui-multiple span {
-    padding: 0 0.33em;
+.w121-multiple span {
+    padding: 0.15em 0.33em;
     border-radius: 4px;
-    line-height: 26px;
+    outline: 0;
 }
-.wui-multiple span a {
+.w121-multiple span a {
     display:none;
     margin-left: 0.5em;
 }
-.wui-multiple span.wui-selected {margin:0 0.25em;}
-.wui-multiple span.wui-selected a {
+.w121-multiple span.w121-selected {margin:0 0.25em;}
+.w121-multiple span.w121-selected a {
     display: inline-block;
 }
-.wui-selected a {color:#fff;}
-.wui-selected a:hover {text-decoration: underline;}
+.w121-selected a {color:#fff;}
+.w121-selected a:hover {text-decoration: underline;}
 
-.wui-selected:focus{ outline: none; }
+.w121-selected:focus{ outline: none; }
 
-.wui-multiple .wui-btn.field-btn.dd-switch {
+.w121-multiple .w121-btn.field-btn.dd-switch {
     border: 0 none;
 }

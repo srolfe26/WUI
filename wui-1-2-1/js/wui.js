@@ -207,22 +207,8 @@ Wui.percentToPixels = function(el,percent,dim){
 
 
 Wui.positionItem = function(parent,child){
-    var ofst    =   parent.offset(),
-        cWidth  =   child.outerWidth(),
-        cHeight =   child.outerHeight(),
-        plBelow =   (function(){
-                        var retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
-
-                        if(!retVal && (ofst.top - cHeight < 0)){
-                            cHeight = ofst.top -5;
-                            retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
-                        }else{
-                            cHeight = '';
-                        }
-
-                        return retVal;
-                    })(),
-        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0),
+    var ofst    =   parent[0].getBoundingClientRect(),
+        top     =   ofst.top,
         fxdOrAbs =  (function(){
                         var retVal = 'absolute';
 
@@ -232,11 +218,26 @@ Wui.positionItem = function(parent,child){
                         });
 
                         return retVal;
-                    })();
+                    })(),
+        cWidth  =   child.outerWidth(),
+        cHeight =   child.outerHeight(),
+        plBelow =   (function(){
+                        var retVal = top + parent.outerHeight() + cHeight < $.viewportH();
+
+                        if(!retVal && (top - cHeight < 0)){
+                            cHeight = top -5;
+                            retVal = top + parent.outerHeight() + cHeight < $.viewportH();
+                        }else{
+                            cHeight = '';
+                        }
+
+                        return retVal;
+                    })(),
+        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0);
 
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
-        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
+        top:        (plBelow) ? top + parent.outerHeight() : top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
         height:     cHeight,
         position:   fxdOrAbs,
         zIndex:     Wui.maxZ()
@@ -901,7 +902,7 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                 },
     init:       function(){
                     var me = this;
-                    me.appendTo = $('body');
+                    me.appendTo = me.appendTo || $('body');
                     
                     // Make it a modal window & add everything to the DOM
                     if(me.isModal){
@@ -918,9 +919,8 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
                     }
                     
                     // Add close buttons where appropriate
-                    me.tbar.push(
-                        me.closeBtn = new Wui.Button({ text:'X', name:'window_close' })
-                    );
+                    me.tbar.push( me.closeBtn = new Wui.Button({ text:'X', name:'window_close' }) );
+                    
                     if(me.bbar.length === 0) 
                         me.bbar = [ new Wui.Button({ text:'Close', name:'window_close' }) ];
                     

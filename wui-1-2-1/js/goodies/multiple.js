@@ -83,20 +83,31 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         Wui.FormField.prototype.init.apply(me,arguments);
 
                         // Put the items on the DOM
-                        (me.elAlias || me.el).addClass('wui-multiple')
-                        .append( me.combo.el, me.selectEl )
-                        .on('click','a', function(){ 
-                            me.removeItems(this); 
-                        })
-                        .on('valchange', function(evnt,obj){ 
-                            if(obj.value !== null){
-                                me.push(obj.value);
-                                obj.val(null);
-                                obj.field.val('');
-                            }
+                        var el = (me.elAlias || me.el);
+                        el.addClass('w121-multiple')
+                            .append( me.combo.el, me.selectEl )
+                            .on('click',function(){
+                                el[ (el.find('.w121-selected').length > 0) ? 'removeClass' : 'addClass' ]('has-focus');
+                            })
+                            .on('click','a', function(){ 
+                                me.removeItems(this); 
+                            })
+                            .on('focus','input',function(){
+                                me.combo.field.val('');
+                                el.addClass('has-focus');
+                            })
+                            .on('blur','input',function(){
+                                el.removeClass('has-focus');
+                            })
+                            .on('valchange', function(evnt,obj){ 
+                                if(obj.value !== null){
+                                    me.push(obj.value);
+                                    obj.val(null);
+                                    obj.field.val('');
+                                }
 
-                            evnt.stopPropagation();
-                        });
+                                evnt.stopPropagation();
+                            });
                     },
     defineTags:     function(){
                         this.template = 
@@ -209,8 +220,8 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
     make:           function (){
                         var me = this,
                             holdingData = me.data || [],
-                            holder = $('<div>'), 
-                            dn = (me.name) ? '.' + me.name : '';
+                            els = [],
+                            holder = $('<div>');
                         
                         // Clear out items list
                         me.items = [];
@@ -218,8 +229,10 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         // Add items to me.items
                         for(var i = 0; (me.displayMax < 0 && i < holdingData.length) || (me.displayMax > 0 && i < me.displayMax && i < holdingData.length); i++){
                             var rec = me.data = holdingData[i],
-                                itm = {el:Wui.Template.prototype.make.call(me, i), rec:rec};
-                                
+                                itmEl = Wui.Template.prototype.make.call(me, i),
+                                itm = { el:itmEl, rec:rec };
+                            
+                            els.push(itmEl);
                             Array.prototype.push.call(me.items,itm);
                             holder.append(me.createItem(itm));
                         }
@@ -233,12 +246,11 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         // object has been manually run
                         me.autoLoad = true;
                         
+                        me.clickListener(els);
+
                         // Event hook and event
                         me.afterMake();
-                        me.el.trigger($.Event('refresh'+ dn),[me,me.data])
-                            .trigger($.Event('refresh'),[me,me.data]);
-                        
-                        // Reset selected items if any
+                        me.el.trigger($.Event('refresh'),[me,me.data]);
                         me.resetSelect();
                     },
     clear:          function(){
