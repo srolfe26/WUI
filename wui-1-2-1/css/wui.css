@@ -19,9 +19,14 @@
 }
 
 .w121-lbl > label, .w121-button, .w121-gc { font-size: 0.9rem; } 
-.w121-checkbox ul label, .w121-radio ul label, .w121-fe input, .w121-fe textarea, .w121-editor, .w121-gc:after, .w121-grid .w121-pane-content * { font-size: 0.8rem; }
+
+.w121-checkbox ul label, .w121-radio ul label, .w121-fe input, .w121-fe textarea, .w121-editor, 
+.w121-gc:after, .w121-grid .w121-pane-content * { font-size: 0.8rem; }
+
 .feedback, .w121-char-counter { font-size: 0.7rem; }
-.w121-pane, .w121-button, .w121-fe input, .w121-fe textarea, .w121-editor { color:#4f4f4f; }
+
+.w121-pane, .w121-button, .w121-fe input, .w121-fe textarea, 
+.w121-editor, .w121-radio ul.button label, .w121-checkbox ul.button label { color:#4f4f4f; }
 
 /****************************************   PANE STYLES   *****************************************/
 .w121-pane {
@@ -248,7 +253,7 @@ button::-moz-focus-inner { border:0; }
     background-color:#fff; 
     border-color:#999; 
 }
-.w121-fe .empty { color:#777; }
+
 .w121-fe textarea { 
     height:100%; 
     width:100%; 
