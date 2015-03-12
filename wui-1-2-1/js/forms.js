@@ -118,7 +118,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                         if(itm.lbl){
                             itm.labelSize = me.labelSize;
                             // setLabelPosition calls setLabelSize and uses the item's labelSize that we just set.
-                            itm.lbl.setLabelPosition( me.labelPosition );
+                            itm.lbl.setLabelPosition( itm.labelPosition || me.labelPosition );
                         }
                         return itm;
                     }else{
