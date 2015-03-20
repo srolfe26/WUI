@@ -9,7 +9,6 @@ Wui.DateRange = function(args){
             init:       function(){
                             var stCls = Wui.id('start-dt'), endCls = Wui.id('end-dt'); 
 
-
                             Wui.FormField.prototype.init.call(this);
                             
                             me.append( 
@@ -30,25 +29,17 @@ Wui.DateRange = function(args){
                             me.el.addClass('w121-date-fields');
 
                             // Add Listeners for valchange and stop propagation
-                            me.el.on('valchange', '[name='+endCls+']', function(evnt,f,newVal,oldVal){
-                            evnt.stopPropagation();
+                            me.el.on('valchange', function(evnt,f,newVal,oldVal){
                                 if(newVal !== oldVal){
-                                    me.value.end_date = newVal;
-                                    fieldsChange();
+                                    if(f === me.startDate){
+                                        me.endDate.minDate = me.value.start_date = newVal;
+                                    }else{
+                                        me.value.end_date = newVal;
+                                    }
+                                    me.field.val(me.startDate.toString() + ' - ' + me.endDate.toString());
+                                    me.setChanged();
                                 }
                             });
-                            me.el.on('valchange', '.'+stCls, function(evnt,f,newVal,oldVal){
-                                evnt.stopPropagation();
-                                if(newVal !== oldVal){
-                                    me.endDate.minDate = me.value.start_date = newVal;
-                                    fieldsChange();
-                                }
-                            });
-
-                            function fieldsChange(){
-                                me.field.val(me.startDate.toString() + ' - ' + me.endDate.toString());
-                                me.setChanged();
-                            }
                         },
             setVal:     function(sv){
                             me.value = $.extend({}, sv);

@@ -1991,7 +1991,10 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         }
                     },
     toString:       function(format){
-                        return this.value.toString(format || this.dtFormat) || '';
+                        if(this.value !== null)
+                            return this.value.toString(format || this.dtFormat) || '';
+                        else
+                            return '';
                     },
     validDate:      function(dt){
                         if (dt === null || typeof dt === 'undefined')  return false;
