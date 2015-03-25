@@ -10,10 +10,11 @@ var _wuiVar = (function(){
             dict:       []
         },
         /** 
-            @param  {object or string}  selector    A selector string (that will be run through jQuery's selector engine, or a jQuery object) 
+            @param  {object or string}  selector    IN: A selector string (that will be run through jQuery's selector 
+                                                    engine to produce a jQuery object), or a jQuery object
 
-            Returns the WUI object matching the selector from a dictionary of all WUI objects. 
-            This is a way to acquire a WUI object in memory having only a DOM node representation.
+            Returns the WUI object matching the selector from a dictionary of all WUI objects. This is a way to acquire 
+            a WUI object in memory having only a DOM node representation.
         */
         wuiSelector = function (selector){
             var nodes   =   (selector instanceof jQuery) ? 
@@ -39,3 +40,21 @@ var _wuiVar = (function(){
 
     return wObj;
 })();
+
+
+(function($,_w) {
+
+
+/**
+    The basic WUI Object consists of an 'n' that represents a DOM node, and an items array that will represent the
+    object's children in memory. Children are added through push() and splice() methods that will add/remove objects
+    from both the items array and the DOM.
+*/
+_w.Obj = function(args){ $.extend(this, {
+    n:          $('<div>'),
+    items:      []
+},args); };
+_w.Obj.prototype = {};
+
+
+}(jQuery,window[_wuiVar]));
