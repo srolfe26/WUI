@@ -238,6 +238,7 @@ Wui.positionItem = function(parent,child){
 
     // If we we are not in a dialog window then add the scrollTop in case they have scrolled down.
     if(win.length == 0){
+        top += $(window).scrollTop();
     }
 		
     child.css({
