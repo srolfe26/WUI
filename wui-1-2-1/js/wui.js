@@ -207,6 +207,7 @@ Wui.percentToPixels = function(el,percent,dim){
 
 
 Wui.positionItem = function(parent,child){
+	var win = $(parent).closest('.w121-window');
     var ofst    =   parent[0].getBoundingClientRect(),
         top     =   ofst.top,
         fxdOrAbs =  (function(){
@@ -235,6 +236,11 @@ Wui.positionItem = function(parent,child){
                     })(),
         plRight =   (ofst.left + parent.outerWidth() - cWidth > 0);
 
+    // If we we are not in a dialog window then add the scrollTop in case they have scrolled down.
+    if(win.length == 0){
+        top += $(window).scrollTop();
+    }
+		
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
         top:        (plBelow) ? top + parent.outerHeight() : top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
