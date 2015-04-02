@@ -215,22 +215,8 @@ Absolutely positions a child element, relative to its parent, such that it will
 be visible within the viewport and at the max z-index. Useful for dialogs and drop-downs.
 */
 Wui.positionItem = function(parent,child){
-    var ofst    =   parent.offset(),
-        cWidth  =   child.outerWidth(),
-        cHeight =   child.outerHeight(),
-        plBelow =   (function(){
-                        var retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
-
-                        if(!retVal && (ofst.top - cHeight < 0)){
-                            cHeight = ofst.top -5;
-                            retVal = ofst.top + parent.outerHeight() + cHeight < $.viewportH();
-                        }else{
-                            cHeight = '';
-                        }
-
-                        return retVal;
-                    })(),
-        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0),
+    var ofst    =   parent[0].getBoundingClientRect(),
+        top     =   ofst.top,
         fxdOrAbs =  (function(){
                         var retVal = 'absolute';
 
@@ -240,11 +226,30 @@ Wui.positionItem = function(parent,child){
                         });
 
                         return retVal;
-                    })()
+                    })(),
+        cWidth  =   child.outerWidth(),
+        cHeight =   child.outerHeight(),
+        plBelow =   (function(){
+                        var retVal = top + parent.outerHeight() + cHeight < $.viewportH();
+
+                        if(!retVal && (top - cHeight < 0)){
+                            cHeight = top -5;
+                            retVal = top + parent.outerHeight() + cHeight < $.viewportH();
+                        }else{
+                            cHeight = '';
+                        }
+
+                        return retVal;
+                    })(),
+        plRight =   (ofst.left + parent.outerWidth() - cWidth > 0);
+
+    // If the parent is not a fixed-position element, then add the scrollTop in case the page is scrolled down.
+    if(fxdOrAbs === 'fixed')
+        top += $(window).scrollTop();
 
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
-        top:        (plBelow) ? ofst.top + parent.outerHeight() : ofst.top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
+        top:        (plBelow) ? top + parent.outerHeight() : top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),
         height:     cHeight,
         position:   fxdOrAbs,
         zIndex:     Wui.maxZ()

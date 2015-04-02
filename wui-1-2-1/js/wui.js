@@ -7,12 +7,23 @@
 
 // Make sure the WUI is defined and doesn't conflict with other versions on the page
 var _wuiVar = (function(){
-    if(typeof Wui === 'undefined'){
-        Wui = function(selector){
+    var wObj,
+        members = {
+            version:    'wui-lite-1', 
+            dict:       []
+        },
+        /** 
+            @param  {object or string}  selector    IN: A selector string (that will be run through jQuery's selector 
+                                                    engine to produce a jQuery object), or a jQuery object
+
+            Returns the WUI object matching the selector from a dictionary of all WUI objects. This is a way to acquire 
+            a WUI object in memory having only a DOM node representation.
+        */
+        wuiSelector = function (selector){
             var nodes   =   (selector instanceof jQuery) ? 
                                 selector : (typeof selector === 'string') ?
                                     $(selector) : [selector],
-                matches =   Wui.dict.filter(function ( obj ) { 
+                matches =   window[_wuiVar].dict.filter(function ( obj ) { 
                                 return $.inArray( obj.el, nodes ) > -1; 
                             }),
                 retVal  =   (function(m){
@@ -26,32 +37,11 @@ var _wuiVar = (function(){
             return retVal;
         };
 
-        Wui.prototype = { version: '1.2.1' };
+    wObj = (typeof Wui === 'undefined') ? 'Wui' : '_w';
+    window[wObj] = wuiSelector;
+    $.extend( window[wObj], members );
 
-        return 'Wui';
-    }else{
-        _w = function(selector){
-            var nodes   =   (selector instanceof jQuery) ? 
-                                selector : (typeof selector === 'string') ?
-                                    $(selector) : [selector],
-                matches =   _w.dict.filter(function ( obj ) { 
-                                return $.inArray( obj.el, nodes ) > -1; 
-                            }),
-                retVal  =   (function(m){
-                                var justItms = [];
-                                
-                                m.forEach(function( obj ){ justItms.push(obj.itm); });
-
-                                return justItms;
-                            })(matches);
-
-            return retVal;
-        };
-
-        _w.prototype = { version: '1.2.1' };
-
-        return '_w';
-    }
+    return wObj;
 })();
 
 
@@ -207,7 +197,6 @@ Wui.percentToPixels = function(el,percent,dim){
 
 
 Wui.positionItem = function(parent,child){
-	var win = $(parent).closest('.w121-window');
     var ofst    =   parent[0].getBoundingClientRect(),
         top     =   ofst.top,
         fxdOrAbs =  (function(){
@@ -236,11 +225,10 @@ Wui.positionItem = function(parent,child){
                     })(),
         plRight =   (ofst.left + parent.outerWidth() - cWidth > 0);
 
-    // If we we are not in a dialog window then add the scrollTop in case they have scrolled down.
-    if(win.length == 0){
+    // If the parent is not a fixed-position element, then add the scrollTop in case the page is scrolled down.
+    if(fxdOrAbs === 'fixed')
         top += $(window).scrollTop();
-    }
-		
+
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
         top:        (plBelow) ? top + parent.outerHeight() : top - ($.isNumeric(cHeight) ? cHeight : child.outerHeight()),

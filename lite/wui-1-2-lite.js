@@ -54,7 +54,22 @@ _w.Obj = function(args){ $.extend(this, {
     n:          $('<div>'),
     items:      []
 },args); };
-_w.Obj.prototype = {};
+_w.Obj.prototype = {
+    push:       function(){
+                    var me = this;
+                    
+                    Array.prototype.forEach.call(arguments,function(arg){
+                        arg.parent = me;
+
+                        if(arg.place)   arg.place();
+                        else            me.addToDOM(arg);
+
+                        if(arg.layout)  arg.layout();
+                    });
+
+                    return Array.prototype.push.apply(me.items,arguments);
+                },
+};
 
 
 }(jQuery,window[_wuiVar]));

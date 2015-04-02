@@ -1283,10 +1283,9 @@ Wui.Combo = function(args){
         && this.hasOwnProperty('titleItem') 
         && this.valueItem 
         && this.titleItem
-    ){
+    )
         this.template = '<li>{' +this.titleItem+ '}</li>';
-        this.noSpecifiedTemplate = true;
-    }
+
     // Ensure that all required items are present
     if(!this.template) throw new Error('Wui.js - valueItem and titleItem, or template, are required configs for a Combo.');
 
@@ -1297,7 +1296,6 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     close:      function(){ 
                     this._open = false;
                     this.dd.hide();
-                    $('body').css('overflow',this.bodyState);
                 },
 
     /** @param {string} srchVal    A search term
@@ -1306,15 +1304,34 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     hilightText:function(srchVal){
                     var me = this;
 
-                    me.dd.children().each(function(i,itm){
-                        itm = $(itm);
-                        var itmTxt = itm.text();
+                    function clearHilight(obj){
+                        return obj.find('.wui-highlight').each(function(){
+                            $(this).replaceWith($(this).html());
+                        }).end();
+                    }
+                    
+                    function hilightText(obj){
+                        if (obj.children().length) {
+                            obj.children().each(function(){
+                                hilightText($(this));
+                            });
+                        }
+                        else {
+                            obj.html(
+                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){
+                                    return '<span class="wui-highlight">' +m+ '</span>';
+                                })
+                            );
+                        }
+                        
+                        return obj;
+                    }
 
-                        if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
-                        else                                                                                    clearHilight(itm).hide();
+                    me.dd.children().each(function(){
+                        var itm = $(arguments[1]);
 
-                        function hilightText(obj){ return clearHilight(obj).html( obj.text().replace(new RegExp(srchVal,"ig"), function(m){ return "<span class='wui-highlight'>" +m+ "</span>"}) ); }
-                        function clearHilight(obj){ return obj.find('.wui-highlight').each(function(){ $(this).replaceWith($(this).html()); }).end(); }
+                        if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                        else                                                                clearHilight(itm).hide();
                     });
 
                     Wui.positionItem(me.field,me.dd);
@@ -1409,7 +1426,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                         click:      function(){ me.set(); me.field.focus(); }
                     });
 
-                    if(me.previous && me.previous.length && me.noSpecifiedTemplate)
+                    if(me.previous && me.previous.length)
                         me.hilightText(me.previous);
 
                     me.dd.on('mousedown',function(){ me.isBlurring = false; });
@@ -1466,8 +1483,8 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     // Scrolling within a dropdown causes crazy stuff to happen on the body,
                     // so save the body overflow state and momentarily set it to be unscrollable.
-                    me.bodyState = $('body').css('overflow');
-                    $('body').append(me.dd.width(width).show()).css('overflow','hidden');
+
+                    $('body').append(me.dd.width(width).show());
                     Wui.positionItem(me.field,me.dd);
                     me.scrollToCurrent();
                 },

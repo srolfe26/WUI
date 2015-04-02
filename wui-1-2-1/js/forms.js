@@ -983,25 +983,34 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     hilightText:function(srchVal){
                     var me = this;
 
-                    me.dd.children().each(function(){
-                        itm = $(arguments[1]);
-                        var itmTxt = itm.text();
-
-                        if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
-                        else                                                                                    clearHilight(itm).hide();
-
-                        function hilightText(obj){ 
-                            return clearHilight(obj).html( 
-                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){ 
-                                    return "<span class='w121-highlight'>" +m+ "</span>";
-                                }) 
+                    function clearHilight(obj){
+                        return obj.find('.wui-highlight').each(function(){
+                            $(this).replaceWith($(this).html());
+                        }).end();
+                    }
+                    
+                    function hilightText(obj){
+                        if (obj.children().length) {
+                            obj.children().each(function(){
+                                hilightText($(this));
+                            });
+                        }
+                        else {
+                            obj.html(
+                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){
+                                    return '<span class="wui-highlight">' +m+ '</span>';
+                                })
                             );
                         }
-                        function clearHilight(obj){ 
-                            return obj.find('.w121-highlight').each(function(){ 
-                                $(this).replaceWith($(this).html()); 
-                            }).end(); 
-                        }
+                        
+                        return obj;
+                    }
+
+                    me.dd.children().each(function(){
+                        var itm = $(arguments[1]);
+
+                        if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                        else                                                                clearHilight(itm).hide();
                     });
 
                     Wui.positionItem(me.field,me.dd);
