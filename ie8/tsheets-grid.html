@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>TSheets Grid - WUI 1.2</title>
+    
+    <link rel="stylesheet" href="wui.css" type="text/css" media="all">
+    
+    <script type="text/javascript" src="wui-grid-compact.js"></script>
+    
+    <script type="text/javascript" class="wui-doc-code">
+        $(document).ready(function(){
+            // Add a new grid on the body
+            a = new Wui.Grid({
+                height:     '80%',
+                sort:       [ {dataItem:'amount', order:'desc'} ],
+                data:       [
+                                {
+                                    "tx_id": "447",
+                                    "date": "7/25/13",
+                                    "amount": "-3",
+                                    "check_number": "",
+                                    "description": "CHECK CRD PURCHASE 07/24 SWEET CLOUDS COTTO SOMEPLACE CA 434258XXXXXX3000 283205709608676 ?MCC=5814"
+                                },
+                                {
+                                    "tx_id": "446",
+                                    "date": "7/24/13",
+                                    "amount": "-1.43",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - GROCERY MRKTPLACE  SOMEPLACE CA 3000 00383205049074828"
+                                },
+                                {
+                                    "tx_id": "445",
+                                    "date": "7/23/13",
+                                    "amount": "-750",
+                                    "check_number": "",
+                                    "description": "CREDIT CARD 130722 1607379881 Some Guy"
+                                },
+                                {
+                                    "tx_id": "444",
+                                    "date": "7/22/13",
+                                    "amount": "-93.25",
+                                    "check_number": "",
+                                    "description": "SOMEPLACE CITY DEBITS 21335971XA Some Guy"
+                                },
+                                {
+                                    "tx_id": "443",
+                                    "date": "7/22/13",
+                                    "amount": "-5.38",
+                                    "check_number": "",
+                                    "description": "CHECK CRD PURCHASE 07/19 LITTLE CAESARS 163 SOMEPLACE CA 434258XXXXXX1207 083201019986349 ?MCC=5814"
+                                },
+                                {
+                                    "tx_id": "442",
+                                    "date": "7/22/13",
+                                    "amount": "-20",
+                                    "check_number": "",
+                                    "description": "CHECK CRD PURCHASE 07/19 SQ *AMANDA HANSEN SOMEPLACE CA 434258XXXXXX1207 003200562963205 ?MCC=7299"
+                                },
+                                {
+                                    "tx_id": "441",
+                                    "date": "7/22/13",
+                                    "amount": "90",
+                                    "check_number": "",
+                                    "description": "MOBILE DEPOSIT : REF NUMBER :106220716643"
+                                },
+                                {
+                                    "tx_id": "440",
+                                    "date": "7/19/13",
+                                    "amount": "-108.3",
+                                    "check_number": "",
+                                    "description": "ELECTRICITY BILL 130718 195197480ACHPAY Some Gal"
+                                },
+                                {
+                                    "tx_id": "439",
+                                    "date": "7/19/13",
+                                    "amount": "-15",
+                                    "check_number": "",
+                                    "description": "WITHDRAWAL MADE IN A BRANCH/STORE"
+                                },
+                                {
+                                    "tx_id": "438",
+                                    "date": "7/19/13",
+                                    "amount": "-7.36",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - GROCERY MRKTPLACE  SOMEPLACE CA 1207 00463201030665114"
+                                },
+                                {
+                                    "tx_id": "437",
+                                    "date": "7/19/13",
+                                    "amount": "-5.49",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA 1207 00383200586002618"
+                                },
+                                {
+                                    "tx_id": "436",
+                                    "date": "7/19/13",
+                                    "amount": "-23.49",
+                                    "check_number": "",
+                                    "description": "CHECK CRD PURCHASE 07/18 INTERNET COMMUNICATIO 800-244-1111 VA 434258XXXXXX3000 163199660309491 ?MCC=4814"
+                                },
+                                {
+                                    "tx_id": "435",
+                                    "date": "7/17/13",
+                                    "amount": "-20.75",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - GROCERY MRKTPLACE  SOMEPLACE CA 1207 00583198654598002"
+                                },
+                                {
+                                    "tx_id": "434",
+                                    "date": "7/17/13",
+                                    "amount": "-2.67",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - FAMILY DOLLAR 6045 SOMEPLACE CA 1207 00463198641654953"
+                                },
+                                {
+                                    "tx_id": "433",
+                                    "date": "7/15/13",
+                                    "amount": "-12.91",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - WAL MART  NORTH SOMEPLACE CA 1207 00000000144129385"
+                                },
+                                {
+                                    "tx_id": "432",
+                                    "date": "7/15/13",
+                                    "amount": "-57.19",
+                                    "check_number": "",
+                                    "description": "CHECK CRD PURCHASE 07/13 FOOTHILL MART NORTH SOMEPLACE CA 434258XXXXXX3000 163194586078806 ?MCC=5542"
+                                },
+                                {
+                                    "tx_id": "431",
+                                    "date": "7/12/13",
+                                    "amount": "-350",
+                                    "check_number": "170",
+                                    "description": "CHECK # 170"
+                                },
+                                {
+                                    "tx_id": "430",
+                                    "date": "7/12/13",
+                                    "amount": "-360",
+                                    "check_number": "",
+                                    "description": "CAR LEASE PMT 130710 030342BX431 Some Guy"
+                                }
+                            ],
+                columns:    [
+                                {heading:'Date', dataItem:'date', dataType:'date', fit:1},
+                                {heading:'Check Number', dataItem:'check_number', dataType:'numeric', fit:1},
+                                {heading:'Description', dataItem:'description', fit:7},
+                                {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
+                            ],
+            });
+            a.place();
+        });
+    </script>
+</head>
+<body class="wui-docs">
+</body>
+</html>
