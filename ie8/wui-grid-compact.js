@@ -505,11 +505,11 @@ Wui.O.prototype = {
 
                         // calculate percentage based dimensions
                         if(Wui.isPercent(m.width)){
-                            a = Wui.percentToPixels(m.el,m.width,'width');
+                            var a = Wui.percentToPixels(m.el,m.width,'width');
                             if(a != 0) m.el.css({width:a});
                         }
                         if(Wui.isPercent(m.height)){
-                            a = Wui.percentToPixels(m.el,m.height,'height');
+                            var a = Wui.percentToPixels(m.el,m.height,'height');
                             if(a != 0) m.el.css({height:a});
                         }
                         
