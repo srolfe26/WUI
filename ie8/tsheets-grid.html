@@ -8,7 +8,7 @@
     
     <script type="text/javascript" src="wui-grid-compact.js"></script>
     
-    <script type="text/javascript" class="wui-doc-code">
+    <script type="text/javascript">
         $(document).ready(function(){
             // Add a new grid on the body
             a = new Wui.Grid({
@@ -145,7 +145,7 @@
                 columns:    [
                                 {heading:'Date', dataItem:'date', dataType:'date', fit:1},
                                 {heading:'Check Number', dataItem:'check_number', dataType:'numeric', fit:1},
-                                {heading:'Description', dataItem:'description', fit:7},
+                                {heading:'Description', dataItem:'description', fit:7, sortable:false},
                                 {heading:'Amount', dataItem:'amount', dataType:'numeric', fit:3},
                             ],
             });
@@ -153,6 +153,5 @@
         });
     </script>
 </head>
-<body class="wui-docs">
-</body>
+<body></body>
 </html>

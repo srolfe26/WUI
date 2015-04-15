@@ -246,36 +246,37 @@ This function will size items relative to each other via a 'fit' value, as well 
 Wui.fit = function(collection,dim,mindTheScrollbar){
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
-        var i           = 0,
-            dimArray    = ['height','width'],
-            parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
-            parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent;
+        var i           =   0,
+            dimArray    =   ['height','width'],
+            parent      =   (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
+            parentEl    =   (parent.el) ? (parent.elAlias || parent.el) : parent,
+            dimOpposite =   (function(){
+                                // Make sure dim is a lowercase string, or just leave it alone for now
+                                dim = (dim && dim.toLowerCase) ? dim.toLowerCase() : dim;
 
-        // Make sure dim is a lowercase string, or just leave it alone for now
-        dim = (dim && dim.toLowerCase) ? dim.toLowerCase() : dim;
+                                // Make sure the value of dim is something this method will be able to utilize
+                                dim = ($.inArray(dim,dimArray) >= 0) ? dim : dimArray[0];
 
-        // Make sure the value of dim is something this method will be able to utilize
-        dim = ($.inArray(dim,dimArray) >= 0) ? dim : dimArray[0];
-        var dimOpposite = dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
-
-        // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
-        if(mindTheScrollbar !== true && parentEl.css('overflow') != 'hidden')
-            for(i = 0; i < collection.length; i++)
-                if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
-                    break;
-
-        var sbw         = (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0
-            parentSize  = (($(parentEl)[0] === $('body')[0]) ? $(window) : $(parentEl))[dim]() - sbw,
-            fitCt       = 0,
-            fixedSize   = 0,
-            fitMux      = 0;
+                                return dimArray[($.inArray(dim,dimArray)) ? 0 : 1];
+                            })(),
+            sbw         =   (function(){
+                                // Change the value of mindTheScrollbar if some of the items in the collection are taller than the container.
+                                if(mindTheScrollbar !== true && parentEl.css('overflow') != 'hidden')
+                                    for(i = 0; i < collection.length; i++)
+                                        if(mindTheScrollbar = collection[i].el['outer' + dimOpposite.charAt(0).toUpperCase() + dimOpposite.slice(1)]() > parentEl[dimOpposite]())
+                                            break;
+                                return (mindTheScrollbar === true) ? Wui.scrollbarWidth() : 0;
+                            })()
+            parentSize  =   (($(parentEl)[0] === $('body')[0]) ? $(window) : $(parentEl))[dim]() - sbw,
+            fitCt       =   0,
+            fixedSize   =   0,
+            fitMux      =   0;
 
         // Tally all sizes we're dealing with
         $.each(collection,function(i,itm){
-            if(itm.fit){
+            if($.isNumeric(itm.fit) && itm.fit >= 0){
                 fitCt += itm.fit;           // Tally fit values
-                itm[dim] = -1;              /* Set to -1 so that CSSByParam will not act on it (just deleting it was
-                                             * ineffective because this property can be inherited through the prototype chain)*/
+                itm[dim] = -1;              // Set to -1 so that CSSByParam will not act on it
             }else if(itm[dim]){
                 // Tally fixed size values & percentage based size values. Doing this gives percentages precedence over fit.
                 if($.isNumeric(itm[dim]))   { fixedSize += itm[dim]; }
@@ -288,7 +289,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
                 fitCt += (itm.fit = 1);     // Add a fit value to an item that doesn't have dimensions specified
             }
         });
-        
+
         // If the grid becomes entirely fixed widths the fit won't work so the items will be set to fits
         if(fitCt === 0 && fixedSize != parentSize){
             fitCt = 1;
@@ -313,7 +314,7 @@ Wui.fit = function(collection,dim,mindTheScrollbar){
             }
         });
     }else{
-        console.log('Improper collection specified', arguments);
+        // console.log('Improper collection specified', arguments); IE 8 Incompatible
         //throw('Improper collection specified');
     }
 };
@@ -763,108 +764,6 @@ Wui.O.prototype = {
                     }
                     
                     return retVal;
-                }
-};
-
-/** The Long Poll object provides a way to poll a remote resource at a given interval.
-This is similar to listening on a socket, but is rather repeatedly polling a resource via AJAX.
-Long polling is useful for checking on the status of an item, or reloading data that 
-changes in real-time while the user has the page on the screen.
-
-The example source is the best way to understand how to use this resource.
-If you have a javascript console available, watching the console while this page is loaded
-will give you a demonstration if what is happening.
-
-The WUI Long Poll has a self-decaying retry feature: In the case that the resource is unavailable,
-rather than continuing to poll at a constant interval, the poll will slow its polling by a factor of the
-waitFactor config, until it eventually stops trying. If the resource returns, the poll will revert to
-its initial interval.
-
- @event     pollStart     Fires before polling starts (event, Wui.longPoll)
- @event     pollSuccess   Fires When the poll recieves a successful response. Includes remote data. (event, Wui.longPoll, data)
- @event     pollError     Fires when $.ajax() has an error in the request. (event, Wui.longPoll, err)
- @event     pollStopped   Fires after polling has stopped. Stopping polling doesn't trigger until the startup of the next poll. (event, Wui.longPoll)
- @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
-*/
-Wui.LongPoll = function(args){
-    $.extend(this,{
-        /** The time in milliseconds between each polling. The ajax timeout parameter will also be set to this value so that the server will not be pestered faster than it can respond to a given request. */
-        pollTime:   1000,
-
-        /** A multiple of pollTime at which polling retries will cease. */
-        maxRetry:   120,
-
-        /** When a poll fails, retries will increase in length by this factor until 'maxRetry' has been reached. */
-        waitFactor: 2,
-
-        /** The URL of the resource to poll. */
-        url:        null,
-
-        /** Parameters to pass to the resource specified in URL. */
-        params:     null,
-
-        /** The name of the longPoll (useful to identifying its responses in the event that there are multiple polls on the same page), defaults to the result of Wui.id(). */
-        name:       null,
-
-        /** Setting to pass to the jQuery AJAX function. Settings defined in the poll method already will be overridden. */
-        ajaxParams: {}
-    },args);
-    this.init();
-};
-Wui.LongPoll.prototype = {
-    /** Set up the polling interval and gives the object a name if none is specified. */
-    init:       function(){
-                    var me = this;
-                    me.originalPollTime = me.pollTime;
-                    me.naturalPollTime = me.pollTime + 1;
-                    me.name = (me.name) ? me.name : Wui.id();
-                    me.start();
-                },
-
-    /** Polls a resource and sends events on success, failure, and if/when polling stops. */
-    poll:       function(){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
-                    setTimeout(function() { 
-                        $.ajax($.extend(me.ajaxParams, { 
-                            url:        me.url,
-                            data:       me.params,
-                            beforeSend: function(jqXHR){
-                                            if(me.pollTime > me.originalPollTime * me.maxRetry){
-                                                jqXHR.abort();
-                                                $(window).trigger($.Event('pollStopped'+ dn),[me])
-                                                    .trigger($.Event('pollStopped'),[me]);
-                                                return false;
-                                            }
-                                        },
-                            success:    function(data) { 
-                                            me.pollTime = me.naturalPollTime;
-                                            $(window).trigger($.Event('pollSuccess' + dn),[me, data])
-                                                .trigger($.Event('pollSuccess'),[me, data]);
-                                        },
-                            complete:   function(){ me.poll(); },
-                            timeout:    me.pollTime,
-                            error:      function(err){ 
-                                            // This allows the poll to retry once at the original poll time before increasing 
-                                            // by a factor of waitFactor
-                                            me.pollTime = (me.pollTime == me.naturalPollTime) ? me.originalPollTime 
-                                                : me.pollTime * me.waitFactor;
-                                            $(window).trigger($.Event('pollError' + dn),[me, err])
-                                                .trigger($.Event('pollError'),[me, err]);
-                                        }
-                        })); 
-                    }, me.pollTime);
-                },
-
-    /** Stops the poll engine at just before the beginning of the next poll attempt. */
-    stop:       function(){ this.pollTime = this.pollTime * this.maxRetry + 1; },
-
-    /** Resumes polling instantly. */
-    start:      function(){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
-                    me.pollTime = me.naturalPollTime;
-                    $(window).trigger($.Event('pollStart' + dn),[me])
-                        .trigger($.Event('pollStart'),[me]);
-                    me.poll();
                 }
 };
 
@@ -2501,11 +2400,10 @@ Wui.Grid.prototype = $.extend(new Wui.DataList(), new Wui.Pane(), {
                     if(me.columns.length > 1 && !col.vertical && col.resizable){
                         col.el.resizable({
                             handles:    'e',
-                            start:      function(event,ui){ me.tempLayout = me.layout; me.layout = function(){}; },
-                            stop:       function(event,ui){ me.sizeCols(); me.layout = me.tempLayout; },
-                            resize:     function(event,ui){ 
-                                            col.width = ui.size.width; col.fit = -1;
-                                            Wui.fit(me.cols,'width');
+                            stop:       function(event,ui){ me.sizeCols(); },
+                            resize:     function(){ 
+                                            $.extend(col, { width: arguments[1].size.width, fit:-1 });
+                                            Wui.fit(me.cols,'width',true,col.width);
                                         }
                         });
                     }
