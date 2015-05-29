@@ -40,16 +40,19 @@
     width: 100%;
 }
 .w121-multiple.opt-display-pill span {
-    background: none repeat scroll 0 0 #cccccc;
-    border: thin solid #a0a0a0;
+    background-color: #d6d6d6;
+    border: thin solid #ccc;
     border-radius: 10px;
     color: #333;
     display: inline-block;
-    margin: 2px;
-    padding: 2px 5px;
+    margin: 1px;
+    padding: 3px 8px;
 }
 .w121-multiple.opt-display-block span a {
-
+    display: block;
+    position: absolute;
+    right: 5px;
+    top: 0;
 }
 .w121-multiple.opt-display-block span {
     display: block;
@@ -58,13 +61,6 @@
     position: relative;
     border-radius: 0;
     padding: 0.33em 0.5em;
-}
-.w121-multiple .w121-combo > input {
-    background-color: #038be0;
-    color: rgba(255, 255, 255, 0.5);
-}
-.w121-multiple .w121-combo > input:focus {
-    color: #fff;
 }
 .w121-multiple.opt-display-block span a {
     position: absolute;
