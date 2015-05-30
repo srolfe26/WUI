@@ -39,22 +39,32 @@
     min-width: 120px;*/
     width: 100%;
 }
+.w121-fe.w121-multiple .w121-combo {
+    -webkit-flex: none;
+        -ms-flex: none;
+            flex: none;
+    display: block;
+    width: 100%;
+}
+.w121-fe.w121-multiple span + .w121-combo {
+    border-top: solid thin #bbb;
+}
 .w121-multiple span {
     background-color: #d6d6d6;
-    border: thin solid #ccc;
+    border: thin solid #bbb;
     border-radius: 10px;
     color: #333;
     display: inline-block;
     margin: 1px;
     padding: 3px 8px;
 }
-.w121-multiple.opt-display-block span a {
+.w121-multiple.wui-multiple-block span a {
     display: block;
     position: absolute;
     right: 5px;
     top: 0;
 }
-.w121-multiple.opt-display-block span {
+.w121-multiple.wui-multiple-block span {
     display: block;
     width: 100%;
     border: none;
@@ -63,8 +73,9 @@
     position: relative;
     border-radius: 0;
     padding: 0.33em 0.5em;
+    margin: 0;
 }
-.w121-multiple.opt-display-block span a {
+.w121-multiple.wui-multiple-block span a {
     position: absolute;
     right: 5px;
     bottom: 0;
@@ -74,8 +85,9 @@
 }
 .w121-multiple span a {
     margin-left: 0.5em;
+    padding: 5px;
 }
-.w121-selected a {color:#fff;}
+/*.w121-selected a {color:#fff;}*/
 .w121-selected a:hover {text-decoration: underline;}
 
 .w121-selected:focus{ outline: none; }
