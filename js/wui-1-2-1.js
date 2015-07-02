@@ -27,12 +27,23 @@ if(typeof jQuery === 'undefined'){
 
 // Make sure the WUI is defined and doesn't conflict with other versions on the page
 var _wuiVar = (function(){
-    if(typeof Wui === 'undefined'){
-        Wui = function(selector){
+    var wObj,
+        members = {
+            version:    'wui-lite-1', 
+            dict:       []
+        },
+        /** 
+            @param  {object or string}  selector    IN: A selector string (that will be run through jQuery's selector 
+                                                    engine to produce a jQuery object), or a jQuery object
+
+            Returns the WUI object matching the selector from a dictionary of all WUI objects. This is a way to acquire 
+            a WUI object in memory having only a DOM node representation.
+        */
+        wuiSelector = function (selector){
             var nodes   =   (selector instanceof jQuery) ? 
                                 selector : (typeof selector === 'string') ?
                                     $(selector) : [selector],
-                matches =   Wui.dict.filter(function ( obj ) { 
+                matches =   window[_wuiVar].dict.filter(function ( obj ) { 
                                 return $.inArray( obj.el, nodes ) > -1; 
                             }),
                 retVal  =   (function(m){
@@ -46,32 +57,11 @@ var _wuiVar = (function(){
             return retVal;
         };
 
-        Wui.prototype = { version: '1.2.1' };
+    wObj = (typeof Wui === 'undefined') ? 'Wui' : '_w';
+    window[wObj] = wuiSelector;
+    $.extend( window[wObj], members );
 
-        return 'Wui';
-    }else{
-        _w = function(selector){
-            var nodes   =   (selector instanceof jQuery) ? 
-                                selector : (typeof selector === 'string') ?
-                                    $(selector) : [selector],
-                matches =   _w.dict.filter(function ( obj ) { 
-                                return $.inArray( obj.el, nodes ) > -1; 
-                            }),
-                retVal  =   (function(m){
-                                var justItms = [];
-                                
-                                m.forEach(function( obj ){ justItms.push(obj.itm); });
-
-                                return justItms;
-                            })(matches);
-
-            return retVal;
-        };
-
-        _w.prototype = { version: '1.2.1' };
-
-        return '_w';
-    }
+    return wObj;
 })();
 
 
@@ -254,6 +244,10 @@ Wui.positionItem = function(parent,child){
                         return retVal;
                     })(),
         plRight =   (ofst.left + parent.outerWidth() - cWidth > 0);
+
+    // If the parent is not a fixed-position element, then add the scrollTop in case the page is scrolled down.
+    if(fxdOrAbs === 'fixed')
+        top += $(window).scrollTop();
 
     child.css({
         left:       (plRight) ? ofst.left + parent.outerWidth() - cWidth : ofst.left,
@@ -1428,9 +1422,12 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                             });
                         }
 
-                        me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     }
+                    
+                    // Okay to fire this in either case because itemSelect will not fire it if 
+                    // multiselect is true.
+                    me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
+                        .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                 },
     dblClick:   function(){
                     var me = this,
@@ -3323,7 +3320,7 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                         if(itm.lbl){
                             itm.labelSize = me.labelSize;
                             // setLabelPosition calls setLabelSize and uses the item's labelSize that we just set.
-                            itm.lbl.setLabelPosition( me.labelPosition );
+                            itm.lbl.setLabelPosition( itm.labelPosition || me.labelPosition );
                         }
                         return itm;
                     }else{
@@ -4051,7 +4048,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
     disable:    function(){
                     this.disabled = true;
                     if(this.el && this.el.addClass)
-                        this.el.addClass('wui-disabled').find('input,textarea,iframe').attr('disabled','disabled');
+                        this.el.addClass('w121-disabled').find('input,textarea,iframe').attr('disabled','disabled');
                 },
 
     /** What to do when an individual element changes */
@@ -4061,7 +4058,7 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
     enable:     function(){
                     this.disabled = false;
                     if(this.el && this.el.addClass)
-                        this.el.removeClass('wui-disabled').find('.wui-disabled,*[disabled]').removeAttr('disabled');
+                        this.el.removeClass('w121-disabled').find('.w121-disabled,*[disabled]').removeAttr('disabled');
                 },
     getVal:     function(){ return this.value; },
     setChanged: function(oldVal){
@@ -4188,25 +4185,34 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     hilightText:function(srchVal){
                     var me = this;
 
-                    me.dd.children().each(function(){
-                        itm = $(arguments[1]);
-                        var itmTxt = itm.text();
-
-                        if(itmTxt.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 && me.noSpecifiedTemplate)  hilightText(itm).show();
-                        else                                                                                    clearHilight(itm).hide();
-
-                        function hilightText(obj){ 
-                            return clearHilight(obj).html( 
-                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){ 
-                                    return "<span class='w121-highlight'>" +m+ "</span>";
-                                }) 
+                    function clearHilight(obj){
+                        return obj.find('.wui-highlight').each(function(){
+                            $(this).replaceWith($(this).html());
+                        }).end();
+                    }
+                    
+                    function hilightText(obj){
+                        if (obj.children().length) {
+                            obj.children().each(function(){
+                                hilightText($(this));
+                            });
+                        }
+                        else {
+                            obj.html(
+                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){
+                                    return '<span class="wui-highlight">' +m+ '</span>';
+                                })
                             );
                         }
-                        function clearHilight(obj){ 
-                            return obj.find('.w121-highlight').each(function(){ 
-                                $(this).replaceWith($(this).html()); 
-                            }).end(); 
-                        }
+                        
+                        return obj;
+                    }
+
+                    me.dd.children().each(function(){
+                        var itm = $(arguments[1]);
+
+                        if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+                        else                                                                clearHilight(itm).hide();
                     });
 
                     Wui.positionItem(me.field,me.dd);
@@ -5196,7 +5202,10 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         }
                     },
     toString:       function(format){
-                        return this.value.toString(format || this.dtFormat) || '';
+                        if(this.value !== null)
+                            return this.value.toString(format || this.dtFormat) || '';
+                        else
+                            return '';
                     },
     validDate:      function(dt){
                         if (dt === null || typeof dt === 'undefined')  return false;
@@ -5231,12 +5240,16 @@ Wui.File = function(args) {
 
 Wui.File.prototype = $.extend(new Wui.Text(), {
     disable:function(){
-                    this.disabled = true;
-                    this.field.attr('disabled','true');
+                this.disabled = true;
+                if(this.el && this.el.addClass)
+                    this.el.addClass('w121-disabled').find('input,textarea,iframe').attr('disabled','disabled');
             },
+    
+    /** Enables the field so the user can interact with it. */
     enable: function(){
-                    this.disabled = false;
-                    this.field.removeAttr('disabled');
+                this.disabled = false;
+                if(this.el && this.el.addClass)
+                    this.el.removeClass('w121-disabled').find('.w121-disabled,*[disabled]').removeAttr('disabled');
             },
     init:   function(){
                 var me = this;
@@ -5314,7 +5327,10 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                         (me.elAlias || me.el).addClass('w121-toggle');
                         me.el.find('.w121-toggle-outer').height(th - 2).width(me.toggleWidth);
                         me.el.find('.w121-toggle-outer, .w121-toggle-btn').css('border-radius', me.borderRadius);
-                        me.el.find('.w121-toggle-btn').height(th - 4).width(th - 4).css('left','calc(50% - ' + (th - 4) + 'px)');
+                        me.el.find('.w121-toggle-btn').css({
+                            width:  th - 4,
+                            left:   'calc(50% - ' + (th - 4) + 'px)'
+                        });
                         me.el.find('.w121-opt-1').css({
                             'text-indent':      -(th - me.borderRadius) + (me.borderRadius ? 0 : 2),
                             'background-color': me.opt1Color

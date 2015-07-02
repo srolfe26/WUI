@@ -1402,9 +1402,12 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                             });
                         }
 
-                        me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     }
+                    
+                    // Okay to fire this in either case because itemSelect will not fire it if 
+                    // multiselect is true.
+                    me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
+                        .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                 },
     dblClick:   function(){
                     var me = this,
