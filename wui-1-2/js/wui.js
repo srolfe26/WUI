@@ -1390,10 +1390,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                                     rec.el.addClass('wui-selected');
                                 });
                             }
-
-                            me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
-                                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                         }
+                        
+                        me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                     }
 
                     function doubleClick(e){
