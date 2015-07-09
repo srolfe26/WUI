@@ -50,6 +50,25 @@ $.extend(_w,_);
 _w.underscoreVer = _w.VERSION;
 delete _w.VERSION;
 
+/** 
+ * A function to get the scrollbar width is necessary because it varies among browsers, and is useful
+ for sizing objects within a container with overflow set to scroll, or auto.
+ @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
+ @return Number specifying the scrollbar width for the current page in pixels.
+ */
+    _w.scrollbarWidth = function() {
+    var parent, child, width;
+
+    if(width===undefined) {
+        parent = $('<div style="width:50px;height:50px;overflow:auto"><div/></div>').appendTo('body');
+        child=parent.children();
+        width=child.innerWidth()-child.height(99).innerWidth();
+        parent.remove();
+    }
+
+    return width;
+};
+    
 /**
     The basic WUI Object consists of an 'n' that represents a DOM node, and an items array that will represent the
     object's children in memory. Children are added through push() and splice() methods that will add/remove objects
@@ -265,13 +284,15 @@ _w.Panel = function(args){
 
     this.init();
 };
-_w.Panel.prototype = new Wui.Obj({
+_w.Panel.prototype = $.extend( new Wui.Obj(), {
+    constructor:    _w.Panel,
+    supr:           _w.Obj.prototype,
     init:           function(){ 
                         var me = this, n = me.n = me.surePane = $('<div>').addClass('wlt-panel');
                         
-                        _w.Obj.prototype.init.call(me);
+                        me.supr.init.call(me);
 
-                        if(!me.border)      
+                        if(!me.border)
                                 n.addClass('no-border');
 
                         if(me.title !== null)
@@ -360,6 +381,5 @@ _w.Panel.prototype = new Wui.Obj({
                             me.titleN.removeClass('right left center').addClass(me.titleAlign);
                     }
 });
-
 
 }(jQuery,window[_wuiVar]));
