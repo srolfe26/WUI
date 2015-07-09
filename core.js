@@ -284,7 +284,7 @@ _w.Panel = function(args){
 
     this.init();
 };
-_w.Panel.prototype = $.extend( new Wui.Obj(), {
+_w.Panel.prototype = $.extend( new _w.Obj(), {
     constructor:    _w.Panel,
     supr:           _w.Obj.prototype,
     init:           function(){ 

@@ -19,10 +19,19 @@ _w.DocObj = function(args){
 };
 _w.DocObj.prototype = {
     /**
+        Exists in the prototype so that multiple instances (accessing multiple namespaces)
+        can have a common root.
+    */
+    allDocs:    {},
+    /**
         Fires 'getFiles' to get the documentation targets specified in 'fileList'.
     */
     init:       function(){
                     this.getFiles();
+                },
+
+    getAllDocs: function(){
+
                 },
 
     /**
@@ -84,17 +93,22 @@ _w.DocObj.prototype = {
                     }
 
                     if(me.successCount > 0) {
+                            // Namespace items
+                        var namespaceItm = me.namespace + '\\.[\\w]+',
                             // Gets top level items with documentation
-                        var documentedL0 = new RegExp('(\\/\\*\\*((?:[^\\*]|(?:\\*+(?:[^\\*/])))*)\\*+\\/)[\\s]*(' + me.namespace + '\\.[\\S]+)', 'g'),
+                            documentedL0 = new RegExp('(\\/\\*\\*((?:[^\\*]|(?:\\*+(?:[^\\*/])))*)\\*+\\/)[\\s]*(' + me.namespace + '\\.[\\S]+)', 'g'),
                             // Undocumented level 0 items
-                            noDocL0 = new RegExp('[\\n]' + me.namespace + '\\.[\\w]+', 'g'),
-                            // Get documented methods like '/** ...docs... */ method: function'
+                            noDocL0 = new RegExp('[\\n]' + namespaceItm, 'g'),
+                            // Get documented methods with preceeding javadoc comments
                             memberMethods = /(\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*function)/g,
-                            // Get documented configs like '/** ...docs... */ config: 123'
+                            // Get documented configs with preceeding javadoc comments
                             // The similar regex needs to run after getting methods so that it doesn't pick up the same stuff
                             memberConfigs = /\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*([^\,^\s]+)/g;
 
-                        
+                        // Clear out common docs root
+                        _w.DocObj.prototype.allDocs[me.namespace] = {};
+
+                        // Break the code into objects, methods, and configs
                         _.each(me.deferredCollection,function(itm,i){
                             if(itm.success){
                                 
@@ -122,32 +136,134 @@ _w.DocObj.prototype = {
                                     }
                                 });
 
+                                // Get the code block of each member object, if it exists, and look for extensions
                                 _.each(itm.members,function(member,i){
-                                    // Get the code block of the member object if it exists
-                                    me.getBlock(itm.code, me.namespace + '.' + i);
-                                    // console.log('MEMBER: ',i,'DOCUMENTED: ',member.documented);
+                                    var itmDetail = me.getBlock(itm.code, me.namespace + '.' + i),
+                                        tmpCode;
+
+                                    // Establish Item Attributes
+                                    member.name = i;
+                                    member.ancestors = [];
+                                    member.methods = [];
+                                    member.configs = [];
+
+                                    if(itmDetail.success){
+                                        member.code = tmpCode = itmDetail.code;
+                                        
+                                        // Check whether this object is an extension of others
+                                        itmDetail.between.replace(new RegExp(namespaceItm,'g'),function() {
+                                            member.ancestors.push( arguments[0].replace(me.namespace + '.', '') );
+                                        });
+
+                                        // Parse through the code of each item and pull out methods and configs
+                                        tmpCode = tmpCode.replace(memberMethods, function(){
+                                            var name = $.trim(arguments[3]),
+                                                detail = me.getBlock( tmpCode, name, name + '\\:[\\s]*function' );
+
+                                            member.methods.push({
+                                                comment:    arguments[2],
+                                                name:       name,
+                                                code:       (detail.success) ? detail.code : '',
+                                                documented: true
+                                            });
+                                            
+                                            return '';
+                                        });
+                                        
+                                        // Get configs - the similar regex will not match the functions because they were removed in the last step
+                                        tmpCode = tmpCode.replace(memberConfigs, function(){
+                                            
+                                            if(arguments[3].match(/\bfunction\b/) === null){
+                                                member.configs.push({
+                                                    comment:    arguments[1],
+                                                    name:       arguments[2].replace('//',''),
+                                                    defaultVal: arguments[3],
+                                                    documented: true
+                                                });
+                                            }
+
+                                            return '';
+                                        });
+
+                                        // Get undocumented methods and configs wrapped in a while loop to eliminate matches
+                                        // as they are found so that configs inside methods/values aren't picked up
+                                        while(tmpCode.match(/[\n]([^\n,^:]+):[\s]*([^\,^\n]+)/) !== null){
+                                            var foundItm;
+
+                                            tmpCode = tmpCode.replace(/[\n]([^\n,^:]+):[\s]*([^\,^\n]+)/,function(){
+                                                var name = $.trim(arguments[1]),
+                                                    defaultVal = $.trim(arguments[2]);
+
+                                                if(defaultVal.match(/\bfunction\b/) === null) {
+                                                    member.configs.push(foundItm = {
+                                                        name:       name,
+                                                        defaultVal: defaultVal,
+                                                        documented: false
+                                                    });
+                                                } 
+                                                else {
+                                                    var detail = me.getBlock( tmpCode, name, name + '\\:[\\s]*function' );
+
+                                                    member.methods.push(foundItm = {
+                                                        name:       name,
+                                                        code:       (detail.success) ? detail.code : '',
+                                                        documented: false
+                                                    });
+                                                }
+                                                
+                                            });
+
+                                            // Remove function blocks
+                                            if(typeof foundItm.code !== 'undefined') {
+                                                // Because the previous 'replace' takes the opening brace,
+                                                // trim it off the front of the code to use in this replace
+                                                tmpCode = tmpCode.replace($.trim(foundItm.code.substring(1)), '');
+                                            }
+                                        }
+                                    }
+
+                                    // Add members to the common root
+                                    _w.DocObj.prototype.allDocs[me.namespace][i] = member;
                                 });
                             }
                         });
-
                     }
                     else {
                         // Admit defeat. There's nothing more to do.
                         console.log('Total Failure');
                     }
                 },
-    getBlock:   function(filetext, obj){
-                    var me = this, obj = obj.replace('.','\\.'), objCode = '', betweenBrace = '', success = false;
+    /**
+        @param  string  filetext    The text containing the code block associated with 'obj'
+        @param  string  obj         The name of the object or method naming the code block 
+        Using 
+    */
+    getBlock:   function(filetext, obj, regEx){
+                    var me = this, 
+                        obj = obj.replace('.','\\.'), 
+                        objCode = '', 
+                        betweenBrace = '', 
+                        success = false;
                     
-                    filetext.replace(new RegExp(obj+ " \=|" + obj + '\.prototype \=', "g"),function(match,matchStart){
-                        var endOfMatch = matchStart + match.length,
-                            firstBrace = filetext.indexOf('{', endOfMatch);
-                        
+                    try {
+                        regEx = (typeof regEx !== 'undefined') ? new RegExp(regEx,'g') : new RegExp(obj+ " \=|" + obj + '\.prototype \=', 'g');    
+                    } catch(e) {
+                        return {success:success};
+                    }
+
+                    filetext.replace(regEx,function(match,matchStart){
+                        var endOfMatch  = matchStart + match.length,
+                            nextCR      = filetext.indexOf('\n', endOfMatch);
+                            firstBrace  = filetext.indexOf('{', endOfMatch);
+
                         // indicates that there was in fact a match
                         success = true;
+
                         // gets what's between the match and the opening of the object defintion
                         // allowing the code to catch extended objects
-                        betweenBrace = filetext.substr(matchStart + match.length,firstBrace - (matchStart + match.length)); 
+                        if(nextCR > firstBrace) {
+                            betweenBrace = filetext.substr(matchStart + match.length,firstBrace - (matchStart + match.length)); 
+                        }
                         
                         objCode += me.braceCount(filetext.substr(firstBrace,filetext.length - firstBrace)) + '\n\n';            
                         return match;
