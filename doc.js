@@ -137,26 +137,23 @@ _w.DocObj.prototype = {
                     }
                 },
     getBlock:   function(filetext, obj){
-                    var me = this, obj = obj.replace('.','\\.'), objCode = '', objIntro = '', betweenBrace = '', success = false;
+                    var me = this, obj = obj.replace('.','\\.'), objCode = '', betweenBrace = '', success = false;
                     
-                    filetext.replace(new RegExp(obj+ " \=|" + obj + '\.prototype \=', "g"),function(match,comment,matchStart){
-                        console.log(arguments);
-                        // var endOfMatch = matchStart + match.length,
-                        //     firstBrace = filetext.indexOf('{', endOfMatch);
+                    filetext.replace(new RegExp(obj+ " \=|" + obj + '\.prototype \=', "g"),function(match,matchStart){
+                        var endOfMatch = matchStart + match.length,
+                            firstBrace = filetext.indexOf('{', endOfMatch);
                         
-                        // // indicates that there was in fact a match
-                        // success = true;
-                        // // gets what's between the match and the opening of the object deifintion
-                        // // allowing the code to catch extended objects
-                        // betweenBrace = filetext.substr(matchStart + match.length,firstBrace - (matchStart + match.length)); 
+                        // indicates that there was in fact a match
+                        success = true;
+                        // gets what's between the match and the opening of the object defintion
+                        // allowing the code to catch extended objects
+                        betweenBrace = filetext.substr(matchStart + match.length,firstBrace - (matchStart + match.length)); 
                         
-                        // if($.trim(comment).length > 0)
-                        //     objIntro = comment;
-                        // objCode += me.braceCount(filetext.substr(firstBrace,filetext.length - firstBrace)) + '\n\n';            
-                        // return match;
+                        objCode += me.braceCount(filetext.substr(firstBrace,filetext.length - firstBrace)) + '\n\n';            
+                        return match;
                     });
 
-                    return {success:success, code:objCode, intro:objIntro, between:betweenBrace};
+                    return {success:success, code:objCode, between:betweenBrace};
                 },
     braceCount: function(s){
                     var i = 1,
