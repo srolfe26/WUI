@@ -15,14 +15,11 @@ _w.DocObj = function(args){
         namespace:  'Wui'
     },args);
 
+    this.docsGathered = $.Deferred();
+
     this.init();
 };
 _w.DocObj.prototype = {
-    /**
-        Exists in the prototype so that multiple instances (accessing multiple namespaces)
-        can have a common root.
-    */
-    allDocs:    {},
     /**
         Fires 'getFiles' to get the documentation targets specified in 'fileList'.
     */
@@ -82,6 +79,9 @@ _w.DocObj.prototype = {
                         me.deferredCollection = arguments;
 
                         me.process();
+
+                        // Signals that all requests have been processed for this document
+                        me.docsGathered.resolve(me.deferredCollection);
                     });
                 },
     process:    function(){
@@ -104,9 +104,6 @@ _w.DocObj.prototype = {
                             // Get documented configs with preceeding javadoc comments
                             // The similar regex needs to run after getting methods so that it doesn't pick up the same stuff
                             memberConfigs = /\/\*\*((?:[^\*]|(?:\*+(?:[^\*/])))*)\*+\/[\s]*([^\:]+)\:[\s]*([^\,^\s]+)/g;
-
-                        // Clear out common docs root
-                        _w.DocObj.prototype.allDocs[me.namespace] = {};
 
                         // Break the code into objects, methods, and configs
                         _.each(me.deferredCollection,function(itm,i){
@@ -142,7 +139,7 @@ _w.DocObj.prototype = {
                                         tmpCode;
 
                                     // Establish Item Attributes
-                                    member.name = i;
+                                    member.name = me.namespace + '.' + i;
                                     member.ancestors = [];
                                     member.methods = [];
                                     member.configs = [];
@@ -221,9 +218,6 @@ _w.DocObj.prototype = {
                                             }
                                         }
                                     }
-
-                                    // Add members to the common root
-                                    _w.DocObj.prototype.allDocs[me.namespace][i] = member;
                                 });
                             }
                         });
