@@ -4,18 +4,66 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>WUI Lite Docs</title>
 
+    <link href='http://fonts.googleapis.com/css?family=Rajdhani:500,600,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../../wui-1-2/css/wui-min.css" type="text/css" media="all">
     <link rel="stylesheet" href="../wui-lite.css" type="text/css" media="all">
     <style type="text/css">
-        body, html { margin:0; padding:0; }
+        body, html { 
+            margin:0; 
+            padding:0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .wui-pane-wrap { width:100%; }
+
+        .wui-pane .doc-win.wui-pane .wui-pane-content { 
+            background-color:#fff; 
+            padding:1em; 
+        }
+
+        .doc-name, .wui-pane h2, .wui-pane h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600
+        }
+
+        .wui-pane h2 {
+            font-weight: 700;
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+         .wui-pane h3 {
+            text-transform: uppercase;
+            color: #999;
+            font-weight: 700;
+            font-size: 1.5em;
+            margin: 2em 0 0.5em;
+         }
+
         .no-doc {
             font-size: 10px;
             font-style: italic;
+            line-height: 1;
+            margin: -0.33em 0 0.33em;
         }
 
-        .doc-list {
-            width:180px;
-            margin:100px;
+        .dv-main-view > .wui-pane-wrap > .wui-pane-content {
+            display: flex;
+            background-color: #e2e2e2;
+        }
+
+        .wui-pane .wui-pane.doc-list {
+            max-width: 200px;
+            min-width: 200px;
+            border-right: 2px solid #333;
+        }
+
+        .wui-pane .wui-pane.doc-win {
+            border-right: 2px dashed #333;
+        }
+        .wui-pane .wui-pane.doc-win:last-child {
+            border-right: none;
         }
 
         tr.wui-selected:focus {
@@ -29,66 +77,85 @@
         .wui-selected td, .wui-selected, .wui-sort-menu li:hover {
           background-color: #038BE0;
         }
+
+        .grid-body tr:focus {
+            outline:0;
+        }
+
+        .wui-btn.close-panel {
+            position: absolute;
+            top: 1em;
+            right: 1em;
+            background-color: transparent;
+            border: 0;
+            padding: 0;
+            line-height: 1;
+        }
+
+        table.doc-table {
+            display: block;
+        }
+
+        .doc-table tbody {
+            display: block;
+        }
+
+        .doc-table tr {
+            display: block;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .cfg-name, .cfg-default {
+            min-width: 100px;
+            max-width: 150px;
+            white-space: nowrap;   overflow: hidden;   text-overflow: ellipsis;
+            width: 50%;
+            padding-right: 1em;
+        }
+
+        .doc-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .doc-table td.cfg-awesome, .doc-table td.cfg-creation-date, .doc-table td.cfg-deprecated, .doc-table td.cfg-required {
+            display: none;
+        }
+
+        .cfg-default {
+            font-size: 0.8em;
+            color: #777;
+        }
+
+        .cfg-default:before {
+            content: "dflt: ";
+            text-transform: uppercase;
+            font-size: 0.65em;
+            color: #ccc;
+        }
+
+        .doc-table td {
+            display: inline-block;
+        }
+
+        .cfg-name {
+            font-family: 'Rajdhani', sans-serif;   font-weight: 700;
+        }
+
+        .cfg-default {
+            max-width: 200px;
+        }
     </style>
 
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
-    <script src="../../wui-1-2/js/wui-1-2-min.js"></script>
+    <script src="../../wui-1-2/js/jquery-2-1-1-ui-1-10-4.js"></script>
+    <script src="../../wui-1-2/js/wui.js"></script>
+    <script src="../../wui-1-2/js/grid.js"></script>
     <script type="text/javascript" src="../underscore-min.js"></script>
     <script type="text/javascript" src="../core.js"></script>
     <script type="text/javascript" src="../doc.js"></script>
 </head>
 <body>
-    <script type="text/javascript">
-        var dv = dv || {},
-            allDocs = [];
-
-        dv.instance = {};
-
-        var doc = new _w.DocObj({
-                fileList:   ['../core.js','../doc.js'],
-                namespace:  '_w'
-            }),
-            doc2 = new _w.DocObj({
-                fileList:   ['../../wui-1-2-1/js/wui-1-2-1.js'],
-                namespace:  'Wui'
-            });
-
-        allDocs.push(doc.docsGathered, doc2.docsGathered);
-
-        // Display documentation
-        $.when.apply( $, allDocs ).done(function() {
-            var allItems = [],
-                sorted,
-                docs = docs || {};
-
-            // Put all top level objects in the same data structure
-            _.each(arguments,function(instance){
-                _.each(instance,function(file){
-                    if(file.success){
-                        allItems.push.apply( allItems, _.toArray(file.members) );
-                    }
-                });
-            });
-
-            // Sort alphabetically by name
-            sorted = _.sortBy(allItems,function(itm){ return itm.name; });
-
-            // Create View
-            dv.instance.docItems = new Wui.Grid({
-                cls:        'doc-list',
-                data:       sorted,
-                border:     false,
-                hideHeader: true,
-                height:     400,
-                columns:    [
-                                { 
-                                    dataItem: 'name',
-                                    dataTemplate: '<div>{name}</div>{( (!documented) ? "<div class=\\"no-doc\\">not nocumented</div>" : "" )}'
-                                }
-                            ]
-            });
-            dv.instance.docItems.place();
-        });
-    </script>
+    <script type="text/javascript" src="docsViews.js"></script>
+    <script type="text/javascript" src="docsController.js"></script>
 </body>
 </html>

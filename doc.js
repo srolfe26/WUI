@@ -139,10 +139,12 @@ _w.DocObj.prototype = {
                                         tmpCode;
 
                                     // Establish Item Attributes
-                                    member.name = me.namespace + '.' + i;
-                                    member.ancestors = [];
-                                    member.methods = [];
-                                    member.configs = [];
+                                    $.extend(member,{
+                                        name:       me.namespace + '.' + i,
+                                        ancestors:  [],
+                                        methods:    [],
+                                        configs:    []
+                                    });
 
                                     if(itmDetail.success){
                                         member.code = tmpCode = itmDetail.code;
@@ -276,6 +278,151 @@ _w.DocObj.prototype = {
                     }
                     
                     return s.substr(0, i + 1);
+                },
+    parseJavaDoc:function(itm){
+                    var jd = itm.comment
+                        htmlSafeText = '',
+                        keepPre = false;
+
+                    // Parse JavaDoc Comments on Main Item
+                    if(typeof itm.parsed == 'undefined' && itm.documented === true){
+                        itm.parsed = {
+                            params:     [],
+                            returns:    [],
+                            authors:    [],
+                            'throws':   [],
+                            version:    null,
+                            creation:   null,
+                            deprecated: false,
+                            'private':  false,
+                            required:   false,
+                            awesome:    false,
+                            eventhook:  false,
+                            text:       $('<div>')
+                        };
+
+                        jd = jd
+                        //get parameters
+                        .replace(/\@param\s+\{([^\}]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
+                            itm.parsed.params.push({
+                                data_typet:     dt, 
+                                description:    desc, 
+                                var_name:       varname
+                            });
+
+                            return '';
+                        })
+                        //return & throws
+                        .replace(/\@return\s+([^\n]+)/,function(){ 
+                            itm.parsed.returns.push({
+                                description: arguments[1]
+                            }); 
+
+                            return ''; 
+                        })
+                        .replace(/\@throws\s+([^\n]+)/,function(){ 
+                            itm.parsed['throws'].push({
+                                description: arguments[1]
+                            }); 
+
+                            return ''; 
+                        })
+
+                        // get Author Info
+                        .replace(/\@author\s+([^\n]+)/,function(m,author){
+                            var email = null,
+                                author = $.trim(author.replace(/\(([^\)]+)\)/, function(mch,eml){ email = eml; return ''; }));
+                            
+                            itm.parsed.authors.push({
+                                author:     author,
+                                email:      email
+                            });
+
+                            return '';
+                        })
+                        // //get creation date & Flags
+                        .replace(/\@version\s+([^\n]+)/,function(mch,ver){ keyInfo.push({title:'Version', val:ver, dt:'', varname:''}); return ''; })
+                        .replace(/\@creation\s+([^\n]+)/,function(mch,creationDate){ keyInfo.push({title:'Created', val:creationDate, dt:'', varname:''}); return ''; })
+                        .replace(/\@deprecated/,function(){ 
+                            itm.parsed.deprecated = true;
+
+                            return '';
+                        })
+                        .replace(/\@private/,function(){ 
+                            itm.parsed.private = true;
+
+                            return '';
+                        })
+                        .replace(/\@required/,function(){ 
+                            itm.parsed.required = true;
+
+                            return '';
+                        })
+                        .replace(/\@awesome/,function(){ 
+                            itm.parsed.awesome = true;
+
+                            return '';
+                        })
+                        .replace(/\@eventhook/,function(){ 
+                            itm.parsed.eventhook = true;
+
+                            return '';
+                        });
+
+                        // Load the code into a <pre> tag
+                        htmlSafeText = _w.DocObj.prototype.HTMLifyCode(jd.replace(/\*/g,''),false);
+
+                        // Determine whether to keep the pre formatting 
+                        htmlSafeText = htmlSafeText.replace(/\@preserve_format/,function(mch){ keepPre = true; return ''; });
+                        pre = $(htmlSafeText);
+
+                        // Convert to paragraphs after a double line break
+                        if(!keepPre){
+                            var paragraphs = pre.text().split(/([\n\r]{2}?\s*)/g);
+
+                            paragraphs.forEach(function(txt,i){
+                                if($.trim(txt).length > 0) {
+                                    itm.parsed.text.append( $('<p>').text(txt) );
+                                }
+                            });
+                        }else{
+                            itm.parsed.text.append(pre);
+                        }
+
+                        // Process any child items
+                        if(itm.configs){
+                            itm.configs.forEach(function(cfg){
+                                _w.DocObj.prototype.parseJavaDoc(cfg);
+                            });
+                            itm.methods.forEach(function(method){
+                                _w.DocObj.prototype.parseJavaDoc(method);
+                            });
+                        }
+                        // Remove code that was only used to get the child items
+                        else {
+                            delete itm.code;
+                        }
+                     
+                        console.log(itm);
+                    }
+                    // return key;
+                },
+    HTMLifyCode: function(c,codeColoring,lang){
+                    lang = lang || 'javascript';
+                    codeColoring = (codeColoring === false) ? false : true;
+
+                    var e = document.createElement('i'),
+                        languageClass = 'language-' + lang,
+                        addClass = (codeColoring) ? 'class="' + languageClass + '"' : '';
+                        var r = '<pre '+addClass+ '><code '+addClass+ '>' + $.trim(_w.DocObj.prototype.escapeTags(c)) + '</code></pre>';
+                        
+                    // replace tabs with 4 spaces where the browser doesn't support tab size
+                    if(e.style.tabSize !== '' && e.style.MozTabSize !== '' && e.style.oTabSize !== '')    r.replace(/\t/g,'    ');
+                    
+                    return r;
+                },
+    escapeTags: function(str){
+                    return str.replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 }
 };
 
