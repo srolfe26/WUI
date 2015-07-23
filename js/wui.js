@@ -1470,7 +1470,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         me.selected = [itm];
                         me.el.addClass('w121-has-selected');
 
-                        if(!me.multiSelect && !silent){
+                        if(!silent){
                             me.el.trigger($.Event('wuiselect'+ dn), [me, itm.el, itm.rec])
                                 .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
                                 .trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
