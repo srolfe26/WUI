@@ -378,7 +378,7 @@ _w.DocObj.prototype = {
 
                         // Convert to paragraphs after a double line break
                         if(!keepPre){
-                            var paragraphs = pre.text().split(/([\n\r]{2}?\s*)/g);
+                            var paragraphs = jd.split(/([\n\r]{2}?\s*)/g);
 
                             paragraphs.forEach(function(txt,i){
                                 if($.trim(txt).length > 0) {
@@ -403,18 +403,25 @@ _w.DocObj.prototype = {
                             delete itm.code;
                         }
                      
-                        console.log(itm);
+                        // console.log(itm);
                     }
                     // return key;
                 },
     HTMLifyCode: function(c,codeColoring,lang){
-                    lang = lang || 'javascript';
-                    codeColoring = (codeColoring === false) ? false : true;
+                    var ws = '',
+                        e = document.createElement('i'),
+                        languageClass = 'language-' + (lang || 'javascript'),
+                        addClass = (codeColoring !== false) ? 'class="' + languageClass + '"' : '',
+                        r;
 
-                    var e = document.createElement('i'),
-                        languageClass = 'language-' + lang,
-                        addClass = (codeColoring) ? 'class="' + languageClass + '"' : '';
-                        var r = '<pre '+addClass+ '><code '+addClass+ '>' + $.trim(_w.DocObj.prototype.escapeTags(c)) + '</code></pre>';
+                    // Remove extraneous whitespace
+                    c.replace(/(\n[\s]+\}[\s]*$)/g,function(ws_match){
+                        ws = ws_match.split('}')[0];
+                    });
+                    // Remove the newline and then put one on the beginning to ensure that one is there
+                    c = c.replace(new RegExp('\n' + ws.replace('\n',''),'g'),'\n');
+
+                    r = '<pre '+addClass+ '><code '+addClass+ '>' + $.trim(_w.DocObj.prototype.escapeTags(c)) + '</code></pre>';
                         
                     // replace tabs with 4 spaces where the browser doesn't support tab size
                     if(e.style.tabSize !== '' && e.style.MozTabSize !== '' && e.style.oTabSize !== '')    r.replace(/\t/g,'    ');

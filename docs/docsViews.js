@@ -5,7 +5,7 @@ var dv = {
                         namespace:  '_w'
                     }),
     docEngine2:     new _w.DocObj({
-                        fileList:   ['../../wui-1-2-1/js/wui-1-2-1.js'],
+                        fileList:   ['../../wui-1-2/js/wui-1-2.js'],
                         namespace:  'Wui'
                     }),
     data:           [],
@@ -46,7 +46,6 @@ $.when.apply( $, dv.data ).done(function() {
                             border:     false,
                             hideHeader: true,
                             multiSelect:true,
-                            
                             columns:    [
                                             { 
                                                 dataItem: 'name',
@@ -59,6 +58,6 @@ $.when.apply( $, dv.data ).done(function() {
     dv.instance.mainView.place();
 
     setTimeout(function(){
-        dv.instance.docItems.selectBy('name','Wui.File');
+        dv.instance.docItems.selectBy('name','Wui.FileBasic');
     },0);
 });

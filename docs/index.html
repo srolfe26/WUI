@@ -7,6 +7,7 @@
     <link href='http://fonts.googleapis.com/css?family=Rajdhani:500,600,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../../wui-1-2/css/wui-min.css" type="text/css" media="all">
     <link rel="stylesheet" href="../wui-lite.css" type="text/css" media="all">
+    <link rel="stylesheet" href="prism.css" type="text/css" media="all">
     <style type="text/css">
         body, html { 
             margin:0; 
@@ -101,15 +102,17 @@
         }
 
         .doc-table tr {
-            display: block;
+            display: flex;
+            flex-wrap: wrap;
             border-bottom: 1px dashed #ccc;
+            padding: 0.33em 0 0.1em;
         }
 
         .cfg-name, .cfg-default {
             min-width: 100px;
-            max-width: 150px;
+            max-width: 120px;
             white-space: nowrap;   overflow: hidden;   text-overflow: ellipsis;
-            width: 50%;
+            flex: 1;
             padding-right: 1em;
         }
 
@@ -117,7 +120,19 @@
             border-bottom: none;
         }
 
-        .doc-table td.cfg-awesome, .doc-table td.cfg-creation-date, .doc-table td.cfg-deprecated, .doc-table td.cfg-required {
+        .doc-table td {
+            display: inline-block;
+        }
+
+        .doc-table td.cfg-awesome
+        , .doc-table td.cfg-creation-date
+        , .doc-table td.cfg-deprecated
+        , .doc-table td.cfg-eventhook
+        , .doc-table td.cfg-version
+        , .doc-table td.cfg-required
+        , .doc-table td.cfg-code
+        , .doc-table td.cfg-returns
+        , .doc-table td.cfg-throws {
             display: none;
         }
 
@@ -133,9 +148,6 @@
             color: #ccc;
         }
 
-        .doc-table td {
-            display: inline-block;
-        }
 
         .cfg-name {
             font-family: 'Rajdhani', sans-serif;   font-weight: 700;
@@ -144,12 +156,66 @@
         .cfg-default {
             max-width: 200px;
         }
+
+        .doc-table .wui-selected td.cfg-awesome
+        , .doc-table .wui-selected td.cfg-creation-date
+        , .doc-table .wui-selected td.cfg-deprecated
+        , .doc-table .wui-selected td.cfg-eventhook
+        , .doc-table .wui-selected td.cfg-version
+        , .doc-table .wui-selected td.cfg-required
+        , .doc-table .wui-selected td.cfg-code
+        , .doc-table .wui-selected td.cfg-returns
+        , .doc-table .wui-selected td.cfg-throws {
+            display: inline-block;
+        }
+        
+        td.cfg-text {
+            flex: 1;
+            min-width: 100px;
+        }
+        .doc-table .cfg-text p {
+            display: none;
+        }
+
+        .doc-table .cfg-text p:first-child {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+        }
+
+        /********* WHEN STUFF IS SELECTED ***********/
+        .doc-table .wui-selected td, .doc-table .wui-selected {
+            background-color: #fff;
+            color: #333;
+        }
+
+        .doc-table tr:focus {
+            outline: none;
+        }
+
+        .doc-table .wui-selected td.cfg-code {
+            display: block;
+            margin: 0 auto;
+            min-width: 98%;
+        }
+        .wui-pane pre span {
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 0.9em !important;
+        }
+        .wui-selected td.cfg-name {
+            color: #038BE0;
+            font-size: 1.25em;
+            max-width: none;
+        }
     </style>
 
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
     <script src="../../wui-1-2/js/jquery-2-1-1-ui-1-10-4.js"></script>
     <script src="../../wui-1-2/js/wui.js"></script>
     <script src="../../wui-1-2/js/grid.js"></script>
+    <script type="text/javascript" src="prism.js"></script>
     <script type="text/javascript" src="../underscore-min.js"></script>
     <script type="text/javascript" src="../core.js"></script>
     <script type="text/javascript" src="../doc.js"></script>

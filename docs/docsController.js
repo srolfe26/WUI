@@ -22,11 +22,19 @@
 
 
 // CONTROLLER METHODS
-}(dv.MainController = {
+}(dv.MCtrlr = {
     closeDoc:   function() {
                     var btn = arguments[1];
 
                     btn.parent.remove();
+                },
+    getParsed:  function(param, parsed){
+                    if(typeof parsed != 'undefined' && typeof parsed[param] !='undefined') {
+                        return parsed[param];
+                    }
+                    else {
+                        return undefined;
+                    }
                 },
     loadDoc:    function() {
                     var selection = arguments[4];
@@ -70,12 +78,13 @@
                                     data:       rec.configs,
                                     border:     false,
                                     hideHeader: true,
+                                    multiSelect:true,
                                     template:   '<tr>' +
                                                     '<td class="cfg-name">{name}</td>' +
-                                                    '<td class="cfg-awesome">{( (typeof parsed != "undefined") ? parsed.awesome : "" )}</td>' +
+                                                    '<td class="cfg-awesome" data-flag="{( (typeof parsed != "undefined") ? parsed.awesome : "" )}"></td>' +
                                                     '<td class="cfg-creation-date">{( (typeof parsed != "undefined") ? parsed.creation : "" )}</td>' +
                                                     '<td class="cfg-deprecated">{( (typeof parsed != "undefined") ? parsed.deprecated : "" )}</td>' +
-                                                    '<td class="cfg-required">{( (typeof parsed != "undefined") ? parsed.required : "" )}</td>' +
+                                                    '<td class="cfg-required" data-flag="{( (typeof parsed != "undefined") ? parsed.required : "" )}"></td>' +
                                                     '<td class="cfg-default">{( (typeof defaultVal != "undefined") ? _w.DocObj.prototype.escapeTags(defaultVal) : "" )}</td>' +
                                                     '<td class="cfg-text">{( (typeof parsed != "undefined") ? parsed.text[0].outerHTML : "" )}</td>' +
                                                 '</tr>',
@@ -102,15 +111,16 @@
                                     data:       rec.methods,
                                     border:     false,
                                     hideHeader: true,
+                                    multiSelect:true,
                                     template:   '<tr>' +
-                                                    '<td>{name}</td>' +
+                                                    '<td class="cfg-name">{name}</td>' +
                                                     '<td class="cfg-authors">{( (typeof parsed != "undefined") ? parsed.authors : "" )}</td>' +
                                                     '<td class="cfg-params">{( (typeof parsed != "undefined") ? parsed.params : "" )}</td>' +
-                                                    '<td class="cfg-awesome">{( (typeof parsed != "undefined") ? parsed.awesome : "" )}</td>' +
+                                                    '<td class="cfg-awesome" data-flag="{( (typeof parsed != "undefined") ? parsed.awesome : "" )}"></td>' +
                                                     '<td class="cfg-creation-date">{( (typeof parsed != "undefined") ? parsed.creation : "" )}</td>' +
-                                                    '<td class="cfg-deprecated">{( (typeof parsed != "undefined") ? parsed.deprecated : "" )}</td>' +
-                                                    '<td class="cfg-eventhook">{( (typeof parsed != "undefined") ? parsed.eventhook : "" )}</td>' +
-                                                    '<td class="cfg-required">{( (typeof parsed != "undefined") ? parsed.required : "" )}</td>' +
+                                                    '<td class="cfg-deprecated" data-flag="{( (typeof parsed != "undefined") ? parsed.deprecated : "" )}"></td>' +
+                                                    '<td class="cfg-eventhook" data-flag="{( dv.MCtrlr.getParsed(\"eventhook\", parsed) )}"></td>' +
+                                                    '<td class="cfg-required" data-flag="{( (typeof parsed != "undefined") ? parsed.required : "" )}"></td>' +
                                                     '<td class="cfg-returns">{( (typeof parsed != "undefined") ? parsed.returns : "" )}</td>' +
                                                     '<td class="cfg-throws">{( (typeof parsed != "undefined") ? parsed.throws : "" )}</td>' +
                                                     '<td class="cfg-version">{( (typeof parsed != "undefined") ? parsed.version : "" )}</td>' +
@@ -132,6 +142,8 @@
 
                         );
                     });
+
+                    setTimeout(function(){ Prism.highlightAll(); },0);
                 }
 }));
 
