@@ -1363,10 +1363,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                     function singleClick(e,row){
                         // Determine the # of selected items before the change
-                        if(!me.multiSelect || !(e.metaKey || e.ctrlKey || e.shiftKey)){
-                            if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
-                            else                                                    me.itemSelect(itm);     //change selection
-                        }else{
+                        if(me.multiSelect && (e.metaKey || e.ctrlKey || e.shiftKey)){
                             var alreadySelected = $(row).hasClass('wui-selected');
                             
                             if(!e.shiftKey){
@@ -1390,10 +1387,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                                     rec.el.addClass('wui-selected');
                                 });
                             }
+                               
+                            me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
+                                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                         }
-                        
-                        me.el.trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+                        else{
+                            if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
+                            else                                                    me.itemSelect(itm);     //change selection
+                        }
                     }
 
                     function doubleClick(e){
