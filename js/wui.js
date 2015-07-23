@@ -1371,14 +1371,13 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
     click:      function(e,row){
                     var me = this,
-                        itm = me.getItemByEl(row);
+                        itm = me.getItemByEl(row),
+                        txtSelection, 
+                        alreadySelected;
 
                     // Determine the # of selected items before the change
-                    if(!me.multiSelect || !(e.metaKey || e.ctrlKey || e.shiftKey)){
-                        if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
-                        else                                                    me.itemSelect(itm);     //change selection
-                    }else{
-                        var alreadySelected = $(row).hasClass('w121-selected');
+                    if(me.multiSelect && (e.metaKey || e.ctrlKey || e.shiftKey)){
+                        alreadySelected = $(row).hasClass('w121-selected');
                         
                         if(!e.shiftKey){
                             // WHEN THE CTRL KEY IS HELD SELECT/DESELECT INDIVIDUAL ITEMS
@@ -1386,6 +1385,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                             if(alreadySelected) $.each(me.selected || [], function(idx,sel){ if(sel == itm) me.selected.splice(idx,1); });
                             else                me.selected.push(itm);
+
+                            me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
+                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                         }else{
                             // WHEN THE SHIFT KEY IS HELD - SELECT ALL ITEMS BETWEEN TWO POINTS
                             var firstSelected = me.selectByEl(me.el.find('tr.w121-selected:first')),
@@ -1396,18 +1398,32 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                                 currSelection = [];
 
                             me.selected = currSelection = me.items.slice(start.rec.wuiIndex,end.rec.wuiIndex + 1);
+                            
                             $('w121-selected').removeClass('w121-selected');
+                            
                             currSelection.forEach(function(rec){
                                 rec.el.addClass('w121-selected');
                             });
-                        }
 
+                            // Clear text selection that results from using the shift key in a cross browser way
+                            if(window.getSelection){
+                                txtSelection = window.getSelection();
+                            } else if(document.selection){
+                                txtSelection = document.selection;
+                            }
+                            if(txtSelection){
+                                if(txtSelection.empty){
+                                    txtSelection.empty();
+                                }
+                                if(txtSelection.removeAllRanges){
+                                    txtSelection.removeAllRanges();
+                                }
+                            }
+                        }
+                    }else{
+                        if(me.selected.length > 0 && me.selected[0] === itm)    me.itemDeselect(itm);   //deselect item
+                        else                                                    me.itemSelect(itm);     //change selection
                     }
-                    
-                    // Okay to fire this in either case because itemSelect will not fire it if 
-                    // multiselect is true.
-                    me.el.trigger($.Event('wuichange'+ me.id), [me, itm.el, itm.rec, me.selected])
-                        .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
                 },
     dblClick:   function(){
                     var me = this,
