@@ -155,7 +155,9 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                         me.selectEl.empty().append(holder.children().unwrap());
                         me.value = me.data;
 
-                        me.el.trigger($.Event('valchange'), [me, me.value, oldVal, me.val()]);
+                        // Taking out.  This causes recursion and is not needed because
+                        // the combo already has called valchange()..
+                        //me.el.trigger($.Event('valchange'), [me, me.value, oldVal, me.val()]);
                     },
     push:           function(){
                         var me = this, actuallyPush = [];
@@ -190,9 +192,13 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                             me.data = [];
                             me.make();
                             
-                            // Space delimited strings of numbers are converterd to an array
-                            if(typeof sv === 'string')
+                            // Comma/Space delimited strings of numbers are converted to an array
+                            var pattern = /,/;
+                            if(typeof sv === 'string' && sv.match(pattern)) {
+                                sv = sv.split(',');
+                            } else if (typeof sv === 'string') {
                                 sv = sv.split(' ');
+                            }
 
                             // Single values are made an array of 1 element
                             if(!$.isArray(sv)){

@@ -1,5 +1,9 @@
 /* daterange */
-.w121-date-fields.w121-fe, .w121-date-fields > .w121-fe { display:flex; }
+.w121-date-fields.w121-fe, .w121-date-fields > .w121-fe {
+    display: -ms-flexbox;
+        display: -webkit-flex;
+            display: flex;
+}
 .w121-date-fields .w121-datetime:first-child { margin-right: 4px; }
 
 
