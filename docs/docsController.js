@@ -28,13 +28,49 @@
 
                     btn.parent.remove();
                 },
-    getParsed:  function(param, parsed){
+    getParsed:  function(param){
+                    var parsed = arguments.callee.caller.arguments.parsed;
+
                     if(typeof parsed != 'undefined' && typeof parsed[param] !='undefined') {
                         return parsed[param];
                     }
                     else {
-                        return undefined;
+                        return '';
                     }
+                },
+    getReturns: function(){
+                    var parsed = arguments.callee.caller.arguments.parsed;
+
+                    if(typeof parsed != 'undefined') {
+                        console.log(parsed.returns);
+                    }
+                    else {
+                        return '';
+                    }
+                },
+    getParams: function(){
+                    var args = arguments.callee.caller.arguments,
+                        argList = arguments.callee.caller.toString().match(/\([^(\()]+\)/)[0].replace('(','').replace(')','').split(',') || [],
+                        parsed = args[$.inArray('parsed', argList)] || undefined,
+                        retVal = '';
+
+                    if( typeof parsed != 'undefined' && typeof parsed.params != 'undefined' && $.isArray(parsed.params)) {
+                        // TODO: Make a version of Wui.Template that doesn't build teh jQuery object, but just returns the string
+                        var tplt = new Wui.Template({
+                            template:   '<div class="doc-param">' +
+                                            '<span class="doc-var-name">{var_name}</span>' +
+                                            '<span class="doc-data-type">{data_type}</span>' +
+                                            '<span class="doc-param-descrip">{description}</span>' +
+                                        '</div>'
+                            });
+
+                        parsed.params.forEach(function(p){
+                            tplt.data = p;
+                            retVal += tplt.make()[0].outerHTML;
+                        });
+                    }
+
+                    return retVal;
                 },
     loadDoc:    function() {
                     var selection = arguments[4];
@@ -115,13 +151,13 @@
                                     template:   '<tr>' +
                                                     '<td class="cfg-name">{name}</td>' +
                                                     '<td class="cfg-authors">{( (typeof parsed != "undefined") ? parsed.authors : "" )}</td>' +
-                                                    '<td class="cfg-params">{( (typeof parsed != "undefined") ? parsed.params : "" )}</td>' +
-                                                    '<td class="cfg-awesome" data-flag="{( (typeof parsed != "undefined") ? parsed.awesome : "" )}"></td>' +
-                                                    '<td class="cfg-creation-date">{( (typeof parsed != "undefined") ? parsed.creation : "" )}</td>' +
-                                                    '<td class="cfg-deprecated" data-flag="{( (typeof parsed != "undefined") ? parsed.deprecated : "" )}"></td>' +
-                                                    '<td class="cfg-eventhook" data-flag="{( dv.MCtrlr.getParsed(\"eventhook\", parsed) )}"></td>' +
-                                                    '<td class="cfg-required" data-flag="{( (typeof parsed != "undefined") ? parsed.required : "" )}"></td>' +
-                                                    '<td class="cfg-returns">{( (typeof parsed != "undefined") ? parsed.returns : "" )}</td>' +
+                                                    '<td class="cfg-params">{( dv.MCtrlr.getParams() )}</td>' +
+                                                    '<td class="cfg-awesome" data-flag="{( dv.MCtrlr.getParsed("awesome") )}"></td>' +
+                                                    '<td class="cfg-creation-date">{( dv.MCtrlr.getParsed("creation") )}</td>' +
+                                                    '<td class="cfg-deprecated" data-flag="{( dv.MCtrlr.getParsed("deprecated") )}"></td>' +
+                                                    '<td class="cfg-eventhook" data-flag="{( dv.MCtrlr.getParsed("eventhook") )}"></td>' +
+                                                    '<td class="cfg-required" data-flag="{( dv.MCtrlr.getParsed("required") )}"></td>' +
+                                                    '<td class="cfg-returns">{( dv.MCtrlr.getReturns() )}</td>' +
                                                     '<td class="cfg-throws">{( (typeof parsed != "undefined") ? parsed.throws : "" )}</td>' +
                                                     '<td class="cfg-version">{( (typeof parsed != "undefined") ? parsed.version : "" )}</td>' +
                                                     '<td class="cfg-text">{( (typeof parsed != "undefined") ? parsed.text[0].outerHTML : "" )}</td>' +

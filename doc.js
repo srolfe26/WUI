@@ -305,8 +305,8 @@ _w.DocObj.prototype = {
                         //get parameters
                         .replace(/\@param\s+\{([^\}]+)\}\s+([\[,\w\]\.]+)\s+([^\n]+)/g,function(mch,dt,varname,desc){
                             itm.parsed.params.push({
-                                data_typet:     dt, 
-                                description:    desc, 
+                                data_type:      dt,
+                                description:    desc,
                                 var_name:       varname
                             });
 

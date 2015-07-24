@@ -57,7 +57,12 @@ $.when.apply( $, dv.data ).done(function() {
     });
     dv.instance.mainView.place();
 
+
+// Really Lazy Autoselect
     setTimeout(function(){
-        dv.instance.docItems.selectBy('name','Wui.FileBasic');
+        dv.instance.docItems.selectBy('name','Wui.Data');
     },0);
+    setTimeout(function(){
+        dv.instance.mainView.items[1].methodGrid.selectBy('name',"dataChanged");
+    },400);
 });
