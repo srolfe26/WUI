@@ -277,9 +277,7 @@ Wui.Smarty.prototype = {
 
 
                     /*
-                     * Inverts an object so that its keys are its values, and its values are its keys.
-                     * Complex values will be dropped (functions, arrays, and objects). If a non-object,
-                     * or an empty object is passed in, an empty object will be returned.
+                     * Determines whether a property exists in a given object's context.
                      *
                      * @param   {object}    obj         The object to be searched within.
                      * @param   {string}    property    A string of the property to search for within 'obj'.
