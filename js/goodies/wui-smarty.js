@@ -4,15 +4,21 @@
  *      - The risk of XSS attack through use of inline functions
  *      - Inability to escape HTML and Javascript values
  *      - Inability to access nested variables in a fail-safe manner
+ *      - Inability to "compile" the template - a 2X speed improvement in Wui.Smarty
  * 
  * Wui.Smarty syntactically follows the familiar usage of placing variables in the template surrounded by braces (or curly
  * brackets). Data is set as a parameter to the make() method, and make() always returns a string. Functions are available
  * via a 'function' flag that will be described below. Additionaly, it borrows many features and syntax from the PHP 
- * server-side templating system.
+ * server-side templating system Smarty.
  *      
  *      (http://www.smarty.net/)
+ *
+ * Wui.Smarty will "compile" its template on the first run, meaning rather than parsing the template string with a regex on
+ * every iteration, it will dynamically create a function on the first iteration that will then be called with the new data
+ * of each subsequent iteration. This creates approximately a 2X speed advantage (tested on a 10,000 X 4 data set), even 
+ * with the more functionality in the template.
  *      
- * For example, a simple template may look like this:
+ * Template syntax can be understood through the follow examples, starting with the most simple:
  * 
  *      '<p>{firstname}</p>'
  *      
@@ -84,7 +90,8 @@
  *      escape      Used to encode special characters. Accepts 'html', 'javascript', 'json' and 'url'
  *      
  *      function    Will call a function within the scope of the template. Parameters are the function name, and then arguments to pass. 
- *                  Example {|function:funcName:param1Name:param2Name:...}
+ *                  Example {|function:funcName:param1Name:param2Name:...} When functions are used, the function flag MUST be the first one,
+ *                  and the the key value MUST be blank since the keys are parameters to the function.
  *                  
  *      lower       Equivalent to toLowerCase()
  *      
@@ -96,10 +103,12 @@
 
 var Wui = Wui || {};
 
-
 Wui.Smarty = function(args) {
     $.extend(this, {
-        html:       ''
+        html:       '',
+        compiled:   null,
+        build:      [],
+        __s:        ""
     }, args);
 };
 
@@ -115,6 +124,17 @@ Wui.Smarty.prototype = {
                      */
     applyFlags:     function(str, flags){
                         var me = this;
+
+                        // Method for adding flags and params to the build array
+                        function addToBuid(fn, params) {
+                            var latestKey = me.build[me.build.length - 1];
+
+                            latestKey.fn = latestKey.fn || [];
+                            latestKey.params = latestKey.params || [];
+                            
+                            latestKey.fn.push(fn);
+                            latestKey.params.push($.extend(true, [], params));
+                        }
 
                         for (var index = 0; index < flags.length; index++) {
                             var params = flags[index].split(':')
@@ -132,6 +152,9 @@ Wui.Smarty.prototype = {
 
                             switch (flag) {
                                 case 'function':
+                                    // Add the functions to the build
+                                    addToBuid('js_function', params);
+
                                     // Function is a JS keyword and requires special parsing
                                     str = me.js_function.apply(me, params);
                                     break;
@@ -140,11 +163,19 @@ Wui.Smarty.prototype = {
                                     // run the default behavior
                                     flag = 'defaultVal';
                                 default:
-                                    // Add the string to be modified as the first parameter
-                                    params.splice(0,0,str);
-                                    
-                                    // Run the function with all parameters
-                                    str = me[flag].apply(me, params);
+                                    if (typeof me[flag] !== 'function') {
+                                        new Error('wui-smarty.js - Unsupported flag: \'' + flag + '\'.');
+                                    }
+                                    else {
+                                        // Add the functions to the build
+                                        addToBuid(flag, params);
+                                        
+                                        // Add the string to be modified as the first parameter
+                                        params.splice(0,0,str);
+
+                                        // Run the function with all parameters
+                                        str = me[flag].apply(me, params);
+                                    }
                             }
                         }
 
@@ -161,7 +192,81 @@ Wui.Smarty.prototype = {
     capitalize:     function(str) {
                         return String(str).replace(/\w\S*/g, function(txt) {
                             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-                        });
+                        });                    
+                    },
+
+
+                    /*
+                     * Allows a named function to be chainable through using the common me.__s
+                     *
+                     * @param   {string}    fn     The name of a function to call within the context of this object
+                     * @param   {array}     params Array of parameters to be passed into function
+
+                     * @return  {object}    A reference to the template object so that chaning can occur
+                     */
+    chain:          function(fn, params) {
+                        var me = this;
+
+                        params.splice(0, 0, me.__s);
+                        me.__s = me[fn].apply(me, params);
+
+                        return me;
+                    },
+
+
+                    /*
+                     * Turns the build array into a function that will be run in all future uses
+                     * of the template. Makes use of me.build[] to create the function.
+                     *
+                     * @return  {function}  The compiled function
+                     */
+    compile:        function() {
+                        var me = this,
+                            fnString = 'var me = this, retString = "";';
+
+                        function addDelimiter(index) {
+                            return (index !== me.build.length - 1) ? '+' : ';';
+                        }
+
+                        function arrToStr(arr) {
+                            return '[\'' + arr.join('\',\'')+ '\']';
+                        }
+
+                        // Contstruct the compiled function from the array items
+                        for (var i = 0; i < me.build.length; i++) {
+                            var itm = me.build[i];
+
+                            if ($.isPlainObject(itm)) {
+                                // Do a lookup of keys that have a name (not function expressions)
+                                if(itm.key.length > 0) {
+                                    fnString += 'me.__s = me.lookup(rec, \'' + itm.key + '\');';
+                                }
+                                // Set the initial value from the function (function flag must be first)
+                                else if (typeof itm.fn !== 'undefined') {
+                                    fnString += 'me.__s = me.' +itm.fn.shift()+ '.apply(me, ' +arrToStr(itm.params.shift())+ ');';
+                                }
+
+                                // Perform additional flags on me.__s if they exist
+                                if (typeof itm.fn !== 'undefined' && itm.fn.length > 0) {
+                                    fnString += 'me';
+                                    for (var f = 0; f < itm.fn.length; f++) {
+                                        fnString += '.chain(\'' +itm.fn[f]+ '\',' +arrToStr(itm.params[f])+ ')'
+                                    }
+                                    fnString += ';';
+                                }
+
+                                fnString += 'retString += me.__s;';
+                            }
+                            // Item is a string
+                            else {
+                                fnString += 'retString += \'' + itm + '\';';
+                            }
+                        }
+
+                        fnString += "return retString;"
+                        
+                        // create function that will perform the conditional statement
+                        return Function.apply(null, ['rec', fnString]);
                     },
 
 
@@ -277,7 +382,9 @@ Wui.Smarty.prototype = {
 
 
                     /*
-                     * Determines whether a property exists in a given object's context.
+                     * Inverts an object so that its keys are its values, and its values are its keys.
+                     * Complex values will be dropped (functions, arrays, and objects). If a non-object,
+                     * or an empty object is passed in, an empty object will be returned.
                      *
                      * @param   {object}    obj         The object to be searched within.
                      * @param   {string}    property    A string of the property to search for within 'obj'.
@@ -397,37 +504,69 @@ Wui.Smarty.prototype = {
                      * @return  {string}    A template string with data values filled in
                      */
     make:           function(rec){
-                        var me = this
-                            , tplCopy = me.html;
+                        var me = this;
                     
                         // The engine will break if we don't have both of these pieces
                         if(!(rec && me.html)) {
-                            throw new Error('Wui.js - Template engine missing data and/or html template.');
+                            throw new Error('wui-smarty.js - Template engine missing data and/or html template.');
                         }
 
                         // Make the rec data available to the whole object without having to pass it from
                         // method to method
                         me.rec = rec;
 
+                        if (me.compiled === null) {
+                            // Since the template is not compiled, parse through it to get a build list to compile the template
+                            var retStr = me.parse();
+                            
+                            // Create a "compiled" function representing the parsed template from the build object
+                            me.compiled = me.compile();
+
+                            return retStr;
+                        }
+                        else {
+                            return me.compiled.call(me, rec);
+                        }
+                    },
+
+
+parse:              function() {
+                        var me = this
+                            , offsetLast = 0
+                            , matchLen = 0
+                            , tplCopy = me.html;
+
                         // Remove comments. Comments are of the form {* ... *} and can be multi-line
                         tplCopy = tplCopy.replace(/{\*[\w\s.,\/#!$%\^&\*;:{}=\-_`~()\[\]@]*\*}/g,'');
                         
                         // Fill values into the template
-                        return tplCopy.replace(/{([\w+|:\. '"]+)}/g,function() {
+                        tplCopy = tplCopy.replace(/{([\w+|:\. '"-]+)}/g,function(match, expr, offset) {
                             // '/*The regex throws off code hilighting in Sublime. So killing it with a comment*/
-                            var match = arguments[1]
+                            var match = expr
                                 , flags = match.split('|')
                                 , key = flags.shift()
                                 , value = "";
-                                
+                            
+                            // Add the string literal to the build array
+                            me.build.push(me.html.substr(offsetLast, offset - offsetLast));
+                            offsetLast = offset + match.length + 2;
+
+                            // Add the key val to the build array
+                            me.build.push({key: key});
+
                             // Lookup the value in the record
-                            value = me.lookup(rec, key);
+                            value = me.lookup(me.rec, key);
                                 
                             // Run any flags on the value before returning it
                             value = me.applyFlags(value, flags);
 
                             return value;
                         });
+
+                        // Add the final string literal before returning tplCopy for the first outputted template
+                        me.build.push(me.html.substr(offsetLast));
+
+                        return tplCopy;
                     },
 
 
@@ -448,7 +587,7 @@ Wui.Smarty.prototype = {
                         }
 
                         if (!/^[gi]*$/.test(flags)) {
-                            throw new TypeError("Invalid flags supplied '" + flags.match(new RegExp("[^gi]*")) + "'");
+                            throw new TypeError("wui-smarty.js - Invalid regex flags supplied '" + flags.match(new RegExp("[^gi]*")) + "'");
                         }
 
                         characters = characters.replace(/[\[\](){}?*+\^$\\.|\-]/g, "\\$&");
