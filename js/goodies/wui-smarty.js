@@ -137,10 +137,10 @@ Wui.Smarty.prototype = {
                         }
 
                         for (var index = 0; index < flags.length; index++) {
-                            var params = flags[index].split(':')
-                                  // Replaces the first element (which is the name of the flag), with the string to be
-                                  // modified. Then splice returns the flag in an array, so get the first element. 
-                                , flag;
+                            var params = flags[index].split(':'),
+                                // Replaces the first element (which is the name of the flag), with the string to be
+                                // modified. Then splice returns the flag in an array, so get the first element. 
+                                flag;
 
                             // Remove quotes from around params, they're already a string at this point
                             for (var i = 1; i < params.length; i++) {
@@ -250,7 +250,7 @@ Wui.Smarty.prototype = {
                                 if (typeof itm.fn !== 'undefined' && itm.fn.length > 0) {
                                     fnString += 'me';
                                     for (var f = 0; f < itm.fn.length; f++) {
-                                        fnString += '.chain(\'' +itm.fn[f]+ '\',' +arrToStr(itm.params[f])+ ')'
+                                        fnString += '.chain(\'' +itm.fn[f]+ '\',' +arrToStr(itm.params[f])+ ')';
                                     }
                                     fnString += ';';
                                 }
@@ -263,7 +263,7 @@ Wui.Smarty.prototype = {
                             }
                         }
 
-                        fnString += "return retString;"
+                        fnString += "return retString;";
                         
                         // create function that will perform the conditional statement
                         return Function.apply(null, ['rec', fnString]);
@@ -322,12 +322,13 @@ Wui.Smarty.prototype = {
                      * @return  {string}    An escaped string.
                      */
     escape:         function(str, type, unescape) {
-                        var me = this
-                            , unescape = unescape || false
-                            , actions = {
+                        unescape = unescape || false;
+
+                        var me = this,
+                            actions = {
                                 maps:       function(baseMap) {
-                                                var map = unescape ? me.invert(baseMap) : baseMap
-                                                    ,regex = new RegExp('[' + me.getKeys(map).join().replace(/\//,'\\/') + ']', 'g');
+                                                var map = unescape ? me.invert(baseMap) : baseMap,
+                                                    regex = new RegExp('[' + me.getKeys(map).join().replace(/\//,'\\/') + ']', 'g');
 
                                                 return String(str).replace(regex, function(match) {
                                                     return map[match];
@@ -352,7 +353,7 @@ Wui.Smarty.prototype = {
                             return actions[type]();
                         }
                         else {
-                            return actions['html']();
+                            return actions.html();
                         }
                     },
 
@@ -413,7 +414,7 @@ Wui.Smarty.prototype = {
                                 if (!$.isArray(value) && !$.isPlainObject(value) && !$.isFunction(value)) {
                                     retObj[value] = key;
                                 }
-                            })
+                            });
                         }
 
                         return retObj;
@@ -431,10 +432,10 @@ Wui.Smarty.prototype = {
                      * @return  {string}    The return value from the function
                      */
     js_function:    function(fn){
-                        var me = this
+                        var me = this,
                             // Function name is the first argument, function parameters are all afterward
-                            , index = 1
-                            , paramVals = [];
+                            index = 1,
+                            paramVals = [];
                         for (index; index < arguments.length; index++) {
                             paramVals.push(me.lookup(me.rec, arguments[index]));
                         }
@@ -453,8 +454,8 @@ Wui.Smarty.prototype = {
                      *                      did not exist.
                     */
     lookup:         function(rec, key) {
-                        var me = this
-                            , value = "";
+                        var me = this,
+                            value = "";
 
                         // If the key exists in rec, use its value
                         if (rec.hasOwnProperty(key)) {
@@ -463,9 +464,9 @@ Wui.Smarty.prototype = {
                         else {
                             // If the key is a nested value, determine if the nested value exists
                             if (key.indexOf('.') > 0) {
-                                var context = rec
-                                    , keys = key.split('.')
-                                    , index = 0;
+                                var context = rec,
+                                    keys = key.split('.'),
+                                    index = 0;
 
                                 while (context != null && index < keys.length) {
                                     if (index === keys.length - 1 && me.hasProperty(context, keys[index])) {
@@ -530,26 +531,26 @@ Wui.Smarty.prototype = {
                     },
 
 
-parse:              function() {
-                        var me = this
-                            , offsetLast = 0
-                            , matchLen = 0
-                            , tplCopy = me.html;
+    parse:          function() {
+                        var me = this,
+                            offsetLast = 0,
+                            matchLen = 0,
+                            tplCopy = me.html,
+                            commentsClean;
 
                         // Remove comments. Comments are of the form {* ... *} and can be multi-line
-                        tplCopy = tplCopy.replace(/{\*[\w\s.,\/#!$%\^&\*;:{}=\-_`~()\[\]@]*\*}/g,'');
+                        tplCopy = commentsClean = tplCopy.replace(/{\*[\w\s.,\/#!$%\^&\*;:{}=\-_`~()\[\]@]*\*}/g,'');
                         
                         // Fill values into the template
                         tplCopy = tplCopy.replace(/{([\w+|:\. '"-]+)}/g,function(match, expr, offset) {
                             // '/*The regex throws off code hilighting in Sublime. So killing it with a comment*/
-                            var match = expr
-                                , flags = match.split('|')
-                                , key = flags.shift()
-                                , value = "";
+                            var flags = expr.split('|'),
+                                key = flags.shift(),
+                                value = "";
                             
                             // Add the string literal to the build array
-                            me.build.push(me.html.substr(offsetLast, offset - offsetLast));
-                            offsetLast = offset + match.length + 2;
+                            me.build.push(commentsClean.substr(offsetLast, offset - offsetLast));
+                            offsetLast = offset + expr.length + 2;
 
                             // Add the key val to the build array
                             me.build.push({key: key});
@@ -564,7 +565,7 @@ parse:              function() {
                         });
 
                         // Add the final string literal before returning tplCopy for the first outputted template
-                        me.build.push(me.html.substr(offsetLast));
+                        me.build.push(commentsClean.substr(offsetLast));
 
                         return tplCopy;
                     },
