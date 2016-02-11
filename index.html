@@ -56,6 +56,8 @@
                 font-family: Helvetica, Arial, sans-serif;
                 width: 800px;
                 margin: 0 auto;
+                line-height:1.5;
+                color: #555;
             }
         </style>
     </head>
@@ -87,11 +89,11 @@
         <p>This is my priority list for the WUI from where I sit right now:</p>
 
         <ul>
-            <li><b>Review:</b> NONE of the WUI code has been peer reviewed. The MAIN thing that the WUI suffers from is 
+            <li><b>Review:</b> NONE of the WUI code has been peer reviewed. The MAIN thing that the WUI suffers from is lack of 
             peer review. Peer review has driven me further as a programmer, and made my code better, than anything else 
             that has happened to me in the last ten years of programming. Its the first order of business for me to get 
-            a good review framework set up for the WUI. Hopefully then, I can convince a few of you to review my code. 
-            In truth, I have no desire to develop the WUI any further without review. It'll just get more messy if I'm 
+            a good review framework set up for the WUI. I'm looking closely at Phabricator, and will set up an instance as soon as I secure hosting. Hopefully then, I can convince a few of you to review my code. 
+            <b>In truth, I have no desire to develop the WUI any further without peer review.</b> It'll just get more messy if I'm 
             left to my own devices. With good review, any nervousness in deploying new code is at least spread across 
             a few more people.
                 <ul>
@@ -103,11 +105,11 @@
                 </ul>
             </li>
             <li>
-                <p><b>Testing:</b> Unit tests, performance using jsPerf, and eventually Nightwatch &amp; Selenium running 
-                cross-browser tests using BrowserStack. I came across a great quote last week that goes like this:</p>
+                <p><b>Testing:</b> Unit tests, performance using <a href="https://jsperf.com/" target="_blank">jsPerf</a>, and eventually <a href="http://nightwatchjs.org/" target="_blank">Nightwatch</a> &amp; <a href="http://www.seleniumhq.org/" target="_blank">Selenium</a> running 
+                cross-browser tests using <a href="https://www.browserstack.com/" target="_blank">BrowserStack</a>. I came across a great quote last week that goes like this:</p>
                 <blockquote>
                     <q>Legacy code is any code without tests.</q>
-                    <cite>Michael Feathers in <i></i>Working Effectively with Legacy Code</i></cite>
+                    <cite>Michael Feathers in <i></i><a href="http://www.amazon.com/Working-Effectively-Legacy-Michael-Feathers/dp/0131177052" target="_blank">Working Effectively with Legacy Code</a></i></cite>
                 </blockquote>
                 <p>In that sense, ALL of WUI 1.2.1 is legacy code! How great it would be to make a change to code, and 
                 have a massive battery of tests to run against it. We have a story here of an ex-Oracle employee                     who was asked about the value of their database software. His reply was that the software was 
