@@ -72,7 +72,72 @@
             </div>
         </header>
 
-        <p> Content Pending... </p>
+        <h1>Webteam User Interface (WUI) Project</h1>
+        
+        <h2>Update 2/11/15: WUI Dev Priority List</h2>
+        
+        <p>This is my priority list for the WUI from where I sit right now:</p>
+
+        <ul>
+            <li><b>Review:</b> NONE of the WUI code has been peer reviewed. The MAIN thing that the WUI suffers from is 
+            peer review. Peer review has driven me further as a programmer, and made my code better, than anything else 
+            that has happened to me in the last ten years of programming. Its the first order of business for me to get 
+            a good review framework set up for the WUI. Hopefully then, I can convince a few of you to review my code. 
+            In truth, I have no desire to develop the WUI any further without review. It'll just get more messy if I'm 
+            left to my own devices. With good review, any nervousness in deploying new code is at least spread across 
+            a few more people.
+                <ul>
+                    <li><b>Documentation:</b> This is a subset of review because one of the most important elements of 
+                    review is to make sure that the documentation matches and adequately describes the code - ensuring that 
+                    another human can understand both. For now, I believe the best place to document the WUI is within the 
+                    source code itself. Good documentation describes not just 'what' (and sometimes not even 'what'), 
+                    but more importantly 'how' and 'why'.</li>
+                </ul>
+            </li>
+            <li>
+                <p><b>Testing:</b> Unit tests, performance using jsPerf, and eventually Nightwatch &amp; Selenium running 
+                cross-browser tests using BrowserStack. I came across a great quote last week that goes like this:</p>
+                <blockquote>
+                    <q>Legacy code is any code without tests.</q>
+                    <cite>Michael Feathers in <i></i>Working Effectively with Legacy Code</i></cite>
+                </blockquote>
+                <p>In that sense, ALL of WUI 1.2.1 is legacy code! How great it would be to make a change to code, and 
+                have a massive battery of tests to run against it. We have a story here of an ex-Oracle employee                     who was asked about the value of their database software. His reply was that the software was 
+                worthless. The value, he said, was in the tests. Every time a customer would call with a problem, 
+                along with a ticket to fix the issue, a test was written to prove that the issue was fixed. 
+                Eventually the test suite became so large, that the software could be thrown out and replaced, and 
+                as long as it matched up to the testing suite they would know it was good. The test suite housed 
+                ALL of the value.</p>
+            </li>
+            <li><b>Backlog:</b> With review and testing in place, I will be ready to expand on WUI 1.2.1. 
+                These are some issues I see as important, and I will speak to items you mention too:
+                <ul>
+                    <li>Splitting the WUI down further into different components. Potentially adding AMD loading, 
+if it ends up making sense for building components nicely, but I don't want someone to 
+have to use grunt to build a WUI application.</li>
+                    <li>Removing dependencies on flexbox CSS styling, while retaining the existing CSS class and 
+DOM structure. There are too many browser issues with legacy browsers and flexbox to 
+justify using it. If the WUI is going to make it outside of USURF (and its starting to) 
+the world isn't ready for flexbox. This will actually resolve the grid headers problem.</li>
+                    <li>Fixing the combo box is a definite priority. However, the current iteration of combo box is such 
+a multi-faceted beast that it is unreasonable to work on it without a test structure in place.
+Wui.maxZ does perform as I desire it to. Indeed NOTHING should appear above a modal 
+window. If your control is being messed up by maxZ, perhaps its just a wrong fit for your 
+control. Modal windows and maxZ are a perfect fit.</li>
+                    <li>As far as sub-categories in Datalists are concerned, I struggle to conceptualize a good use 
+case for such a feature. At least within the context of how I understand a Datalist along 
+with its data-binding and interaction methods. That also gets into nesting, if I have top 
+level categories, shouldn't I be able to go further? What are the interactions that surround 
+category headers? Should the framework automatically apply those interactions, or what 
+programmatic interface can it provide to let you customize them?  I'm not against this feature, 
+but again, I have a hard time conceptualizing a use case. If you're interested in the 
+feature, I would say writing out in plain English the use case would be a great first step - 
+and then peer reviewing that.</li>
+                </ul>
+            </li>
+
+            <p>So that's my priority list for the WUI. I'm not implying that this list is entirely 
+            top to bottom in chronology, but it IS top to bottom in importance from my perspective.</p>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
