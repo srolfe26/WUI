@@ -12,7 +12,8 @@ body { padding:60px 0 0 0; }
 }
 
 .content {
-    max-width: 1096px;
+    width: 1096px;
+    max-width: 100%;
     margin: 0 auto;
     display: flex;
     align-items:center;
@@ -40,6 +41,7 @@ body { padding:60px 0 0 0; }
 .body-content {
     font-family: Helvetica, Arial, sans-serif;
     width: 800px;
+    max-width: 100%;
     margin: 0 auto;
     line-height:1.5;
     color: #555;
