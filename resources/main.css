@@ -1,1 +1,89 @@
-/* Main.css */
+body { padding:60px 0 0 0; }
+
+.top-nav {
+    font-family: 'Rajdhani', sans-serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #A0C9CC;
+    height: 60px;
+    width: 100%;
+    border-bottom: 1px solid #bbb;
+}
+
+.content {
+    max-width: 1096px;
+    margin: 0 auto;
+    display: flex;
+    align-items:center;
+    height:100%;
+    padding:0 1%;
+}
+
+.site-nav {
+    display: flex;
+    flex:1;
+    justify-content: space-between;
+}
+
+.top-nav a { 
+    text-decoration: none;
+    text-transform: uppercase;
+    color: #fff; 
+    transition: color 167ms;
+}
+
+.top-nav a:hover {
+    color: #333;
+}
+
+.body-content {
+    font-family: Helvetica, Arial, sans-serif;
+    width: 800px;
+    margin: 0 auto;
+    line-height:1.5;
+    color: #555;
+}
+
+.body-content a {
+    color: #FA8072;
+    text-decoration:none;
+}
+
+.body-content a:hover {
+    color: #A0C9CC;
+}
+
+blockquote {
+    text-align: center;
+    background-color: #f1f1f1;
+    margin: 2em 4em;
+}
+
+p {
+    text-align: justify;
+}
+
+cite {
+    display: block;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    font-weight: 100;
+}
+
+cite:before {
+    content: "- ";
+}
+
+q {
+    font-size: 1.25em;
+    color: #000;
+}
+
+li {
+    margin-top: 0.75em;
+}
+
+ul {
+    list-style-type: square;
+}
