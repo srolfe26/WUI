@@ -1,0 +1,4 @@
+[submodule "wui-1-2"]
+	path = wui-1-2
+	url = https://github.com/srolfe26/WUI
+	branch = 1.2
