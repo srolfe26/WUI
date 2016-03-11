@@ -4,19 +4,17 @@
     <meta charset="utf-8">
     <title>Random Number Function - WUI 1.2</title>
     
-    <link rel="stylesheet" href="../css/wui.css" type="text/css" media="all">
-    <link rel="stylesheet" href="../css/docs.css" type="text/css" media="all">
-    <link rel="stylesheet" href="../js/docs/prism.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../dist/css/wui.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../dist/css/docs.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="../docs/js/prism.css" type="text/css" media="all">
     
-    <script type="text/javascript" src="../js/jquery-2-1-1-ui-1-10-4.js"></script>
-    <script type="text/javascript" src="../js/wui.js"></script>
-    <script type="text/javascript" src="../js/forms.js"></script>
-    <script type="text/javascript" src="../js/grid.js"></script>
-    <script type="text/javascript" src="../js/docs/docs.js"></script>
+    <script type="text/javascript" src="../src/js/libs/jquery-2-1-1-ui-1-10-4.js"></script>
+    <script type="text/javascript" src="../dist/wui.1.2.min.js"></script>
+    <script type="text/javascript" src="../docs/js/docs.js"></script>
     
     <script type="text/javascript">
         $(document).ready(function(){
-            Wui.docCode('../js/wui.js','Wui.randNum','Wui.randNum()');
+            Wui.docCode('../dist/js/wui.js','Wui.randNum','Wui.randNum()');
         }); // end document.ready        
     </script>
     
@@ -35,7 +33,7 @@
             ts.test('Random Number between 1 and 100:', function(){ return Wui.randNum(1,100); });
         }); // end document.ready        
     </script>
-    <script type="text/javascript" src="../js/docs/prism.js"></script>
+    <script type="text/javascript" src="../docs/js/prism.js"></script>
 </head>
 <body class="wui-docs">
 </body>
