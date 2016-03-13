@@ -1,3 +1,6 @@
+/**
+ * A Wui.Pane is a box with a top toobar (tbar), and a bottom toolbar (bbar).
+ */
 Wui.Pane = function(args){ 
     $.extend(this,{
         bbar:       [],
