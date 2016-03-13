@@ -1,0 +1,4 @@
+// verge 1.9.1+201402130803
+// https://github.com/ryanve/verge
+// MIT License 2013 Ryan Van Etten
+!function(n,e,t){"undefined"!=typeof module&&module.exports?module.exports=t():n[e]=t()}(this,"verge",function(){{var n={},e="undefined"!=typeof window&&window,t="undefined"!=typeof document&&document,i=t&&t.documentElement,r=e.matchMedia||e.msMatchMedia,u=r?function(n){return!!r.call(e,n).matches}:function(){return!1};n.viewportW=function(){var n=i.clientWidth,t=e.innerWidth;return t>n?t:n},n.viewportH=function(){var n=i.clientHeight,t=e.innerHeight;return t>n?t:n}}return n.mq=u,n.matchMedia=r?function(){return r.apply(e,arguments)}:function(){return{}},n});jQuery.extend(verge);

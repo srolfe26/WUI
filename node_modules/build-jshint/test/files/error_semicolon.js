@@ -1,0 +1,2 @@
+// Missing semicolon
+Object.create({})
