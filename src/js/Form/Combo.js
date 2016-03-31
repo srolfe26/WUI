@@ -173,6 +173,7 @@ Wui.Combo = function(args){
         this.titleItem
     ){
         this.template = '<li>{' +this.titleItem+ '}</li>';
+        // TODO: This likely doesn't need to exist
         this.noSpecifiedTemplate = true;
     }
     // Ensure that all required items are present
@@ -181,237 +182,380 @@ Wui.Combo = function(args){
     this.init(); 
 };
 Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
-    close:      function(){ 
-                    this._open = false;
-                    this.dd.css('display','none');
-                },
-    argsByParam:function(){
-                    Wui.O.prototype.argsByParam.apply(this,[ ['name'], (this.hiddenField || this.field) ]);
-                },
-    hilightText:function(srchVal){
-                    var me = this;
+/**
+ * Closes the options menu
+ */
+close: function() {
+    this._open = false;
+    this.dd.css('display','none');
+},
 
-                    function clearHilight(obj){
-                        return obj.find('.wui-highlight').each(function(){
-                            $(this).replaceWith($(this).html());
-                        }).end();
-                    }
-                    
-                    function hilightText(obj){
-                        if (obj.children().length) {
-                            obj.children().each(function(){
-                                hilightText($(this));
-                            });
+
+/**
+ * Creates the arrow-down button on the right side of the combo field that opens and closes the options list (or
+ * drop down) as long as `showDD` is true.
+ */
+createOptionsListToggle: function() {
+    var me = this;
+
+    if(me.showDD){
+        me.ddSwitch = new Wui.Button({
+            text:       '<i class="fa fa-angle-down"></i>',
+            tabIndex:   -1,
+            appendTo:   me.wrapper,
+            cls:        'field-btn dd-switch'
+        });
+
+        me.ddSwitch.place();
+
+        me.ddSwitch.el.mousedown(function() {
+            // Set this to false so that a click on this button (which is not on the input field) will not be
+            // acted on as a blur away from the Combo's field.
+            me.isBlurring = false;
+        });
+
+        // Listener for the toggle on button click
+        me.el.on('wuibtnclick', function(event) {
+            if (me._open) {
+                me.close();
+            }
+            else {
+                me.open();
+            }
+
+            me.field.focus();
+            event.stopPropagation();
+        });
+    }
+},
+
+
+/**
+ * Overrides Wui.O.argsByParam. Causes the name attribute to be applied to the hiddenField rather
+ * than the visible search field. This is important for HTML forms to get the correct value.
+ */
+argsByParam: function() {
+    Wui.O.prototype.argsByParam.apply(this,[ ['name'], (this.hiddenField || this.field) ]);
+},
+
+
+/**
+ * Text matching srchVal in the DOM elements of the options list will be high-lighted
+ *
+ * @param   {string}    srchVal     The text that will be searched for
+ */
+hilightText: function(srchVal) {
+    var me = this;
+
+    function clearHilight(obj){
+        return obj.find('.wui-highlight').each(function(){
+            $(this).replaceWith($(this).html());
+        }).end();
+    }
+
+    function hilightText(obj){
+        if (obj.children().length) {
+            obj.children().each(function() {
+                hilightText($(this));
+            });
+        }
+        else {
+            obj.html(
+                obj.text().replace( new RegExp(srchVal,"ig"), function(m) {
+                    return '<span class="wui-highlight">' +m+ '</span>';
+                })
+            );
+        }
+
+        return obj;
+    }
+
+    me.dd.children().each(function(){
+        var itm = $(arguments[1]);
+
+        if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+        else                                                                clearHilight(itm).hide();
+    });
+
+    Wui.positionItem(me.field,me.dd);
+},
+
+
+/**
+ * Adds necessary classes to the combo, and adds listeners that prevent propagation of Wui.DataList events from
+ * the combo.
+ */
+init: function() {
+    var me = this;
+
+    // Set up object
+    Wui.FormField.prototype.init.call(me);
+    me.el.addClass('w121-combo ' + (me.idCls = Wui.id()));
+    me._open = false;
+    me.identity = me.valueItem;
+    me.setBlankText(me.blankText);
+    
+    // Place field elements
+    me.append(
+        me.wrapper = $('<div>').addClass('w121-combo').append(
+            me.hiddenField,
+            me.setListeners(me)
+        )
+    );
+
+    // Create options list
+    $('body').append( 
+        me.dd = $('<ul>')
+                    .addClass('w121-combo-dd ' + me.ddCls)
+                    .on('mousedown', function() {
+                        // Set this to false so that a click on the options list (which is not on the input field) will 
+                        // not be acted on as a blur away from the Combo's field.
+                        me.isBlurring = false;
+                    })
+    );
+
+    // Create Dropdown Button
+    me.createOptionsListToggle();
+
+    // Listeners - These listeners must stop propagation or else they
+    // will trigger events for their containing DataLists (like grids with
+    // combos in the tbar)
+    me.el.on({
+        wuichange:  function(evnt,combo,el,rec,selection){
+                        var text = (selection.length) ? rec[combo.titleItem] : combo.previous;
+                        Wui.Text.prototype.fieldText.call(me,text);
+                        evnt.stopPropagation();
+                    },
+        click:      function(evnt){ evnt.stopPropagation(); },
+        wuiselect:  function(evnt){ evnt.stopPropagation(); },
+        wuideselect:function(evnt){ evnt.stopPropagation(); },
+        datachanged:function(evnt){ evnt.stopPropagation(); },
+        wuidblclick:function(evnt){ evnt.stopPropagation(); }
+    });
+},
+
+
+/**
+ * Override Wui.DataList.onRender to look for the `autoLoad` parameter, and additionally run Wui.FormField.onRender
+ */
+onRender: function() {
+    if (this.rendered !== true) {
+        // Loads data per the method appropriate for the object
+        if (this.autoLoad && this.url !== null) {
+            this.loadData();
+        }
+        else if (this.url === null) {
+            this.make();
+        }
+
+        Wui.FormField.prototype.onRender.apply(this,arguments);
+    }
+},
+
+
+/**
+ * Overrides Wui.DataList.itemSelect to throw different events
+ * @param   {Object}    itm         An object from the items array containing both an `el` and a `rec`
+ * @param   {Boolean}   silent      Optional parameter. If true, the events will not fire
+ *
+ * @returns {Object}    The selected item is returned
+ */
+itemSelect: function(itm, silent) {
+    var me = this;
+
+    me.dd.find('.w121-selected').removeClass('w121-selected');
+    itm.el.addClass('w121-selected');
+    me.selected = [itm];
+
+    if(!me.multiSelect && !silent){
+        me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
+            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+    }
+
+    return itm;
+},
+
+
+/**
+ * Renders the data items from the items array. Overrides Wui.DataList.make. Selects a pre-applied value if it was
+ * set on the combo before the data came in from the server.
+ */
+make: function() {
+    var me = this;
+
+    me.elAlias = me.dd.empty().removeClass('w121-spinner');
+    Wui.DataList.prototype.make.call(me);
+    
+
+    // TODO: (sn) ought to be moved to hilightText method when the 'if' statement is removed below
+    if(me.data.length === 0) {
+        me.elAlias.html(me.emptyMsg);
+    }
+
+    // Makes rendering of the HTML asynchronous
+    window.setTimeout(function(){
+        me.dd.children()
+        .off('click')
+        .bind('touchstart',function(){ 
+            me.itemSelect($(this).data('itm')); 
+            me.isBlurring = false; 
+        }).on({
+            mouseenter: function() {
+                            me.itemSelect($(this).data('itm'));
+                        },
+            mousedown:  function() {
+                            me.isBlurring = false;
+                        },
+            click:      function() {
+                            me.set(); me.field.focus();
                         }
-                        else {
-                            obj.html(
-                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){
-                                    return '<span class="wui-highlight">' +m+ '</span>';
-                                })
-                            );
-                        }
-                        
-                        return obj;
-                    }
+        });
 
-                    me.dd.children().each(function(){
-                        var itm = $(arguments[1]);
+        // TODO: (sn) probably able to remove this if statement
+        if (me.previous && me.previous.length && me.noSpecifiedTemplate) {
+            me.hilightText(me.previous);
+        }
 
-                        if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
-                        else                                                                clearHilight(itm).hide();
-                    });
+        // Select a pre-applied value if it exists
+        if(me.value && me.field.val().length === 0){
+            var selectedItm = me.selectBy(me.valueItem, me.value);
+            
+            if (!selectedItm) {
+                me.notFound(me.value);
+            }
+            else {
+                me.set();
+            }
+        }
+    }, 0);
+},
 
-                    Wui.positionItem(me.field,me.dd);
-                },
-    init:       function(){
-                    var me = this;
 
-                    // Set up object
-                    Wui.FormField.prototype.init.call(me);
-                    me.el.addClass('w121-combo ' + (me.idCls = Wui.id()));
-                    me._open = false;
-                    me.identity = me.valueItem;
-                    if(typeof me.blankText !== 'undefined')
-                        me.setBlankText(me.blankText);
-                    
+/**
+ * Overrides Wui.DataList.modifyItem, and is meant to be overridden where a developer can manipulate the DOM element
+ * of an item as it is created.
+ *
+ * @param   {Object}    itm     An item from the Combo's items array
+ *
+ * @returns {Object}    Returns the item passed in
+ */
+modifyItem: function(itm) {
+    return itm.el.data('itm', itm);
+},
 
-                    // Place field elements
-                    me.append( 
-                        me.wrapper = $('<div>').addClass('w121-combo').append(
-                            me.hiddenField,
-                            me.setListeners(me)
-                        )
-                    );
-                    $('body').append( me.dd = $('<ul>').addClass('w121-combo-dd ' + me.ddCls) );
 
-                    // Listeners - These listeners must stop propagation or else they
-                    // will trigger events for their containing DataLists (like grids with
-                    // combos in the tbar)
-                    me.el.on({
-                        wuichange:  function(evnt,combo,el,rec,selection){
-                                        var text = (selection.length) ? rec[combo.titleItem] : combo.previous;
-                                        Wui.Text.prototype.fieldText.call(me,text);
-                                        evnt.stopPropagation();
-                                    },
-                        click:      function(evnt){ evnt.stopPropagation(); },
-                        wuiselect:  function(evnt){ evnt.stopPropagation(); },
-                        wuideselect:function(evnt){ evnt.stopPropagation(); },
-                        datachanged:function(evnt){ evnt.stopPropagation(); },
-                        wuidblclick:function(evnt){ evnt.stopPropagation(); },
-                        wuibtnclick:function(evnt){
-                                        if(me._open) me.close();
-                                        else         me.open();
-                                        me.field.focus();
+/**
+ * Method meant to be overridden. Runs when the pre-applied value for the combo is not found in the dataset.
+ */
+notFound:   function(){},
 
-                                        evnt.stopPropagation();
-                                    }
-                    });
 
-                    // Create Dropdown Button
-                    if(me.showDD){
-                        me.ddSwitch = new Wui.Button({
-                            text:       '<i class="fa fa-angle-down"></i>',
-                            tabIndex:   -1,
-                            appendTo:   me.wrapper,
-                            cls:        'field-btn dd-switch'
-                        });
-                        me.ddSwitch.place();
-                        me.ddSwitch.el.mousedown(function(){ me.isBlurring = false; });
-                    }
-                },
-    /** Override Wui.Datalist.onRender to make it do nothing */
-    onRender:   function(){
-                    if(this.rendered !== true){
-                        // Loads data per the method appropriate for the object
-                        if(this.autoLoad && this.url !== null)  this.loadData();
-                        else if(this.url === null)              this.make();
+/**
+ * Opens the options menu
+ */
+open: function(){
+    var me = this,
+        width = (me.field.innerWidth() < 100) ? 100 : me.field.innerWidth();
 
-                        Wui.FormField.prototype.onRender.apply(this,arguments);
-                    }
-                },
-    itemSelect: function(itm, silent){
-                    var me = this;
+    me._open = true;
 
-                    me.dd.find('.w121-selected').removeClass('w121-selected');
-                    itm.el.addClass('w121-selected');
-                    me.selected = [itm];
-                    
-                    if(!me.multiSelect && !silent){
-                        me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
-                    }
-                    return itm;
-                },
-    make:       function(){
-                    var me = this;
+    // Clear the drop down when it loses focus
+    $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){
+        if(evnt.target !== me.field[0]) me.close();
+    });
+    $('body').append(me.dd.css({width:width, display:'block'}));
 
-                    me.elAlias = me.dd.empty().removeClass('w121-spinner');
-                    Wui.DataList.prototype.make.call(me);
-                    if(me.data.length === 0)
-                        me.elAlias.html(me.emptyMsg);
+    Wui.positionItem(me.field,me.dd);
+    me.scrollToCurrent();
+},
 
-                    window.setTimeout(function(){
-                        me.dd.children()
-                        .off('click')
-                        .bind('touchstart',function(){ 
-                            me.itemSelect($(this).data('itm')); 
-                            me.isBlurring = false; 
-                        }).on({
-                            mouseenter: function(){ me.itemSelect($(this).data('itm')); },
-                            mousedown:  function(){ me.isBlurring = false; },
-                            click:      function(){ me.set(); me.field.focus(); }
-                        });
 
-                        if(me.previous && me.previous.length && me.noSpecifiedTemplate)
-                            me.hilightText(me.previous);
+/**
+ * Performs a remote search and sets in motion the rendering of that data by calling loadData() with the srchVal
+ * set as the value of the `searchArgName` parameter.
+ *
+ * @param   {string}    srchVal     The string that will be passed to the remote search function.
+ */
+searchData: function(srchVal) {
+    var me = this,
+        oldSearch = me.previous || undefined,
+        srchParams = {};
 
-                        me.dd.on('mousedown',function(){ me.isBlurring = false; });
+    if(me.filterField){
+        me.previous = srchVal;
 
-                        // Select a pre-applied value if it exists
-                        if(me.value && me.field.val().length === 0){
-                            var selectedItm = me.selectBy(me.valueItem, me.value);
-                            
-                            if(!selectedItm)    me.notFound(me.value);
-                            else                me.set();
-                        }
-                    },0);
-                },
-    modifyItem: function(itm){ return itm.el.data('itm',itm); },
-    notFound:   function(){},
-    open:       function(){
-                    var me = this, 
-                        width = (me.field.innerWidth() < 100) ? 100 : me.field.innerWidth();
+        if(me.searchLocal){
+            me.hilightText(srchVal);
+        }else{
+            me.clearSelect();
+            if((srchVal.length >= me.minKeys || srchVal.length === 0) && me.previous != oldSearch){
+                if(srchVal.length === 0) {
+                    me.val(null);
+                }
 
-                    me._open = true;
+                me.dd.addClass('w121-spinner');
+                srchParams[me.searchArgName] = srchVal;
+                me.loadData(srchParams);
+            }
+        }
+    }
+},
 
-                    // Clear the drop down when it loses focus
-                    $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){ 
-                        if(evnt.target !== me.field[0]) me.close(); 
-                    });
-                    $('body').append(me.dd.css({width:width, display:'block'}));
 
-                    Wui.positionItem(me.field,me.dd);
-                    me.scrollToCurrent();
-                },
-    searchData: function(srchVal){
-                    var me = this, oldSearch = me.previous || undefined;
+/**
+ * Selects the next or the previous item in the Combo's options list.
+ *
+ * @param       {number}    num     A 1 or -1. 1 to select the next item, -1 to select the previous.
+ *
+ * @returns     {object}    The newly selected item is returned
+ */
+selectAjacent: function(num) {
+    var me = this,
+        selector = me._open ? ':visible' : '',
+        container = me.elAlias || me.el,
+        theEnd = (num == 1) ? ':first' : ':last',
+        fn = (num == 1) ? 'nextAll' : 'prevAll',
+        itm = me.selected.length ? me.selected[0].el[fn](selector+':first') : container.children(selector+theEnd);
 
-                    if(me.filterField){
-                        me.previous = srchVal;
-                        
-                        if(me.searchLocal){
-                            me.hilightText(srchVal);
-                        }else{
-                            me.clearSelect();
-                            if((srchVal.length >= me.minKeys || srchVal.length === 0) && me.previous != oldSearch){
-                                if(srchVal.length === 0)
-                                    me.val(null);
+    return me.selectByEl(itm);
+},
 
-                                // me.open();
-                                me.dd.addClass('w121-spinner');
 
-                                var srchParams = {};
-                                srchParams[me.searchArgName] = srchVal;
-                                me.loadData(srchParams);
-                            }
-                        }  
-                    }
-                },
-    selectAjacent:function(num){
-                    var me = this,
-                        selector = me._open ? ':visible' : '',
-                        container = me.elAlias || me.el,
-                        theEnd = (num == 1) ? ':first' : ':last',
-                        fn = (num == 1) ? 'nextAll' : 'prevAll',
-                        itm = me.selected.length ? me.selected[0].el[fn](selector+':first') : container.children(selector+theEnd);
+/**
+ * Selects an item in the options list by a key value pair.
+ *
+ * @param   {string}    key     The name of a data item in the Combo's dataset
+ * @param val
+ * @returns {*}
+ */
+selectBy:   function(key, val) {
+    var me = this,
+        retVal;
 
-                    return me.selectByEl(itm);
-                },
-    selectBy:   function(key,val){
-                    var me = this, retVal;
+    me.each(function(itm) {
+        if (itm.rec[key] !== undefined && itm.rec[key] == val) {
+            retVal = me.itemSelect(itm);
+            return retVal;
+        }
+    });
 
-                    me.each(function(itm){
-                        if(itm.rec[key] !== undefined && itm.rec[key] == val){
-                            retVal = me.itemSelect(itm);
-                            return retVal;
-                        }
-                    });
+    return retVal;
+},
 
-                    return retVal;
-                },
-    set:        function(){
-                    var me = this, sel = me.selected[0];
 
-                    if(sel && me.value != sel.rec){
-                        me.val(sel.rec);
+set:        function(){
+    var me = this, sel = me.selected[0];
 
-                        if(sel.rec)
-                            me.hiddenField.val(sel.rec[me.valueItem]);
-                    }
-                        
-                    if(me._open)
-                        me.close();
-                },
+    if(sel && me.value != sel.rec){
+        me.val(sel.rec);
+
+        if(sel.rec)
+            me.hiddenField.val(sel.rec[me.valueItem]);
+    }
+
+    if(me._open)
+        me.close();
+},
     setBlankText:function(){ 
                     Wui.Text.prototype.setBlankText.apply(this,arguments); 
                 },

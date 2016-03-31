@@ -14,7 +14,7 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
 
                         Wui.FormField.prototype.init.call(me);
 
-                        if(me.blankText && me.blankText.length)    me.setBlankText(me.blankText);
+                        me.setBlankText(me.blankText);
                         
                         me.append(Wui.Text.prototype.setListeners.call(me,me));
                     },
@@ -39,14 +39,39 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
                             }
                         }
                     },
-    setBlankText:   function(bt){
+
+
+                    /**
+                     * Sets the placeholder text of the field. If the string is blank, the placeholder attribute
+                     * will be removed. If `bt` is a number, it will be converted to a string.
+                     *
+                     * @param       {string}    bt      A string to set as the placeholder text
+                     *
+                     * @returns     {string}    The value that was passed in
+                     */
+    setBlankText:   function(bt) {
                         var me = this;
-                        
-                        me.blankText = bt;
-                        me.field.attr('placeholder', bt);
-                        
+
+                        // Ensure eligible values are a string
+                        if (typeof bt == 'number') {
+                            bt = String(bt);
+                        }
+
+                        if (typeof bt == 'string') {
+                            me.blankText = bt;
+
+                            if (me.blankText.length == 0) {
+                                me.field.removeAttr('placeholder');
+                            }
+                            else {
+                                me.field.attr('placeholder', bt);
+                            }
+                        }
+
                         return bt;
                     },
+
+
     setListeners:   function(t){
                         var me = this,
                             fieldState = null;
