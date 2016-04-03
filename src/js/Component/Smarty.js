@@ -223,10 +223,6 @@ Wui.Smarty.prototype = {
         var me = this,
             fnString = 'var me = this, retString = "";';
 
-        function addDelimiter(index) {
-            return (index !== me.build.length - 1) ? '+' : ';';
-        }
-
         function arrToStr(arr) {
             return '[\'' + arr.join('\',\'')+ '\']';
         }
@@ -390,8 +386,8 @@ Wui.Smarty.prototype = {
      *
      * @return  {boolean}   Whether the property exists within the object
      */
-    hasProperty:    function(obj, property) {
-        return obj != null && typeof obj === 'object' && (property in obj);
+    hasProperty: function(obj, property) {
+        return obj !== null && typeof obj === 'object' && (property in obj);
     },
 
 
@@ -466,7 +462,7 @@ Wui.Smarty.prototype = {
                     keys = key.split('.'),
                     index = 0;
 
-                while (context != null && index < keys.length) {
+                while (context !== null && index < keys.length) {
                     if (index === keys.length - 1 && me.hasProperty(context, keys[index])) {
                         value = context[keys[index]];
                     }
@@ -529,10 +525,9 @@ Wui.Smarty.prototype = {
     },
 
 
-    parse:          function() {
+    parse: function() {
         var me = this,
             offsetLast = 0,
-            matchLen = 0,
             tplCopy = me.html,
             commentsClean;
 
