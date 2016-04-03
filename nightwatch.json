@@ -1,0 +1,117 @@
+{
+  "src_folders" : ["nightwatch-tests"],
+  "output_folder" : "reports",
+
+  "selenium" : {
+    "start_process" : false,
+    "host" : "hub.browserstack.com",
+    "port" : 80
+  },
+
+  "test_settings" : {
+    "default" : {
+      "launch_url" : "http://<BROWSERSTACK_USERNAME>.browserstack.com:45692/",
+      "selenium_port"  : 80,
+      "selenium_host"  : "hub.browserstack.com",
+      "silent": true,
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserName": "firefox",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "browserstack.user": "<BROWSERSTACK_USERNAME>",
+        "browserstack.key": "<BROWSERSTACK_KEY>",
+        "browserstack.local" : "true",
+        "browserstack.localIdentifier" : "automated"
+      }
+    },
+    "firefox" : {
+      "launch_url" : "http://<BROWSERSTACK_USERNAME>.browserstack.com/",
+      "selenium_port"  : 80,
+      "selenium_host"  : "hub.browserstack.com",
+      "silent": true,
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserName": "firefox",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "browserstack.user": "<BROWSERSTACK_USERNAME>",
+        "browserstack.key": "<BROWSERSTACK_KEY>",
+        "browserstack.local" : "true",
+        "browserstack.localIdentifier" : "automated"
+      }
+    },
+    "chrome" : {
+      "launch_url" : "http://<BROWSERSTACK_USERNAME>.browserstack.com/",
+      "selenium_port"  : 80,
+      "selenium_host"  : "hub.browserstack.com",
+      "silent": true,
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserName": "chrome",
+        "os": "Windows",
+        "browser_version": "46.0",
+        "os_version": "7",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "browserstack.user": "<BROWSERSTACK_USERNAME>",
+        "browserstack.key": "<BROWSERSTACK_KEY>",
+        "browserstack.local" : "true",
+        "browserstack.localIdentifier" : "automated"
+      }
+    },
+    "safari" : {
+      "launch_url" : "http://<BROWSERSTACK_USERNAME>.browserstack.com/",
+      "selenium_port"  : 80,
+      "selenium_host"  : "hub.browserstack.com",
+      "silent": true,
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserstack.ie.enablePopups": true,
+        "browserName": "safari",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "browserstack.user": "<BROWSERSTACK_USERNAME>",
+        "browserstack.key": "<BROWSERSTACK_KEY>",
+        "browserstack.local" : "true",
+        "browserstack.localIdentifier" : "automated"
+      }
+    },
+    "ie" : {
+      "launch_url" : "http://<BROWSERSTACK_USERNAME>.browserstack.com/",
+      "selenium_port"  : 80,
+      "selenium_host"  : "hub.browserstack.com",
+      "silent": true,
+      "screenshots" : {
+        "enabled" : false,
+        "path" : ""
+      },
+      "desiredCapabilities": {
+        "browserstack.ie.enablePopups": true,
+        "browserName": "internet explorer",
+        "os": "Windows",
+        "os_version" : "7",
+        "browser" : "IE",
+        "browser_version" : "8",
+        "javascriptEnabled": true,
+        "acceptSslCerts": true,
+        "browserstack.user": "<BROWSERSTACK_USERNAME>",
+        "browserstack.key": "<BROWSERSTACK_KEY>",
+        "browserstack.local" : "true",
+        "browserstack.localIdentifier" : "automated"
+      }
+    }
+  }
+}

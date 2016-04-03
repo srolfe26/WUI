@@ -1,0 +1,176 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Web Team User Interface (WUI)</title>
+        <meta name="description" content="WUI - Webteam User Interface is a *vc javascript framework for rapid app development.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <link rel="stylesheet" href="../src/css/wui.css" type="text/css" media="all">
+        <style>
+            body {
+                text-align: left;
+                margin: 3em;
+            }
+        </style>
+        
+        <!-- <script src="../dist/wui-1-2-with-jquery.js"></script> -->
+        <script src="../src/js/libs/jquery-1-10-2-ui-1-10-3.js"></script>
+        <script src="../src/js/libs/plugins.js"></script>
+        <script src="../src/js/Core.js"></script>
+        <script src="../src/js/Component/Object.js"></script>
+        <script src="../src/js/Component/Button.js"></script>
+        <script src="../src/js/Component/Data.js"></script>
+        <script src="../src/js/Component/Template.js"></script>
+        <script src="../src/js/Component/DataList.js"></script>
+        <script src="../src/js/Form/Form.js"></script>
+        <script src="../src/js/Form/Label.js"></script>
+        <script src="../src/js/Form/FormField.js"></script>
+        <script src="../src/js/Form/Text.js"></script>
+        <script src="../src/js/Form/Combo.js"></script>
+    </head>
+    <body>
+        <!-- <p>The following should show 'Tim' with a value of "Tim"</p> -->
+        <select name="the_guys" id="the_guys">
+            <option>Tim</option>
+            <option>Stephen</option>
+            <option>Lance</option>
+            <option>Bobby</option>
+            <option>DeVerl</option>
+            <option>Jeff</option>
+        </select>
+        <!--
+        <p>The following should show '(required)' on page load with a value of null</p>
+        <select name="disabled_selected" id="disabled_selected">
+            <option value disabled selected>(required)</option>
+            <option value="clark kent">Super Man</option>
+            <option value="oliver queen">Green Arrow</option>
+            <option value="barry allen">The Flash</option>
+        </select>
+        
+        <p>The following should be blank on page load with a value of ""</p>
+        <select name="blank_first_line" id="blank_first_line">
+            <option value selected></option>
+            <option value="clark kent">Super Man</option>
+            <option value="oliver queen">Green Arrow</option>
+            <option value="barry allen">The Flash</option>
+        </select>
+        
+        <p>The following should show 'Batman' with a value of "bruce wayne"</p>
+        <select name="heroes" id="heroes">
+            <option value="bruce wayne">Na na na na na na na na na na na na na na na na na na na na na na na na na Batman!</option>
+            <option value="clark kent">Super Man</option>
+            <option value="oliver queen">Green Arrow</option>
+            <option value="barry allen">The Flash</option>
+        </select>
+        
+        <p>The following should show 'Green Arrow' with a value of "oliver queen"</p>
+        <select name="star_city" id="star_city">
+            <option value="bruce wayne">Na na na na na na na na na na na na na na na na na na na na na na na na na Batman!</option>
+            <option value="clark kent">Super Man</option>
+            <option value="oliver queen" selected>Green Arrow</option>
+            <option value="barry allen">The Flash</option>
+        </select> -->
+        
+        <script>
+            // var pageCombos = {};
+            
+            // // Consume all of the selects on the page into Wui.Combos
+            // $('select').each(function(index, itm){
+            //     var name = $(itm).attr('name');
+                
+            //     pageCombos[name] = new Wui.Combo({
+            //         label:          name.replace(/_/g, ' '),
+            //         labelPosition:  'left',
+            //         width:          450,
+            //         template:       '<li id="' +name+ '_{value}">{label}</li>'
+            //     }, itm);
+            // });
+
+            jsCombo = new Wui.Combo({
+                id:         'js-created-wui-select',
+                data:       [
+                                {
+                                    "tx_id": "447",
+                                    "date": "7/25/13",
+                                    "amount": "-3",
+                                    "check_number": "",
+                                    "description": "CHECK CARD PURCHASE"
+                                },
+                                {
+                                    "tx_id": "446",
+                                    "date": "7/24/13",
+                                    "amount": "-1.43",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - GROCERY MRKTPLACE"
+                                },
+                                {
+                                    "tx_id": "445",
+                                    "date": "7/23/13",
+                                    "amount": "-750",
+                                    "check_number": "",
+                                    "description": "CREDIT CARD PAYMENT"
+                                },
+                                {
+                                    "tx_id": "444",
+                                    "date": "7/22/13",
+                                    "amount": "-93.25",
+                                    "check_number": "",
+                                    "description": "SMITHFIELD CITY UTILITY"
+                                },
+                                {
+                                    "tx_id": "443",
+                                    "date": "7/22/13",
+                                    "amount": "-5.38",
+                                    "check_number": "",
+                                    "description": "CHEAP PIZZA"
+                                },
+                                {
+                                    "tx_id": "442",
+                                    "date": "7/22/13",
+                                    "amount": "-20",
+                                    "check_number": "",
+                                    "description": "HAIR CUT"
+                                },
+                                {
+                                    "tx_id": "441",
+                                    "date": "7/22/13",
+                                    "amount": "90",
+                                    "check_number": "",
+                                    "description": "MOBILE DEPOSIT"
+                                },
+                                {
+                                    "tx_id": "440",
+                                    "date": "7/19/13",
+                                    "amount": "-108.3",
+                                    "check_number": "",
+                                    "description": "ELECTRICITY BILL"
+                                },
+                                {
+                                    "tx_id": "439",
+                                    "date": "7/19/13",
+                                    "amount": "-15",
+                                    "check_number": "",
+                                    "description": "WITHDRAWAL MADE IN A BRANCH"
+                                },
+                                {
+                                    "tx_id": "438",
+                                    "date": "7/19/13",
+                                    "amount": "-7.36",
+                                    "check_number": "",
+                                    "description": "POS PURCHASE - GROCERY MRKTPLACE"
+                                }
+                            ],
+                valueItem:  'tx_id',
+                titleItem:  'description',
+                template:   '<li id="js_combo_{tx_id}">{( Number(amount).toFixed(2) )} {description}</li>',
+                labelPosition: 'top',
+                label:      'Generated by JavaScript Only',
+                width:      450
+            });
+
+            jsCombo.place();
+        </script>
+    </body>
+</html>
