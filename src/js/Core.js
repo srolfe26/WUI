@@ -158,14 +158,15 @@ Wui.randNum = function(lower,upper) {
 Gets the maximum CSS z-index on the page and returns one higher, or one if no z-indexes are defined.
 */
 Wui.maxZ = function(){
-    var bodyElems = $('body *'),
-        useElems = bodyElems.length < 2500 ? bodyElems : $('body > *, [style*="z-index"]')
-        topZ =  Math.max.apply(null, 
-                    $.map(useElems, function(e) {
-                        if ($(e).css('position') != 'static')
-                            return parseInt($(e).css('z-index')) || 0;
-                    })
-                );
+    var bodyElems =     $('body *'),
+        useElems =      bodyElems.length < 2500 ? bodyElems : $('body > *, [style*="z-index"]'),
+        topZ =          Math.max.apply(null, 
+                            $.map(useElems, function(e) {
+                                if ($(e).css('position') != 'static')
+                                    return parseInt($(e).css('z-index')) || 0;
+                            })
+                        );
+        
     return ($.isNumeric(topZ) ? topZ : 0) + 1;
 };
 
@@ -244,7 +245,7 @@ the method returns false. If the property is supported, the passed in string wil
 returned as-is, or with the necessary vendor appropriate prefix.
 */
 
-Wui.cssCheck = function(prop){
+Wui.cssCheck = function(prop) {
     var i           = 0,
         parts       = prop.split('-'),
         ucProp      = '';
@@ -277,11 +278,10 @@ Wui.cssCheck = function(prop){
         case 0:
         case 1:
             return prop;
-            break;
         default:
             return prefixes[n-2] + prop;
     }
-}
+};
 
 
 /**
@@ -293,8 +293,7 @@ This function will size items relative to each other via a 'fit' value, as well 
 Wui.fit = function(collection,dim){
     // Ensure the collection is an array of Wui Objects
     if(collection instanceof Array && collection.length > 0){
-        var i           = 0,
-            fitCt       = 0,
+        var fitCt       = 0,
             parent      = (collection[0].parent) ? collection[0].parent : collection[0].el.parent(),
             parentEl    = (parent.el) ? (parent.elAlias || parent.el) : parent,
             dir         = (dim == 'width') ? 'row' : 'column';
@@ -324,7 +323,6 @@ Wui.fit = function(collection,dim){
        
         // Apply CSS Flex properties
         $.each(collection,function(i,itm){
-            var css = {};
             if(itm.fit){
                 $(itm.el).css(Wui.cssCheck('flex'),itm.fit + ' auto');
             }else if(itm.cssByParam === undefined){
@@ -336,3 +334,5 @@ Wui.fit = function(collection,dim){
         console.log('Improper collection specified', arguments);
     }
 };
+
+}(jQuery,this));
