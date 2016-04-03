@@ -219,5 +219,5 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
     @param {string}    newVal    New value being set on the field
     An event hook for when the value changes. Useful for extending objects, but generally use the 'valchange' event listener
     */
-    valChange:  function(newVal){}
+    valChange:  function() {}
 });

@@ -92,8 +92,14 @@ Wui.Text.prototype = $.extend(new Wui.FormField(),{
     fieldText:      function(sv){
                         this.field.val(sv);
                     },
-    getVal:         function(){ return (this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null); },
-    setVal:         function(sv){ 
+                    
+    getVal:         function() {
+                        this.value = (this.field.val() && this.field.val().length) ? this.field.val() : null;
+                         
+                        return this.value;
+                    },
+                    
+    setVal:         function(sv) { 
                         this.fieldText(this.value = (sv && $.trim(sv).length) ? sv : null);
                     }
 });

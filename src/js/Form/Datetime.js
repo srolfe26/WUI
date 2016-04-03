@@ -354,10 +354,11 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(),{
     /**
     @param {Date} dt  A date in which month to generate the calendar. If not specified this value will fall back to the value of the Wui.Datetime element, and if not defined it will fall back to the current date.
     Makes an HTML calendar to use as a datepicker */
-    makeCalendar:   function(dt,onSelect,controlVal){
+    makeCalendar:   function(dt, onSelect, controlVal) {
+                        controlVal = me.validDate(controlVal) ? controlVal : me.value;
+                        
                         var me = this,
                             today = new Date(),
-                            controlVal = me.validDate(controlVal) ? controlVal : me.value,
                             calDate = dt || (me.validDate(controlVal) ? controlVal : today),
                             dn = (me.name) ? '.' + me.name : '',
                             calendar = $('<div>').addClass('wui-cal');
