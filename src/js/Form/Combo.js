@@ -174,206 +174,222 @@ Wui.Combo = function(args){
 };
 Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     /** Closes the drop-down menu. */
-    close:      function(){ 
-                    this._open = false;
-                    this.dd.hide();
-                },
+    close: function() { 
+        this._open = false;
+        this.dd.hide();
+    },
+    
 
-    /** @param {string} srchVal    A search term
-    Hilight text within the search results given the search term. Only works
-    when there is not a custom template defined. */
-    hilightText:function(srchVal){
-                    var me = this;
+    /** 
+     * Hilight text within the search results given the search term. Only works when there is not 
+     * a custom template defined.
+     * 
+     * @param   {string}    srchVal    A search term
+     */
+    hilightText: function(srchVal) {
+        var me = this;
 
-                    function clearHilight(obj){
-                        return obj.find('.wui-highlight').each(function(){
-                            $(this).replaceWith($(this).html());
-                        }).end();
-                    }
-                    
-                    function hilightText(obj){
-                        if (obj.children().length) {
-                            obj.children().each(function(){
-                                hilightText($(this));
-                            });
-                        }
-                        else {
-                            obj.html(
-                                obj.text().replace( new RegExp(srchVal,"ig"), function(m){
-                                    return '<span class="wui-highlight">' +m+ '</span>';
-                                })
-                            );
-                        }
-                        
-                        return obj;
-                    }
+        function clearHilight(obj){
+            return obj.find('.wui-highlight').each(function(){
+                $(this).replaceWith($(this).html());
+            }).end();
+        }
+        
+        function hilightText(obj){
+            if (obj.children().length) {
+                obj.children().each(function(){
+                    hilightText($(this));
+                });
+            }
+            else {
+                obj.html(
+                    obj.text().replace( new RegExp(srchVal,"ig"), function(m){
+                        return '<span class="wui-highlight">' +m+ '</span>';
+                    })
+                );
+            }
+            
+            return obj;
+        }
 
-                    me.dd.children().each(function(){
-                        var itm = $(arguments[1]);
+        me.dd.children().each(function(){
+            var itm = $(arguments[1]);
 
-                        if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
-                        else                                                                clearHilight(itm).hide();
-                    });
+            if(itm.text().toUpperCase().indexOf(srchVal.toUpperCase()) >= 0)    hilightText(itm).show();
+            else                                                                clearHilight(itm).hide();
+        });
 
-                    Wui.positionItem(me.field,me.dd);
-                },
+        Wui.positionItem(me.field,me.dd);
+    },
+
 
     /** Method that runs when the object is initiated */
-    init:       function(){
-                    var me = this;
+    init: function(){
+        var me = this;
 
-                    // Set up object
-                    Wui.FormField.prototype.init.call(me);
-                    me.el.addClass('wui-combo ' + (me.idCls = Wui.id()));
-                    me._open = false;
-                    me.identity = me.valueItem;
-                    if(typeof me.blankText !== 'undefined')
-                        me.setBlankText(me.blankText);
-                    
+        // Set up object
+        Wui.FormField.prototype.init.call(me);
+        me.el.addClass('wui-combo ' + (me.idCls = Wui.id()));
+        me._open = false;
+        me.identity = me.valueItem;
+        if(typeof me.blankText !== 'undefined')
+            me.setBlankText(me.blankText);
+        
 
-                    // Place field elements
-                    me.append( me.wrapper = $('<div>').addClass('wui-combo').append(me.setListeners(me)) );
-                    $('body').append( 
-                        me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
-                    );
+        // Place field elements
+        me.append( me.wrapper = $('<div>').addClass('wui-combo').append(me.setListeners(me)) );
+        $('body').append( 
+            me.dd = $('<ul>').addClass('wui-combo-dd ' + me.ddCls).on('mousewheel scroll', function(evnt){ evnt.stopPropagation(); })
+        );
 
-                    // Listeners - These listeners must stop propagation or else they
-                    // will trigger events for their containing DataLists (like grids with
-                    // combos in the tbar)
-                    me.el.on({
-                        wuichange:  function(evnt,combo,el,rec,selection){
-                                        var text = (selection.length) ? rec[combo.titleItem] : combo.previous;
-                                        Wui.Text.prototype.fieldText.call(me,text);
-                                        evnt.stopPropagation();
-                                    },
-                        click:      function(evnt){ evnt.stopPropagation(); },
-                        wuiselect:  function(evnt){ evnt.stopPropagation(); },
-                        wuideselect:function(evnt){ evnt.stopPropagation(); },
-                        datachanged:function(evnt){ evnt.stopPropagation(); },
-                        wuidblclick:function(evnt){ evnt.stopPropagation(); }
-                    });
+        // Listeners - These listeners must stop propagation or else they
+        // will trigger events for their containing DataLists (like grids with
+        // combos in the tbar)
+        me.el.on({
+            wuichange:  function(evnt,combo,el,rec,selection){
+                            var text = (selection.length) ? rec[combo.titleItem] : combo.previous;
+                            Wui.Text.prototype.fieldText.call(me,text);
+                            evnt.stopPropagation();
+                        },
+            click:      function(evnt){ evnt.stopPropagation(); },
+            wuiselect:  function(evnt){ evnt.stopPropagation(); },
+            wuideselect:function(evnt){ evnt.stopPropagation(); },
+            datachanged:function(evnt){ evnt.stopPropagation(); },
+            wuidblclick:function(evnt){ evnt.stopPropagation(); }
+        });
 
-                    // Create Dropdown Button
-                    if(me.showDD){
-                        me.ddSwitch = new Wui.Button({
-                            click:      function(){
-                                            if(me._open) me.close();
-                                            else         me.open();
-                                            me.field.focus();
-                                        },
-                            text:       '',
-                            tabIndex:   -1,
-                            appendTo:   me.wrapper,
-                            cls:        'field-btn dd-switch'
-                        });
-                        me.ddSwitch.place();
-                        me.ddSwitch.el.mousedown(function(){ me.isBlurring = false; });
-                    }
-                    
-                    me.setData(me.data);
-                },
+        // Create Dropdown Button
+        if(me.showDD){
+            me.ddSwitch = new Wui.Button({
+                click:      function(){
+                                if(me._open) me.close();
+                                else         me.open();
+                                me.field.focus();
+                            },
+                text:       '',
+                tabIndex:   -1,
+                appendTo:   me.wrapper,
+                cls:        'field-btn dd-switch'
+            });
+            me.ddSwitch.place();
+            me.ddSwitch.el.mousedown(function(){ me.isBlurring = false; });
+        }
+        
+        me.setData(me.data);
+    },
+
 
     /** Overrides the Wui.itemSelect and simplifies events for combo. */
-    itemSelect: function(itm, silent){
-                    var me = this;
+    itemSelect: function(itm, silent) {
+        var me = this;
 
-                    me.dd.find('.wui-selected').removeClass('wui-selected');
-                    itm.el.addClass('wui-selected');
-                    me.selected = [itm];
-                    
-                    if(!me.multiSelect && !silent){
-                        me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
-                            .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
-                    }
-                    return itm;
-                },
+        me.dd.find('.wui-selected').removeClass('wui-selected');
+        itm.el.addClass('wui-selected');
+        me.selected = [itm];
+        
+        if(!me.multiSelect && !silent){
+            me.el.trigger($.Event('wuiselect'), [me, itm.el, itm.rec])
+                .trigger($.Event('wuichange'), [me, itm.el, itm.rec, me.selected]);
+        }
+        return itm;
+    },
+    
 
     /** Overrides the Wui.DataList make and adds listeners to objects. */    
-    make:       function(){
-                    var me = this;
+    make: unction() {
+        var me = this;
 
-                    me.elAlias = me.dd.empty().removeClass('wui-spinner');
-                    Wui.DataList.prototype.make.apply(me,arguments);
-                    
-                    if(me.data.length === 0)
-                        me.elAlias.html(me.emptyMsg);
+        me.elAlias = me.dd.empty().removeClass('wui-spinner');
+        Wui.DataList.prototype.make.apply(me,arguments);
+        
+        if(me.data.length === 0)
+            me.elAlias.html(me.emptyMsg);
 
-                    me.dd.children()
-                    .off('click')
-                    .bind('touchstart',function() { 
-                        me.itemSelect($(this).data('itm')); 
-                        me.isBlurring = false; 
-                    }).on({
-                        mouseenter: function(){ me.itemSelect($(this).data('itm')); },
-                        mousedown:  function(){ me.isBlurring = false; },
-                        click:      function(){ me.set(); me.field.focus(); }
-                    });
+        me.dd.children()
+        .off('click')
+        .bind('touchstart',function() { 
+            me.itemSelect($(this).data('itm')); 
+            me.isBlurring = false; 
+        }).on({
+            mouseenter: function(){ me.itemSelect($(this).data('itm')); },
+            mousedown:  function(){ me.isBlurring = false; },
+            click:      function(){ me.set(); me.field.focus(); }
+        });
 
-                    if(me.previous && me.previous.length)
-                        me.hilightText(me.previous);
+        if(me.previous && me.previous.length)
+            me.hilightText(me.previous);
 
-                    me.dd.on('mousedown',function(){ me.isBlurring = false; });
+        me.dd.on('mousedown',function(){ me.isBlurring = false; });
 
-                    // Select a pre-applied value if it exists
-                    var selectedItm = me.selectBy(me.valueItem, me.value);
-                    
-                    if(!selectedItm)    me.notFound(me.value);
-                    else                me.set();
+        // Select a pre-applied value if it exists
+        var selectedItm = me.selectBy(me.valueItem, me.value);
+        
+        if(!selectedItm)    me.notFound(me.value);
+        else                me.set();
 
-                    Wui.positionItem(me.field,me.dd);
-                },
+        Wui.positionItem(me.field,me.dd);
+    },
+    
 
     /** Overrides the Wui.DataList modifyItem to add data to the element. */ 
-    modifyItem: function(itm){ return itm.el.data('itm',itm); },
+    modifyItem: function(itm) {
+        return itm.el.data('itm',itm);
+    },
+    
     
     /**
-    @param    {number or string} val The current value of the control
-    Empty function meant to be overridden to handle cases where the value of
-    the field is not in the list of possible values. Needs to call
-    this.setData(data) where data is the value to load on the grid.
-    */
+     * Empty function meant to be overridden to handle cases where the value of the field is not 
+     * in the list of possible values. Needs to call this.setData(data) where data is the value 
+     * to load on the grid.
+     *
+     * @param    {number|string}    val     The current value of the control
+     */
     notFound:   function() {},
+    
 
     /** Loads data via the appropriate method when added to the DOM */
-    afterRender:function(){
-                    if(this.afterRendered !== true){
-                        Wui.FormField.prototype.onRender.apply(this,arguments);
+    afterRender:function() {
+        if(this.afterRendered !== true){
+            Wui.FormField.prototype.onRender.apply(this,arguments);
 
-                        // Loads data per the method appropriate for the object
-                        if(this.autoLoad && this.url !== null)  this.loadData();
-                        else if(this.url === null)              this.make();
+            // Loads data per the method appropriate for the object
+            if(this.autoLoad && this.url !== null)  this.loadData();
+            else if(this.url === null)              this.make();
 
-                        this.afterRendered = true;
-                    }
-                },
+            this.afterRendered = true;
+        }
+    },
+
 
     /** Override Wui.Datalist.onRender to make it do nothing */
-    onRender:   function(){},
+    onRender: function() {},
+
 
     /** Opens the drop down */
-    open:       function(){
-                    var me = this, 
-                        width = (me.field.innerWidth() < 100) ? 100 : me.field.innerWidth();
+    open: function(){
+        var me = this, 
+            width = (me.field.innerWidth() < 100) ? 100 : me.field.innerWidth();
 
-                    me._open = true;
+        me._open = true;
 
-                    // Clear the drop down when it loses focus
-                    $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){ 
-                        if(evnt.target !== me.field[0]) me.close(); 
-                    });
+        // Clear the drop down when it loses focus
+        $(document).one('click','*:not(.' +me.idCls+ ' input)',function(evnt){ 
+            if(evnt.target !== me.field[0]) me.close(); 
+        });
 
-                    // Scrolling within a dropdown causes crazy stuff to happen on the body,
-                    // so save the body overflow state and momentarily set it to be unscrollable.
+        // Scrolling within a dropdown causes crazy stuff to happen on the body,
+        // so save the body overflow state and momentarily set it to be unscrollable.
 
-                    $('body').append(me.dd.width(width).show());
-                    Wui.positionItem(me.field,me.dd);
-                    me.scrollToCurrent();
-                },
+        $('body').append(me.dd.width(width).show());
+        Wui.positionItem(me.field,me.dd);
+        me.scrollToCurrent();
+    },
 
 
     /**
      * Overrides Wui.Data.processData. Used here to add a blank first item to the combo if
-     * AddBlankDataItem is true.
+     * AddBlankDataItem is true. Adding a blank item preserves legacy Wui 1.2 behavior where
+     * a blank (null) option is the default value.
      *
      * @param   {Array}     data    Data that is passed in from the Wui.Data setData method.
      *
@@ -402,188 +418,222 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     },
 
 
-    /** @param {string} srchVal    A search term
-    Searches locally within the drop-down's data for the srchVal, otherwise 
-    if searchLocal is false, the data is searched remotely. */
-    searchData: function(srchVal){
-                    var me = this, oldSearch = me.previous || undefined;
+    /** 
+     * Searches locally within the option list's data for the srchVal, otherwise
+     * if searchLocal is false, the data is searched remotely, and high-lighting
+     * occurs still occurs on the local option list.
+     *
+     * @param   {string}    srchVal     A search term
+     */
+    searchData: function(srchVal) {
+        var me = this,
+            oldSearch = me.previous || undefined,
+            srchParams = {};
 
-                    if(me.filterField){
-                        me.previous = srchVal;
-                        
-                        if(me.searchLocal){
-                            me.hilightText(srchVal);
-                        }else{
-                            me.clearSelect();
-                            if((srchVal.length >= me.minKeys || srchVal.length === 0) && me.previous != oldSearch){
-                                if(srchVal.length === 0)
-                                    me.val(null);
-
-                                // me.open();
-                                me.dd.addClass('wui-spinner');
-
-                                var srchParams = {};
-                                srchParams[me.searchArgName] = srchVal;
-                                me.loadData(srchParams);
-                            }
-                        }  
+        if(me.filterField){
+            me.previous = srchVal;
+            
+            if(me.searchLocal) {
+                me.hilightText(srchVal);
+            }
+            else {
+                me.clearSelect();
+                
+                if((srchVal.length >= me.minKeys || srchVal.length === 0) && me.previous != oldSearch) {
+                    if(srchVal.length === 0) {
+                        me.val(null);
                     }
-                },
+
+                    me.dd.addClass('wui-spinner');
+                    srchParams[me.searchArgName] = srchVal;
+                    me.loadData(srchParams);
+                }
+            }  
+        }
+    },
+
 
     /**
-    @param    {number} num Direction to go to select an ajacent value [1,-1]
-    Selects the list item immediately before or after the currently selected item,
-    works on the filtered visibility if the drop down is open.
-    Overrides Wui.DataList.selectAjacent
+     * Selects the list item immediately before or after the currently selected item, works on 
+     * the filtered visibility if the drop down is open. Overrides Wui.DataList.selectAjacent.
+     *
+     * @param       {number}    num     Direction to go to select an ajacent value [1,-1]
+     *
+     * @returns     {object}    The selected item containing an 'el' and 'rec'
     */
-    selectAjacent:function(num){
-                    var me = this,
-                        selector = me._open ? ':visible' : '',
-                        container = me.elAlias || me.el,
-                        theEnd = (num == 1) ? ':first' : ':last',
-                        fn = (num == 1) ? 'nextAll' : 'prevAll',
-                        itm = me.selected.length ? me.selected[0].el[fn](selector+':first') : container.children(selector+theEnd);
+    selectAjacent: function(num) {
+        var me = this,
+            selector = me._open ? ':visible' : '',
+            container = me.elAlias || me.el,
+            theEnd = (num == 1) ? ':first' : ':last',
+            fn = (num == 1) ? 'nextAll' : 'prevAll',
+            itm = me.selected.length ? me.selected[0].el[fn](selector+':first') : container.children(selector+theEnd);
 
-                    return me.selectByEl(itm);
-                },
+        return me.selectByEl(itm);
+    },
 
-    /**
-    
-    @param    {string} key The data item to look for
-    @param    {string|number} val The value to look for
-    @return An object containing the dataList, row, and record, or undefined if there was no matching row.
-    Selects an item according to the key value pair to be found in a record. */
-    selectBy:   function(key,val){
-                    var me = this, 
-                        retVal;
-                        
-                    me.each(function(itm){
-                        if(itm.rec[key] !== undefined && itm.rec[key] == val) {
-                            retVal = me.itemSelect(itm);
-                            
-                            return retVal;
-                        }
-                    });
-                    return retVal;
-                },
 
     /**
-    Overrides Wui.DataList selectByEl because the scrollToCurrent added weird scrolling on closed dropdowns
-    @param    {jQuery Object} el An object that will match an element in the DataList.
-    Selects the matching DataList item.
+     * Selects an item according to the key value pair to be found in a record.
+     *    
+     * @param   {string}            key     The data item to look for
+     * @param   {string|number}     val     The value to look for
+     *
+     * @return  {Object}            An object containing the dataList, row, and record, or 
+     *                              undefined if there was no matching row.
+     */
+    selectBy: function(key, val) {
+        var me = this, 
+            retVal;
+            
+        me.each(function(itm){
+            if(itm.rec[key] !== undefined && itm.rec[key] == val) {
+                retVal = me.itemSelect(itm);
+                
+                return retVal;
+            }
+        });
+        return retVal;
+    },
+
+    /**
+     * Overrides Wui.DataList.selectByEl because the scrollToCurrent added weird scrolling on
+     * closed option lists.
+     *
+     * @param       {jQuery Object}     el  An object that will match an element in the DataList.
+     *
+     * @return      {Object}            An object containing the dataList, row, and record, or 
+     *                                  undefined if there was no matching row.
     */
     selectByEl: function(el){
-                    var me = this,
-                        retVal;
+        var me = this,
+            retVal;
 
-                    me.itemSelect(retVal = me.getItemByEl(el));
-                    
-                    return retVal;
-                },
+        me.itemSelect(retVal = me.getItemByEl(el));
+        
+        return retVal;
+    },
+
 
     /** Sets the value of the drop down to the value of the selected item */
-    set:        function(){
-                    var me = this;
+    set: function() {
+        var me = this;
 
-                    if(me.selected[0] && me.value != me.selected[0].rec)
-                        me.val(me.selected[0].rec);
-                    if(me._open)
-                        me.close();
-                },
+        if(me.selected[0] && me.value != me.selected[0].rec)
+            me.val(me.selected[0].rec);
+        if(me._open)
+            me.close();
+    },
+
 
     /** Sets blank text on the field */
-    setBlankText:function() { 
-                    Wui.Text.prototype.setBlankText.apply(this,arguments); 
-                },
+    setBlankText: function() { 
+        Wui.Text.prototype.setBlankText.apply(this,arguments); 
+    },
+    
 
-    /** @param {Wui Object} t Wui Object to add listeners to its field.
-    Sets listeners on the field that give it combo-box-like interactions */    
-    setListeners:function(t){
-                    // t = the combo field
-                    return t.field.on({
-                        keydown: function(evnt){
+    /** 
+     * Sets listeners on the field that give it combo-box-like interactions
+     *
+     * @param   {Wui Object}    t   Wui Object to add listeners to its field.
+     */    
+    setListeners: function(t) {
+        function move(dir){
+            var itm = null;
 
-                            //clear the value if the user blanks out the field
-                            if(t.field.val().length === 0) t.value = null;
+            if(t.selected.length){
+                var edgeSel = (dir == 1) ? ':last' : ':first',
+                    selector = t._open ? ':visible' : '',
+                    onEdge = (t.elAlias || t.el).children(selector+edgeSel)[0] == t.selected[0].el[0];
 
-                            switch(evnt.keyCode){
-                                case 40:    evnt.preventDefault(); move(1);     break;  // downkey
-                                case 38:    evnt.preventDefault(); move(-1);    break;  // upkey
-                                case 9:     t.set();                            break;  //tab
-                                case 27:                                                // escape
-                                    evnt.preventDefault(); 
-                                    t.field.val(t.previous);
-                                    t.close();
-                                break;
-                            }
-                            
-                            evnt.stopPropagation();
-                        },
-                        keyup: function(evnt){
-                            if(evnt.keyCode == 13){  // enter
-                                evnt.preventDefault(); 
-                                t.set();
-                            }
-                            evnt.stopPropagation();
-                        },
-                        input: function() {
-                            if(!t._open) t.open();
-                            t.searchData(this.value);
-                        },
-                        focus: function(evnt){
-                            t.isBlurring = undefined;
-                            evnt.stopPropagation();
-                        },
-                        blur: function() {
-                            if(t.isBlurring !== false){
-                                t.close();
-                            }else{
-                                // IE needs some time
-                                setTimeout(function(){ t.field.focus(); }, 10);
-                                // evnt.preventDefault();
-                            }
-                        }
-                    });
+                if(onEdge)  t.clearSelect();
+                else        itm = t.selectAjacent(dir);
+            }else{
+                itm = t.selectAjacent(dir);
+            }
 
-                    function move(dir){
-                        var itm = null;
+            // Actually change the value if the drop-down isn't open
+            if(!t._open){
+                if(itm !== null)    { t.set(); }
+                else                { t.val(null); t.field.val(t.previous); }
+            }
+        }
+        
+        // t = the combo field
+        return t.field.on({
+            keydown: function(evnt){
 
-                        if(t.selected.length){
-                            var edgeSel = (dir == 1) ? ':last' : ':first',
-                                selector = t._open ? ':visible' : '',
-                                onEdge = (t.elAlias || t.el).children(selector+edgeSel)[0] == t.selected[0].el[0];
+                //clear the value if the user blanks out the field
+                if(t.field.val().length === 0) t.value = null;
 
-                            if(onEdge)  t.clearSelect();
-                            else        itm = t.selectAjacent(dir);
-                        }else{
-                            itm = t.selectAjacent(dir);
-                        }
+                switch(evnt.keyCode){
+                    case 40:    evnt.preventDefault(); move(1);     break;  // downkey
+                    case 38:    evnt.preventDefault(); move(-1);    break;  // upkey
+                    case 9:     t.set();                            break;  //tab
+                    case 27:                                                // escape
+                        evnt.preventDefault(); 
+                        t.field.val(t.previous);
+                        t.close();
+                    break;
+                }
+                
+                evnt.stopPropagation();
+            },
+            keyup: function(evnt){
+                if(evnt.keyCode == 13){  // enter
+                    evnt.preventDefault(); 
+                    t.set();
+                }
+                evnt.stopPropagation();
+            },
+            input: function() {
+                if(!t._open) t.open();
+                t.searchData(this.value);
+            },
+            focus: function(evnt){
+                t.isBlurring = undefined;
+                evnt.stopPropagation();
+            },
+            blur: function() {
+                if(t.isBlurring !== false){
+                    t.close();
+                }else{
+                    // IE needs some time
+                    setTimeout(function(){ t.field.focus(); }, 10);
+                    // evnt.preventDefault();
+                }
+            }
+        });
+    },
+    
 
-                        // Actually change the value if the drop-down isn't open
-                        if(!t._open){
-                            if(itm !== null)    { t.set(); }
-                            else                { t.val(null); t.field.val(t.previous); }
-                        }
-                    }
-                },
+    /** 
+     * Allows the value to be set via a simple or complex value
+     *
+     * @param   {any}   sv  The value to set on the field. The method will determine what to do
+     *                      with `sv` based on its type and value.
+     *
+     * @returns {object}    The selected value, or null if null was passed in
+     */
+    setVal: function(sv){
+        var me = this;
 
-    /** Allows the value to be set via a simple or complex value */
-    setVal:     function(sv){
-                    var me = this;
+        me.value = sv;
 
-                    me.value = sv;
+        if (sv === null) {
+            me.clearSelect();
+            return sv;
+        }
+        else if (typeof sv == 'object') {
+            return me.selectBy(me.valueItem,sv[me.valueItem]);
+        }
+        else {
+            return me.selectBy(me.valueItem,sv);
+        }
+    },
+    
 
-                    if(sv === null){
-                        me.clearSelect();
-                        return sv;
-                    }else if(typeof sv == 'object'){
-                        return me.selectBy(me.valueItem,sv[me.valueItem]);
-                    }else{
-                        return me.selectBy(me.valueItem,sv);
-                    }
-                },
-
-    /** Returns only the simple value of an item */
+    /** Returns only the simple value of the Combo */
     getVal:     function(){
                     return (this.value !== null && typeof this.value[this.valueItem] != 'undefined') ? this.value[this.valueItem] : this.value;
                 }
