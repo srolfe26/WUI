@@ -60,11 +60,11 @@ Wui.Combo = function(args){
     }); 
 
     // Create template when one hasn't been defined
-    if( !(this.hasOwnProperty('template') && this.template !== null && this.template !== undefined) 
-        && this.hasOwnProperty('valueItem') 
-        && this.hasOwnProperty('titleItem') 
-        && this.valueItem 
-        && this.titleItem
+    if( !(this.hasOwnProperty('template') && this.template !== null && this.template !== undefined) &&
+        this.hasOwnProperty('valueItem') &&
+        this.hasOwnProperty('titleItem') &&
+        this.valueItem &&
+        this.titleItem
     )
         this.template = '<li>{' +this.titleItem+ '}</li>';
 
@@ -174,7 +174,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
     /** Overrides the Wui.itemSelect and simplifies events for combo. */
     itemSelect: function(itm, silent){
-                    var me = this, dn = (me.name) ? '.' + me.name : '';
+                    var me = this;
 
                     me.dd.find('.wui-selected').removeClass('wui-selected');
                     itm.el.addClass('wui-selected');
@@ -199,7 +199,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
 
                     me.dd.children()
                     .off('click')
-                    .bind('touchstart',function(evnt){ 
+                    .bind('touchstart',function() { 
                         me.itemSelect($(this).data('itm')); 
                         me.isBlurring = false; 
                     }).on({
@@ -214,7 +214,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                     me.dd.on('mousedown',function(){ me.isBlurring = false; });
 
                     // Select a pre-applied value if it exists
-                    if(me.value && me.field.val().length == 0){
+                    if(me.value && me.field.val().length === 0){
                         var selectedItm = me.selectBy(me.valueItem, me.value);
                         
                         if(!selectedItm)    me.notFound(me.value);
@@ -233,7 +233,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     the field is not in the list of possible values. Needs to call
     this.setData(data) where data is the value to load on the grid.
     */
-    notFound:   function(val){},
+    notFound:   function() {},
 
     /** Loads data via the appropriate method when added to the DOM */
     afterRender:function(){
@@ -323,10 +323,15 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     @return An object containing the dataList, row, and record, or undefined if there was no matching row.
     Selects an item according to the key value pair to be found in a record. */
     selectBy:   function(key,val){
-                    var me = this, retVal = undefined;
+                    var me = this, 
+                        retVal;
+                        
                     me.each(function(itm){
-                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
-                            return retVal = me.itemSelect(itm);
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val) {
+                            retVal = me.itemSelect(itm);
+                            
+                            return retVal;
+                        }
                     });
                     return retVal;
                 },
@@ -337,7 +342,8 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
     Selects the matching DataList item.
     */
     selectByEl: function(el){
-                    var me = this, retVal = undefined;
+                    var me = this,
+                        retVal;
 
                     me.itemSelect(retVal = me.getItemByEl(el));
                     
@@ -355,7 +361,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                 },
 
     /** Sets blank text on the field */
-    setBlankText:function(bt){ 
+    setBlankText:function() { 
                     Wui.Text.prototype.setBlankText.apply(this,arguments); 
                 },
 
@@ -389,7 +395,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                             }
                             evnt.stopPropagation();
                         },
-                        input: function(evnt){
+                        input: function() {
                             if(!t._open) t.open();
                             t.searchData(this.value);
                         },
@@ -397,7 +403,7 @@ Wui.Combo.prototype = $.extend(new Wui.FormField(), new Wui.DataList(), {
                             t.isBlurring = undefined;
                             evnt.stopPropagation();
                         },
-                        blur: function(evnt){
+                        blur: function() {
                             if(t.isBlurring !== false){
                                 t.close();
                             }else{
