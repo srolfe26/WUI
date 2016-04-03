@@ -73,7 +73,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                         old = [];
                     
                     if(me.selected.length > 0 && !me.multiSelect && !silent){
-                        var old = $.extend(true,[],me.selected);
+                        old = $.extend(true,[],me.selected);
                         me.el.trigger($.Event('wuideselect'),[me, old[0].el, old[0].rec, old]);
                     }
 
@@ -384,8 +384,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                         retVal;
                         
                     me.each(function(itm){
-                        if(itm.rec[key] !== undefined && itm.rec[key] == val)
-                            return retVal = me.itemSelect(itm);
+                        if(itm.rec[key] !== undefined && itm.rec[key] == val) {
+                            retVal = me.itemSelect(itm);
+                            
+                            return retVal;
+                        }
                     });
                     me.scrollToCurrent();
                     return retVal;

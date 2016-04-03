@@ -74,12 +74,14 @@ Wui.O.prototype = {
                         action     = (obj.appendTo !== undefined) ? 'append' : (obj.prependTo !== undefined) ? 'prepend' : (act !== undefined && target[act]) ? act : 'append';
                     
                     // Try appending with WUI modifiers, else just append in good ol' jQuery fashion
-                    try{
+                    try {
                       $(target)[action](obj.el);
-                    }catch(e){
-                        try{
+                    }
+                    catch(e) {
+                        try {
                           $(target)[action](obj);
-                        }catch(e){}
+                        }
+                        catch(err) {}
                     }
                     
                     // Add styles
@@ -97,9 +99,9 @@ Wui.O.prototype = {
     @param {object}    item    A jQuery object to be added
     Appends item to the WUI Object's 'elAlias' or 'el', whichever is defined.
     */
-    append:     function(obj){
+    append:     function() {
                     var me = this, el = me.elAlias || me.el;
-                    $.each(arguments,function(i,itm){
+                    $.each(arguments,function(i,itm) {
                         el.append(itm);
                     });
                 },
@@ -161,6 +163,7 @@ Wui.O.prototype = {
     or percentages of their parent.
     */
     cssByParam: function(m) { 
+                    var a;
                     m = m || this;
                     
                     if(m.el && m.el.addClass){
@@ -175,13 +178,17 @@ Wui.O.prototype = {
                         if($.isNumeric(m.width) && m.width >= 0)        m.el.css({width: m.width});
 
                         // calculate percentage based dimensions
-                        if(Wui.isPercent(m.width)){
+                        if(Wui.isPercent(m.width)) {
                             a = Wui.percentToPixels(m.el,m.width,'width');
-                            if(a != 0) m.el.css({width:a});
+                            if (a !== 0) {
+                                m.el.css({width: a});
+                            }
                         }
-                        if(Wui.isPercent(m.height)){
+                        if(Wui.isPercent(m.height)) {
                             a = Wui.percentToPixels(m.el,m.height,'height');
-                            if(a != 0) m.el.css({height:a});
+                            if (a !== 0) {
+                                m.el.css({height: a});
+                            }
                         }
                         
                         // hide an object based on its hidden value
@@ -238,7 +245,9 @@ Wui.O.prototype = {
     This function is DIFFERENT from jQuery's index() function which provides a DOM elements position within its parent node.
     */
     index:       function(){ 
-                    var me = this, myPosition = undefined;
+                    var me = this, 
+                        myPosition;
+                        
                     if(me.parent){
                         // Get my position within the parental array
                         me.parent.each(function(itm,idx){ if(itm === me) myPosition = idx; });
@@ -364,8 +373,8 @@ Wui.O.prototype = {
                         if(spliceVal !== null)
                             me.parent.splice(spliceVal,1);
                     }
+                    
                     this.el.remove();
-                    delete this;
                 },
     /**
     @param {number} [speed] Time in milliseconds for the showing element to fade in
