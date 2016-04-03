@@ -69,7 +69,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     */
     itemSelect: function(itm, silent){
                     var me = this, 
-                        dn = (me.name) ? '.' + me.name : ''
+                        dn = (me.name) ? '.' + me.name : '',
                         old = [];
                     
                     if(me.selected.length > 0 && !me.multiSelect && !silent){
@@ -78,7 +78,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                     }
 
                     me.el.find('.wui-selected').removeClass('wui-selected').removeAttr('tabindex');
-                    itm.el.addClass('wui-selected').attr('tabindex',1)
+                    itm.el.addClass('wui-selected').attr('tabindex',1);
                     
                     if(me.focusOnSelect)
                         itm.el.focus();
@@ -201,7 +201,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
                         }
                     }
 
-                    function doubleClick(e){
+                    function doubleClick() {
                         me.itemSelect(itm,true);
                         me.el
                             .trigger($.Event('wuichange'+ dn), [me, itm.el, itm.rec, me.selected])
@@ -291,7 +291,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     Returns the matching DataList item.
     */
     getItemByEl:function(el){
-                    var me = this, retVal = undefined;
+                    var me = this, 
+                        retVal;
 
                     me.each(function(itm){ if(itm.el[0] == el[0]) retVal = itm; });
                     
@@ -330,9 +331,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
 
                         selList.forEach(function(rec){
                             Wui.O.prototype.each.call(me,function(itm){
-                                var sameRec = (me.identity) 
-                                        ? itm.rec[me.identity] === rec[me.identity] 
-                                        : JSON.stringify(itm.rec) === JSON.stringify(rec);
+                                var sameRec = (me.identity) ?
+                                        itm.rec[me.identity] === rec[me.identity] :
+                                        JSON.stringify(itm.rec) === JSON.stringify(rec);
                                 
                                 if(sameRec){
                                     if(me.multiSelect){
@@ -379,7 +380,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @return An object containing the dataList, row, and record, or undefined if there was no matching row.
     Selects an item according to the key value pair to be found in a record. */
     selectBy:   function(key,val){
-                    var me = this, retVal = undefined;
+                    var me = this, 
+                        retVal;
+                        
                     me.each(function(itm){
                         if(itm.rec[key] !== undefined && itm.rec[key] == val)
                             return retVal = me.itemSelect(itm);
@@ -393,7 +396,8 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Template(), new Wui.Data(
     @param    {boolean}         doScroll    Will prevent scrolling to the item if set to 'false'.
     Selects the matching DataList item.*/
     selectByEl: function(el, doScroll){
-                    var me = this, retVal = undefined;
+                    var me = this,
+                        retVal;
 
                     me.itemSelect(retVal = me.getItemByEl(el));
                     
