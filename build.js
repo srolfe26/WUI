@@ -192,12 +192,18 @@ var opts = {
     }
 };
  
-var files = ['./src/js/**/*.js'];
- 
-buildJSHint(files, opts, function(err, hasError) {
-    /******************************* START BUILDING *******************************************/
-    var builder = new buildEngine();
 
+/*************************************** START BUILDING *******************************************/
+var builder = new buildEngine();
+var files = ['./src/js/**/*.js'];
+
+/********************************************** CSS ***********************************************/
+builder.cssMinify('./src/css/wui.css', './dist/css/wui.css', './src/css/');
+builder.cssMinify('./src/css/docs.css', './dist/css/docs.css', './src/css/');
+
+
+/***************************************** LINT & BUILD *******************************************/
+buildJSHint(files, opts, function(err, hasError) {
     // Create 'wui.js'
     var component = builder.concat([
             './src/js/Component/Object.js',       // Most EVERYTHING inherits from this one
@@ -318,10 +324,6 @@ buildJSHint(files, opts, function(err, hasError) {
         dest : './dist/wui.1.2.min.js',
         fn: ['addCopyright']
     });
-
-    /********************************************** CSS ***********************************************/
-    builder.cssMinify('./src/css/wui.css', './dist/css/wui.css', './src/css/');
-    builder.cssMinify('./src/css/docs.css', './dist/css/docs.css', './src/css/');
     
     if (hasError === true) {
         console.log('---------------------------------------------------------------------------');
@@ -333,4 +335,7 @@ buildJSHint(files, opts, function(err, hasError) {
         console.log('BUILD COMPLETE AND LOOKING FINE.');
         console.log('---------------------------------------------------------------------------');
     }
+    
+    shell.rm('-rf', '../shazdev/include/js/wui');
+    shell.cp('-R', './dist/', '../shazdev/include/js/wui');
 });

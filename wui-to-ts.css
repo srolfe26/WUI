@@ -1,0 +1,92 @@
+.wui-pane tr:focus {
+    outline: 0;
+}
+
+.wui-pane,
+.wui-pane *,
+.wui-form,
+.wui-lbl,
+.wui-lbl *,
+.wui-fe,
+.wui-fe *,
+.ui-datepicker,
+.wui-cal,
+.wui-combo-dd,
+.wui-sort-menu {
+    font-family: 'ClearSans', sans-serif;
+    font-size: 12px;
+    text-decoration: none;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.wui-btn {
+    font-family: 'ClearSans', sans-serif;
+    border-radius: 3px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.wui-btn.remove_test_client {
+    margin: 0; 
+    background: transparent;
+    border: 0;
+    height: auto;
+    padding: 0;
+    line-height: normal;
+}
+
+.wui-pane-footer.wui-pane-bar {
+    background: transparent;
+}
+
+.wui-pane-content, .wui-pane {
+    background: transparent;
+}
+
+.grid-body {
+    background: #fff;
+}
+
+.wui-form {
+    margin: 11px -4px 0 0;
+}
+
+.wui-combo input[type="text"] {
+    background: url('/images/glyph_icons/triangle_down_16.png') no-repeat right 5px center #fff;
+    font-family: ClearSans, sans-serif;
+    min-width: 44px;
+    padding-left: 5px;
+    padding-right: 21px;
+    font-size: 14px;
+    line-height: normal;
+    height: 28px;
+    border: 0;
+    border-radius: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    border: 1px solid #ccc;
+}
+
+.wui-btn.primary.action {
+    line-height: 20px;
+    font-size: 14px;
+}
+
+.wui-btn:focus {
+    box-shadow: none;
+}
+
+.wui-btn.primary.action:hover, .wui-btn.primary.action:focus {
+    background-color: #5a93d1;
+    color: #fff;
+}
