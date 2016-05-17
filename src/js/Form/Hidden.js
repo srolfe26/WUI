@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Hidden = function(args){
     $.extend(this, args, {
         label:  null,
@@ -19,3 +21,5 @@ Wui.Hidden.prototype = new Wui.FormField({
                 },
     setVal:     function(sv){ this.fieldText(this.value = (sv && $.trim(sv).length) ? sv : null); }
 });
+
+})(jQuery,window[_wuiVar]);

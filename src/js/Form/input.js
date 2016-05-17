@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.input = function(msg, callback, msgTitle, inputs, content){
     // make sure the inputs will be acceptable on the form
     if(inputs){
@@ -56,3 +58,6 @@ Wui.input = function(msg, callback, msgTitle, inputs, content){
     Msg.header.splice(0,1);
     return inputFrm;
 };
+
+})(jQuery,window[_wuiVar]);
+

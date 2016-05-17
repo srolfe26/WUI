@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 /** 
 @author     Stephen Nielsen (rolfe.nielsen@gmail.com)
 
@@ -184,7 +186,76 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     // hide the header
                     if(me.hideHeader)    me.heading.height(0);
                 },
-    
+    exportToCsv: function(filename, filterDataItem, filterValue) {
+        var me = this;
+        var exportStr = "";
+
+        for ( var i=0; i < me.columns.length; i++ ) {
+            exportStr += '"'+me.columns[i].heading+'"'+",";
+        }
+        exportStr += "\n";
+
+        for ( var i=0; i < me.data.length; i++ ) {
+            if ( filterDataItem == "ALL" || me.data[i][filterDataItem] == filterValue) {
+                for ( var j=0; j < me.columns.length; j++ ) {
+                    if (typeof me.data[i][me.columns[j].dataItem] !== 'undefined') {
+                        exportStr += '"'+me.data[i][me.columns[j].dataItem]+'"'+",";
+                    } else {
+                        exportStr += ",";
+                    }
+                    
+                }
+                exportStr += "\n";   
+            }
+        }
+
+        me.export(exportStr, filename, 'text/csv;charset=utf-8;');
+    },
+
+    exportToExcel: function(filename, filterDataItem, filterValue) {
+        var me = this;
+        var exportStr = "<table><tr>";
+
+        for ( var i=0; i < me.columns.length; i++ ) {
+            exportStr += '<th>'+me.columns[i].heading+'</th>';
+        }
+        exportStr += "</tr>";
+
+        for ( var i=0; i < me.data.length; i++ ) {
+            if ( filterDataItem == "ALL" || me.data[i][filterDataItem] == filterValue) {
+                exportStr += "<tr>";
+                for ( var j=0; j < me.columns.length; j++ ) {
+                    if (typeof me.data[i][me.columns[j].dataItem] !== 'undefined') {
+                        exportStr += '<td>'+me.data[i][me.columns[j].dataItem]+'</td>';
+                    } else {
+                        exportStr += "<td></td>";
+                    }
+                }
+                exportStr += "</tr>";
+            }
+        }
+        exportStr += "</tr></table>";
+
+        me.export(exportStr, filename, 'data:application/vnd.ms-excel;');
+    },
+    export:     function(exportStr, filename, fileType) {
+        var blob = new Blob([exportStr], { type: fileType });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+                // Browsers that support HTML5 download attribute
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    },
     /** Overrides the Wui.O layout to allow for the optional sizing to fit content, column sizing, and data positioning. */
     layout:     function(){
                     Wui.O.prototype.layout.apply(this,arguments);
@@ -514,3 +585,5 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     me.runSort();
                 }
 });
+
+})(jQuery,window[_wuiVar]);

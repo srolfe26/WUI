@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 /**The template engine is a simple way to create DOM elements based on data. A template string is provided that contains the
 template html with the variable interspersed surrounded by '{}'. For example, a simple data template to display a list
 of names may be: 
@@ -80,3 +82,5 @@ Wui.Template.prototype = {
                     throw new Error('Wui.js - Template engine missing data and/or template.');
                 }
 };
+
+})(jQuery,window[_wuiVar]);

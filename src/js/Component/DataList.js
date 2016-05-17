@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.DataList = function(args){
     var me = this;
 
@@ -349,3 +351,5 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     return retVal;
                 }
 });
+
+})(jQuery,window[_wuiVar]);

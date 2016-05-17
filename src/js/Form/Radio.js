@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Radio = function(args){ 
     $.extend(this,{
         /** A true value converts the normal radio group to a button group */
@@ -91,3 +93,5 @@ Wui.Radio.prototype = $.extend(new Wui.FormField(),{
                     this.el.find("input[value='" + sv + "']").attr('checked',true);
                 }
 });
+
+})(jQuery,window[_wuiVar]);

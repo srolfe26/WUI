@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 // Base WUI Object
 Wui.O = function(args) { 
     $.extend(this, {
@@ -317,3 +319,5 @@ Wui.O.prototype = {
                     return retVal;
                 }
 };
+
+})(jQuery,window[_wuiVar]);

@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.InfiniteGrid = function(args){
     $.extend(this,{
         /** Array of data for the grid. */
@@ -256,3 +258,6 @@ Wui.InfiniteGrid.prototype = $.extend(new Wui.Grid(), {
                         this.sizeCols();
                     }
 });
+
+
+})(jQuery,window[_wuiVar]);

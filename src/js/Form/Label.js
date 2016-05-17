@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Label = function(args){ 
     $.extend(this,{
         html:           '',
@@ -59,3 +61,5 @@ Wui.Label.prototype = $.extend(new Wui.O(),{
                             return me.labelPosition;
                         }
 });
+
+})(jQuery,window[_wuiVar]);

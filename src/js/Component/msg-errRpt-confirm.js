@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 /**
  * Creates an alert() style message in a modal Wui.Window, but with callback options, 
  * and in the style of the application's UI.
@@ -117,3 +119,5 @@ Wui.confirm = function(msg, msgTitle, callback) {
 
     return cw;
 };
+
+})(jQuery,window[_wuiVar]);

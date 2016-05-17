@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Textarea = function(args){
     $.extend(this, { 
         field:  $('<textarea>'),
@@ -16,3 +18,5 @@ Wui.Textarea.prototype = $.extend(new Wui.Text(), {
                     this.el.css({ height: '' });
                 }
 });
+
+})(jQuery,window[_wuiVar]);

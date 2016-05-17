@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Form = function(args){
     $.extend(this,{
         disabled:       false,
@@ -196,3 +198,5 @@ Wui.Form.prototype = $.extend(new Wui.O(),{
                     return (me.errors.length === 0);
                 }
 });
+
+})(jQuery,window[_wuiVar]);

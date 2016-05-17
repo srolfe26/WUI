@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 /**
  @event        datachanged    When the data changes (name, data object)
  @author    Stephen Nielsen (rolfe.nielsen@gmail.com)
@@ -221,3 +223,5 @@ Wui.Data.prototype = {
                         return retVal;
                     }
 };
+
+})(jQuery,window[_wuiVar]);

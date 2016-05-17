@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 /**
  * Wui.Combo
  * =================================================================================================
@@ -663,3 +665,5 @@ set:        function(){
                     return (this.value !== null && typeof this.value[this.valueItem] != 'undefined') ? this.value[this.valueItem] : this.value;
                 }
 });
+
+})(jQuery,window[_wuiVar]);

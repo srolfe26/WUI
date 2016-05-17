@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Checkbox = function(args){ 
     $.extend(this,{
         name:       'w121-checkbox',
@@ -54,3 +56,5 @@ Wui.Checkbox.prototype = $.extend(new Wui.Radio(),{
                 },
     validTest:  function(){ if(this.required && this.val() === 0) return false;    return true; }
 });
+
+})(jQuery,window[_wuiVar]);

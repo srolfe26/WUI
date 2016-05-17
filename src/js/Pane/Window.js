@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.Window = function(args){ 
     $.extend(this,{
         bbar:           [],
@@ -161,3 +163,5 @@ Wui.Window.prototype = $.extend(true, {}, Wui.Pane.prototype,{
     height:     300,   
     width:      400
 });
+
+})(jQuery,window[_wuiVar]);

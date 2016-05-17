@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.Wysiwyg = function(args){
     $.extend(this,{
         css:        'body {' +
@@ -233,3 +235,5 @@ Wui.Wysiwyg.prototype = $.extend(new Wui.FormField(),{
                         $(me.editor.body).html(sv);
                 }
 });
+
+})(jQuery,window[_wuiVar]);

@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Text = function(args){
     $.extend(this,{
         blankText:  '',
@@ -89,3 +91,5 @@ Wui.Text.prototype = $.extend(new Wui.Hidden(),{
                         return t.field;
                     }
 });
+
+})(jQuery,window[_wuiVar]);

@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Datetime = function(args){ 
     $.extend(this,args,{ 
         field:      $('<input>',{type:'text'}),
@@ -604,3 +606,5 @@ Wui.Datetime.prototype = $.extend(new Wui.Text(), {
                         return true;
                     }
 });
+
+})(jQuery,window[_wuiVar]);

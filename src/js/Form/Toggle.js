@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.Toggle = function(args){
     $.extend(this,{
         opt1:           'option 1',
@@ -75,3 +77,5 @@ Wui.Toggle.prototype = $.extend(new Wui.FormField(),{
                          me.field.val( me.value ? me.value : '' );
                     }
 });
+
+})(jQuery,window[_wuiVar]);

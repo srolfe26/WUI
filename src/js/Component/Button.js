@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.Button = function(args){
     $.extend(this, {
         disabled:   false,
@@ -61,3 +63,5 @@ Wui.Button.prototype = $.extend(new Wui.O(),{
                 },
     setText:    function(txt){ return this.el.html(txt); }
 });
+
+})(jQuery,window[_wuiVar]);

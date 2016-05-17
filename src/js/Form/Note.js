@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Note = function(args){ 
     $.extend(this,{
         html:   ''
@@ -8,3 +10,5 @@ Wui.Note.prototype = $.extend(new Wui.O(),{
     init:   function(){ this.el = $('<div>').html(this.html).addClass('w121-note'); },
     setHTML:function(html){ this.el.html(html); }
 });
+
+})(jQuery,window[_wuiVar]);

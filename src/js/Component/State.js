@@ -77,7 +77,7 @@ Wui.stateMachine.prototype = {
                             stateStr += ((i > 0) ? '/' : '') + stateArray[i].view;
                             
                             for(var j = 0; j < keys.length; j++)
-                                stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + stateArray[i].params[keys[j]];
+                                stateStr += ((j > 0) ? '&' : '?') + keys[j] + '=' + encodeURI(stateArray[i].params[keys[j]]);
                         }
                         
                         return stateStr;
@@ -93,7 +93,7 @@ Wui.stateMachine.prototype = {
                         window.location.hash.replace(/([^\/^#]+)/g,function(viewarea){
                             var itm = {};
                             viewarea = viewarea.replace(/(\?|\&)([^=]+)\=([^&]*)/g,function(match,delim,key,val){
-                                itm[key] = val;
+                                itm[key] = decodeURI(val);
                                 return '';
                             });
                             state.push({view:viewarea, params:itm});

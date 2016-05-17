@@ -1,3 +1,5 @@
+(function($,Wui) {
+
 Wui.Tabs = function(args){ 
     $.extend(this,{
         bbar:           [],
@@ -100,3 +102,5 @@ Wui.Tabs.prototype = $.extend(new Wui.Pane(),{
                         }
                     }
 });
+
+})(jQuery,window[_wuiVar]);

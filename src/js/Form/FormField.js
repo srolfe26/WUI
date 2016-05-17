@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.FormField = function(args){
     $.extend(this,{
         disabled:       false,
@@ -158,3 +160,5 @@ Wui.FormField.prototype = $.extend(new Wui.O(),{
                 },
     valChange:  function(){}
 });
+
+})(jQuery,window[_wuiVar]);

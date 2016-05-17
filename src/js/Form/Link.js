@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 Wui.Link = function(args) { 
     $.extend(this, {
         invalidMsg: 'The value for \'' + ((this.label) ? this.label : (this.args && this.args.name) ? this.args.name : 'a link field') + '\' is not a properly formatted link.',
@@ -94,3 +96,5 @@ Wui.Link.prototype = $.extend(new Wui.FormField(),{
                 },
     validTest:  function(){ if(this.required && !this.testLink()) return false; return true; }
 });
+
+})(jQuery,window[_wuiVar]);

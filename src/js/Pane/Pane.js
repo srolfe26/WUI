@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 /**
  * A Wui.Pane is a box with a top toobar (tbar), and a bottom toolbar (bbar).
  */
@@ -200,3 +202,5 @@ Wui.Pane.prototype = $.extend(new Wui.O(), {
                             me.titleEl.removeClass('right left center').addClass(me.titleAlign);
                     }
 });
+
+})(jQuery,window[_wuiVar]);

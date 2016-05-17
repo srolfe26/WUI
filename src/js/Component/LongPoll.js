@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 /** The Long Poll object provides a way to poll a remote resource at a given interval.
 This is similar to listening on a socket, but is rather repeatedly polling a resource via AJAX.
 Long polling is useful for checking on the status of an item, or reloading data that 
@@ -99,3 +101,5 @@ Wui.LongPoll.prototype = {
                     me.poll();
                 }
 };
+
+})(jQuery,window[_wuiVar]);

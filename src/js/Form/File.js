@@ -1,3 +1,5 @@
+(function($,Wui) {
+    
 /**
 @author Dan Perry (dan.perry@usurf.usu.edu)
 An HTML5 file tool than can upload files via ajax.
@@ -61,3 +63,5 @@ Wui.File.prototype = $.extend(new Wui.Text(), {
                     this.field.val('');
             }
 });
+
+})(jQuery,window[_wuiVar]);
