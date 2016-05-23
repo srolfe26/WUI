@@ -18,6 +18,41 @@ Wui.DataList = function(args){
 };
 Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     dataChanged:function(){ this.make(); },
+    onSuccess:function(data){ 
+        var me = this;
+        me.data = data.payload;
+
+        function configBar(bar){
+            var bars = {
+                    tbar: 'header',
+                    bbar: 'footer'
+                },
+                thisBar =   me[bars[bar]],
+                hasBar =    me.surePane.hasClass(bar),
+                hasItems =  (function(){
+                                var barItemNum = 0;
+
+                                thisBar.items.forEach(function(itm){
+                                    //if(itm instanceof Wui.O)
+                                        barItemNum++;
+                                });
+
+                                return barItemNum > 0;
+                            })();
+
+                    me.surePane.addClass(bar);
+                    thisBar.place();
+        
+        }
+
+        if (typeof me.pager != 'undefined' && me.pager.type === 'local' && me.pager.pageSize != -1) {
+            me.pager.createPagingUI();
+            if (me.pager.totalPages > 1) {
+                configBar('bbar');   
+            }
+        }
+        return data;
+    },
     clearSelect:function(){
                     var me = this,
                         dn = (me.name) ? '.' + me.name : '',
@@ -189,6 +224,16 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         maxI = (me.data.length > me.displayMax && me.displayMax > 0) ? me.displayMax : me.data.length,
                         els = [],
                         i = 0;
+
+                    // if Paging is turned on use paging object to get start and end index.
+                    if (typeof me.pager != 'undefined' && me.pager.pageSize != -1 &&
+                        (me.pager.type === 'local'  || me.pager.type === 'remote' ) ) {
+                        me.startIdx = me.pager.getStartIdx();
+                        me.endIdx = me.pager.getEndIdx();
+                    } else {
+                        me.startIdx = 0;
+                        me.endIdx = maxI;
+                    }
                     
                     // Clear out items list
                     me.clear();
@@ -206,7 +251,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     }
 
                     // Add items to me.items
-                    for(i; i < maxI; i++) makeItems(i);
+                    for(i=me.startIdx; i < me.endIdx; i++) makeItems(i); 
 
                     me.clickListener(els);
 

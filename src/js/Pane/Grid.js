@@ -558,6 +558,14 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                                     me.mngSorters(me.cols[j],me.sort[i].order);
 
                     this.sortList();
+
+                    // If a pager is defined -- call make() after a page button has been clicked.
+                    if (typeof me.pager != 'undefined') {
+                        me.pager.afterClick = function(page, pageObj) {
+                            me.make();
+                        }  
+                    }
+
                 },
 
     /** Size up the columns of the table to match the headings @private */
