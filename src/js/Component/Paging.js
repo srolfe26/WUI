@@ -9,7 +9,8 @@ Wui.Paging = function(args, dataObj){
         type: 'none',
         pageSize:  100,
         pageIdxNm: '',
-        width: '600px'
+        width: '600px',
+        height: '30px'
     }, args);
 
     this.init(dataObj);
@@ -65,7 +66,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
                         page: i,
                         startContext: startContext,
                         endContext: endContext,
-                        widthInPercent: me.widthInPercent
+                        widthInPercent: me.widthInPercent,
+                        height: me.height
                     });
                 }
             }
@@ -84,7 +86,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
     
         me.page = me.getPagingObj();
 
-        var te = new Wui.Template({template: '<div  class="node" style="width: {widthInPercent}%" data-page-index="{page}" data-node-start-context="{startContext}" data-node-end-context="{endContext}">'});
+        var te = new Wui.Template({template: '<div  class="node" style="width: {widthInPercent}%; height: {height};" data-page-index="{page}" data-node-start-context="{startContext}" data-node-end-context="{endContext}">'});
 
         function makeItems(i) {
             var rec = te.data = me.page[i],
@@ -100,9 +102,12 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             $(itm.el).appendTo($(me.innerDiv));
         }
         
-        for(i=0; i <= me.totalPages; i++) {
-            makeItems(i);
+        if (me.totalPages > 0) {
+            for(i=0; i <= me.totalPages; i++) {
+                makeItems(i);
+            }    
         }
+
     },
 
     getStartIdx:    function() {
@@ -130,10 +135,9 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.endIdx = me.startIdx + me.pageSize;
         } else {
             // TODO:  Implement Remote 
-            // Do an ajax call (using the url of the dataObj) to get the next page.
+            // Do an ajax call (using the url of the dataObj
         }
-
-        me.afterClick(page,me.items[page]);
+        me.afterClick(page,me.pageObj);
     }
 });
 
