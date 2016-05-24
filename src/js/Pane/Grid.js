@@ -257,7 +257,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
         }
     },
 
-    processData:function(data){ 
+    updatePagingBar: function(data) {
         var me = this;
         me.data = data;
 
@@ -275,10 +275,13 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
             me.pager.createPagingUI();
             if (me.pager.totalPages >= 1) {
                 // Redraw everything that is currently in the bbar.
-                configBar('bbar');   
+                configBar('bbar');  
+                // after click of a page do the make(). 
+                me.pager.afterClick = function(page, pageObj) {
+                    me.make();
+                }  
             }
         }
-        return data;
     },
 
     /** Overrides the Wui.O layout to allow for the optional sizing to fit content, column sizing, and data positioning. */
@@ -570,8 +573,10 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     
                     return me.getSrcData();
                 },
-    setData:    function(){
+    setData:    function(data){
                     var me = this, i = null, j = null;
+                    
+                    me.updatePagingBar(data);
 
                     Wui.DataList.prototype.setData.apply(me,arguments);
                     
@@ -583,14 +588,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                                     me.mngSorters(me.cols[j],me.sort[i].order);
 
                     this.sortList();
-
-                    // If a pager is defined -- call make() after a page button has been clicked.
-                    if (typeof me.pager != 'undefined') {
-                        me.pager.afterClick = function(page, pageObj) {
-                            me.make();
-                        }  
-                    }
-
                 },
 
     /** Size up the columns of the table to match the headings @private */
