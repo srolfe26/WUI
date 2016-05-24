@@ -133,11 +133,12 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             console.log("Going to page: "+page);
             me.startIdx = page * me.pageSize;
             me.endIdx = me.startIdx + me.pageSize;
+            me.afterClick(page,me.page[page]);
         } else {
             // TODO:  Implement Remote 
             // Do an ajax call (using the url of the dataObj
         }
-        me.afterClick(page,me.pageObj);
+        
     }
 });
 
