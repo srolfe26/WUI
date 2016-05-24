@@ -4,7 +4,7 @@ The WUI Paging Object will handle both 'local' and 'remote' paging.
 
 (function($,Wui) {
 
-Wui.Paging = function(args, dataObj){
+Wui.Paging = function(args, wuiDataObj) {
     $.extend(this, {
         type: 'none',
         pageSize:  100,
@@ -13,15 +13,14 @@ Wui.Paging = function(args, dataObj){
         height: '30px'
     }, args);
 
-    this.init(dataObj);
-
-    // Assign the dataObject to have a pager.  
-    // This is important so the DataList Object knows that it should do paging.
-    dataObj.pager = this;
+    this.init(wuiDataObj);
+ 
+    // This is important - so the DataList Object knows it has a pager now.
+    wuiDataObj.pager = this;
 };
 
 Wui.Paging.prototype = $.extend(new Wui.O(),{
-    init: function(dataObj) {
+    init: function(wuiDataObj) {
         Wui.O.prototype.init.call(this);
         var me = this, el = me.el = me.surePane = $('<div>', { 
             id: 'outsidediv',
@@ -31,7 +30,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             'width': '100%'
         }));
         this.currPage = 0;
-        this.dataObj = dataObj;
+        this.dataObj = wuiDataObj;
     },
 
     afterClick: function(page, pageObj) {
@@ -78,7 +77,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
     },
 
     // Create the default paging UI
-    createPagingUI:   function() {
+    createPagingUI: function() {
         var me = this;
         me.items = [];
         me.innerDiv[0].innerHTML = "";
@@ -109,7 +108,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
 
     },
 
-    getStartIdx:    function() {
+    getStartIdx: function() {
         var me = this;
         if (me.totalPages < 1) {
             return 0;
@@ -117,7 +116,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         return me.startIdx;
     },
 
-    getEndIdx:      function() {
+    getEndIdx: function() {
         var me = this;
         if (me.totalPages < 1) {
             return me.dataObj.data.length;
@@ -127,7 +126,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         return me.endIdx;
     },
 
-    goToPage:       function(page) {
+    goToPage: function(page) {
         var me = this;
 
         if (me.type === 'local') {                 
@@ -138,7 +137,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.afterClick(page,me.pages[page]);
         } else {
             // TODO:  Implement Remote 
-            // Do an ajax call (using the url of the dataObj
+            // Do an ajax call (using the url of the dataObj)
         }
         
     }

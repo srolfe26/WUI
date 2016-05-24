@@ -256,6 +256,31 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
             }
         }
     },
+
+    processData:function(data){ 
+        var me = this;
+        me.data = data;
+
+        function configBar(bar){
+            var bars = {
+                    tbar: 'header',
+                    bbar: 'footer'
+                };
+            var thisBar =   me[bars[bar]];
+            me.surePane.addClass(bar);
+            thisBar.place();
+        }
+
+        if (typeof me.pager != 'undefined' && me.pager.type === 'local' && me.pager.pageSize != -1) {
+            me.pager.createPagingUI();
+            if (me.pager.totalPages >= 1) {
+                // Redraw everything that is currently in the bbar.
+                configBar('bbar');   
+            }
+        }
+        return data;
+    },
+
     /** Overrides the Wui.O layout to allow for the optional sizing to fit content, column sizing, and data positioning. */
     layout:     function(){
                     Wui.O.prototype.layout.apply(this,arguments);

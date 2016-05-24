@@ -18,28 +18,6 @@ Wui.DataList = function(args){
 };
 Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     dataChanged:function(){ this.make(); },
-    processData:function(data){ 
-        var me = this;
-        me.data = data;
-
-        function configBar(bar){
-            var bars = {
-                    tbar: 'header',
-                    bbar: 'footer'
-                };
-            var thisBar =   me[bars[bar]];
-            me.surePane.addClass(bar);
-            thisBar.place();
-        }
-
-        if (typeof me.pager != 'undefined' && me.pager.type === 'local' && me.pager.pageSize != -1) {
-            me.pager.createPagingUI();
-            if (me.pager.totalPages >= 1) {
-                configBar('bbar');   
-            }
-        }
-        return data;
-    },
     clearSelect:function(){
                     var me = this,
                         dn = (me.name) ? '.' + me.name : '',
