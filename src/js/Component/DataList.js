@@ -18,30 +18,18 @@ Wui.DataList = function(args){
 };
 Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     dataChanged:function(){ this.make(); },
-    onSuccess:function(data){ 
+    processData:function(data){ 
         var me = this;
-        me.data = data.payload;
+        me.data = data;
 
         function configBar(bar){
             var bars = {
                     tbar: 'header',
                     bbar: 'footer'
-                },
-                thisBar =   me[bars[bar]],
-                hasBar =    me.surePane.hasClass(bar),
-                hasItems =  (function(){
-                                var barItemNum = 0;
-
-                                thisBar.items.forEach(function(itm){
-                                    //if(itm instanceof Wui.O)
-                                        barItemNum++;
-                                });
-
-                                return barItemNum > 0;
-                            })();
-
-                    me.surePane.addClass(bar);
-                    thisBar.place();
+                };
+            var thisBar =   me[bars[bar]];
+            me.surePane.addClass(bar);
+            thisBar.place();
         }
 
         if (typeof me.pager != 'undefined' && me.pager.type === 'local' && me.pager.pageSize != -1) {

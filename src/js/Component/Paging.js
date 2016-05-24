@@ -80,12 +80,10 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
     // Create the default paging UI
     createPagingUI:   function() {
         var me = this;
-        //me.clear();
         me.items = [];
         me.innerDiv[0].innerHTML = "";
     
         me.pages = me.getPagingObj();
-        //console.log(me.pages,me.totalPages)
 
         var te = new Wui.Template({template: '<div  class="node" style="width: {widthInPercent}%; height: {height};" data-page-index="{page}" data-node-start-context="{startContext}" data-node-end-context="{endContext}">'});
 
