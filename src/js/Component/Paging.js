@@ -48,7 +48,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.totalPages = parseInt(me.dataObj.data.length / me.pageSize);
             me.widthInPercent = 100 / (me.totalPages + 1);
 
-            if (me.totalPages <= 1) {
+            if (me.totalPages < 1) {
                 return pagingObj;
             }
 
@@ -84,12 +84,13 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         me.items = [];
         me.innerDiv[0].innerHTML = "";
     
-        me.page = me.getPagingObj();
+        me.pages = me.getPagingObj();
+        //console.log(me.pages,me.totalPages)
 
         var te = new Wui.Template({template: '<div  class="node" style="width: {widthInPercent}%; height: {height};" data-page-index="{page}" data-node-start-context="{startContext}" data-node-end-context="{endContext}">'});
 
         function makeItems(i) {
-            var rec = te.data = me.page[i],
+            var rec = te.data = me.pages[i],
                 itmEl = te.make(i),
                 itm = {el:itmEl, rec:rec};
 
@@ -102,9 +103,9 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             $(itm.el).appendTo($(me.innerDiv));
         }
         
-        if (me.totalPages > 0) {
-            for(i=0; i <= me.totalPages; i++) {
-                makeItems(i);
+        if (me.totalPages >= 1) {
+            for(j=0; j <= me.totalPages; j++) {
+                makeItems(j);
             }    
         }
 
@@ -112,7 +113,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
 
     getStartIdx:    function() {
         var me = this;
-        if (me.totalPages <= 1) {
+        if (me.totalPages < 1) {
             return 0;
         }
         return me.startIdx;
@@ -120,7 +121,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
 
     getEndIdx:      function() {
         var me = this;
-        if (me.totalPages <= 1) {
+        if (me.totalPages < 1) {
             return me.dataObj.data.length;
         }
         return me.endIdx;
@@ -133,7 +134,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             console.log("Going to page: "+page);
             me.startIdx = page * me.pageSize;
             me.endIdx = me.startIdx + me.pageSize;
-            me.afterClick(page,me.page[page]);
+            me.afterClick(page,me.pages[page]);
         } else {
             // TODO:  Implement Remote 
             // Do an ajax call (using the url of the dataObj

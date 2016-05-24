@@ -42,12 +42,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                     me.surePane.addClass(bar);
                     thisBar.place();
-        
         }
 
         if (typeof me.pager != 'undefined' && me.pager.type === 'local' && me.pager.pageSize != -1) {
             me.pager.createPagingUI();
-            if (me.pager.totalPages > 1) {
+            if (me.pager.totalPages >= 1) {
                 configBar('bbar');   
             }
         }
