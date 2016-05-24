@@ -30,7 +30,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             id: 'innerdiv',
             'width': '100%'
         }));
-
+        this.currPage = 0;
         this.dataObj = dataObj;
     },
 
@@ -123,6 +123,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         var me = this;
         if (me.totalPages < 1) {
             return me.dataObj.data.length;
+        } else if (me.totalPages == me.currPage) {
+            return me.dataObj.data.length;
         }
         return me.endIdx;
     },
@@ -134,6 +136,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             console.log("Going to page: "+page);
             me.startIdx = page * me.pageSize;
             me.endIdx = me.startIdx + me.pageSize;
+            me.currPage = page;
             me.afterClick(page,me.pages[page]);
         } else {
             // TODO:  Implement Remote 
