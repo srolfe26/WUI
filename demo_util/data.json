@@ -1,0 +1,3131 @@
+[
+    {
+        "tx_id": "447",
+        "date": "7/25/13",
+        "amount": "-3",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/24 SWEET CLOUDS COTTO SOMEPLACE CA"
+    },
+    {
+        "tx_id": "446",
+        "date": "7/24/13",
+        "amount": "-1.43",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "445",
+        "date": "7/23/13",
+        "amount": "-750",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "444",
+        "date": "7/22/13",
+        "amount": "-93.25",
+        "check_number": "",
+        "description": "SOMEPLACE CITY DEBITSA Some Guy"
+    },
+    {
+        "tx_id": "443",
+        "date": "7/22/13",
+        "amount": "-5.38",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/19 PIZZA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "442",
+        "date": "7/22/13",
+        "amount": "-20",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/19 SQ *HAIRDRESSER SOMEPLACE CA"
+    },
+    {
+        "tx_id": "441",
+        "date": "7/22/13",
+        "amount": "90",
+        "check_number": "",
+        "description": "MOBILE DEPOSIT"
+    },
+    {
+        "tx_id": "440",
+        "date": "7/19/13",
+        "amount": "-108.3",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "439",
+        "date": "7/19/13",
+        "amount": "-15",
+        "check_number": "",
+        "description": "WITHDRAWAL MADE IN A BRANCH/STORE"
+    },
+    {
+        "tx_id": "438",
+        "date": "7/19/13",
+        "amount": "-7.36",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "437",
+        "date": "7/19/13",
+        "amount": "-5.49",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "436",
+        "date": "7/19/13",
+        "amount": "-23.49",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/18 INTERNET COMMUNICATIO-244-1111 VA"
+    },
+    {
+        "tx_id": "435",
+        "date": "7/17/13",
+        "amount": "-20.75",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "434",
+        "date": "7/17/13",
+        "amount": "-2.67",
+        "check_number": "",
+        "description": "POS PURCHASE - FAMILY DOLLAR SOMEPLACE CA"
+    },
+    {
+        "tx_id": "433",
+        "date": "7/15/13",
+        "amount": "-12.91",
+        "check_number": "",
+        "description": "POS PURCHASE - WAL MART NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "432",
+        "date": "7/15/13",
+        "amount": "-57.19",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/13 GAS NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "431",
+        "date": "7/12/13",
+        "amount": "-350",
+        "check_number": "170",
+        "description": "CHECK # 170"
+    },
+    {
+        "tx_id": "430",
+        "date": "7/12/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "429",
+        "date": "7/12/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER TO LASTNAME S SAVINGS REF #OPE5FT6Q5W"
+    },
+    {
+        "tx_id": "428",
+        "date": "7/12/13",
+        "amount": "-7.95",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/10 WEBSITE.COM-3927870 OK"
+    },
+    {
+        "tx_id": "427",
+        "date": "7/11/13",
+        "amount": "-3.99",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/11 Video 216-1072 WA"
+    },
+    {
+        "tx_id": "426",
+        "date": "7/10/13",
+        "amount": "-9.56",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "425",
+        "date": "7/9/13",
+        "amount": "-104.02",
+        "check_number": "",
+        "description": "PHONE PaymentSMT2Z SOME GAL"
+    },
+    {
+        "tx_id": "424",
+        "date": "7/9/13",
+        "amount": "-16.3",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "423",
+        "date": "7/9/13",
+        "amount": "-6.55",
+        "check_number": "",
+        "description": "POS PURCHASE - KMART NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "422",
+        "date": "7/8/13",
+        "amount": "-400.36",
+        "check_number": "169",
+        "description": "CHECK # 169"
+    },
+    {
+        "tx_id": "421",
+        "date": "7/8/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE2JQKTTQ TO RENT ON7/07/13"
+    },
+    {
+        "tx_id": "420",
+        "date": "7/8/13",
+        "amount": "-69.47",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/05 GROCERY MRKTPLACE-LO SOMEPLACE CA"
+    },
+    {
+        "tx_id": "419",
+        "date": "7/8/13",
+        "amount": "-3.5",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/05 SWIMMING-716-9000 CA"
+    },
+    {
+        "tx_id": "418",
+        "date": "7/8/13",
+        "amount": "-5.26",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/05 BURGERS/PIZZ CA"
+    },
+    {
+        "tx_id": "417",
+        "date": "7/5/13",
+        "amount": "-2.21",
+        "check_number": "",
+        "description": "POS PURCHASE - LOWES SOMEPLACE CA"
+    },
+    {
+        "tx_id": "416",
+        "date": "7/5/13",
+        "amount": "-10.01",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "415",
+        "date": "7/5/13",
+        "amount": "177.22",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis CCPNE1Y2Y17ZFNJ payments.ONLINE.COM ID#CCPNE1Y2Y17ZFNJ"
+    },
+    {
+        "tx_id": "414",
+        "date": "7/3/13",
+        "amount": "-16.85",
+        "check_number": "",
+        "description": "POS PURCHASE - USPS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "413",
+        "date": "7/3/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "412",
+        "date": "7/2/13",
+        "amount": "-84.38",
+        "check_number": "168",
+        "description": "CHECK # 168"
+    },
+    {
+        "tx_id": "411",
+        "date": "7/2/13",
+        "amount": "-32.89",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/02 ONLINE.COM AMZN.COM/BILL WA"
+    },
+    {
+        "tx_id": "410",
+        "date": "7/1/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "409",
+        "date": "7/1/13",
+        "amount": "-3.97",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/29 BURGER KING SOMEPLACE CA"
+    },
+    {
+        "tx_id": "408",
+        "date": "7/1/13",
+        "amount": "-3.2",
+        "check_number": "",
+        "description": "POS PURCHASE - MAVERIK COUNTRY STORE1 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "407",
+        "date": "7/1/13",
+        "amount": "-16",
+        "check_number": "",
+        "description": "POS PURCHASE - THEATER SOMEPLACE CA"
+    },
+    {
+        "tx_id": "406",
+        "date": "6/28/13",
+        "amount": "-26.88",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "405",
+        "date": "6/28/13",
+        "amount": "-22.2",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/27 REDWOOD DENTAL, LL CA"
+    },
+    {
+        "tx_id": "404",
+        "date": "6/27/13",
+        "amount": "-2.69",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/25 BURGERS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "403",
+        "date": "6/26/13",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "402",
+        "date": "6/24/13",
+        "amount": "-400.36",
+        "check_number": "167",
+        "description": "CHECK # 167"
+    },
+    {
+        "tx_id": "401",
+        "date": "6/24/13",
+        "amount": "-8.72",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "400",
+        "date": "6/24/13",
+        "amount": "-30",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/22 CHEVRON SOMEPLACE CA"
+    },
+    {
+        "tx_id": "399",
+        "date": "6/24/13",
+        "amount": "-3.75",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/22 MOVIES SOMEPLACE CA"
+    },
+    {
+        "tx_id": "398",
+        "date": "6/24/13",
+        "amount": "-20.66",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/21 ANGIE'S RESTAURANT SOMEPLACE CA"
+    },
+    {
+        "tx_id": "397",
+        "date": "6/21/13",
+        "amount": "-13.68",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "396",
+        "date": "6/21/13",
+        "amount": "-2.99",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/20 TWIZLBERRY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "395",
+        "date": "6/20/13",
+        "amount": "-3.99",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/20 Video 216-1072 WA"
+    },
+    {
+        "tx_id": "394",
+        "date": "6/18/13",
+        "amount": "-1.69",
+        "check_number": "",
+        "description": "POS PURCHASE - ELEVEN SOMEPLACE CA"
+    },
+    {
+        "tx_id": "393",
+        "date": "6/18/13",
+        "amount": "-108.43",
+        "check_number": "",
+        "description": "POS PURCHASE - THE HOME DEPOT SOMEPLACE CA"
+    },
+    {
+        "tx_id": "392",
+        "date": "6/18/13",
+        "amount": "-116.28",
+        "check_number": "",
+        "description": "POS PURCHASE - THE HOME DEPOT SOMEPLACE CA"
+    },
+    {
+        "tx_id": "391",
+        "date": "6/18/13",
+        "amount": "-5.38",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/17 PIZZA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "390",
+        "date": "6/17/13",
+        "amount": "-19.4",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/13 DENNY'S CA"
+    },
+    {
+        "tx_id": "389",
+        "date": "6/14/13",
+        "amount": "-12.1",
+        "check_number": "",
+        "description": "POS PURCHASE - RIVE SOCAH CA"
+    },
+    {
+        "tx_id": "388",
+        "date": "6/14/13",
+        "amount": "-13.88",
+        "check_number": "",
+        "description": "POS PURCHASE - TARGET T2 SOCAH CA"
+    },
+    {
+        "tx_id": "387",
+        "date": "6/14/13",
+        "amount": "-9.06",
+        "check_number": "",
+        "description": "POS PURCHASE - GYMBOREE SOCAH CA"
+    },
+    {
+        "tx_id": "386",
+        "date": "6/14/13",
+        "amount": "-45.95",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/13 PAPA MURPHY'S CA"
+    },
+    {
+        "tx_id": "385",
+        "date": "6/13/13",
+        "amount": "-5.15",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY FRES CA"
+    },
+    {
+        "tx_id": "384",
+        "date": "6/13/13",
+        "amount": "-53.04",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/12 TEXACO SOMEPLACE CA"
+    },
+    {
+        "tx_id": "383",
+        "date": "6/13/13",
+        "amount": "-5.38",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/12 PIZZA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "382",
+        "date": "6/13/13",
+        "amount": "-14.89",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/12 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "381",
+        "date": "6/12/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "380",
+        "date": "6/12/13",
+        "amount": "-9.09",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "379",
+        "date": "6/12/13",
+        "amount": "-18.33",
+        "check_number": "",
+        "description": "POS PURCHASE - WAL MART NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "378",
+        "date": "6/12/13",
+        "amount": "-7.45",
+        "check_number": "",
+        "description": "POS PURCHASE - ULTA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "377",
+        "date": "6/12/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER TO LASTNAME S SAVINGS REF #OPETPWWRF2"
+    },
+    {
+        "tx_id": "376",
+        "date": "6/12/13",
+        "amount": "-7.95",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/10 WEBSITE.COM-3927870 OK"
+    },
+    {
+        "tx_id": "375",
+        "date": "6/11/13",
+        "amount": "-33.18",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "374",
+        "date": "6/11/13",
+        "amount": "-22.5",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/10 INTERNET COMMUNICATIO-244-1111 VA"
+    },
+    {
+        "tx_id": "373",
+        "date": "6/10/13",
+        "amount": "-38.32",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "372",
+        "date": "6/10/13",
+        "amount": "-56.75",
+        "check_number": "",
+        "description": "SOMEPLACE CITY DEBITSA Some Guy"
+    },
+    {
+        "tx_id": "371",
+        "date": "6/10/13",
+        "amount": "-102.49",
+        "check_number": "",
+        "description": "PHONE PaymentMYW9E SOME GAL"
+    },
+    {
+        "tx_id": "370",
+        "date": "6/10/13",
+        "amount": "-3.99",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/08 Video 216-1072 WA"
+    },
+    {
+        "tx_id": "369",
+        "date": "6/10/13",
+        "amount": "-10.29",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "368",
+        "date": "6/10/13",
+        "amount": "-35",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/06 PEDIATRICIAN SOMEPLACE CA"
+    },
+    {
+        "tx_id": "367",
+        "date": "6/7/13",
+        "amount": "-10",
+        "check_number": "",
+        "description": "WITHDRAWAL MADE IN A BRANCH/STORE"
+    },
+    {
+        "tx_id": "366",
+        "date": "6/7/13",
+        "amount": "-25.89",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/07 MKTPLACE PM AMZN.COM/BILL WA"
+    },
+    {
+        "tx_id": "365",
+        "date": "6/7/13",
+        "amount": "-79.72",
+        "check_number": "",
+        "description": "POS PURCHASE - JOYRIDE BIKES SOMEPLACE CA"
+    },
+    {
+        "tx_id": "364",
+        "date": "6/7/13",
+        "amount": "-4.26",
+        "check_number": "",
+        "description": "POS PURCHASE - DOLLAR TREE STO SOMEPLACE CA"
+    },
+    {
+        "tx_id": "363",
+        "date": "6/7/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEJZQ9KBZ TO RENT ON6/06/13"
+    },
+    {
+        "tx_id": "362",
+        "date": "6/7/13",
+        "amount": "-6.39",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/06 TWIZLBERRY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "361",
+        "date": "6/7/13",
+        "amount": "-5",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/06 PHARMACY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "360",
+        "date": "6/6/13",
+        "amount": "-20",
+        "check_number": "",
+        "description": "ATM WITHDRAWAL - NORTH MAIN SOMEPLACE CA"
+    },
+    {
+        "tx_id": "359",
+        "date": "6/6/13",
+        "amount": "-5.32",
+        "check_number": "",
+        "description": "POS PURCHASE - FAMILY DOLLAR SOMEPLACE CA"
+    },
+    {
+        "tx_id": "358",
+        "date": "6/6/13",
+        "amount": "-8.51",
+        "check_number": "",
+        "description": "POS PURCHASE - WAL MART NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "357",
+        "date": "6/5/13",
+        "amount": "-79.51",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "356",
+        "date": "6/5/13",
+        "amount": "-27.93",
+        "check_number": "",
+        "description": "POS PURCHASE - FAMILY DOLLAR SOMEPLACE CA"
+    },
+    {
+        "tx_id": "355",
+        "date": "6/5/13",
+        "amount": "-11.76",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/04 WENDYS #8838 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "354",
+        "date": "6/5/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "353",
+        "date": "6/4/13",
+        "amount": "-2.12",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "352",
+        "date": "6/3/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "351",
+        "date": "6/3/13",
+        "amount": "-5.37",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE6/01 MCDONALD'S SOMEPLACE CA"
+    },
+    {
+        "tx_id": "350",
+        "date": "5/29/13",
+        "amount": "-2.1",
+        "check_number": "",
+        "description": "POS PURCHASE - LOWES SOMEPLACE CA"
+    },
+    {
+        "tx_id": "349",
+        "date": "5/28/13",
+        "amount": "-25.56",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/25 SPORTING GOODS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "348",
+        "date": "5/28/13",
+        "amount": "-53.47",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/25 CHEVRON SOMEPLACE CA"
+    },
+    {
+        "tx_id": "347",
+        "date": "5/28/13",
+        "amount": "-22.5",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/24 INTERNET COMMUNICATIO-244-1111 VA"
+    },
+    {
+        "tx_id": "346",
+        "date": "5/28/13",
+        "amount": "-2.69",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/24 BURGERS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "345",
+        "date": "5/24/13",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "344",
+        "date": "5/24/13",
+        "amount": "-1.98",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "343",
+        "date": "5/24/13",
+        "amount": "-4.93",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/22 RESTURAUNT SOMEPLACE CA"
+    },
+    {
+        "tx_id": "342",
+        "date": "5/23/13",
+        "amount": "-6.12",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "341",
+        "date": "5/23/13",
+        "amount": "-19.44",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "340",
+        "date": "5/21/13",
+        "amount": "-84.11",
+        "check_number": "",
+        "description": "PHONE PaymentSMT9Q SOME GAL"
+    },
+    {
+        "tx_id": "339",
+        "date": "5/20/13",
+        "amount": "-8.02",
+        "check_number": "",
+        "description": "POS PURCHASE - SOMEPLACE IMPL SOMEPLACE CA"
+    },
+    {
+        "tx_id": "338",
+        "date": "5/20/13",
+        "amount": "-4.25",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/17 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "337",
+        "date": "5/17/13",
+        "amount": "-82.8",
+        "check_number": "",
+        "description": "Lowes CC LWS EPAY"
+    },
+    {
+        "tx_id": "336",
+        "date": "5/17/13",
+        "amount": "-2.9",
+        "check_number": "",
+        "description": "POS PURCHASE - WAL MART SOCAH CA"
+    },
+    {
+        "tx_id": "335",
+        "date": "5/17/13",
+        "amount": "-47.29",
+        "check_number": "",
+        "description": "POS PURCHASE - SOMEPLACE SINCLAIR SOMEPLACE CA"
+    },
+    {
+        "tx_id": "334",
+        "date": "5/17/13",
+        "amount": "-6.19",
+        "check_number": "",
+        "description": "POS PURCHASE - SOMEPLACE SINCLAIR SOMEPLACE CA"
+    },
+    {
+        "tx_id": "333",
+        "date": "5/17/13",
+        "amount": "-8.69",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/16 PANDA EXPRESS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "332",
+        "date": "5/17/13",
+        "amount": "-3.09",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "331",
+        "date": "5/16/13",
+        "amount": "-12.58",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "330",
+        "date": "5/16/13",
+        "amount": "-3.19",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/15 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "329",
+        "date": "5/16/13",
+        "amount": "-11.34",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/14 A & W RESTAURANT L SOMEPLACE CA"
+    },
+    {
+        "tx_id": "328",
+        "date": "5/15/13",
+        "amount": "-49.2",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "327",
+        "date": "5/15/13",
+        "amount": "-10.68",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/14 TEXACO SOMEPLACE CA"
+    },
+    {
+        "tx_id": "326",
+        "date": "5/15/13",
+        "amount": "79.89",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis BOFS709BUXSZIYN payments.ONLINE.COM ID#BOFS709BUXSZIYN"
+    },
+    {
+        "tx_id": "325",
+        "date": "5/14/13",
+        "amount": "-30.8",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "324",
+        "date": "5/13/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "323",
+        "date": "5/13/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER TO LASTNAME S SAVINGS REF #OPEMWK5CDV"
+    },
+    {
+        "tx_id": "322",
+        "date": "5/13/13",
+        "amount": "-25.79",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "321",
+        "date": "5/13/13",
+        "amount": "-11.06",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/10 ORSON GYGI STORE & SALT LAKE CIT CA"
+    },
+    {
+        "tx_id": "320",
+        "date": "5/13/13",
+        "amount": "-7.95",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/10 WEBSITE.COM-3927870 OK"
+    },
+    {
+        "tx_id": "319",
+        "date": "5/13/13",
+        "amount": "-3.22",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/10 ARBY'S #1663 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "318",
+        "date": "5/10/13",
+        "amount": "-90",
+        "check_number": "",
+        "description": "Cash eWithdrawal in Branch/Store - S MAIN ST SOMEPLACE CA"
+    },
+    {
+        "tx_id": "317",
+        "date": "5/10/13",
+        "amount": "-8.06",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super SOCAH CA"
+    },
+    {
+        "tx_id": "316",
+        "date": "5/10/13",
+        "amount": "-5.32",
+        "check_number": "",
+        "description": "POS PURCHASE - USPS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "315",
+        "date": "5/10/13",
+        "amount": "-22.15",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/08 PIZZA HCA #022569 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "314",
+        "date": "5/9/13",
+        "amount": "-331.77",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "313",
+        "date": "5/9/13",
+        "amount": "-4.89",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/08 TWIZLBERRY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "312",
+        "date": "5/9/13",
+        "amount": "-2.69",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/07 BURGERS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "311",
+        "date": "5/8/13",
+        "amount": "-72.51",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "310",
+        "date": "5/8/13",
+        "amount": "-10.2",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "309",
+        "date": "5/8/13",
+        "amount": "-10.13",
+        "check_number": "",
+        "description": "POS PURCHASE - FAMILY DOLLAR SOMEPLACE CA"
+    },
+    {
+        "tx_id": "308",
+        "date": "5/8/13",
+        "amount": "-49.81",
+        "check_number": "",
+        "description": "POS PURCHASE - FLYING J OGDEN CA"
+    },
+    {
+        "tx_id": "307",
+        "date": "5/8/13",
+        "amount": "-30",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/07 HEALTHY EYES OF CA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "306",
+        "date": "5/7/13",
+        "amount": "-10.88",
+        "check_number": "165",
+        "description": "CHECK # 165"
+    },
+    {
+        "tx_id": "305",
+        "date": "5/7/13",
+        "amount": "-75.75",
+        "check_number": "",
+        "description": "SOMEPLACE CITY DEBITSA Some Guy"
+    },
+    {
+        "tx_id": "304",
+        "date": "5/6/13",
+        "amount": "-420.88",
+        "check_number": "166",
+        "description": "CHECK # 166"
+    },
+    {
+        "tx_id": "303",
+        "date": "5/6/13",
+        "amount": "-22.56",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "302",
+        "date": "5/6/13",
+        "amount": "-4.6",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/04 ISLAND MARKET SOMEPLACE CA"
+    },
+    {
+        "tx_id": "301",
+        "date": "5/6/13",
+        "amount": "-50",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/04 INTERNET COMMUNICATIO-244-1111 VA"
+    },
+    {
+        "tx_id": "300",
+        "date": "5/6/13",
+        "amount": "-46.48",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "299",
+        "date": "5/6/13",
+        "amount": "-7.19",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "298",
+        "date": "5/6/13",
+        "amount": "-64.25",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "297",
+        "date": "5/6/13",
+        "amount": "-6.5",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/03 CINE FOUR THEATER SOMEPLACE CA"
+    },
+    {
+        "tx_id": "296",
+        "date": "5/3/13",
+        "amount": "-26.67",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "295",
+        "date": "5/3/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE5F7P3FV TO RENT ON5/03/13"
+    },
+    {
+        "tx_id": "294",
+        "date": "5/3/13",
+        "amount": "-15.97",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "293",
+        "date": "5/3/13",
+        "amount": "-13.76",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE5/01 FORMOSA RESTAURANT SOMEPLACE CA"
+    },
+    {
+        "tx_id": "292",
+        "date": "5/3/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "291",
+        "date": "5/2/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "290",
+        "date": "5/2/13",
+        "amount": "-700",
+        "check_number": "",
+        "description": "CREDIT CARD MOBIL Some Guy"
+    },
+    {
+        "tx_id": "289",
+        "date": "5/1/13",
+        "amount": "-37.65",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "288",
+        "date": "4/30/13",
+        "amount": "-10.63",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/30 NOODLES & CO SOMEPLACE CA"
+    },
+    {
+        "tx_id": "287",
+        "date": "4/30/13",
+        "amount": "-14.91",
+        "check_number": "",
+        "description": "POS PURCHASE - GARDEN NURSERY CA"
+    },
+    {
+        "tx_id": "286",
+        "date": "4/30/13",
+        "amount": "-15.86",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "285",
+        "date": "4/30/13",
+        "amount": "700",
+        "check_number": "",
+        "description": "ATM CASH DEPOSIT - NORTH MAIN SOMEPLACE CA"
+    },
+    {
+        "tx_id": "284",
+        "date": "4/29/13",
+        "amount": "-50.44",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/27 CHEVRON SOMEPLACE CA"
+    },
+    {
+        "tx_id": "283",
+        "date": "4/26/13",
+        "amount": "-35",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/24 PHARMACY GY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "282",
+        "date": "4/24/13",
+        "amount": "-300",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "281",
+        "date": "4/24/13",
+        "amount": "-5.94",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "280",
+        "date": "4/24/13",
+        "amount": "-10",
+        "check_number": "",
+        "description": "POS PURCHASE - WAL MART NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "279",
+        "date": "4/24/13",
+        "amount": "-250",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/22 HOSPITAL CA"
+    },
+    {
+        "tx_id": "278",
+        "date": "4/24/13",
+        "amount": "65",
+        "check_number": "",
+        "description": "ATM CASH DEPOSIT - N. MAIN SOMEPLACE CA"
+    },
+    {
+        "tx_id": "277",
+        "date": "4/23/13",
+        "amount": "-196.4",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/22 UNIVERSITY"
+    },
+    {
+        "tx_id": "276",
+        "date": "4/22/13",
+        "amount": "-35.51",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/20 FIRE HOUSE PIZZERI SOMEPLACE CA"
+    },
+    {
+        "tx_id": "275",
+        "date": "4/22/13",
+        "amount": "-2.6",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "274",
+        "date": "4/19/13",
+        "amount": "-40",
+        "check_number": "",
+        "description": "ATM WITHDRAWAL - NORTH MAIN SOMEPLACE CA"
+    },
+    {
+        "tx_id": "273",
+        "date": "4/18/13",
+        "amount": "-41.98",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "272",
+        "date": "4/17/13",
+        "amount": "-10.63",
+        "check_number": "",
+        "description": "POS PURCHASE - LOWES SOMEPLACE CA"
+    },
+    {
+        "tx_id": "271",
+        "date": "4/17/13",
+        "amount": "-3.08",
+        "check_number": "",
+        "description": "POS PURCHASE - MACEY S SOMEPLACE SOMEPLACE CA"
+    },
+    {
+        "tx_id": "270",
+        "date": "4/17/13",
+        "amount": "851.78",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis payments.ONLINE.COM ID"
+    },
+    {
+        "tx_id": "269",
+        "date": "4/15/13",
+        "amount": "-536.5",
+        "check_number": "164",
+        "description": "CHECK # 164"
+    },
+    {
+        "tx_id": "268",
+        "date": "4/15/13",
+        "amount": "-2.95",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/15 Video 216-1072 WA"
+    },
+    {
+        "tx_id": "267",
+        "date": "4/15/13",
+        "amount": "-25.57",
+        "check_number": "",
+        "description": "POS PURCHASE - THE RED BALLOON PROVO CA"
+    },
+    {
+        "tx_id": "266",
+        "date": "4/15/13",
+        "amount": "-6.01",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/13 THE OLIVE GARD0001 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "265",
+        "date": "4/15/13",
+        "amount": "-2.2",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/11 CHARLIES ICE CREAM SOMEPLACE CA"
+    },
+    {
+        "tx_id": "264",
+        "date": "4/12/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "263",
+        "date": "4/12/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER TO LASTNAME S SAVINGS REF #OPEXLG2LBZ"
+    },
+    {
+        "tx_id": "262",
+        "date": "4/11/13",
+        "amount": "-33.56",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "261",
+        "date": "4/11/13",
+        "amount": "-6.96",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "260",
+        "date": "4/11/13",
+        "amount": "-62.66",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "259",
+        "date": "4/11/13",
+        "amount": "-7.95",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/09 WEBSITE.COM-3927870 OK"
+    },
+    {
+        "tx_id": "258",
+        "date": "4/10/13",
+        "amount": "-8.66",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/09 ARCTIC CIRCLE SOMEPLACE CA"
+    },
+    {
+        "tx_id": "257",
+        "date": "4/8/13",
+        "amount": "-52.36",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/07 MAVERIK #359 PERRY CA"
+    },
+    {
+        "tx_id": "256",
+        "date": "4/8/13",
+        "amount": "-21.34",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/05 PAPA JOHNS # 3604.-254-5656 CA"
+    },
+    {
+        "tx_id": "255",
+        "date": "4/5/13",
+        "amount": "-56.75",
+        "check_number": "",
+        "description": "SOMEPLACE CITY DEBITSA Some Guy"
+    },
+    {
+        "tx_id": "254",
+        "date": "4/5/13",
+        "amount": "-111.14",
+        "check_number": "",
+        "description": "PHONE PaymentMYW9S SOME GAL"
+    },
+    {
+        "tx_id": "253",
+        "date": "4/5/13",
+        "amount": "-127.81",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "252",
+        "date": "4/5/13",
+        "amount": "-10.67",
+        "check_number": "",
+        "description": "POS PURCHASE - IKEA DRAPER DRAPER CA"
+    },
+    {
+        "tx_id": "251",
+        "date": "4/5/13",
+        "amount": "-52.32",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/04 AMZ*Best Price Con amzn.com/pmts WA"
+    },
+    {
+        "tx_id": "250",
+        "date": "4/5/13",
+        "amount": "-45",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/04 INTERNET COMMUNICATIO-244-1111 VA"
+    },
+    {
+        "tx_id": "249",
+        "date": "4/4/13",
+        "amount": "-550",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "248",
+        "date": "4/4/13",
+        "amount": "-13.6",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "247",
+        "date": "4/4/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE2HWJGPL TO RENT ON4/03/13"
+    },
+    {
+        "tx_id": "246",
+        "date": "4/3/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "245",
+        "date": "4/1/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "244",
+        "date": "4/1/13",
+        "amount": "-3.46",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "243",
+        "date": "4/1/13",
+        "amount": "-8.71",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE3/30 JAMBA JUICE SALT LAKE CIT CA"
+    },
+    {
+        "tx_id": "242",
+        "date": "4/1/13",
+        "amount": "-35",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE3/29 PHARMACY GY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "241",
+        "date": "3/29/13",
+        "amount": "-49.69",
+        "check_number": "",
+        "description": "POS PURCHASE - EXXONMOBIL POS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "240",
+        "date": "3/29/13",
+        "amount": "-8.99",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "239",
+        "date": "3/29/13",
+        "amount": "-27.4",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE3/28 REDWOOD DENTAL, LL PROVIDENCE CA"
+    },
+    {
+        "tx_id": "238",
+        "date": "3/29/13",
+        "amount": "-7.99",
+        "check_number": "",
+        "description": "RECUR DEBIT CRD PMT03/28 HLU*HULUPLUS-8015441 CA"
+    },
+    {
+        "tx_id": "237",
+        "date": "3/28/13",
+        "amount": "-6.12",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "236",
+        "date": "3/28/13",
+        "amount": "-4.82",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE3/26 A & W RESTAURANT L SOMEPLACE CA"
+    },
+    {
+        "tx_id": "235",
+        "date": "3/26/13",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "234",
+        "date": "3/26/13",
+        "amount": "-48.48",
+        "check_number": "",
+        "description": "KOHL'S DEPT STRS CHG PYMT LASTNAME FNAME"
+    },
+    {
+        "tx_id": "233",
+        "date": "3/26/13",
+        "amount": "-16.73",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "232",
+        "date": "3/25/13",
+        "amount": "482.35",
+        "check_number": "",
+        "description": "Square IncM2 M153560451 Some Gal"
+    },
+    {
+        "tx_id": "231",
+        "date": "3/22/13",
+        "amount": "-35",
+        "check_number": "",
+        "description": "OVERDRAFT FEE FOR ITEM $38.513/21 ELECTRICITY BILLACH PAY Some Gal"
+    },
+    {
+        "tx_id": "230",
+        "date": "3/21/13",
+        "amount": "-12.5",
+        "check_number": "",
+        "description": "OVERDRAFT TRANSFER FEE"
+    },
+    {
+        "tx_id": "229",
+        "date": "3/21/13",
+        "amount": "35",
+        "check_number": "",
+        "description": "OVERDRAFT PROTECTIONFER FROM DEP ACT"
+    },
+    {
+        "tx_id": "228",
+        "date": "3/21/13",
+        "amount": "-38.51",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "227",
+        "date": "3/21/13",
+        "amount": "-161.43",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "226",
+        "date": "3/21/13",
+        "amount": "-1000",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "225",
+        "date": "3/20/13",
+        "amount": "-7.2",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "224",
+        "date": "3/18/13",
+        "amount": "-114.82",
+        "check_number": "162",
+        "description": "CHECK # 162"
+    },
+    {
+        "tx_id": "223",
+        "date": "3/18/13",
+        "amount": "-40",
+        "check_number": "",
+        "description": "ATM WITHDRAWAL - WTH S WEST CA"
+    },
+    {
+        "tx_id": "222",
+        "date": "3/18/13",
+        "amount": "1038",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "221",
+        "date": "3/15/13",
+        "amount": "-400",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "220",
+        "date": "3/13/13",
+        "amount": "-25.49",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "219",
+        "date": "3/12/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "218",
+        "date": "3/12/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER TO LASTNAME S SAVINGS REF #OPEG3WKPTZ"
+    },
+    {
+        "tx_id": "217",
+        "date": "3/12/13",
+        "amount": "432",
+        "check_number": "",
+        "description": "ca TAX EFT LASTNAME,FIRST#####1000"
+    },
+    {
+        "tx_id": "216",
+        "date": "3/11/13",
+        "amount": "-454.16",
+        "check_number": "163",
+        "description": "CHECK # 163"
+    },
+    {
+        "tx_id": "215",
+        "date": "3/11/13",
+        "amount": "-624",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "214",
+        "date": "3/11/13",
+        "amount": "-856",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "213",
+        "date": "3/11/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEC6TMNH7 TO RENT ON3/09/13"
+    },
+    {
+        "tx_id": "212",
+        "date": "3/5/13",
+        "amount": "-52.27",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "211",
+        "date": "3/5/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "210",
+        "date": "3/4/13",
+        "amount": "-55",
+        "check_number": "161",
+        "description": "CHECK # 161"
+    },
+    {
+        "tx_id": "209",
+        "date": "3/1/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "208",
+        "date": "2/28/13",
+        "amount": "338",
+        "check_number": "",
+        "description": "FINDER LASTNAME"
+    },
+    {
+        "tx_id": "207",
+        "date": "2/27/13",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "206",
+        "date": "2/27/13",
+        "amount": "-2.44",
+        "check_number": "",
+        "description": "ca STATE UNIVE WEBCKFEB25 SOME GAL"
+    },
+    {
+        "tx_id": "205",
+        "date": "2/22/13",
+        "amount": "-650",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "204",
+        "date": "2/22/13",
+        "amount": "70.02",
+        "check_number": "",
+        "description": "ONLINE TRANSFER FROM LASTNAME S SAVINGS REF #IBEMVTXVS7 ON2/22/13"
+    },
+    {
+        "tx_id": "203",
+        "date": "2/21/13",
+        "amount": "-47.13",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "202",
+        "date": "2/20/13",
+        "amount": "-8",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE2/19 SQ *HAIRDRESSER SOMEPLACE CA"
+    },
+    {
+        "tx_id": "201",
+        "date": "2/19/13",
+        "amount": "-8.63",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLACE  SOMEPLACE CA"
+    },
+    {
+        "tx_id": "200",
+        "date": "2/19/13",
+        "amount": "-32.25",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "199",
+        "date": "2/13/13",
+        "amount": "-2.13",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE2/12 MCDONALD'S SOMEPLACE CA"
+    },
+    {
+        "tx_id": "198",
+        "date": "2/12/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "197",
+        "date": "2/12/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPE2HGBXQP TO SAVINGS"
+    },
+    {
+        "tx_id": "196",
+        "date": "2/11/13",
+        "amount": "-806.11",
+        "check_number": "",
+        "description": "Lowes CC LWS EPAY"
+    },
+    {
+        "tx_id": "195",
+        "date": "2/11/13",
+        "amount": "-914.67",
+        "check_number": "160",
+        "description": "CHECK # 160"
+    },
+    {
+        "tx_id": "194",
+        "date": "2/11/13",
+        "amount": "-37.18",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY SOMEPLACE CA"
+    },
+    {
+        "tx_id": "193",
+        "date": "2/8/13",
+        "amount": "-58.93",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "192",
+        "date": "2/8/13",
+        "amount": "-219.84",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "191",
+        "date": "2/8/13",
+        "amount": "833.1",
+        "check_number": "",
+        "description": "REPUBLIC TRS ERD FED Some Guy"
+    },
+    {
+        "tx_id": "190",
+        "date": "2/5/13",
+        "amount": "-124",
+        "check_number": "159",
+        "description": "CHECK # 159"
+    },
+    {
+        "tx_id": "189",
+        "date": "2/5/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBETNSV88Y TO RENT ON2/05/13"
+    },
+    {
+        "tx_id": "188",
+        "date": "2/5/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "187",
+        "date": "2/4/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "186",
+        "date": "1/28/13",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "185",
+        "date": "1/25/13",
+        "amount": "-800",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "184",
+        "date": "1/24/13",
+        "amount": "800",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEG3HN3Z4 FROM SAVINGS ON1/24/13"
+    },
+    {
+        "tx_id": "183",
+        "date": "1/24/13",
+        "amount": "17.2",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis DPI36DJOH6Y1OUH payments.ONLINE.COM ID#DPI36DJOH6Y1OUH"
+    },
+    {
+        "tx_id": "182",
+        "date": "1/14/13",
+        "amount": "-340",
+        "check_number": "156",
+        "description": "CHECK # 156"
+    },
+    {
+        "tx_id": "181",
+        "date": "1/14/13",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "180",
+        "date": "1/14/13",
+        "amount": "-420",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "179",
+        "date": "1/14/13",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEQRKGDXL TO SAVINGS"
+    },
+    {
+        "tx_id": "178",
+        "date": "1/11/13",
+        "amount": "-150",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "177",
+        "date": "1/10/13",
+        "amount": "74.23",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis QKNH3LVV9F2PFSZ payments.ONLINE.COM ID#QKNH3LVV9F2PFSZ"
+    },
+    {
+        "tx_id": "176",
+        "date": "1/9/13",
+        "amount": "-1527.04",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "175",
+        "date": "1/9/13",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEJYFQJD4 TO RENT ON1/09/13"
+    },
+    {
+        "tx_id": "174",
+        "date": "1/8/13",
+        "amount": "-7.56",
+        "check_number": "158",
+        "description": "CHECK # 158"
+    },
+    {
+        "tx_id": "173",
+        "date": "1/8/13",
+        "amount": "1527.04",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "172",
+        "date": "1/7/13",
+        "amount": "-783.52",
+        "check_number": "157",
+        "description": "CHECK # 157"
+    },
+    {
+        "tx_id": "171",
+        "date": "1/4/13",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "170",
+        "date": "1/2/13",
+        "amount": "-12.5",
+        "check_number": "",
+        "description": "OVERDRAFT TRANSFER FEE"
+    },
+    {
+        "tx_id": "169",
+        "date": "1/2/13",
+        "amount": "37.5",
+        "check_number": "",
+        "description": "OVERDRAFT PROTECTIONFER FROM DEP ACT"
+    },
+    {
+        "tx_id": "168",
+        "date": "1/2/13",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "167",
+        "date": "1/2/13",
+        "amount": "-291.82",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "166",
+        "date": "12/24/12",
+        "amount": "-54.88",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "165",
+        "date": "12/24/12",
+        "amount": "-450",
+        "check_number": "",
+        "description": "WITHDRAWAL MADE IN A BRANCH/STORE"
+    },
+    {
+        "tx_id": "164",
+        "date": "12/21/12",
+        "amount": "-10.65",
+        "check_number": "147",
+        "description": "CHECK # 147"
+    },
+    {
+        "tx_id": "163",
+        "date": "12/13/12",
+        "amount": "-1175",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "162",
+        "date": "12/12/12",
+        "amount": "-25",
+        "check_number": "143",
+        "description": "CHECK # 143"
+    },
+    {
+        "tx_id": "161",
+        "date": "12/12/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "160",
+        "date": "12/12/12",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEC644KJB TO SAVINGS"
+    },
+    {
+        "tx_id": "159",
+        "date": "12/11/12",
+        "amount": "175.07",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "158",
+        "date": "12/11/12",
+        "amount": "900",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "157",
+        "date": "12/10/12",
+        "amount": "-100",
+        "check_number": "153",
+        "description": "CHECK # 153"
+    },
+    {
+        "tx_id": "156",
+        "date": "12/7/12",
+        "amount": "-900",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "155",
+        "date": "12/5/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE2GW5KPG TO RENT ON2/05/12"
+    },
+    {
+        "tx_id": "154",
+        "date": "12/5/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "153",
+        "date": "12/4/12",
+        "amount": "-1.99",
+        "check_number": "",
+        "description": "RECISIO IAT PAYPALT8J26HE5J9M6 Some Guy"
+    },
+    {
+        "tx_id": "152",
+        "date": "12/3/12",
+        "amount": "-12.5",
+        "check_number": "",
+        "description": "OVERDRAFT TRANSFER FEE"
+    },
+    {
+        "tx_id": "151",
+        "date": "12/3/12",
+        "amount": "37.5",
+        "check_number": "",
+        "description": "OVERDRAFT PROTECTIONFER FROM DEP ACT"
+    },
+    {
+        "tx_id": "150",
+        "date": "12/3/12",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "149",
+        "date": "11/28/12",
+        "amount": "0.02",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "148",
+        "date": "11/23/12",
+        "amount": "-800",
+        "check_number": "",
+        "description": "CREDIT CARD Some Guy"
+    },
+    {
+        "tx_id": "147",
+        "date": "11/20/12",
+        "amount": "-16",
+        "check_number": "152",
+        "description": "CHECK # 152"
+    },
+    {
+        "tx_id": "146",
+        "date": "11/14/12",
+        "amount": "-29.35",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "145",
+        "date": "11/14/12",
+        "amount": "-340",
+        "check_number": "148",
+        "description": "CHECK # 148"
+    },
+    {
+        "tx_id": "144",
+        "date": "11/13/12",
+        "amount": "-150",
+        "check_number": "149",
+        "description": "CHECK # 149"
+    },
+    {
+        "tx_id": "143",
+        "date": "11/13/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "142",
+        "date": "11/13/12",
+        "amount": "-428",
+        "check_number": "142",
+        "description": "CHECK # 142"
+    },
+    {
+        "tx_id": "141",
+        "date": "11/13/12",
+        "amount": "-450",
+        "check_number": "151",
+        "description": "CHECK # 151"
+    },
+    {
+        "tx_id": "140",
+        "date": "11/13/12",
+        "amount": "-324.98",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEQR2X3TY TO SAVINGS EVEN THOUSAND"
+    },
+    {
+        "tx_id": "139",
+        "date": "11/13/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEMTZCL9C TO RENT ON1/12/12"
+    },
+    {
+        "tx_id": "138",
+        "date": "11/13/12",
+        "amount": "-117.1",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE1/12 KOHL'S DEPARTMENT MENOMONEE FAL WI"
+    },
+    {
+        "tx_id": "137",
+        "date": "11/13/12",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEMTZBNTM TO SAVINGS"
+    },
+    {
+        "tx_id": "136",
+        "date": "11/5/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "135",
+        "date": "11/2/12",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "134",
+        "date": "11/2/12",
+        "amount": "-2.5",
+        "check_number": "",
+        "description": "NON-WELLS FARGO ATM TRANSACTION FEE"
+    },
+    {
+        "tx_id": "133",
+        "date": "11/2/12",
+        "amount": "-63",
+        "check_number": "",
+        "description": "ATM WITHDRAWAL - S. LINCOLNFIRST FEDEJEROME ID"
+    },
+    {
+        "tx_id": "132",
+        "date": "10/30/12",
+        "amount": "-31.87",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "131",
+        "date": "10/29/12",
+        "amount": "-1546.38",
+        "check_number": "",
+        "description": "CREDIT CARD SOME GAL"
+    },
+    {
+        "tx_id": "130",
+        "date": "10/26/12",
+        "amount": "1850.44",
+        "check_number": "",
+        "description": "COLLEGE INVOICE FNAME LASTNAME"
+    },
+    {
+        "tx_id": "129",
+        "date": "10/25/12",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "128",
+        "date": "10/24/12",
+        "amount": "-12.98",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "127",
+        "date": "10/22/12",
+        "amount": "-236.56",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE0/19 ENTERPRISE RENT-A- ATLANTA GA"
+    },
+    {
+        "tx_id": "126",
+        "date": "10/15/12",
+        "amount": "-7793.05",
+        "check_number": "",
+        "description": "CREDIT CARD SOME GAL"
+    },
+    {
+        "tx_id": "125",
+        "date": "10/15/12",
+        "amount": "400",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE2GH2WD5 FROM SAVINGS VIA MOBILE"
+    },
+    {
+        "tx_id": "124",
+        "date": "10/12/12",
+        "amount": "-80",
+        "check_number": "140",
+        "description": "CHECK # 140"
+    },
+    {
+        "tx_id": "123",
+        "date": "10/12/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "122",
+        "date": "10/12/12",
+        "amount": "-100",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEQQSSDPN TO SAVINGS ON0/12/12"
+    },
+    {
+        "tx_id": "121",
+        "date": "10/12/12",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEMTR56NW TO SAVINGS"
+    },
+    {
+        "tx_id": "120",
+        "date": "10/12/12",
+        "amount": "1946.25",
+        "check_number": "",
+        "description": "COLLEGE INVOICE FNAME LASTNAME"
+    },
+    {
+        "tx_id": "119",
+        "date": "10/11/12",
+        "amount": "-252",
+        "check_number": "139",
+        "description": "CHECK # 139"
+    },
+    {
+        "tx_id": "118",
+        "date": "10/11/12",
+        "amount": "7000",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "117",
+        "date": "10/10/12",
+        "amount": "-1947",
+        "check_number": "",
+        "description": "CREDIT CARD SOME GAL"
+    },
+    {
+        "tx_id": "116",
+        "date": "10/10/12",
+        "amount": "100",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE5CHBMPC FROM SAVINGS COVER MYSELF"
+    },
+    {
+        "tx_id": "115",
+        "date": "10/9/12",
+        "amount": "-21.79",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "114",
+        "date": "10/9/12",
+        "amount": "-45.56",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "113",
+        "date": "10/4/12",
+        "amount": "-410",
+        "check_number": "",
+        "description": "Cash eWithdrawal in Branch/Store - N MAIN ST SOMEPLACE CA"
+    },
+    {
+        "tx_id": "112",
+        "date": "10/4/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEXJTZTMH TO RENT ON0/04/12"
+    },
+    {
+        "tx_id": "111",
+        "date": "10/3/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "110",
+        "date": "10/2/12",
+        "amount": "-60.75",
+        "check_number": "",
+        "description": "LIFE INSURANCE SOME GAL"
+    },
+    {
+        "tx_id": "109",
+        "date": "9/27/12",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "108",
+        "date": "9/20/12",
+        "amount": "-150",
+        "check_number": "",
+        "description": "CREDIT CARD SOME GAL"
+    },
+    {
+        "tx_id": "107",
+        "date": "9/17/12",
+        "amount": "-89.78",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "106",
+        "date": "9/17/12",
+        "amount": "-2251.13",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "105",
+        "date": "9/14/12",
+        "amount": "-125",
+        "check_number": "137",
+        "description": "CHECK # 137"
+    },
+    {
+        "tx_id": "104",
+        "date": "9/13/12",
+        "amount": "-24.42",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "103",
+        "date": "9/13/12",
+        "amount": "91.39",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis BYBA5MD8HB4OQM8 payments.ONLINE.COM ID#BYBA5MD8HB4OQM8"
+    },
+    {
+        "tx_id": "102",
+        "date": "9/12/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "101",
+        "date": "9/12/12",
+        "amount": "-25",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPE2G72WWJ TO SAVINGS"
+    },
+    {
+        "tx_id": "100",
+        "date": "9/11/12",
+        "amount": "-1204.15",
+        "check_number": "",
+        "description": "WF HOME MTG ACAO PAY Some Guy"
+    },
+    {
+        "tx_id": "99",
+        "date": "9/10/12",
+        "amount": "-400",
+        "check_number": "136",
+        "description": "CHECK # 136"
+    },
+    {
+        "tx_id": "98",
+        "date": "9/7/12",
+        "amount": "-22.72",
+        "check_number": "",
+        "description": "POS PURCHASE - Wal Mart Super NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "97",
+        "date": "9/7/12",
+        "amount": "-6.85",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE9/06 USPS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "96",
+        "date": "9/6/12",
+        "amount": "867.96",
+        "check_number": "",
+        "description": "Square IncM2 M131510052 Some Gal"
+    },
+    {
+        "tx_id": "95",
+        "date": "9/6/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "94",
+        "date": "8/28/12",
+        "amount": "-1400",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "93",
+        "date": "8/27/12",
+        "amount": "1444.64",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "92",
+        "date": "8/24/12",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "91",
+        "date": "8/24/12",
+        "amount": "-1950",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "90",
+        "date": "8/21/12",
+        "amount": "-137.27",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "89",
+        "date": "8/21/12",
+        "amount": "1944.03",
+        "check_number": "",
+        "description": "Square IncS2 M130279181 Some Gal"
+    },
+    {
+        "tx_id": "88",
+        "date": "8/20/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "87",
+        "date": "8/20/12",
+        "amount": "-40",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEG27LHWT TO SAVINGS EMERGENCY FUND"
+    },
+    {
+        "tx_id": "86",
+        "date": "8/17/12",
+        "amount": "-8.55",
+        "check_number": "",
+        "description": "POS PURCHASE - SAM S Club SOMEPLACE CA"
+    },
+    {
+        "tx_id": "85",
+        "date": "8/16/12",
+        "amount": "818.12",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis QKIGU8B0SV0M5WV payments.ONLINE.COM ID#QKIGU8B0SV0M5WV"
+    },
+    {
+        "tx_id": "84",
+        "date": "8/13/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "83",
+        "date": "8/9/12",
+        "amount": "-275",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "82",
+        "date": "8/7/12",
+        "amount": "-758.33",
+        "check_number": "134",
+        "description": "CHECK # 134"
+    },
+    {
+        "tx_id": "81",
+        "date": "8/6/12",
+        "amount": "-27.05",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "80",
+        "date": "8/6/12",
+        "amount": "-211.16",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "79",
+        "date": "8/6/12",
+        "amount": "275",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "78",
+        "date": "8/3/12",
+        "amount": "-970",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE87YWCK2 TO SAVINGS EMERGENCY FUND"
+    },
+    {
+        "tx_id": "77",
+        "date": "8/3/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE2FVX58M TO RENT ON8/03/12"
+    },
+    {
+        "tx_id": "76",
+        "date": "8/3/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "75",
+        "date": "8/1/12",
+        "amount": "-30",
+        "check_number": "133",
+        "description": "CHECK # 133"
+    },
+    {
+        "tx_id": "74",
+        "date": "7/31/12",
+        "amount": "20.01",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEG22S8G4 FROM SAVINGS FOOLISHNESS"
+    },
+    {
+        "tx_id": "73",
+        "date": "7/23/12",
+        "amount": "4.87",
+        "check_number": "",
+        "description": "ONLINE.COM Retail disLUEL60L1GTKG5Q payments.ONLINE.COM ID#XLUEL60L1GTKG5Q"
+    },
+    {
+        "tx_id": "72",
+        "date": "7/12/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "71",
+        "date": "7/10/12",
+        "amount": "-76.89",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "70",
+        "date": "7/9/12",
+        "amount": "-36.69",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "69",
+        "date": "7/9/12",
+        "amount": "-900",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "68",
+        "date": "7/9/12",
+        "amount": "-141.9",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE7/07 KOHL'S DEPARTMENT MENOMONEE FAL WI"
+    },
+    {
+        "tx_id": "67",
+        "date": "7/9/12",
+        "amount": "-100",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEJWX3W62 TO SAVINGS"
+    },
+    {
+        "tx_id": "66",
+        "date": "7/9/12",
+        "amount": "150",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEJWX4XDF FROM SAVINGS KOHLS"
+    },
+    {
+        "tx_id": "65",
+        "date": "7/6/12",
+        "amount": "-370.9",
+        "check_number": "132",
+        "description": "CHECK # 132"
+    },
+    {
+        "tx_id": "64",
+        "date": "7/6/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE5BPQSDT TO RENT ON7/05/12"
+    },
+    {
+        "tx_id": "63",
+        "date": "7/5/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "62",
+        "date": "6/26/12",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "61",
+        "date": "6/26/12",
+        "amount": "-42.94",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "60",
+        "date": "6/13/12",
+        "amount": "-1315.78",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "59",
+        "date": "6/12/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CAR LEASE PMTBX431 Some Guy"
+    },
+    {
+        "tx_id": "58",
+        "date": "6/12/12",
+        "amount": "1300",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEMSRHV94 FROM BUSINESS CHECKING MACBOOK AIR PURCHASE"
+    },
+    {
+        "tx_id": "57",
+        "date": "6/11/12",
+        "amount": "-15",
+        "check_number": "129",
+        "description": "CHECK # 129"
+    },
+    {
+        "tx_id": "56",
+        "date": "6/11/12",
+        "amount": "-446.34",
+        "check_number": "131",
+        "description": "CHECK # 131"
+    },
+    {
+        "tx_id": "55",
+        "date": "6/11/12",
+        "amount": "-2200",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "54",
+        "date": "6/11/12",
+        "amount": "10.15",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis P0OOIE9V0SXGZ46 payments.ONLINE.COM ID#P0OOIE9V0SXGZ46"
+    },
+    {
+        "tx_id": "53",
+        "date": "6/7/12",
+        "amount": "-100",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEFZMGPF7 TO SAVINGS"
+    },
+    {
+        "tx_id": "52",
+        "date": "6/6/12",
+        "amount": "-21.82",
+        "check_number": "",
+        "description": "GAS COMPANY GAS COMPANY SOME GAL"
+    },
+    {
+        "tx_id": "51",
+        "date": "6/6/12",
+        "amount": "410.86",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "50",
+        "date": "6/6/12",
+        "amount": "1385",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "49",
+        "date": "6/5/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CREDIT UNION CUTH TRANS Some Guy"
+    },
+    {
+        "tx_id": "48",
+        "date": "6/5/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBEMSQ3BS6 TO RENT ON6/05/12"
+    },
+    {
+        "tx_id": "47",
+        "date": "6/5/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "46",
+        "date": "5/29/12",
+        "amount": "29.69",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis QMFYCSKP43G0HE9 payments.ONLINE.COM ID#QMFYCSKP43G0HE9"
+    },
+    {
+        "tx_id": "45",
+        "date": "5/23/12",
+        "amount": "-1900",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "44",
+        "date": "5/21/12",
+        "amount": "150",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "43",
+        "date": "5/21/12",
+        "amount": "464.6",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis QSRJGNMZXFMWD79 payments.ONLINE.COM ID#QSRJGNMZXFMWD79"
+    },
+    {
+        "tx_id": "42",
+        "date": "5/18/12",
+        "amount": "-650",
+        "check_number": "128",
+        "description": "CHECK # 128"
+    },
+    {
+        "tx_id": "41",
+        "date": "5/18/12",
+        "amount": "97.25",
+        "check_number": "",
+        "description": "Square IncS2 Some Gal"
+    },
+    {
+        "tx_id": "40",
+        "date": "5/18/12",
+        "amount": "1300",
+        "check_number": "",
+        "description": "BANK DEPOSIT"
+    },
+    {
+        "tx_id": "39",
+        "date": "5/17/12",
+        "amount": "-400",
+        "check_number": "",
+        "description": "POS PURCHASE - CAR DEALER H SOMEPLACE CA"
+    },
+    {
+        "tx_id": "38",
+        "date": "5/16/12",
+        "amount": "-33.3",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "37",
+        "date": "5/16/12",
+        "amount": "583.5",
+        "check_number": "",
+        "description": "Square IncA2 Some Gal"
+    },
+    {
+        "tx_id": "36",
+        "date": "5/14/12",
+        "amount": "-350.34",
+        "check_number": "126",
+        "description": "CHECK # 126"
+    },
+    {
+        "tx_id": "35",
+        "date": "5/14/12",
+        "amount": "300",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBETLMR4ZK FROM SAVINGS WATER HEATER"
+    },
+    {
+        "tx_id": "34",
+        "date": "5/7/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CREDIT UNION CUTH TRANS Some Guy"
+    },
+    {
+        "tx_id": "33",
+        "date": "5/7/12",
+        "amount": "-1000",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "32",
+        "date": "5/7/12",
+        "amount": "-100",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPETLLB5LD TO SAVINGS"
+    },
+    {
+        "tx_id": "31",
+        "date": "5/7/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE2F5ZP3P TO RENT ON5/04/12"
+    },
+    {
+        "tx_id": "30",
+        "date": "5/3/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "29",
+        "date": "4/25/12",
+        "amount": "0.01",
+        "check_number": "",
+        "description": "INTEREST PAYMENT"
+    },
+    {
+        "tx_id": "28",
+        "date": "4/20/12",
+        "amount": "-15.15",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/19 CHEVRON SOMEPLACE CA"
+    },
+    {
+        "tx_id": "27",
+        "date": "4/16/12",
+        "amount": "-31.52",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "26",
+        "date": "4/16/12",
+        "amount": "-389.26",
+        "check_number": "125",
+        "description": "CHECK # 125"
+    },
+    {
+        "tx_id": "25",
+        "date": "4/16/12",
+        "amount": "-12.89",
+        "check_number": "",
+        "description": "POS PURCHASE - WAL MART NORTH SOMEPLACE CA"
+    },
+    {
+        "tx_id": "24",
+        "date": "4/16/12",
+        "amount": "-6.59",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/14 SOMEPLACE CA"
+    },
+    {
+        "tx_id": "23",
+        "date": "4/13/12",
+        "amount": "-11.61",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE4/12 PANDA EXPRESS SOMEPLACE CA"
+    },
+    {
+        "tx_id": "22",
+        "date": "4/9/12",
+        "amount": "-1000",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "21",
+        "date": "4/9/12",
+        "amount": "-100",
+        "check_number": "",
+        "description": "RECURRING TRANSFER REF #OPEMS8C7XT TO SAVINGS"
+    },
+    {
+        "tx_id": "20",
+        "date": "4/5/12",
+        "amount": "-360",
+        "check_number": "",
+        "description": "CREDIT UNION CUTH TRANS Some Guy"
+    },
+    {
+        "tx_id": "19",
+        "date": "4/5/12",
+        "amount": "33.62",
+        "check_number": "",
+        "description": "Square IncB2 Some Gal"
+    },
+    {
+        "tx_id": "18",
+        "date": "4/4/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE86ZQ8B9 TO RENT ON4/04/12"
+    },
+    {
+        "tx_id": "17",
+        "date": "4/4/12",
+        "amount": "5000",
+        "check_number": "",
+        "description": "DONATED PLASMA"
+    },
+    {
+        "tx_id": "16",
+        "date": "4/3/12",
+        "amount": "-3.48",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MRKTPLACE SOMEPLACE CA"
+    },
+    {
+        "tx_id": "15",
+        "date": "3/30/12",
+        "amount": "-39.18",
+        "check_number": "",
+        "description": "POS PURCHASE - SOMEPLACE REGIONAL SOMEPLACE CA"
+    },
+    {
+        "tx_id": "14",
+        "date": "3/26/12",
+        "amount": "-79.57",
+        "check_number": "124",
+        "description": "CHECK # 124"
+    },
+    {
+        "tx_id": "13",
+        "date": "3/26/12",
+        "amount": "-10.65",
+        "check_number": "",
+        "description": "CHECK CRD PURCHASE3/23 CHARLIE'S SUPREME SOMEPLACE CA"
+    },
+    {
+        "tx_id": "12",
+        "date": "3/23/12",
+        "amount": "-2.36",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MRKTPLACE SOMEPLACE CA"
+    },
+    {
+        "tx_id": "11",
+        "date": "3/23/12",
+        "amount": "-12.58",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "10",
+        "date": "3/22/12",
+        "amount": "-8.11",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MARKETPLA SOMEPLACE CA"
+    },
+    {
+        "tx_id": "9",
+        "date": "3/20/12",
+        "amount": "-500",
+        "check_number": "",
+        "description": "CREDIT CARD MR SOME GAL"
+    },
+    {
+        "tx_id": "8",
+        "date": "3/19/12",
+        "amount": "-566.8",
+        "check_number": "123",
+        "description": "CHECK # 123"
+    },
+    {
+        "tx_id": "7",
+        "date": "3/19/12",
+        "amount": "315.49",
+        "check_number": "",
+        "description": "ONLINE.COM Retail dis RULOTMJBZ2SSBGE payments.ONLINE.COM ID#RULOTMJBZ2SSBGE"
+    },
+    {
+        "tx_id": "6",
+        "date": "3/16/12",
+        "amount": "400",
+        "check_number": "",
+        "description": "ONLINE TRANSFER REF #IBE86V6CK7 FROM SAVINGS EMERGENCY"
+    },
+    {
+        "tx_id": "5",
+        "date": "3/16/12",
+        "amount": "31.77",
+        "check_number": "",
+        "description": "FLEX A0444429S CAS Some Guy"
+    },
+    {
+        "tx_id": "4",
+        "date": "3/15/12",
+        "amount": "-21.66",
+        "check_number": "",
+        "description": "POS PURCHASE - GROCERY MRKTPLACE SOMEPLACE CA"
+    },
+    {
+        "tx_id": "3",
+        "date": "3/14/12",
+        "amount": "-44.1",
+        "check_number": "",
+        "description": "ELECTRICITY BILLACHPAY Some Gal"
+    },
+    {
+        "tx_id": "2",
+        "date": "3/13/12",
+        "amount": "-250",
+        "check_number": "121",
+        "description": "CHECK # 121"
+    },
+    {
+        "tx_id": "1",
+        "date": "3/12/12",
+        "amount": "-441.29",
+        "check_number": "122",
+        "description": "CHECK # 122"
+    }
+]

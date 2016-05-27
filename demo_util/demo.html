@@ -22,16 +22,14 @@
 
     <script type="text/javascript" src="../dist/wui-1-2-1-with-jquery.js"></script>
 
-<link href="../src/css/font-awesome.min.css" rel="stylesheet">
-
-
+    <link href="../src/css/font-awesome.min.css" rel="stylesheet">
 
     <script type="text/javascript">
         (function($,Wui){
             Wui.demo = Wui.demo || {};
 
             Wui.demo.grid = new Wui.Grid({
-                url:        '/resources/wui-nextgen/wui-1-2/docs/data.txt',
+                url:        'data.json',
                 border:     false,
                 columns:    [
                                 {heading:'Date', dataItem:'date', dataType:'date', fit:1},
@@ -50,7 +48,7 @@
 
 <pre><code>
 Wui.demo.grid = new Wui.Grid({
-    url:        '/resources/wui-nextgen/wui-1-2/docs/data.txt',
+    url:        'data.json',
     border:     false,
     columns:    [
                     {heading:'Date', dataItem:'date', dataType:'date', fit:1},

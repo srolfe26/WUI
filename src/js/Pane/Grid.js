@@ -21,7 +21,7 @@ Custom renderers can be applied to columns.  These renderers are defined as func
 either be defined in the column definition, or defined elsewhere in scope and simply named by
 a string. The rendering function is defined passed the following parameters as below:
 
-renderer: function(cell, value, record, row, grid){}
+renderer: function (cell, value, record, row, grid) {}
 
 Grids can be sorted by clicking on the headings of columns. Headings sort ascending on the first click, 
 descending on the second and revert to their 'unsorted' order on the third.Sorting on multiple columns 
@@ -306,29 +306,42 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     else                    return this.getColumns();
                 },    
 
-    /** Fill in gaps in the column definition and append to the cols array. The cols array is what the grid uses to 
-    render/reference columns. The append the column to the DOM */            
-    renderColumn:function(col,idx){
+
+    /** 
+     * Fill in gaps in the column definition and append to the cols array. The cols array is what 
+     * the grid uses to render/reference columns. The append the column to the DOM. 
+     * TODO: This is a terrible function name.
+     *
+     * @param   Object      col     A column definition.
+     *                              TODO: Add a sample column definition here.
+     *
+     * @param   Number      idx     The index of the column from left to right.
+     */                    
+    renderColumn:function(col, idx){
                     var me = this;
                     
                     $.extend(col,{
                         dataType:   col.dataType || me.defaultDataType,
                         fit:        (col.fit === undefined) ? (col.width === undefined) ? 1 : -1 : col.fit,
                         cls:        col.cls || '',
-                        renderer:   (col.renderer) ?    (function(a){
-                                                            // Handles renderer if it exists
-                                                            if(typeof a !== 'function' && eval('typeof ' + a) == 'function')
-                                                                a = new Function('return ' + a + '.apply(this,arguments)');
-                                                            if(typeof a === 'function')
-                                                                me.renderers.push({dataItem:col.dataItem, renderer:a, index:idx});
-                                                        })(col.renderer) : '',
+                        renderer:   (col.renderer) ? (function(renderer){
+                                        if (typeof renderer === 'function') {
+                                            me.renderers.push({
+                                                dataItem: col.dataItem,
+                                                renderer: renderer,
+                                                index: idx
+                                            });
+                                        }
+                                    })(col.renderer) : '',
                         index:      idx,
                         resizable:  typeof col.resizable === 'undefined' ? true : col.resizable,
                         sortable:   typeof col.sortable === 'undefined' ? true : col.sortable,
                         width:      col.width === undefined ? 0 : col.width,
-                        el:         $('<div>').append($('<div>').text(col.heading))
-                                        .attr({unselectable:'on'})
-                                        .addClass('w121-gc ' + col.cls)
+                        el:         $('<div>').append(
+                                        $('<div>', {unselectable:'on'})
+                                            .text(col.heading))
+                                            .addClass('w121-gc ' + col.cls
+                                    )
                     });
                     
                     col.el.css({
@@ -381,6 +394,7 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     // Append newly created el to the DOM
                     me.heading.append(col.el);
                 },
+                
 
     runSort:    function(){
                     // Sort the list
@@ -418,7 +432,12 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     return retVal;
                 },
 
-    /** Ensures that columns have all of the proper information */
+    /** 
+     * Ensures that columns have all of the proper information. For rendering the column data, the
+     * following parameter precedence is followed: dataItem > renderer > dataTemplate 
+     *
+     * @param   Array   cols    An array of objects containing column definitions.
+     */
     setColumns: function(cols){
                     var me = this;
                     

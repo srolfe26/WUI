@@ -179,32 +179,36 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                 },
     modifyItem: function(itm){ return itm.el; },
     make:       function(){
-                    if(!(this.data instanceof Array))
-                        return false;
-
                     var me = this,
                         te = new Wui.Template({template: me.template}),
                         maxI = (me.data.length > me.displayMax && me.displayMax > 0) ? me.displayMax : me.data.length,
                         els = [],
                         i = 0;
                     
-                    // Clear out items list
-                    me.clear();
-                    me.items = [];
-
                     function makeItems(i){
-                        var rec = te.data = me.data[i],
-                            itmEl = te.make(i),
-                            itm = {el:itmEl, rec:rec};
+                        var rec = $.extend(me.data[i], {wuiIndex:i}),
+                            itmEl = $(te.make(rec)),
+                            itm = {el: itmEl, rec: rec};
                         
                         els.push(itmEl);
                         me.items.push(itm);
 
                         (me.elAlias || me.el).append(me.createItem(itm));
                     }
+                    
+                    // Clear out items list
+                    me.clear();
+                    me.items = [];
+                    
+                    // If there is no data, there is nothing to make
+                    if (!(this.data instanceof Array)) {
+                        return false;
+                    }
 
                     // Add items to me.items
-                    for(i; i < maxI; i++) makeItems(i);
+                    for(i; i < maxI; i++) {
+                        makeItems(i);
+                    }
 
                     me.clickListener(els);
 

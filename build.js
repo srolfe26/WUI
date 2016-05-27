@@ -18,12 +18,12 @@ var buildEngine = function(){
  * @return  {string}    src with copyright
  */
 buildEngine.prototype.addCopyright = function(src) {
-    return  "/*! Wui 1.2.1" + 
+    return  "/*! Wui 1.3.01" + 
         // Copyright should be the year the work was first published
-        "\n * Copyright (c) 2015 Stephen Rolfe Nielsen (rolfe.nielsen@gmail.com)" +
+        "\n * Copyright (c) 2016 Stephen Rolfe Nielsen (rolfe.nielsen@gmail.com)" +
         "\n *" +
         "\n * @license MIT" +
-        "\n * http://www.wui-js.com/wui-1-2-1/license.html" +
+        "\n * http://www.wui-js.com/wui-1-3/license.html" +
         "\n */ \n\n" + 
         src;
 };
