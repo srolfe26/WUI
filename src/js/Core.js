@@ -182,6 +182,10 @@ Wui.maxZ = function(){
     return $.getMaxZ();
 };
 
+Wui.doSort = function(sortArray,depth,a,b){ 
+    return $.fn.doSort(sortArray,depth,a,b);
+};
+
 
 Wui.percentToPixels = function(el,percent,dim){
     var parent = el.parent(),
