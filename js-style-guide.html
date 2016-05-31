@@ -9,7 +9,7 @@
 
         <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
         <link href='resources/main.css' rel='stylesheet' type='text/css'>
-
+        <script async src="https://use.fontawesome.com/b5b8f627e7.js"></script>
     </head>
     <body class="language-js">
         <!--[if lt IE 8]>
@@ -60,7 +60,7 @@
             </q>
         </blockquote>
         
-        <h2>Table of Contents</h2>
+        <h2 id="top">Table of Contents</h2>
         
         <div class="col-container three-col">
             <div>
@@ -335,11 +335,272 @@ var foo = "bar";
 
 
 <h3 id="operators_equity">Comparison Operators and Equity</h3>
+<ul>
+    <li>Use `===` and `!==` over `==` and `!=` when comparing with 0, 1, true, false, undefined, or null.</li>
+    
+    <li>Conditional statements such as the if statement evaluate their expression using coercion 
+    with the ToBoolean abstract method and always follow these simple rules:
+    <blockquote class="citation">
+        <q>For more information see: 
+            <a href="https://javascriptweblog.wordpress.com/2011/02/07/truth-equality-and-javascript/" target="_blank">
+                Truth Equality and Javascript
+            </a>
+        </q>
+    </blockquote>
+    <ul>
+        <li><b>Objects</b> evaluate to <b>true</b></li>
+        <li><b>Undefined</b> evaluates to <b>false</b></li>
+        <li><b>Null</b> evaluates to <b>false</b></li>
+        <li><b>Booleans</b> evaluate to the value of the <b>boolean</b></li>
+        <li><b>Numbers</b> evaluate to <b>false</b> if +0, -0, or NaN, otherwise <b>true</b></li>
+        <li><b>Strings</b> evaluate to <b>false</b> if an empty string '', otherwise <b>true</b></li>
+    </ul>
+    <pre><code>if ([0] && []) {
+    // true
+    // an array (even an empty one) is an object, objects will evaluate to true
+}</code></pre>
+    </li>
+
+    <li>Avoid unneeded ternary statements.
+    <pre><code>// bad
+var foo = a ? a : b;
+var bar = c ? true : false;
+var baz = c ? false : true;
+
+// good
+var foo = a || b;
+var bar = !!c;
+var baz = !c;</code></pre>
+    </li>
+    
+    <li>Ternaries should not be nested and generally be single line expressions.
+    <pre><code>// bad
+var foo = maybe1 > maybe2
+  ? "bar"
+  : value1 > value2 ? "baz" : null;
+
+// better
+var maybeNull = value1 > value2 ? 'baz' : null;
+
+var foo = maybe1 > maybe2
+  ? 'bar'
+  : maybeNull;
+
+// best
+var maybeNull = value1 > value2 ? 'baz' : null;
+
+var foo = maybe1 > maybe2 ? 'bar' : maybeNull;</code></pre>
+    </li>
+</ul>
+
+    
 <h3 id="events">Events</h3>
+<ul>
+    <li>When attaching data payloads to events, pass a hash instead of a raw value. This allows a 
+    subsequent contributor to add more data to the event payload without finding and updating 
+    every handler for the event. For example, instead of:
+    <pre><code>// bad
+$(this).trigger('listingUpdated', listing.id);
+
+...
+
+$(this).on('listingUpdated', (e, listingId) => {
+  // do something with listingId
+});</code></pre>
+prefer:
+
+<pre><code>// good
+$(this).trigger('listingUpdated', { listingId: listing.id });
+
+...
+
+$(this).on('listingUpdated', (e, data) => {
+  // do something with data.listingId
+});</code></pre>
+    </li>
+</ul>
+
+
 <h3 id="functions">Functions</h3>
+<ul>
+    <li>Wrap immediately invoked function expressions in parentheses.
+    <blockquote class="citation">
+        <q>Why? An immediately invoked function expression is a single unit - wrapping both it, 
+        and its invocation parens, in parens, cleanly expresses this.</q>
+    </blockquote>
+    <pre><code>// immediately-invoked function expression (IIFE)
+(function () {
+    console.log('Welcome to the Internet. Please follow me.');
+}());</code></pre>
+    </li>
+        
+    <li>Never declare a function in a non-function block (if, while, etc). Assign the function to 
+    a variable instead. Browsers will allow you to do it, but they all interpret it differently.</li>
+    
+    <li>Never name a parameter arguments. This will take precedence over the arguments object that 
+    is given to every function scope.</li>
+    
+    <li>Never use the Function constructor to create a new function.
+        <blockquote class="citation">
+            <q>Why? Creating a function in this way evaluates a string similarly to eval(), which opens vulnerabilities.</q>
+        </blockquote>
+    </li>
+</ul>
+
+
 <h3 id="hoisting">Hoisting</h3>
+<ul>
+    <li>`var` declarations get hoisted to the top of their scope, their assignment does not.</li>
+    <li>Anonymous function expressions hoist their variable name, but not the function assignment.
+    <pre><code>function example() {
+  console.log(anonymous); // => undefined
+
+  anonymous(); // => TypeError anonymous is not a function
+
+  var anonymous = function () {
+    console.log('anonymous function expression');
+  };
+}</code></pre>
+    </li>
+    <li>Function declarations hoist their name and the function body.
+    <pre><code>function example() {
+  superPower(); // => Flying
+
+  function superPower() {
+    console.log('Flying');
+  }
+}</code></pre>
+    <li><b>Therefore:</b> Since hoisting occurs on `var` and function declarations, the following declaration
+    order provides the most clarity and <b>should be used always</b>:
+        <blockquote class="citation">
+            <q>For more information read 
+            <a href="http://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html" target="_blank">JavaScript Scoping and Hoisting</a>
+            </q>
+        </blockquote>
+        <pre><code>var heroName
+    , team = 'Avengers'
+    , names = ['Captain America', 'Hulk', 'Iron Man']
+    , i;
+    
+function SuperPower(hero) {
+    // ...whatever this does...
+}
+
+for (i = 0; i < names.length; i++) {
+    heroName = names[i];
+    SuperPower(heroName);
+    // ...
+}</code></pre>
+    </li>
+    
 <h3 id="linting">Linting</h3>
+<p>Use JSHint to detect errors and potential problems. <b>Every jQuery project uses JSHint.</b> 
+The WUI includes JSHint as part of the build process, but JSHint can also be run on individual files
+from the console by calling `jshint filename.js`.
+</p>
+
 <h3 id="naming_conventions">Naming Conventions</h3>
+<ul>
+    <li>Avoid single letter names. Be descriptive with your naming.
+    <pre><code>// bad
+function q() {
+  // ...stuff...
+}
+
+// good
+function query() {
+  // ..stuff..
+}</code></pre>
+    </li>
+    
+    <li>Use camelCase when naming objects, functions, and instances.
+    <pre><code>// bad
+var OBJEcttsssss = {};
+var this_is_my_object = {};
+function c() {}
+
+// good
+var thisIsMyObject = {};
+function thisIsMyFunction() {}</code></pre>
+    </li>
+    <li>Use PascalCase only when naming constructors or classes.
+    <pre><code>// bad
+function user(options) {
+  this.name = options.name;
+}
+
+const bad = new user({
+  name: 'nope',
+});
+
+// good
+class User {
+  constructor(options) {
+    this.name = options.name;
+  }
+}
+
+var good = new User({
+  name: 'yup',
+});</code></pre>
+    </li>
+    
+    <li>When saving references to 'this', <b>always use 'me'</b>. Some JS gurus recommend the use of 'that',
+    but the word 'that' seems to be referring to something else. There are complex cases where a
+    method may be overridden or call in another context, in which saving 'this' into 'that' will refer 
+    to the outside context (a qualifying "something else"). in which case 'that' can be secondary to
+    'me'.
+    <pre><code>function addUser(userData) {
+    var me = this
+        
+        // Creating new object that will overwrite some methods 
+        , newUser = new User({
+            data:       userData,
+
+            // Overwrites member method so gmaps_libs_loaded promise can be added by closure
+            init: function() {
+                var that = this;
+                
+                // Original init functionality
+                User.prototype.init.apply(that, arguments);
+
+                // Ensure google maps libraries are loaded
+                me.gmaps_libs_loaded.done(function() {
+                    that.create_marker();
+                });
+            }
+        });
+
+    // ...
+}</code></pre>
+    </li>
+    <li>Variable names should:
+        <ul>
+            <li>Be as long as necessary without being too long.</li>
+            <li>Use Nounds and Verbs</li>
+            <li>Not include abbrevaited words.</li>
+            <li>Avoid variable types in names.</li>
+            <li>Where possible, use problem domain names, meaning names that the end user would be 
+            familiar with.</li>
+        </ul>
+        <pre><code>//bad
+var pnScrlBarExists = true;
+
+// still bad
+var paneScrollBarExists = true;
+
+// perhaps worse
+var paneScrollBarExistsBool = true;
+
+// better, but still misleading
+var paneHasScrollBar = true;
+
+// best
+var gridHasScrollBar = true;</code></pre>
+    </li>
+</ul>
+
+
 <h3 id="objects">Objects</h3>
 <h3 id="properties">Properties</h3>
 <h3 id="quotes">Quotes</h3>
@@ -557,8 +818,11 @@ $.ajax({
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.4.1/prism.min.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
+            $(function() {
+                $('h3:not(:first)').before('<a class="back-to-top" href="#top"><i class="fa fa-arrow-circle-o-up" aria-hidden="true"></i> back to top</a>');
+            });
+            
             (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
             e=o.createElement(i);r=o.getElementsByTagName(i)[0];

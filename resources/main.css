@@ -97,6 +97,9 @@ blockquote.citation q {
     color: #999;
     font-style: italic;
 }
+blockquote.citation q:before, blockquote.citation q:after {
+    content: "";
+}
 
 li {
     margin-top: 0.75em;
@@ -106,8 +109,20 @@ ul {
     list-style-type: square;
 }
 
+h1 {
+    padding-top: 2em;
+}
+
+h2 {
+    padding-top: 3em;
+}
+
 h3 {
     padding-top: 4em;
+}
+
+.back-to-top {
+    font-size: 0.8em;
 }
 
 /* Columns */
