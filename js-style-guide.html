@@ -1,0 +1,570 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>WUI Javascript Style Guide</title>
+        <meta name="description" content="WUI - Webteam User Interface is a *vc javascript framework for rapid app development.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
+        <link href='resources/main.css' rel='stylesheet' type='text/css'>
+
+    </head>
+    <body class="language-js">
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+        <header class="top-nav">
+            <div class="content">
+                <nav class="site-nav">
+                    <a title="WUI 1.1 Full Documentation" href="/">Home</a>
+                    <a title="WUI 1.1 Full Documentation" href="/wui-1-1">WUI 1.1</a>
+                    <a title="WUI 1.2 Full Documentation" href="/wui-1-2">WUI 1.2</a>
+                    <a title="WUI Javascript Style Guide" href="js-style-guide.html">Style Guide</a>
+                    <a title="Wui JS Blog" href="http://blog.wui-js.com">Blog</a>
+                    <a title="Wui JS Forum" href="http://wuijs.freeforums.net/">Forum</a>
+                </nav>
+            </div>
+        </header>
+
+        <div class="body-content">
+            
+        <h1>WUI Javascript Style Guide</h1>
+        
+        <p>
+            The following style guide has been developed from two primary sources. First, the 
+            <a href="https://contribute.jquery.org/style-guide/js/" target="_blank" nofollow>jQuery
+            style guide</a> was used because the WUI is based on jQuery and it is a standard around the
+            web. The second is the the 
+            <a href="https://github.com/airbnb/javascript" target="_blank" nofollow>AirBNB style guide</a>.
+            This is an excellent guide because of its exhaustive scope, and future-looking 
+            perspective. After hours of pouring over these guides, and their reference documents, 
+            this guide is the result.   
+        </p>
+        <p>
+            I would have adopted the AirBNB guide wholly except its guidelines are full of ES6 
+            rules/references that don't work in IE11 or the bleeding edge nightly's of Firefox, let 
+            alone older browsers. I know writing in ES2016 (or whatever the community wants to call it)
+            is the latest trend, and that this newer code can be transpiled down to ES5/3 for older
+            browsers, but that's not for this version of the WUI. <em>The guide was educational though,
+            and in that is the same aspiration of this document.</em>
+        </p>
+        
+        <!-- TODO: Remove this block as soon as honestly possible -->
+        <blockquote class="citation">
+            <q>It is worth noting that the current state of WUI 1.3 does not conform to many of 
+                the following standards. This document is also aspirational in that sense.
+            </q>
+        </blockquote>
+        
+        <h2>Table of Contents</h2>
+        
+        <div class="col-container three-col">
+            <div>
+                <ul>
+                    <li><a href="#accessors">Accessors</a></li>
+                    <li><a href="#arrays">Arrays</a></li>
+                    <li><a href="#blocks">Blocks</a></li>
+                    <li><a href="#commas">Commas</a></li>
+                    <li><a href="#comments">Comments</a></li>
+                    <li><a href="#operators_equity">Comparison Operators and Equity</a></li>
+                    <li><a href="#events">Events</a></li>
+                </ul>
+            </div>
+            <div>
+                <ul>
+                    <li><a href="#functions">Functions</a></li>
+                    <li><a href="#hoisting">Hoisting</a></li>
+                    <li><a href="#linting">Linting</a></li>
+                    <li><a href="#naming_conventions">Naming Conventions</a></li>
+                    <li><a href="#objects">Objects</a></li>
+                    <li><a href="#properties">Properties</a></li>
+                    <li><a href="#quotes">Quotes</a></li>
+                    <li><a href="#semicolons">Semicolons</a></li>
+                </ul>
+            </div>
+            <div>
+                <ul>
+                    <li><a href="#spacing">Spacing</a></li>
+                    <li><a href="#strings">Strings</a></li>
+                    <li><a href="#types">Types</a></li>
+                    <li><a href="#type_casting_coercion">Type Casting &amp; Coercion</a></li>
+                    <li><a href="#reusable_js">Using the prototype and reusable Javascript objects</a></li>
+                    <li><a href="#variables">Variables</a></li>
+                    <li><a href="#whitespace">Whitespace</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+<h3 id="accessors">Accessors</h3>
+<ul>
+    <li>Accessor functions for properties are not required.</li>
+
+    <li>
+        <p>Do not use JavaScript getters/setters as they cause unexpected side effects and are 
+        harder to test, maintain, and reason about. Instead, if you do make accessor functions, 
+        use getVal() and setVal('hello').</p>
+        <p>
+            The <b>one exception</b> to this is the val() method for input fields because it follows
+            the jQuery convention. However, note that in the WUI, the val() method does call a
+            getVal() and setVal().
+        </p>
+        
+<pre><code>// bad
+dragon.age();
+
+// good
+dragon.getAge();
+
+// bad
+dragon.age(25);
+
+// good
+dragon.setAge(25);</code></pre>
+
+    </li>
+    
+    <li>If the property/method is a boolean, use isVal() or hasVal().
+<pre><code>// bad
+if (!dragon.age()) {
+    return false;
+}
+
+// good
+if (!dragon.hasAge()) {
+    return false;
+}</code></pre>
+    </li>
+</ul>
+
+
+<h3 id="arrays">Arrays</h3>
+<ul>
+    <li>Use the literal syntax for array creation.
+<pre><code>// bad
+var items = new Array();
+
+// good
+var items = [];</code></pre>
+    </li>
+    <li>Use Array#push instead of direct assignment to add items to an array.
+
+<pre><code>var someStack = [];
+
+// bad
+someStack[someStack.length] = 'abracadabra';
+
+// good
+someStack.push('abracadabra');</code></pre>
+    </li>
+</ul>
+
+
+<h3 id="blocks">Blocks</h3>
+<ul>
+    <li>Use newlines and braces with all statements that have a block-style form such as function /
+    if / for / while / do etc...
+<pre><code>// bad
+if (test)
+  return false;
+
+// bad
+if (test) return false;
+
+// good
+if (test) {
+  return false;
+}
+
+// bad
+function foo() { return false; }
+
+// good
+function bar() {
+  return false;
+}</code></pre>
+    </li>
+    
+    <li>If you're using multi-line blocks with if and else, put else on a different line as your if 
+    block's closing brace.
+
+<pre><code>// bad
+if (test) {
+  thing1();
+  thing2();
+} else {
+  thing3();
+}
+
+// good
+if (test) {
+  thing1();
+  thing2();
+}
+else {
+  thing3();
+}
+</code></pre>
+    </li>
+</ul>
+
+
+<h3 id="commas">Commas</h3>
+<ul>
+    <li>Leading commas: Yes.
+
+<pre><code>// bad
+var hero = {
+  firstName: 'Ada',
+  lastName: 'Lovelace',
+  birthYear: 1815,
+  superPower: 'computers'
+};
+
+// good
+var hero = {
+    firstName: 'Ada'
+  , lastName: 'Lovelace'
+  , birthYear: 1815
+  , superPower: 'computers'
+};</code></pre>
+    </li>
+    
+    <li>Additional trailing comma: Nope. This can cause problems with IE6/7 and IE9 if it's in 
+    quirksmode. Also, in some implementations of ES3 would add length to an array if it had an 
+    additional trailing comma. This was clarified in ES5 (source):
+
+<blockquote class="citation">
+    <q>Edition 5 clarifies the fact that a trailing comma at the end of an ArrayInitialiser does not 
+    add to the length of the array. This is not a semantic change from Edition 3 but some 
+    implementations may have previously misinterpreted this.</q>
+</blockquote>
+
+<pre><code>// bad
+  var hero = {
+    firstName: 'Kevin',
+    lastName: 'Flynn',
+  };
+
+  var heroes = [
+    'Batman',
+    'Superman',
+  ];
+
+  // good
+  var hero = {
+    firstName: 'Kevin',
+    lastName: 'Flynn'
+  };
+
+  var heroes = [
+    'Batman',
+    'Superman'
+  ];</code></pre>
+    </li>
+</ul>
+
+
+<h3 id="comments">Comments</h3>
+<ul>
+    <li>Use /** ... */ for method headers. Include a description, specify types and values for 
+    all parameters and return values. There should be blank lines between the method description, 
+    the parameters, and the return. Two blank lines should preceed the method headers.
+    
+
+<pre><code>// bad
+// make() returns a new element
+// based on the passed in tag name
+//
+// @param {String} tag
+// @return {Element} element
+function make(tag) {
+
+  // ...stuff...
+
+  return element;
+}
+
+// good
+/**
+ * make() returns a new element
+ * based on the passed in tag name
+ *
+ * @param   {String}    tag
+ *
+ * @return  {Element}   element
+ */
+function make(tag) {
+
+  // ...stuff...
+
+  return element;
+}</code></pre>
+    </li>
+    
+    <li>
+        <p>
+            Use // for comments. Place single line comments on a newline above the 
+            subject of the comment. Put an empty line before the comment unless it's on the 
+            first line of a block.
+            Comments start with a capital first letter, but don't require a period at the end, 
+            unless you're writing full sentences. There must be a single space between the comment 
+            token and the comment text.
+        </p>
+<pre><code>// We need an explicit "bar", because later in the code foo is checked.
+var foo = "bar";
+ 
+// Even long comments that span multiple lines
+// use the single line comment form when
+// not a method header.
+</code></pre>
+    </li>
+    <li>Prefixing your comments with FIXME or TODO helps other developers quickly understand if 
+    you're pointing out a problem that needs to be revisited, or if you're suggesting a solution 
+    to the problem that needs to be implemented. These are different than regular comments because 
+    they are actionable. The actions are FIXME: -- need to figure this out or TODO: -- need to implement.
+    </li>
+    
+    <li>Use // FIXME: (initials) to annotate problems.</li>
+    <li>Use // TODO: (initials) to annotate solutions to problems.</li>
+</ul>
+
+
+<h3 id="operators_equity">Comparison Operators and Equity</h3>
+<h3 id="events">Events</h3>
+<h3 id="functions">Functions</h3>
+<h3 id="hoisting">Hoisting</h3>
+<h3 id="linting">Linting</h3>
+<h3 id="naming_conventions">Naming Conventions</h3>
+<h3 id="objects">Objects</h3>
+<h3 id="properties">Properties</h3>
+<h3 id="quotes">Quotes</h3>
+<h3 id="semicolons">Semicolons</h3>
+<h3 id="spacing">Spacing</h3>
+<h3 id="strings">Strings</h3>
+<h3 id="types">Types</h3>
+<h3 id="type_casting_coercion">Type Casting &amp; Coercion</h3>
+<h3 id="reusable_js">Using the prototype and reusable Javascript objects</h3>
+<h3 id="variables">Variables</h3>
+<h3 id="whitespace">Whitespace</h3>
+<ul>
+    <li>
+        Use soft tabs set to 4 spaces.
+<pre><code>// bad
+function baz() {
+∙∙var name;
+}
+
+// bad
+function bar() {
+∙var name;
+}
+
+// good
+function foo() {
+∙∙∙∙var name;
+}
+</code></pre>
+    </li>
+    <li>Place 1 space before the leading brace.
+<pre><code>// bad
+function test(){
+  console.log('test');
+}
+
+// good
+function test() {
+  console.log('test');
+}
+
+// bad
+dog.set('attr',{
+  age: '1 year',
+  breed: 'Bernese Mountain Dog',
+});
+
+// good
+dog.set('attr', {
+  age: '1 year',
+  breed: 'Bernese Mountain Dog',
+});</code></pre>
+    </li>
+    
+    <li>Place 1 space before the opening parenthesis in control statements (if, while etc.). Place 
+    no space between the argument list and the function name in function calls and declarations.
+<pre><code>// bad
+if(isJedi) {
+  fight ();
+}
+
+// good
+if (isJedi) {
+  fight();
+}
+
+// bad
+function fight () {
+  console.log ('Swooosh!');
+}
+
+// good
+function fight() {
+  console.log('Swooosh!');
+}</code></pre>
+    </li>
+    
+    <li>Set off operators with spaces.
+<pre><code>// bad
+var x=y+5;
+
+// good
+var x = y + 5;
+
+// bad
+$('#' +varname+ '_id').remove();
+
+// good
+$('#' + varname + '_id').remove();
+</code></pre>
+    </li>
+    
+    <li>Use indentation when making long method chains (more than 2 method chains). Use a leading 
+    dot, which emphasizes that the line is a method call, not a new statement.
+<pre><code>// bad
+$('#items').find('.selected').highlight().end().find('.open').updateCount();
+
+// bad
+$('#items').
+  find('.selected').
+    highlight().
+    end().
+  find('.open').
+    updateCount();
+
+// good
+$('#items')
+  .find('.selected')
+    .highlight()
+    .end()
+  .find('.open')
+    .updateCount();</code></pre>
+    </li>
+    
+    <li>Leave a blank line before and after blocks and before the next statement.
+<pre><code>// bad
+if (foo) {
+  return bar;
+}
+return baz;
+
+// good
+if (foo) {
+  return bar;
+}
+
+return baz;
+
+// bad
+const obj = {
+  foo() {
+  },
+  bar() {
+  },
+};
+return obj;
+
+// good
+const obj = {
+  foo() {
+  },
+
+  bar() {
+  },
+};
+
+return obj;</code></pre>
+
+    <li>Do not pad your blocks with blank lines.
+<pre><code>// bad
+function bar() {
+
+  console.log(foo);
+
+}
+
+// also bad
+if (baz) {
+
+  console.log(qux);
+} else {
+  console.log(foo);
+
+}
+
+// good
+function bar() {
+  console.log(foo);
+}</code></pre>
+    </li>
+    
+    <li>Do not add spaces inside parentheses, brackets, or braces.
+<pre><code>// bad
+function bar( foo ) {
+  return foo;
+}
+
+// good
+function bar(foo) {
+  return foo;
+}</code></pre>
+    </li>
+    
+    <li>
+        <p>Avoid having lines of code that are longer than 100 characters (including whitespace).</p>
+        <blockquote class="citation">
+            <q>Why? This ensures readability and maintainability. It is easier to see diffs,
+            easier to review, everything is better.</q>
+        </blockquote>
+<pre><code>// bad
+var foo = 'Whatever national crop flips the window. The cartoon reverts within the screw. Whatever wizard constrains a helpful ally. The counterpart ascends!';
+
+// bad
+$.ajax({ method: 'POST', url: 'https://airbnb.com/', data: { name: 'John' } }).done(() => console.log('Congratulations!')).fail(() => console.log('You have failed this city.'));
+
+// good
+var foo = 'Whatever national crop flips the window. The cartoon reverts within the screw. ' +
+    'Whatever wizard constrains a helpful ally. The counterpart ascends!';
+
+// good
+$.ajax({
+    method: 'POST',
+    url: 'https://airbnb.com/',
+    data: { name: 'John' },
+})
+    .done(() => console.log('Congratulations!'))
+    .fail(() => console.log('You have failed this city.'));</code></pre>
+    </li>
+</ul>
+
+        </div>
+        
+        
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.4.1/prism.min.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-64003702-1','auto');ga('send','pageview');
+        </script>
+    </body>
+</html>
