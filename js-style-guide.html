@@ -50,7 +50,7 @@
             alone older browsers. I know writing in ES2016 (or whatever the community wants to call it)
             is the latest trend, and that this newer code can be transpiled down to ES5/3 for older
             browsers, but that's not for this version of the WUI. <em>The guide was educational though,
-            and in that is the same aspiration of this document.</em>
+            and that is the same aspiration of this document.</em>
         </p>
         
         <!-- TODO: Remove this block as soon as honestly possible -->
@@ -76,6 +76,7 @@
             </div>
             <div>
                 <ul>
+                    <li><a href="#full_file_closures">Full File Closures</a></li>
                     <li><a href="#functions">Functions</a></li>
                     <li><a href="#hoisting">Hoisting</a></li>
                     <li><a href="#linting">Linting</a></li>
@@ -83,17 +84,16 @@
                     <li><a href="#objects">Objects</a></li>
                     <li><a href="#properties">Properties</a></li>
                     <li><a href="#quotes">Quotes</a></li>
-                    <li><a href="#semicolons">Semicolons</a></li>
                 </ul>
             </div>
             <div>
                 <ul>
-                    <li><a href="#spacing">Spacing</a></li>
+                    <li><a href="#semicolons">Semicolons</a></li>
                     <li><a href="#strings">Strings</a></li>
                     <li><a href="#types">Types</a></li>
                     <li><a href="#type_casting_coercion">Type Casting &amp; Coercion</a></li>
                     <li><a href="#reusable_js">Using the prototype and reusable Javascript objects</a></li>
-                    <li><a href="#variables">Variables</a></li>
+                    <li><a href="#global_variables">Global Variables</a></li>
                     <li><a href="#whitespace">Whitespace</a></li>
                 </ul>
             </div>
@@ -102,7 +102,7 @@
 
 <h3 id="accessors">Accessors</h3>
 <ul>
-    <li>Accessor functions for properties are not required.</li>
+    <li><p>Accessor functions for properties are not required.</p></li>
 
     <li>
         <p>Do not use JavaScript getters/setters as they cause unexpected side effects and are 
@@ -128,7 +128,7 @@ dragon.setAge(25);</code></pre>
 
     </li>
     
-    <li>If the property/method is a boolean, use isVal() or hasVal().
+    <li><p>If the property/method is a boolean, use isVal() or hasVal().</p>
 <pre><code>// bad
 if (!dragon.age()) {
     return false;
@@ -144,14 +144,15 @@ if (!dragon.hasAge()) {
 
 <h3 id="arrays">Arrays</h3>
 <ul>
-    <li>Use the literal syntax for array creation.
+    <li><p>Use the literal syntax for array creation.</p>
 <pre><code>// bad
 var items = new Array();
 
 // good
 var items = [];</code></pre>
     </li>
-    <li>Use Array#push instead of direct assignment to add items to an array.
+    
+    <li><p>Use Array#push instead of direct assignment to add items to an array.</p>
 
 <pre><code>var someStack = [];
 
@@ -166,18 +167,18 @@ someStack.push('abracadabra');</code></pre>
 
 <h3 id="blocks">Blocks</h3>
 <ul>
-    <li>Use newlines and braces with all statements that have a block-style form such as function /
-    if / for / while / do etc...
+    <li><p>Use newlines and braces with all function declarations and control statements (if, while etc.).</p>
+    
 <pre><code>// bad
 if (test)
-  return false;
+    return false;
 
 // bad
 if (test) return false;
 
 // good
 if (test) {
-  return false;
+    return false;
 }
 
 // bad
@@ -185,28 +186,28 @@ function foo() { return false; }
 
 // good
 function bar() {
-  return false;
+    return false;
 }</code></pre>
     </li>
     
-    <li>If you're using multi-line blocks with if and else, put else on a different line as your if 
-    block's closing brace.
+    <li><p>If you're using multi-line blocks with if and else, put else on a different line as your if 
+    block's closing brace.</p>
 
 <pre><code>// bad
 if (test) {
-  thing1();
-  thing2();
+    thing1();
+    thing2();
 } else {
-  thing3();
+    thing3();
 }
 
 // good
 if (test) {
-  thing1();
-  thing2();
+    thing1();
+    thing2();
 }
 else {
-  thing3();
+    thing3();
 }
 </code></pre>
     </li>
@@ -215,28 +216,28 @@ else {
 
 <h3 id="commas">Commas</h3>
 <ul>
-    <li>Leading commas: Yes.
+    <li><p>Leading commas: Yes.</p>
 
 <pre><code>// bad
 var hero = {
-  firstName: 'Ada',
-  lastName: 'Lovelace',
-  birthYear: 1815,
-  superPower: 'computers'
+    firstName: 'Ada',
+    lastName: 'Lovelace',
+    birthYear: 1815,
+    superPower: 'computers'
 };
 
 // good
 var hero = {
     firstName: 'Ada'
-  , lastName: 'Lovelace'
-  , birthYear: 1815
-  , superPower: 'computers'
+    , lastName: 'Lovelace'
+    , birthYear: 1815
+    , superPower: 'computers'
 };</code></pre>
     </li>
     
-    <li>Additional trailing comma: Nope. This can cause problems with IE6/7 and IE9 if it's in 
+    <li><p>Additional trailing comma: Nope. This can cause problems with IE6/7 and IE9 if it's in 
     quirksmode. Also, in some implementations of ES3 would add length to an array if it had an 
-    additional trailing comma. This was clarified in ES5 (source):
+    additional trailing comma. This was clarified in ES5 (source):</p>
 
 <blockquote class="citation">
     <q>Edition 5 clarifies the fact that a trailing comma at the end of an ArrayInitialiser does not 
@@ -245,38 +246,36 @@ var hero = {
 </blockquote>
 
 <pre><code>// bad
-  var hero = {
+var hero = {
     firstName: 'Kevin',
     lastName: 'Flynn',
-  };
+};
 
-  var heroes = [
+var heroes = [
     'Batman',
     'Superman',
-  ];
+];
 
-  // good
-  var hero = {
-    firstName: 'Kevin',
-    lastName: 'Flynn'
-  };
+// good
+var hero = {
+    firstName: 'Kevin'
+    , lastName: 'Flynn'
+};
 
-  var heroes = [
-    'Batman',
-    'Superman'
-  ];</code></pre>
+var heroes = [
+    'Batman'
+    , 'Superman'
+];</code></pre>
     </li>
 </ul>
 
 
 <h3 id="comments">Comments</h3>
 <ul>
-    <li>Use /** ... */ for method headers. Include a description, specify types and values for 
+    <li><p>Use /** ... */ for method headers. Include a description, specify types and values for 
     all parameters and return values. There should be blank lines between the method description, 
-    the parameters, and the return. Two blank lines should preceed the method headers.
-    
-
-<pre><code>// bad
+    the parameters, and the return. Two blank lines should preceed the method headers.</p>
+        <pre><code>// bad
 // make() returns a new element
 // based on the passed in tag name
 //
@@ -323,23 +322,25 @@ var foo = "bar";
 // not a method header.
 </code></pre>
     </li>
-    <li>Prefixing your comments with FIXME or TODO helps other developers quickly understand if 
+    
+    <li><p>Prefixing your comments with FIXME or TODO helps other developers quickly understand if 
     you're pointing out a problem that needs to be revisited, or if you're suggesting a solution 
     to the problem that needs to be implemented. These are different than regular comments because 
     they are actionable. The actions are FIXME: -- need to figure this out or TODO: -- need to implement.
-    </li>
+    </p></li>
     
-    <li>Use // FIXME: (initials) to annotate problems.</li>
-    <li>Use // TODO: (initials) to annotate solutions to problems.</li>
+    <li><p>Use <code>// FIXME: (commenter's initials)</code> to annotate problems.</p></li>
+    <li><p>Use <code>// TODO: (commenter's initials)</code> to annotate solutions to problems.</p></li>
 </ul>
 
 
 <h3 id="operators_equity">Comparison Operators and Equity</h3>
 <ul>
-    <li>Use `===` and `!==` over `==` and `!=` when comparing with 0, 1, true, false, undefined, or null.</li>
+    <li><p>Use <code>===</code> and <code>!==</code> over <code>==</code> and <code>!=</code> when 
+    comparing with 0, 1, true, false, undefined, or null.</p></li>
     
-    <li>Conditional statements such as the if statement evaluate their expression using coercion 
-    with the ToBoolean abstract method and always follow these simple rules:
+    <li><p>Conditional statements such as the if statement evaluate their expression using coercion 
+    with the ToBoolean abstract method and always follow these simple rules:</p>
     <blockquote class="citation">
         <q>For more information see: 
             <a href="https://javascriptweblog.wordpress.com/2011/02/07/truth-equality-and-javascript/" target="_blank">
@@ -361,7 +362,7 @@ var foo = "bar";
 }</code></pre>
     </li>
 
-    <li>Avoid unneeded ternary statements.
+    <li><p>Avoid unneeded ternary statements.</p>
     <pre><code>// bad
 var foo = a ? a : b;
 var bar = c ? true : false;
@@ -373,7 +374,7 @@ var bar = !!c;
 var baz = !c;</code></pre>
     </li>
     
-    <li>Ternaries should not be nested and generally be single line expressions.
+    <li><p>Ternaries should not be nested and generally be single line expressions.</p>
     <pre><code>// bad
 var foo = maybe1 > maybe2
   ? "bar"
@@ -396,9 +397,9 @@ var foo = maybe1 > maybe2 ? 'bar' : maybeNull;</code></pre>
     
 <h3 id="events">Events</h3>
 <ul>
-    <li>When attaching data payloads to events, pass a hash instead of a raw value. This allows a 
+    <li><p>When attaching data payloads to events, pass a hash instead of a raw value. This allows a 
     subsequent contributor to add more data to the event payload without finding and updating 
-    every handler for the event. For example, instead of:
+    every handler for the event. For example, instead of:</p>
     <pre><code>// bad
 $(this).trigger('listingUpdated', listing.id);
 
@@ -420,10 +421,39 @@ $(this).on('listingUpdated', (e, data) => {
     </li>
 </ul>
 
+<h3 id="full_file_closures">Full File Closures</h3>
+<ul>
+    <li><p>When an entire file is wrapped in a closure, the body of the closure is not indented.</p>
+    <pre><code>(function($) {
+ 
+// This doesn't get indented
+ 
+})(jQuery);</code></pre>
+    
+    <pre><code>module.exports = function( grunt ) {
+ 
+// This doesn't get indented
+ 
+};</code></pre>
+    </li>
+    
+    <li><p>The same applies to AMD wrappers.</p>
+    <pre><code>define([
+    "foo",
+    "bar",
+    "baz"
+], function(foo, bar, baz) {
+ 
+// This doesn't get indented
+ 
+});</code></pre>
+    </li>
+</ul>
+
 
 <h3 id="functions">Functions</h3>
 <ul>
-    <li>Wrap immediately invoked function expressions in parentheses.
+    <li><p>Wrap immediately invoked function expressions in parentheses.</p>
     <blockquote class="citation">
         <q>Why? An immediately invoked function expression is a single unit - wrapping both it, 
         and its invocation parens, in parens, cleanly expresses this.</q>
@@ -434,13 +464,13 @@ $(this).on('listingUpdated', (e, data) => {
 }());</code></pre>
     </li>
         
-    <li>Never declare a function in a non-function block (if, while, etc). Assign the function to 
-    a variable instead. Browsers will allow you to do it, but they all interpret it differently.</li>
+    <li><p>Never declare a function in a non-function block (if, while, etc). Assign the function to 
+    a variable instead. Browsers will allow you to do it, but they all interpret it differently.</p></li>
     
-    <li>Never name a parameter arguments. This will take precedence over the arguments object that 
-    is given to every function scope.</li>
+    <li><p>Never name a parameter 'arguments'. This will take precedence over the arguments object that 
+    is given to every function scope.</p></li>
     
-    <li>Never use the Function constructor to create a new function.
+    <li><p>Never use the Function constructor to create a new function.</p>
         <blockquote class="citation">
             <q>Why? Creating a function in this way evaluates a string similarly to eval(), which opens vulnerabilities.</q>
         </blockquote>
@@ -450,28 +480,30 @@ $(this).on('listingUpdated', (e, data) => {
 
 <h3 id="hoisting">Hoisting</h3>
 <ul>
-    <li>`var` declarations get hoisted to the top of their scope, their assignment does not.</li>
-    <li>Anonymous function expressions hoist their variable name, but not the function assignment.
+    <li><p><code>var</code> declarations get hoisted to the top of their scope, their assignment does not.</p></li>
+    <li><p>Anonymous function expressions hoist their variable name, but not the function assignment.</p>
     <pre><code>function example() {
-  console.log(anonymous); // => undefined
+    console.log(anonymous); // => undefined
 
-  anonymous(); // => TypeError anonymous is not a function
+    anonymous(); // => TypeError anonymous is not a function
 
-  var anonymous = function () {
+    var anonymous = function () {
     console.log('anonymous function expression');
-  };
+    };
 }</code></pre>
     </li>
-    <li>Function declarations hoist their name and the function body.
+    <li><p>Function declarations hoist their name and the function body.</p>
     <pre><code>function example() {
-  superPower(); // => Flying
+    superPower(); // => Flying
 
-  function superPower() {
-    console.log('Flying');
-  }
+    function superPower() {
+        console.log('Flying');
+    }
 }</code></pre>
-    <li><b>Therefore:</b> Since hoisting occurs on `var` and function declarations, the following declaration
-    order provides the most clarity and <b>should be used always</b>:
+    </li>
+    
+    <li><p><b>Therefore:</b> Since hoisting occurs on <code>var</code> and function declarations, 
+    the following declaration order provides the most clarity and <b>should be used always</b>:</p>
         <blockquote class="citation">
             <q>For more information read 
             <a href="http://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html" target="_blank">JavaScript Scoping and Hoisting</a>
@@ -492,16 +524,17 @@ for (i = 0; i < names.length; i++) {
     // ...
 }</code></pre>
     </li>
+</ul>
     
 <h3 id="linting">Linting</h3>
-<p>Use JSHint to detect errors and potential problems. <b>Every jQuery project uses JSHint.</b> 
+<ul><li><p>Use JSHint to detect errors and potential problems. <b>Every jQuery project uses JSHint.</b> 
 The WUI includes JSHint as part of the build process, but JSHint can also be run on individual files
 from the console by calling `jshint filename.js`.
-</p>
+</p></li></ul>
 
 <h3 id="naming_conventions">Naming Conventions</h3>
 <ul>
-    <li>Avoid single letter names. Be descriptive with your naming.
+    <li><p>Avoid single letter names. Be descriptive with your naming. This includes iterators.</p>
     <pre><code>// bad
 function q() {
   // ...stuff...
@@ -513,7 +546,7 @@ function query() {
 }</code></pre>
     </li>
     
-    <li>Use camelCase when naming objects, functions, and instances.
+    <li><p>Use camelCase when naming objects, functions, and instances.</p>
     <pre><code>// bad
 var OBJEcttsssss = {};
 var this_is_my_object = {};
@@ -523,13 +556,14 @@ function c() {}
 var thisIsMyObject = {};
 function thisIsMyFunction() {}</code></pre>
     </li>
-    <li>Use PascalCase only when naming constructors or classes.
+    
+    <li><p>Use PascalCase only when naming constructors or classes.</p>
     <pre><code>// bad
 function user(options) {
   this.name = options.name;
 }
 
-const bad = new user({
+var bad = new user({
   name: 'nope',
 });
 
@@ -545,11 +579,11 @@ var good = new User({
 });</code></pre>
     </li>
     
-    <li>When saving references to 'this', <b>always use 'me'</b>. Some JS gurus recommend the use of 'that',
+    <li><p>When saving references to 'this', <b>always use 'me'</b>. Some JS gurus recommend the use of 'that',
     but the word 'that' seems to be referring to something else. There are complex cases where a
     method may be overridden or call in another context, in which saving 'this' into 'that' will refer 
     to the outside context (a qualifying "something else"). in which case 'that' can be secondary to
-    'me'.
+    'me'.</p>
     <pre><code>function addUser(userData) {
     var me = this
         
@@ -574,7 +608,7 @@ var good = new User({
     // ...
 }</code></pre>
     </li>
-    <li>Variable names should:
+    <li><p>Variable names should:</p>
         <ul>
             <li>Be as long as necessary without being too long.</li>
             <li>Use Nounds and Verbs</li>
@@ -602,19 +636,314 @@ var gridHasScrollBar = true;</code></pre>
 
 
 <h3 id="objects">Objects</h3>
+<ul>
+    <li><p>Use the literal syntax for object creation.</p>
+    <pre><code>// bad
+var item = new Object();
+
+// good
+var item = {};</code></pre>
+    </li>
+    
+    <li><p>Use readable synonyms in place of reserved words.</p>
+    <pre><code>// bad
+var superman = {
+  class: 'alien',
+};
+
+// bad
+var superman = {
+  klass: 'alien',
+};
+
+// good
+var superman = {
+  type: 'alien',
+};</code></pre>
+    </li>
+    
+    <li><p>Only quote properties that are invalid identifiers.</p>
+    <pre><code>// bad
+var bad = {
+  'foo': 3,
+  'bar': 4,
+  'data-blah': 5,
+};
+
+// good
+var good = {
+  foo: 3,
+  bar: 4,
+  'data-blah': 5,
+};</code></pre>
+    </li>
+</ul>
+
 <h3 id="properties">Properties</h3>
+<ul>
+    <li><p>Use dot notation when accessing properties.</p>
+    <pre><code>var luke = {
+  jedi: true,
+  age: 28,
+};
+
+// bad
+var isJedi = luke['jedi'];
+
+// good
+var isJedi = luke.jedi;</code></pre>
+    </li>
+    
+    <li><p>Use bracket notation [] when accessing properties with a variable.</p>
+    <pre><code>var luke = {
+  jedi: true,
+  age: 28,
+};
+
+function getProp(prop) {
+  return luke[prop];
+}
+
+var isJedi = getProp('jedi');</code></pre>
+    </li>
+</ul>
+
 <h3 id="quotes">Quotes</h3>
+<ul>
+    <li><p>The WUI uses single quotes.</p>
+    <blockquote class="citation">
+        <q>Why? So that quoting HTML attributes in creating DOM nodes, and in templates uses double quotes.</q>
+    </blockquote>
+    <pre><code>var single = 'I am wrapped in single quotes. Fear me.';</code></pre>
+    </li>
+    
+    <li><p>Strings that require inner quoting must use double outside and single inside.</p>
+    <pre><code>var someTemplate = '&lt;li class="template-class">{value}&lt;/li>';</code></pre>
+    </li>
+</ul>
+
 <h3 id="semicolons">Semicolons</h3>
-<h3 id="spacing">Spacing</h3>
+<ul><li><p>Use them. Don't rely on Automatic Semicolon Insertion (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#Automatic_semicolon_insertion" target="_blank">ASI</a>).</p></li></ul>
+    
+
 <h3 id="strings">Strings</h3>
+<ul>
+    <li><p>Use single quotes '' for strings.</p>
+    <pre><code>// bad
+var name = "Capt. Janeway";
+
+// good
+var name = 'Capt. Janeway';</code></pre>
+    </li>
+    
+    <li><p>Strings that cause the line to go over 100 characters should be written across multiple 
+    lines using string concatenation.</p></li>
+    
+    <li><p>Note: If overused, long strings with concatenation could impact performance.</p>
+    <pre><code>// bad
+var errorMessage = 'This is a super long error that was thrown because of Batman. When you stop to think about how Batman had anything to do with this, you would get nowhere fast.';
+
+// bad
+var errorMessage = 'This is a super long error that was thrown because \
+of Batman. When you stop to think about how Batman had anything to do \
+with this, you would get nowhere \
+fast.';
+
+// good
+var errorMessage = 'This is a super long error that was thrown because ' +
+  'of Batman. When you stop to think about how Batman had anything to do ' +
+  'with this, you would get nowhere fast.';</code></pre>
+    </li>
+    
+    <li><p>Never use eval() on a string, it opens too many vulnerabilities.</p></li>
+    
+    <li><p>Do not unnecessarily escape characters in strings.</p>
+    <blockquote class="citation">
+        <q>Why? Backslashes harm readability, thus they should only be present when necessary.</q>
+    </blockquote>
+    <pre><code>// bad
+var foo = '\'this\' \i\s \"quoted\"';
+
+// good
+var foo = '\'this\' is "quoted"';</code></pre>
+    </li>
+</ul>
+    
 <h3 id="types">Types</h3>
+<ul>
+    <li><p><b>Primitives:</b> When you access a primitive type you work directly on its value.</p>
+        <ul>
+            <li>string</li>
+            <li>number</li>
+            <li>boolean</li>
+            <li>null</li>
+            <li>undefined</li>
+        </ul>
+    </li>
+
+    <li><p><b>Complex:</b> When you access a complex type you work on a reference to its value.</p>
+        <ul>
+            <li>object</li>
+            <li>array</li>
+            <li>function</li>
+        </ul>
+    </li>
+</ul>
+    
 <h3 id="type_casting_coercion">Type Casting &amp; Coercion</h3>
-<h3 id="reusable_js">Using the prototype and reusable Javascript objects</h3>
-<h3 id="variables">Variables</h3>
-<h3 id="whitespace">Whitespace</h3>
+<ul>
+    <li><p>Perform type coercion at the beginning of the statement.</p></li>
+    
+    <li><p>Strings:</p>
+    <pre><code>// => this.reviewScore = 9;
+
+// bad
+var totalScore = this.reviewScore + ''; // invokes this.reviewScore.valueOf()
+
+// bad
+var totalScore = this.reviewScore.toString(); // isn't guaranteed to return a string
+
+// good
+var totalScore = String(this.reviewScore);</code></pre>
+    </li>
+    
+    <li><p>Numbers: Use Number for type casting and parseInt always with a radix for parsing strings.</p>
+    <pre><code>var inputValue = '4';
+
+// bad
+var val = new Number(inputValue);
+
+// bad
+var val = +inputValue;
+
+// bad
+var val = parseInt(inputValue);
+
+// good
+var val = Number(inputValue);
+
+// good
+var val = parseInt(inputValue, 10);</code></pre>
+    </li>
+    
+    <li><p>If for whatever reason you are doing something wild and <code>parseInt</code> is your bottleneck and need to use Bitshift for <a href="http://jsperf.com/coercion-vs-casting/3">performance reasons</a>, leave a comment explaining why and what you're doing.</p>
+    <blockquote class="citation">
+        <q>Note: Be careful when using bitshift operations. Numbers are represented as 
+        <a href="http://es5.github.io/#x4.3.19" target="_blank">64-bit 
+        values</a>, but bitshift operations always return a 32-bit integer (<a href="http://es5.github.io/#x11.7" target="_blank">source</a>).
+        Bitshift can lead to unexpected behavior for integer values larger than 32 bits. Largest signed 
+        32-bit Int is 2,147,483,647.</q>
+    </blockquote>
+    <pre><code>// good
+/**
+ * parseInt was the reason my code was slow.
+ * Bitshifting the String to coerce it to a
+ * Number made it a lot faster.
+ */
+var val = inputValue >> 0;</code></pre>
+    </li>
+    
+    <li><p>Booleans:</p>
+    <pre><code>var age = 0;
+
+// bad
+var hasAge = new Boolean(age);
+
+// good
+var hasAge = Boolean(age);
+
+// best
+var hasAge = !!age;</code></pre>
+    </li>
+</ul>
+
+<h3 id="reusable_js">Prototype and reusable Javascript objects</h3>
 <ul>
     <li>
-        Use soft tabs set to 4 spaces.
+        <p>When you're going to have multiple instances of an object, use Javascript's native prototype inheritance.</p>
+        <blockquote class="citation">
+            <q>For more information see <a href="http://javascriptissexy.com/oop-in-javascript-what-you-need-to-know/" target="_blank">OOP In Javascript: What You NEED to Know</a>
+            </q>
+        </blockquote>
+        <pre><code>function User(theName) {
+    var me = this;
+    
+    me.name = theName;
+    me.quizScores = [];
+    me.currentScore = 0;
+}
+​
+User.prototype = {
+    constructor: User,
+    
+    saveScore: function(theScoreToAdd) {
+        this.quizScores.push(theScoreToAdd);
+    },
+    
+    showNameAndScores: function() {
+        var me = this
+            , scores = me.quizScores.length > 0 ? me.quizScores.join(',') : 'No Scores Yet';
+        
+        return me.name + ' Scores: ' + scores;
+    }
+}</code></pre>
+    </li>
+    
+    <li><p>When you're going to only have one instance and want to keep some members "private", construct your object in
+    the following manner.</p>
+    <pre><code>// Object with private members
+function User() {
+    var me = this;
+    
+    me.init = function(theName) {
+        me.name = theName;
+        
+        // Private properties
+        me.quizScores = [];
+        me.currentScore = 0;
+    }
+
+    
+    me.saveScore = function(theScoreToAdd) {
+        this.quizScores.push(theScoreToAdd);
+    };
+    
+    
+    // This method will be private
+    me.formatScores = function() {
+        if (me.quizScores.length > 0) {
+            return me.quizScores.join(',');
+        }
+        else {
+            return 'No Scores Yet';
+        }
+    };
+    
+    
+    me.showNameAndScores = function() {
+        var me = this;
+        
+        return me.name + ' Scores: ' + me.formatScores();
+    };
+    
+    // Normally the constructor function will return itself when called with 'new' '
+    // if nothing is returned. By returning an explicit object, we hide some members 
+    // by using a closure.
+    return {
+        init: me.init
+        , name: me.name
+        , saveScore: me.saveScore
+        , showNameAndScores: me.showNameAndScores
+    };
+}</code></pre></li>
+</ul>
+
+<h3 id="global_variables">Global Variables</h3>
+<ul><li><p>Each project may expose at most one global variable.</p></li></ul>
+
+<h3 id="whitespace">Whitespace</h3>
+<ul>
+    <li><p>Use soft tabs set to 4 spaces.</p>
 <pre><code>// bad
 function baz() {
 ∙∙var name;
@@ -631,54 +960,54 @@ function foo() {
 }
 </code></pre>
     </li>
-    <li>Place 1 space before the leading brace.
+    <li><p>Place 1 space before the leading brace.</p>
 <pre><code>// bad
 function test(){
-  console.log('test');
+    console.log('test');
 }
 
 // good
 function test() {
-  console.log('test');
+    console.log('test');
 }
 
 // bad
 dog.set('attr',{
-  age: '1 year',
-  breed: 'Bernese Mountain Dog',
+    age: '1 year',
+    breed: 'Bernese Mountain Dog',
 });
 
 // good
 dog.set('attr', {
-  age: '1 year',
-  breed: 'Bernese Mountain Dog',
+    age: '1 year',
+    breed: 'Bernese Mountain Dog',
 });</code></pre>
     </li>
     
-    <li>Place 1 space before the opening parenthesis in control statements (if, while etc.). Place 
-    no space between the argument list and the function name in function calls and declarations.
+    <li><p>Place 1 space before the opening parenthesis in control statements (if, while etc.). Place 
+    no space between the argument list and the function name in function calls and declarations.</p>
 <pre><code>// bad
 if(isJedi) {
-  fight ();
+    fight ();
 }
 
 // good
 if (isJedi) {
-  fight();
+    fight();
 }
 
 // bad
 function fight () {
-  console.log ('Swooosh!');
+    console.log ('Swooosh!');
 }
 
 // good
 function fight() {
-  console.log('Swooosh!');
+    console.log('Swooosh!');
 }</code></pre>
     </li>
     
-    <li>Set off operators with spaces.
+    <li><p>Set off operators with spaces.</p>
 <pre><code>// bad
 var x=y+5;
 
@@ -693,63 +1022,100 @@ $('#' + varname + '_id').remove();
 </code></pre>
     </li>
     
-    <li>Use indentation when making long method chains (more than 2 method chains). Use a leading 
-    dot, which emphasizes that the line is a method call, not a new statement.
+    <li><p>Add a blank line after the <code>var</code> line/block, and a blank line before the 
+    <code>return</code> statement.</p>
+    <pre><code>// bad
+function duplicator(value) {
+    var multiplier = 2;
+    value = value * multiplier;
+    return value;
+}
+
+// good
+function duplicator(value) {
+    var multiplier = 2;
+    
+    value = value * multiplier;
+    
+    return value;
+}</code></pre>
+    </li>
+    
+    <li><p>Don't do any special work to align propert declarations in objects, or equals operators
+        in contiguous var statements. It wastes effort, makes diffs difficult to read, and can 
+        become cumbersome to updating code.</p>
+        <pre><code>// bad
+var musician = {
+    name:                       'Sufjan Stevens'
+    , born:                     'July 1, 1975'
+    , ageAsOfMayTwentySixteen:  40
+};
+
+// good
+var musician = {
+    name: 'Sufjan Stevens'
+    , born: 'July 1, 1975'
+    , ageAsOfMayTwentySixteen: 40
+};</code></pre>
+    </li>
+    
+    <li><p>Use indentation when making long method chains (more than 2 method chains). Use a leading 
+    dot, which emphasizes that the line is a method call, not a new statement.</p>
 <pre><code>// bad
 $('#items').find('.selected').highlight().end().find('.open').updateCount();
 
 // bad
 $('#items').
-  find('.selected').
-    highlight().
-    end().
+    find('.selected').
+        highlight().
+        end().
   find('.open').
-    updateCount();
+        updateCount();
 
 // good
 $('#items')
-  .find('.selected')
-    .highlight()
-    .end()
-  .find('.open')
-    .updateCount();</code></pre>
+    .find('.selected')
+        .highlight()
+        .end()
+    .find('.open')
+        .updateCount();</code></pre>
     </li>
     
-    <li>Leave a blank line before and after blocks and before the next statement.
+    <li><p>Leave a blank line before and after blocks and before the next statement.</p>
 <pre><code>// bad
 if (foo) {
-  return bar;
+    return bar;
 }
 return baz;
 
 // good
 if (foo) {
-  return bar;
+    return bar;
 }
 
 return baz;
 
 // bad
-const obj = {
-  foo() {
-  },
-  bar() {
-  },
+var obj = {
+    foo() {
+    },
+    bar() {
+    },
 };
 return obj;
 
 // good
-const obj = {
-  foo() {
-  },
+var obj = {
+    foo() {
+    },
 
-  bar() {
-  },
+    bar() {
+    },
 };
 
 return obj;</code></pre>
 
-    <li>Do not pad your blocks with blank lines.
+    <li><p>Do not pad your blocks with blank lines.</p>
 <pre><code>// bad
 function bar() {
 
@@ -760,27 +1126,27 @@ function bar() {
 // also bad
 if (baz) {
 
-  console.log(qux);
+    console.log(qux);
 } else {
-  console.log(foo);
+    console.log(foo);
 
 }
 
 // good
 function bar() {
-  console.log(foo);
+    console.log(foo);
 }</code></pre>
     </li>
     
-    <li>Do not add spaces inside parentheses, brackets, or braces.
+    <li><p>Do not add spaces inside parentheses, brackets, or braces.</p>
 <pre><code>// bad
 function bar( foo ) {
-  return foo;
+    return foo;
 }
 
 // good
 function bar(foo) {
-  return foo;
+    return foo;
 }</code></pre>
     </li>
     
@@ -820,7 +1186,20 @@ $.ajax({
 
         <script>
             $(function() {
+                // Add 'back to top' links to all headers
                 $('h3:not(:first)').before('<a class="back-to-top" href="#top"><i class="fa fa-arrow-circle-o-up" aria-hidden="true"></i> back to top</a>');
+                
+                // Add reference links to each of the rules
+                $('h3 + ul').each(function(ulIndex, ul) {
+                    $(ul).children('li').each(function(liIndex, li) {
+                        var ruleNumber = (ulIndex + 1) + '.' + liIndex
+                            , ruleId = (ulIndex + 1) + '_' + liIndex;
+                            
+                        $(li)
+                            .children('p:first')
+                            .prepend('<a href="#' + ruleId + '" id="' + ruleId + '">' + ruleNumber + '</a> ');
+                    });
+                });
             });
             
             (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=

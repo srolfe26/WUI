@@ -6,7 +6,7 @@ body { padding:60px 0 0 0; }
     top: 0;
     left: 0;
     background-color: #A0C9CC;
-    height: 60px;
+    height: 40px;
     width: 100%;
     border-bottom: 1px solid #bbb;
     z-index: 1;
@@ -114,11 +114,11 @@ h1 {
 }
 
 h2 {
-    padding-top: 3em;
+    padding-top: 2em;
 }
 
 h3 {
-    padding-top: 4em;
+    padding-top: 3em;
 }
 
 .back-to-top {
