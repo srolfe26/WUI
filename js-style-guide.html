@@ -9,6 +9,13 @@
 
         <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
         <link href='resources/main.css' rel='stylesheet' type='text/css'>
+        <style type="text/css">
+            /* Because of internal linking within this page and a floating header, adjust the position of the headers */
+            h3 {
+                margin-bottom: -2.5em;
+            }
+        </style>
+        
         <script async src="https://use.fontawesome.com/b5b8f627e7.js"></script>
     </head>
     <body class="language-js">
@@ -78,22 +85,22 @@
                 <ul>
                     <li><a href="#full_file_closures">Full File Closures</a></li>
                     <li><a href="#functions">Functions</a></li>
+                    <li><a href="#global_variables">Global Variables</a></li>
                     <li><a href="#hoisting">Hoisting</a></li>
                     <li><a href="#linting">Linting</a></li>
                     <li><a href="#naming_conventions">Naming Conventions</a></li>
                     <li><a href="#objects">Objects</a></li>
                     <li><a href="#properties">Properties</a></li>
-                    <li><a href="#quotes">Quotes</a></li>
                 </ul>
             </div>
             <div>
                 <ul>
+                    <li><a href="#reusable_js">Prototype and reusable Javascript objects</a></li>
+                    <li><a href="#quotes">Quotes</a></li>
                     <li><a href="#semicolons">Semicolons</a></li>
                     <li><a href="#strings">Strings</a></li>
                     <li><a href="#types">Types</a></li>
                     <li><a href="#type_casting_coercion">Type Casting &amp; Coercion</a></li>
-                    <li><a href="#reusable_js">Using the prototype and reusable Javascript objects</a></li>
-                    <li><a href="#global_variables">Global Variables</a></li>
                     <li><a href="#whitespace">Whitespace</a></li>
                 </ul>
             </div>
@@ -476,6 +483,10 @@ $(this).on('listingUpdated', (e, data) => {
         </blockquote>
     </li>
 </ul>
+
+
+<h3 id="global_variables">Global Variables</h3>
+<ul><li><p>Each project may expose at most one global variable.</p></li></ul>
 
 
 <h3 id="hoisting">Hoisting</h3>
@@ -938,9 +949,6 @@ function User() {
 }</code></pre></li>
 </ul>
 
-<h3 id="global_variables">Global Variables</h3>
-<ul><li><p>Each project may expose at most one global variable.</p></li></ul>
-
 <h3 id="whitespace">Whitespace</h3>
 <ul>
     <li><p>Use soft tabs set to 4 spaces.</p>
@@ -1195,9 +1203,10 @@ $.ajax({
                         var ruleNumber = (ulIndex + 1) + '.' + liIndex
                             , ruleId = (ulIndex + 1) + '_' + liIndex;
                             
-                        $(li)
-                            .children('p:first')
-                            .prepend('<a href="#' + ruleId + '" id="' + ruleId + '">' + ruleNumber + '</a> ');
+                        $(li).children('p:first')
+                            .attr('id', ruleId)
+                            .css('padding-top', 45)
+                            .prepend('<a href="#' + ruleId + '">' + ruleNumber + '</a> ');
                     });
                 });
             });
