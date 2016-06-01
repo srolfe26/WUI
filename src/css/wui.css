@@ -14,12 +14,80 @@
   box-shadow: inset 0 0 1px 1px #333;
   margin-top: 30px;
 }
-.node {
-  float: left;
-  height: 100%;
-  width: 1%;
-  box-shadow: inset 0 0 0 1px #333;
+
+/* Pager */
+.pager-buttons:before, .pager-buttons:after {
+  content: '';
+  display: table;
+}
+.pager-buttons:after {
+  clear: both;
+}
+.pager-buttons {
+  background-color: #fff;
+  border: solid thin #ccc;
+  box-shadow: 0 -5px 10px -7px #ccc inset, 0 5px 10px -7px #ccc inset;
+  border-radius: 5px;
   position: relative;
+}
+.pager-inner {
+  padding: 0 4em;
+}
+.w121-pager-button {
+  float: left;
+  box-shadow: 0 0 1px 0 #ccc inset;
+  height: 2em;
+  width: 10%;
+}
+.pager-active, .w121-pager-button:hover {
+  box-shadow: 0 -30px 10px -10px lightblue inset;
+}
+
+.pager-prev, .pager-next, .w121-pager-button {
+  -webkit-transition: box-shadow 0.2s, color 0.2s;
+  -moz-transition: box-shadow 0.2s, color 0.2s;
+  transition: box-shadow 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.pager-prev, .pager-next {
+  color: #ccc;
+  position: absolute;
+  width: 4em;
+  text-align: center;
+  top: 0.5em;
+}
+.pager-prev:hover, .pager-next:hover {
+  color: #333;
+}
+.pager-prev {
+  left: 0;
+}
+.pager-next {
+  right: 0;
+}
+.pager-tooltip.show {
+  display: table!important;
+}
+.pager-tooltip {
+  box-shadow: 0 5px 5px 1px #ccc;
+  display: none;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #fff;
+  position: relative;
+  transition: all 0.2s linear 0s;
+  max-width: 300px;
+}
+.pager-tooltip:after {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  content: '';
+  display: block;
+  border: solid 1em transparent;
+  border-top-color: #fff;
+  top: 97%;
+  z-index: 100;
 }
 
 .w121-pane p {
