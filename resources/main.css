@@ -1,4 +1,4 @@
-body { padding:40px 0 80px; }
+body { padding:40px 0 0; }
 
 .top-nav {
     font-family: 'Rajdhani', sans-serif;
@@ -41,9 +41,9 @@ body { padding:40px 0 80px; }
 
 .body-content {
     font-family: Helvetica, Arial, sans-serif;
-    width: 800px;
+    width: 860px;
     max-width: 100%;
-    margin: 0 auto;
+    margin: 0 auto 80px;
     line-height:1.5;
     color: #555;
 }

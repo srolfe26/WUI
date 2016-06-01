@@ -1195,7 +1195,9 @@ $.ajax({
         <script>
             $(function() {
                 // Add 'back to top' links to all headers
-                $('h3:not(:first)').before('<a class="back-to-top" href="#top"><i class="fa fa-arrow-circle-o-up" aria-hidden="true"></i> back to top</a>');
+                var backToTop = '<a class="back-to-top" href="#top"><i class="fa fa-arrow-circle-o-up" aria-hidden="true"></i> back to top</a>';
+                $('h3:not(:first)').before(backToTop);
+                $('.body-content').append(backToTop);
                 
                 // Add reference links to each of the rules
                 $('h3 + ul').each(function(ulIndex, ul) {
