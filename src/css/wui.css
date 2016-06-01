@@ -1,20 +1,3 @@
-.absolute-left {
-    position: absolute;
-    left: 5px;
-    top: 2px;
-}
-
-.left {
-    float: left;
-}
-
-.bar {
-  height: 1.5em;
-  width: 100%;
-  box-shadow: inset 0 0 1px 1px #333;
-  margin-top: 30px;
-}
-
 /* Pager */
 .pager-buttons:before, .pager-buttons:after {
   content: '';
@@ -29,9 +12,6 @@
   box-shadow: 0 -5px 10px -7px #ccc inset, 0 5px 10px -7px #ccc inset;
   border-radius: 5px;
   position: relative;
-}
-.pager-inner {
-  padding: 0 4em;
 }
 .w121-pager-button {
   float: left;

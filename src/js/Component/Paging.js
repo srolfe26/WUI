@@ -1,5 +1,7 @@
 /**
 The WUI Paging Object will handle both 'local' and 'remote' paging. 
+
+    Note: Paging can be added to any object that extends Data and implements sort/sorters arrays like (DataList).
 */
 
 (function($,Wui) {
@@ -8,7 +10,6 @@ Wui.Paging = function(args, wuiDataObj) {
     $.extend(this, {
         type: 'none',
         pageSize:  100,
-        pageIdx: '',
         width: '600px',
         height: '30px',
         cls: 'w121-pager',
@@ -28,54 +29,99 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         Wui.O.prototype.init.call(this);
         var me = this, el = me.el = me.surePane = $('<div>').append( me.pageButtons = $('<div>', {class: 'pager-buttons'}));
         this.currPage = 0;
+
+        // Assign the wui data object into the pager so we have access to the url and all member function/variables.
         this.dataObj = wuiDataObj;
+
+        // If the config "sort" array is defined, add them to the sorters array
+        if(me.dataObj.sort.length && !me.dataObj.sorters.length)
+            for(i = 0; i < me.dataObj.sort.length; i++)
+                for(j = 0; j < me.dataObj.cols.length; j++)
+                    if(me.dataObj.cols[j].dataItem == me.dataObj.sort[i].dataItem)
+                        me.dataObj.mngSorters(me.cols[j],me.dataObj.sort[i].order);
+
+        // Update paging bar after ajax comes back and before data is set.
+        me.dataObj.beforeSet = function(data, total) {
+            // Set total if server sends total to us.  Otherwise use data.length.
+            //    Note:  remote paging must set total from the backend - local paging will use data.length.
+            me.dataObj.total = ($.isNumeric(total)) ? total : (data) ? data.length : 0;
+            me.updatePagingBar(data);      
+        }
     },
 
-    afterClick: function(page, pageObj) {
-        console.log("Override this function to do your make() in your object");
+    updatePagingBar: function(data) {
+        var me = this;
+        me.dataObj.data = data;
+
+        function configBar(bar) {
+            var bars = {
+                    tbar: 'header',
+                    bbar: 'footer'
+                };
+            var thisBar =   me.dataObj[bars[bar]];
+            me.dataObj.surePane.addClass(bar);
+            thisBar.place();
+        }
+
+        // create paging ui
+        me.make();
+
+        if (me.totalPages >= 1) {
+            // Redraw everything that is currently in the bbar.
+            configBar('bbar');   
+        }
     },
 
     getPagingObj: function() {
         var me = this;
         var pagingObj = [];
+        var sortArray = me.dataObj.marshallSorters(me.dataObj.sorters);
 
-        if (me.type === 'local') { 
-            me.startIdx = 0;
-            me.endIdx = me.pageSize;
-            me.totalPages = parseInt(me.dataObj.data.length / me.pageSize);
-            me.widthInPercent = 100 / (me.totalPages + 1);
+        me.startIdx = 0;
+        me.endIdx = me.pageSize;
+        me.totalPages = parseInt(me.dataObj.total / me.pageSize);
+        me.widthInPercent = 100 / (me.totalPages + 1);
 
-            if (me.totalPages < 1) {
-                return pagingObj;
-            }
-
-            for (i=0; i<=me.totalPages; i++) { 
-                if (typeof me.dataObj.data[(me.pageSize * i)] != 'undefined') {
-                    var j=i+1;
-                
-                    if (i<me.totalPages) {
-                        var endContext = me.dataObj.data[(me.pageSize * i)+me.pageSize -1][me.pageIdx];
-                    } else {
-                        var endContext = me.dataObj.data[me.dataObj.data.length-1][me.pageIdx];
-                    }
-                    var startContext = me.dataObj.data[(me.pageSize * i)][me.pageIdx];
-                    pagingObj.push({
-                        page: i,
-                        startContext: startContext,
-                        endContext: endContext,
-                        widthInPercent: me.widthInPercent,
-                        height: me.height
-                    });
-                }
-            }
-        } else {
-            // TODO:  Implement Remote Paging here...
+        if (me.totalPages < 1) {
+            return pagingObj;
         }
+
+        for (i=0; i<=me.totalPages; i++) { 
+            var startContext = "";
+            var endContext = "";
+            if (typeof me.dataObj.data[(me.pageSize * i)] != 'undefined') {
+            
+                // Currently only show context for local paging
+                if (me.type === 'local' ) {
+                    
+                    for(k=0; k< sortArray.length; k++) {
+                        if (k>0) {
+                            endContext+= " - ";
+                            startContext += " - ";
+                        }
+                        if (i<me.totalPages) {
+                            endContext += me.dataObj.data[(me.pageSize * i)+me.pageSize -1][sortArray[k].dataItem];
+                        } else {
+                            endContext += me.dataObj.data[me.dataObj.data.length-1][sortArray[k].dataItem];
+                        }
+                        startContext += me.dataObj.data[(me.pageSize * i)][sortArray[k].dataItem];
+                    }
+                } 
+                pagingObj.push({
+                    page: i,
+                    startContext: startContext,
+                    endContext: endContext,
+                    widthInPercent: me.widthInPercent,
+                    height: me.height
+                });
+            }
+        }
+
         return pagingObj;
     },
 
     // Create the default paging UI
-    createPagingUI: function() {
+    make: function() {
         var me = this;
         me.items = [];
         me.pageButtons.html('');
@@ -193,16 +239,26 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
 
     goToPage: function(page) {
         var me = this;
+        console.log("Going to page: "+page);
 
         if (me.type === 'local') {                 
-            console.log("Going to page: "+page);
             me.startIdx = page * me.pageSize;
             me.endIdx = me.startIdx + me.pageSize;
             me.currPage = page;
-            me.afterClick(page,me.pages[page]);
-        } else {
-            // TODO:  Implement Remote 
-            // Do an ajax call (using the url of the dataObj)
+            me.dataObj.fireDataChanged();  // fire to do the DataList.make()
+            me.make(); // call paging make() to update dynamic sorters context for local paging.
+        } else if (me.type == 'remote') {
+            var start = page * me.pageSize;
+            var sortArray = me.dataObj.marshallSorters(me.dataObj.sorters);
+
+            var params = {
+                start: start,
+                limit: me.pageSize,
+                sort: sortArray
+            };
+
+            // Load this page -- Note:  make() will be called after DataSet().
+            me.dataObj.loadData(params);
         }
         me.pageButtons.find('[name=pager_button]').removeClass('pager-active')
         me.pageButtons.find('[data-page-index=' + me.currPage + ']').addClass('pager-active')

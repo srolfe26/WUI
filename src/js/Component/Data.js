@@ -134,7 +134,7 @@ Wui.Data.prototype = {
                         var me = this;
                         
                         // Event hook for before the data is set
-                        me.beforeSet(d);
+                        me.beforeSet(d,t);
                         
                         // Set the data
                         me.data = me.processData(d);
@@ -180,12 +180,14 @@ Wui.Data.prototype = {
                             unwrapped = Wui.unwrapData.call(me,r);
                         
                         me.onSuccess(r);
+                        // TODO:  See if we can move this out...
+                        me.total = ($.isNumeric(unwrapped.total)) ? unwrapped.total : (me.data) ? me.data.length : 0;
                         me.setData(unwrapped.data, unwrapped.total);
                     },
     
     /** @eventhook AllowS for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
-    onSuccess:      function(){},
-    
+    onSuccess: function() {},
+
     /** @eventhook Allows for the setting of the params config before loadData performs a remote call. Meant to be overridden. See loadData(). */
     onFailure:      function(){},
     
@@ -195,7 +197,7 @@ Wui.Data.prototype = {
     /** 
     @param {array} Data to be processed.
     Allows for pre-processing of the data before it is taken into the data object. Meant to be overridden, otherwise will act as a pass-through. See loadData().*/
-    processData:    function(response){ return response; },
+    processData:    function(response) { return response; },
 
     /**
     @param {object} [obj,...] One or more objects to be added to the end of the parent object's items array

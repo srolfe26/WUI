@@ -11,7 +11,10 @@ Wui.DataList = function(args){
         focusOnSelect:  true,
         interactive:    true,
         multiSelect:    false,
-        selected:       []
+        selected:       [],
+        sort:           [],  /** An array containing objects in the following format, that 
+                                define the initial sort of the data: {dataItem:'name', order:'asc/desc'} */
+        // sorters:     []   /** @private Used internally to keep track of sorting, items added to sort will be used in the sorters array */
     }, args);
 
     me.init();
@@ -129,6 +132,10 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                         if( me.selected && me.selected[0] && document.activeElement == me.selected[0].el[0] && me.keyActions.hasOwnProperty(evnt.keyCode) )
                             me.keyActions[evnt.keyCode].call(me);
                     });
+
+                    // columns and sorting on multiple columns
+                    me.cols = [];
+                    me.sorters = [];
                 },
     itemSelect: function(itm, silent){
                     var me = this, old = [], dn = (me.name) ? '.' + me.name : '';
@@ -347,6 +354,189 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                         ofstP.animate({ scrollTop:offset }, 100);
                     },
+
+    setData: function(data){
+        var me = this, i = null, j = null;
+
+        Wui.Data.prototype.setData.apply(me,arguments);
+
+        // If the config sorters is defined, add them to the array
+        if(me.sort.length && !me.sorters.length)
+            for(i = 0; i < me.sort.length; i++)
+                for(j = 0; j < me.cols.length; j++)
+                    if(me.cols[j].dataItem == me.sort[i].dataItem)
+                        me.mngSorters(me.cols[j],me.sort[i].order);
+
+        // If we have paging and it is 'remote' do not sort local - the backend should take care of it.
+        if (typeof me.pager == 'undefined' || me.pager.type !== 'remote') {
+            me.sortList();
+        }      
+    },
+
+    /**
+    @param    {object}    Column object associated with a particular column element
+    Sort the grid based on the values of one or more columns. If the grid is paging
+    then sort remotely.
+    */
+    sortList: function(col) {
+        var me = this;
+        me.mngSorters(col);
+        me.runSort();
+    },
+
+    runSort: function(){
+        // Sort the list
+        var me = this;
+        var sortArray = me.marshallSorters(me.sorters);
+        // Sort the full data arrayWui.maxZ()
+        me.data.sort(function(a, b){ return Wui.doSort(sortArray, 0, a, b); });
+
+        if (typeof me.pager != 'undefined' && me.pager.pageSize != -1 &&
+            (me.pager.type === 'local'  || me.pager.type === 'remote' ) ) {
+            // Here are the options:
+                //      1. Go to page 1 after a sort
+                //      2. Stay on the same page
+                //      3. Whatever row has focus keep it focused but sort everything around it. (will be harder)
+            me.pager.goToPage(0);
+        } 
+    },
+
+    /** 
+    @param    {object}    col    An object containing the sort direction and DOM element of the heading
+    @param    {string}    dir    The direction of the sort
+    Manages the sorters for the grid by keeping them in an array. 
+    */
+    mngSorters: function(col,dir){
+        var me = this,
+            sortClasses = ['one','two','three','four','five'];
+        if(col !== undefined){
+            if(dir !== undefined){
+                var addItem = true;
+                for(i = me.sorters.length; i > 0; i--)
+                    if(me.sorters[i-1].dataItem == col.dataItem)
+                        addItem = false;
+
+                col.sortDir = dir;
+                if(addItem)
+                    me.sorters.push(col);
+            }else{
+                if(col.sortDir){
+                    if(col.sortDir == 'desc'){
+                        delete col.sortDir;
+                        col.el.removeClass().addClass('w121-gc').addClass(col.cls);
+                        
+                        for(var i = me.sorters.length; i > 0; i--)
+                            if(me.sorters[i - 1].el == col.el)
+                                me.sorters.splice(i - 1,1);
+                    }else{
+                        col.sortDir = 'desc';
+                    }
+                }else{
+                    // Can't sort on more than 5 columns
+                    if(me.sorters.length > 5){
+                        col.el.removeClass().addClass('w121-gc').addClass(col.cls);
+                        return false;
+                    }
+                    
+                    col.sortDir = 'asc';
+                    me.sorters.push(col);
+                }
+            }    
+        }
+
+        $.each(me.sorters,function(i,itm){
+            itm.el.removeClass().addClass('w121-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
+        });
+    },
+
+    marshallSorters: function(sorters) {
+        var me = this;
+        var sort = [];
+
+        // creaet a new sort array into the form needed by remote paging and doSort().  
+        //  Note:  remote paging needs an object that it can JSONstringify and send to the server.
+        for(var i=0; i<sorters.length; i++) {
+            sort.push({
+                dataItem: sorters[i].dataItem,
+                order: sorters[i].sortDir,
+                dataType: sorters[i].dataType
+            });
+        }
+        return sort;
+    },
+
+    exportToCsv: function(filename, filterDataItem, filterValue) {
+        var me = this;
+        var exportStr = "";
+
+        for ( var i=0; i < me.columns.length; i++ ) {
+            exportStr += '"'+me.columns[i].heading+'"'+",";
+        }
+        exportStr += "\n";
+
+        for ( var i=0; i < me.data.length; i++ ) {
+            if ( filterDataItem == "ALL" || me.data[i][filterDataItem] == filterValue) {
+                for ( var j=0; j < me.columns.length; j++ ) {
+                    if (typeof me.data[i][me.columns[j].dataItem] !== 'undefined') {
+                        exportStr += '"'+me.data[i][me.columns[j].dataItem]+'"'+",";
+                    } else {
+                        exportStr += ",";
+                    }
+                    
+                }
+                exportStr += "\n";   
+            }
+        }
+
+        me.export(exportStr, filename, 'text/csv;charset=utf-8;');
+    },
+
+    exportToExcel: function(filename, filterDataItem, filterValue) {
+        var me = this;
+        var exportStr = "<table><tr>";
+
+        for ( var i=0; i < me.columns.length; i++ ) {
+            exportStr += '<th>'+me.columns[i].heading+'</th>';
+        }
+        exportStr += "</tr>";
+
+        for ( var i=0; i < me.data.length; i++ ) {
+            if ( filterDataItem == "ALL" || me.data[i][filterDataItem] == filterValue) {
+                exportStr += "<tr>";
+                for ( var j=0; j < me.columns.length; j++ ) {
+                    if (typeof me.data[i][me.columns[j].dataItem] !== 'undefined') {
+                        exportStr += '<td>'+me.data[i][me.columns[j].dataItem]+'</td>';
+                    } else {
+                        exportStr += "<td></td>";
+                    }
+                }
+                exportStr += "</tr>";
+            }
+        }
+        exportStr += "</tr></table>";
+
+        me.export(exportStr, filename, 'data:application/vnd.ms-excel;');
+    },
+
+    export:     function(exportStr, filename, fileType) {
+        var blob = new Blob([exportStr], { type: fileType });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+                // Browsers that support HTML5 download attribute
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    },
+
     selectBy:   function(key,val){
                     var me = this, retVal;
 

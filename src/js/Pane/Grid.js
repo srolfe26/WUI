@@ -65,13 +65,6 @@ Wui.Grid = function(args){
         
         /** An array of the currently selected records */
         selected:       [],
-
-        /** An array containing objects in the following format, that 
-        define the initial sort of the data: {dataItem:'name', order:'asc/desc'} */
-        sort:           [],
-
-        /** @private Used internally to keep track of sorting, items added to sort will be used in the sorters array */
-        // sorters:     []
         
         /** An array of items that will be added to the header */
         tbar:           []
@@ -86,47 +79,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
     
     closeSorter:function(){ this.dd.children('li').off('click').end().css('display','none'); },
 
-    /** 
-    Recursive function for sorting on multiple columns @private
-    @param {number}    depth    Depth of the recursive call
-    @param {number}    a        First item to compare
-    @param {number}    b        Second item to compare
-    
-    @return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
-    */
-    doSort:     function(depth,a,b){
-                    var me = this;
-                    if(me.sorters.length > 0){
-                        var col = me.sorters[depth],
-                            compA = a.rec[col.dataItem],
-                            compB = b.rec[col.dataItem];
-                            
-                        //get the direction of the second sort
-                        var srtVal = (col.sortDir == 'asc') ? 1 : -1;
-                        
-                        // perform the comparison based on 
-                        var compare = 0;
-                        switch(col.dataType){
-                            case 'date':
-                                compA = new Date(compA);
-                                compB = new Date(compB);
-                                compare = (compA.getTime() == compB.getTime()) ? 0 : (compA.getTime() > compB.getTime()) ? 1 : -1;
-                                break;
-                            case 'numeric':
-                                compA = (parseFloat(compA)) ? parseFloat(compA) : 0;
-                                compB = (parseFloat(compB)) ? parseFloat(compB) : 0;
-                                compare = (compA == compB) ? 0 : (compA > compB) ? 1 : -1;
-                                break;
-                            default:
-                                compare = $.trim(compA).toUpperCase().localeCompare($.trim(compB).toUpperCase());
-                        }
-                        
-                        if(compare !== 0 || me.sorters[depth + 1] === undefined)    return compare * srtVal;
-                        else                                                        return me.doSort(depth + 1,a,b);
-                    }else{
-                        return (a.rec.wuiIndex > b.rec.wuiIndex) ? 1 : -1;
-                    }
-                },
 
     /** Verify that columns have been defined on the grid, or that they are available remotely */
     getColumns: function(){
@@ -149,10 +101,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     me.tblContainer = $('<div><table></table></div>').addClass('w121-grid-body').appendTo(me.elAlias);
                     me.heading = $('<div>').addClass('w121-gh').appendTo(me.elAlias);
                     me.elAlias = me.tbl = me.tblContainer.children('table');
-
-                    // columns and sorting on multiple columns
-                    me.cols = [];
-                    me.sorters = [];
                 },
     /** Runs when the object is created, creates the DOM elements for the grid within the Wui.Pane that this object extends */
     init:       function(){
@@ -186,103 +134,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     // hide the header
                     if(me.hideHeader)    me.heading.height(0);
                 },
-    exportToCsv: function(filename, filterDataItem, filterValue) {
-        var me = this;
-        var exportStr = "";
-
-        for ( var i=0; i < me.columns.length; i++ ) {
-            exportStr += '"'+me.columns[i].heading+'"'+",";
-        }
-        exportStr += "\n";
-
-        for ( var i=0; i < me.data.length; i++ ) {
-            if ( filterDataItem == "ALL" || me.data[i][filterDataItem] == filterValue) {
-                for ( var j=0; j < me.columns.length; j++ ) {
-                    if (typeof me.data[i][me.columns[j].dataItem] !== 'undefined') {
-                        exportStr += '"'+me.data[i][me.columns[j].dataItem]+'"'+",";
-                    } else {
-                        exportStr += ",";
-                    }
-                    
-                }
-                exportStr += "\n";   
-            }
-        }
-
-        me.export(exportStr, filename, 'text/csv;charset=utf-8;');
-    },
-
-    exportToExcel: function(filename, filterDataItem, filterValue) {
-        var me = this;
-        var exportStr = "<table><tr>";
-
-        for ( var i=0; i < me.columns.length; i++ ) {
-            exportStr += '<th>'+me.columns[i].heading+'</th>';
-        }
-        exportStr += "</tr>";
-
-        for ( var i=0; i < me.data.length; i++ ) {
-            if ( filterDataItem == "ALL" || me.data[i][filterDataItem] == filterValue) {
-                exportStr += "<tr>";
-                for ( var j=0; j < me.columns.length; j++ ) {
-                    if (typeof me.data[i][me.columns[j].dataItem] !== 'undefined') {
-                        exportStr += '<td>'+me.data[i][me.columns[j].dataItem]+'</td>';
-                    } else {
-                        exportStr += "<td></td>";
-                    }
-                }
-                exportStr += "</tr>";
-            }
-        }
-        exportStr += "</tr></table>";
-
-        me.export(exportStr, filename, 'data:application/vnd.ms-excel;');
-    },
-    export:     function(exportStr, filename, fileType) {
-        var blob = new Blob([exportStr], { type: fileType });
-        if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, filename);
-        } else {
-            var link = document.createElement("a");
-            if (link.download !== undefined) { // feature detection
-                // Browsers that support HTML5 download attribute
-                var url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-    },
-
-    updatePagingBar: function(data) {
-        var me = this;
-        me.data = data;
-
-        function configBar(bar){
-            var bars = {
-                    tbar: 'header',
-                    bbar: 'footer'
-                };
-            var thisBar =   me[bars[bar]];
-            me.surePane.addClass(bar);
-            thisBar.place();
-        }
-
-        if (typeof me.pager != 'undefined' && me.pager.type === 'local' && me.pager.pageSize != -1) {
-            me.pager.createPagingUI();
-            if (me.pager.totalPages >= 1) {
-                // Redraw everything that is currently in the bbar.
-                configBar('bbar');  
-                // after click of a page do the make(). 
-                me.pager.afterClick = function(page, pageObj) {
-                    me.make();
-                }  
-            }
-        }
-    },
 
     /** Overrides the Wui.O layout to allow for the optional sizing to fit content, column sizing, and data positioning. */
     layout:     function(){
@@ -317,55 +168,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     return Wui.Data.prototype.loadData.apply(this,arguments);
                 },            
     
-    /** 
-    @param    {object}    col    An object containing the sort direction and DOM element of the heading
-    @param    {string}    dir    The direction of the sort
-    Manages the sorters for the grid by keeping them in an array. 
-    */
-    mngSorters: function(col,dir){
-                    var me = this,
-                        sortClasses = ['one','two','three','four','five'];
-                    if(col !== undefined){
-                        if(dir !== undefined){
-                            var addItem = true;
-                            for(i = me.sorters.length; i > 0; i--)
-                                if(me.sorters[i-1].dataItem == col.dataItem)
-                                    addItem = false;
-
-                            col.sortDir = dir;
-                            if(addItem)
-                                me.sorters.push(col);
-                        }else{
-                            if(col.sortDir){
-                                if(col.sortDir == 'desc'){
-                                    delete col.sortDir;
-                                    col.el.removeClass().addClass('w121-gc').addClass(col.cls);
-                                    
-                                    for(var i = me.sorters.length; i > 0; i--)
-                                        if(me.sorters[i - 1].el == col.el)
-                                            me.sorters.splice(i - 1,1);
-                                }else{
-                                    col.sortDir = 'desc';
-                                }
-                            }else{
-                                // Can't sort on more than 5 columns
-                                if(me.sorters.length > 5){
-                                    col.el.removeClass().addClass('w121-gc').addClass(col.cls);
-                                    return false;
-                                }
-                                
-                                col.sortDir = 'asc';
-                                me.sorters.push(col);
-                            }
-                        }    
-                    }
-
-                    $.each(me.sorters,function(i,itm){
-                        itm.el.removeClass().addClass('w121-gc ' + sortClasses[i] + ' ' + itm.sortDir).addClass(itm.cls);
-                    });
-                },
-    
-    /** Overrides DataList.modifyItem(), to implement the renderers */        
     modifyItem: function(itm){
                     var me = this;
                     // Perform renderers (if any)
@@ -482,13 +284,27 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                 },
 
     runSort:    function(){
-                    // Sort the list
-                    var me = this, listitems = me.items;
-                    listitems.sort(function(a, b){ return me.doSort(0, a, b); });
+                    var me = this;
+                    var sortArray = me.marshallSorters(me.sorters);
+
+                    // Sort the whole me.data array
+                    me.data.sort(function(a, b){ return Wui.doSort(sortArray, 0, a, b); });
 
                     me.tbl.detach();
-                    // Place items and reset alternate coloring
-                    listitems.forEach(function(row){ row.el.appendTo(me.tbl); });
+                    
+                    if (typeof me.pager != 'undefined' && me.pager.pageSize != -1 &&
+                        (me.pager.type === 'local'  || me.pager.type === 'remote' ) ) {
+                        // Here are the options:
+                            //      1. Go to page 1 after a sort
+                            //      2. Stay on the same page
+                            //      3. Whatever row has focus keep it focused but sort everything around it. (will be harder)
+                        me.pager.goToPage(0);
+                    } else {
+                        // Place items and reset alternate coloring
+                        me.make();
+                        //me.data.forEach(function(row){ row.el.appendTo(me.tbl); });
+                    }
+
                     me.tbl.appendTo(me.tblContainer);
                     me.sizeCols();
                 },
@@ -573,22 +389,14 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     
                     return me.getSrcData();
                 },
-    setData:    function(data){
-                    var me = this, i = null, j = null;
-                    
-                    me.updatePagingBar(data);
 
-                    Wui.DataList.prototype.setData.apply(me,arguments);
-                    
-                    // If the config sorters is defined, add them to the array
-                    if(me.sort.length && !me.sorters.length)
-                        for(i = 0; i < me.sort.length; i++)
-                            for(j = 0; j < me.cols.length; j++)
-                                if(me.cols[j].dataItem == me.sort[i].dataItem)
-                                    me.mngSorters(me.cols[j],me.sort[i].order);
+    // setData:    function(data){
+    //                 var me = this, i = null, j = null;
 
-                    this.sortList();
-                },
+    //                 me.updatePagingBar(data);
+
+    //                 Wui.DataList.prototype.setData.apply(me,arguments);  // Needs to happen after updatePagingBar() in order to make correctly.
+    //             },
 
     /** Size up the columns of the table to match the headings @private */
     sizeCols:   function (){
@@ -603,17 +411,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     for(var i = 0; i < me.cols.length; i++)
                         me.tbl.find('td:eq(' +i+ ')').css({ width: (me.cols[i].el.innerWidth() / me.tbl.width()).toFixed(2) + '%' });
                 },
-                    
-    /**
-    @param    {object}    Column object associated with a particular column element
-    Sort the grid based on the values of one or more columns. If the grid is paging
-    then sort remotely.
-    */
-    sortList:   function(col) {
-                    var me = this;
-                    me.mngSorters(col);
-                    me.runSort();
-                }
 });
 
 })(jQuery,window[_wuiVar]);
