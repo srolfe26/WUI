@@ -367,10 +367,7 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     if(me.cols[j].dataItem == me.sort[i].dataItem)
                         me.mngSorters(me.cols[j],me.sort[i].order);
 
-        // If we have paging and it is 'remote' do not sort local - the backend should take care of it.
-        if (typeof me.pager == 'undefined' || me.pager.type !== 'remote') {
-            me.sortList();
-        }      
+        me.sortList();
     },
 
     /**
@@ -380,8 +377,13 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     */
     sortList: function(col) {
         var me = this;
-        me.mngSorters(col);
-        me.runSort();
+        // If we have paging and it is 'remote' do NOT sort local - the backend should take care of it.
+        //    Also, If no pager is defined we do allow local sorting.
+        if (typeof me.pager == 'undefined' || me.pager.type !== 'remote') {
+            me.mngSorters(col);
+            me.runSort();    
+        } 
+
     },
 
     runSort: function(){

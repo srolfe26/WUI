@@ -185,7 +185,7 @@ Wui.maxZ = function(){
 Wui.doSort = function(sortArray,depth,a,b){ 
     /** 
     Recursive function for sorting on multiple columns @private
-    @param {Array of Objects}   sortArray   Modified sorters array
+    @param {Array of Objects}   sortArray   Modified sorters array that holds -- 'dataType' & 'order'
     @param {number}             depth       Depth of the recursive call
     @param {number}             a           First item to compare
     @param {number}             b           Second item to compare

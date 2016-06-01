@@ -30,21 +30,11 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         var me = this, el = me.el = me.surePane = $('<div>').append( me.pageButtons = $('<div>', {class: 'pager-buttons'}));
         this.currPage = 0;
 
-        // Assign the wui data object into the pager so we have access to the url and all member function/variables.
+        // Assign the wui data object into the pager so we have access to the 'url' and all member function/variables.
         this.dataObj = wuiDataObj;
 
-        // If the config "sort" array is defined, add them to the sorters array
-        if(me.dataObj.sort.length && !me.dataObj.sorters.length)
-            for(i = 0; i < me.dataObj.sort.length; i++)
-                for(j = 0; j < me.dataObj.cols.length; j++)
-                    if(me.dataObj.cols[j].dataItem == me.dataObj.sort[i].dataItem)
-                        me.dataObj.mngSorters(me.cols[j],me.dataObj.sort[i].order);
-
-        // Update paging bar after ajax comes back and before data is set.
-        me.dataObj.beforeSet = function(data, total) {
-            // Set total if server sends total to us.  Otherwise use data.length.
-            //    Note:  remote paging must set total from the backend - local paging will use data.length.
-            me.dataObj.total = ($.isNumeric(total)) ? total : (data) ? data.length : 0;
+        // Update paging bar after data is set.
+        me.dataObj.afterSet = function(data) {
             me.updatePagingBar(data);      
         }
     },
@@ -96,8 +86,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
                     
                     for(k=0; k< sortArray.length; k++) {
                         if (k>0) {
-                            endContext+= " - ";
-                            startContext += " - ";
+                            endContext+= " | ";
+                            startContext += " | ";
                         }
                         if (i<me.totalPages) {
                             endContext += me.dataObj.data[(me.pageSize * i)+me.pageSize -1][sortArray[k].dataItem];
