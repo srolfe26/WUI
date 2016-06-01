@@ -134,35 +134,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     // hide the header
                     if(me.hideHeader)    me.heading.height(0);
                 },
-    
-    updatePagingBar: function(data) {
-        var me = this;
-        me.data = data;
-
-        function configBar(bar){
-            var bars = {
-                    tbar: 'header',
-                    bbar: 'footer'
-                };
-            var thisBar =   me[bars[bar]];
-            me.surePane.addClass(bar);
-            thisBar.place();
-        }
-
-        // if Paging is turned on use paging object to get start and end index.
-        if (typeof me.pager != 'undefined' && me.pager.pageSize != -1 &&
-            (me.pager.type === 'local'  || me.pager.type === 'remote' ) ) {
-            me.pager.make();
-            if (me.pager.totalPages >= 1) {
-                // Redraw everything that is currently in the bbar.
-                configBar('bbar');  
-                // after click of a page do the make(). 
-                me.pager.afterClick = function(page, pageObj) {
-                    me.make();
-                }  
-            }
-        }
-    },
 
     /** Overrides the Wui.O layout to allow for the optional sizing to fit content, column sizing, and data positioning. */
     layout:     function(){
@@ -330,7 +301,8 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                         me.pager.goToPage(0);
                     } else {
                         // Place items and reset alternate coloring
-                        me.data.forEach(function(row){ row.el.appendTo(me.tbl); });
+                        me.make();
+                        //me.data.forEach(function(row){ row.el.appendTo(me.tbl); });
                     }
 
                     me.tbl.appendTo(me.tblContainer);
@@ -418,13 +390,13 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     return me.getSrcData();
                 },
 
-    setData:    function(data){
-                    var me = this, i = null, j = null;
+    // setData:    function(data){
+    //                 var me = this, i = null, j = null;
 
-                    me.updatePagingBar(data);
+    //                 me.updatePagingBar(data);
 
-                    Wui.DataList.prototype.setData.apply(me,arguments);  // Needs to happen after updatePagingBar() in order to make correctly.
-                },
+    //                 Wui.DataList.prototype.setData.apply(me,arguments);  // Needs to happen after updatePagingBar() in order to make correctly.
+    //             },
 
     /** Size up the columns of the table to match the headings @private */
     sizeCols:   function (){

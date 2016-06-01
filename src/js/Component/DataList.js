@@ -366,8 +366,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                 for(j = 0; j < me.cols.length; j++)
                     if(me.cols[j].dataItem == me.sort[i].dataItem)
                         me.mngSorters(me.cols[j],me.sort[i].order);
-                    
-        me.sortList();
+
+        // If we have paging and it is 'remote' do not sort local - the backend should take care of it.
+        if (typeof me.pager == 'undefined' || me.pager.type !== 'remote') {
+            me.sortList();
+        }      
     },
 
     /**

@@ -134,7 +134,7 @@ Wui.Data.prototype = {
                         var me = this;
                         
                         // Event hook for before the data is set
-                        me.beforeSet(d);
+                        me.beforeSet(d,t);
                         
                         // Set the data
                         me.data = me.processData(d);
