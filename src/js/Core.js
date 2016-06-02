@@ -221,7 +221,7 @@ Wui.doSort = function(sortArray,depth,a,b){
         if(compare !== 0 || sortArray[depth + 1] === undefined) {
             return compare * srtVal;
         } else {
-            return me.doSort(sortArray,depth + 1,a,b);
+            return Wui.doSort(sortArray,depth + 1,a,b);
         }                                                       
     }else{
         return (a['wuiIndex'] > b['wuiIndex']) ? 1 : -1;
