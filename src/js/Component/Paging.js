@@ -209,7 +209,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         }
 
         if (me.pagePosition) {
-            me.pagePositionEl.html(me.dataObj.total + ' results<br />' + 'Page ' + (me.currPage + 1) + ' / ' + (me.totalPages + 1 ));
+            me.pagePositionEl.html('page ' + (me.currPage + 1) + ' / ' + (me.totalPages + 1 ) + '<br /> total ' + me.dataObj.total);
         }
 
         if (me.adjacentButtons) {
