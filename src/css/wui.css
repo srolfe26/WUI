@@ -59,7 +59,7 @@
     max-width: 300px;
     position: absolute;
     z-index: 101;
-    text-align: center;
+    min-width: 120px;
 }
 /*.pager-tooltip:after {
     position: absolute;

@@ -10,8 +10,8 @@ Wui.Paging = function(args, wuiDataObj) {
     $.extend(this, {
         type: 'none',
         pageSize:  100,
-        width: 600,
-        height: 30,
+        width: '600px',
+        height: '30px',
         cls: 'w121-pager',
         buttonClass: 'w121-pager-button',
         showPagePosition: true,
@@ -251,14 +251,12 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
 
     goToPage: function(page) {
         var me = this;
-        console.log("Going to page: "+page);
 
         if (me.type === 'local') {                 
             me.startIdx = page * me.pageSize;
             me.endIdx = me.startIdx + me.pageSize;
             me.currPage = page;
             me.dataObj.fireDataChanged();  // fire to do the DataList.make()
-            // me.make(); // call paging make() to update dynamic sorters context for local paging.
         } else if (me.type == 'remote') {
             var start = page * me.pageSize;
             var sortArray = me.dataObj.marshallSorters(me.dataObj.sorters);
