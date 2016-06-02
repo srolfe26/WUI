@@ -1,78 +1,3 @@
-/* Pager */
-.pager-buttons:before, .pager-buttons:after {
-  content: '';
-  display: table;
-}
-.pager-buttons:after {
-  clear: both;
-}
-.pager-buttons {
-  background-color: #fff;
-  border: solid thin #ccc;
-  box-shadow: 0 -5px 10px -7px #ccc inset, 0 5px 10px -7px #ccc inset;
-  border-radius: 5px;
-  position: relative;
-}
-.w121-pager-button {
-  float: left;
-  box-shadow: 0 0 1px 0 #ccc inset;
-  height: 2em;
-  width: 10%;
-}
-.pager-active, .w121-pager-button:hover {
-  box-shadow: 0 -30px 10px -10px lightblue inset;
-}
-
-.pager-prev, .pager-next, .w121-pager-button {
-  -webkit-transition: box-shadow 0.2s, color 0.2s;
-  -moz-transition: box-shadow 0.2s, color 0.2s;
-  transition: box-shadow 0.2s, color 0.2s;
-  cursor: pointer;
-}
-.pager-prev, .pager-next {
-  color: #ccc;
-  position: absolute;
-  width: 4em;
-  text-align: center;
-  top: 0.5em;
-}
-.pager-prev:hover, .pager-next:hover {
-    color: #333;
-}
-.pager-prev {
-    left: 0;
-}
-.pager-next {
-    right: 0;
-}
-.pager-tooltip.show {
-    display: table!important;
-}
-.pager-tooltip {
-    box-shadow: 0 5px 5px 1px #ccc;
-    display: none;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #fff;
-    position: relative;
-    transition: all 0.2s linear 0s;
-    max-width: 300px;
-    position: absolute;
-    z-index: 101;
-    min-width: 120px;
-}
-/*.pager-tooltip:after {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    content: '';
-    display: block;
-    border: solid 1em transparent;
-    border-top-color: #fff;
-    top: 97%;
-    z-index: -1;
-}*/
-
 .w121-pane p {
     margin:1em 0.5em;
     -webkit-flex: none;
@@ -950,3 +875,95 @@ button::-moz-focus-inner { border:0; }
 .w121-pane .w121-button.w121-tab.selected,
 .w121-pane .w121-pane .w121-pane .w121-button.w121-tab.selected,
 .w121-pane .w121-pane .w121-pane .w121-pane .w121-pane .w121-button.w121-tab.selected {background-color:#fff;  color:#555;}
+
+
+
+/*********************** Pager styles ***********************/
+.pager-buttons:before, .pager-buttons:after {
+    content: '';
+    display: table;
+}
+.pager-buttons:after {
+    clear: both;
+}
+.pager-buttons {
+    background-color: #fff;
+    border: solid thin #ccc;
+    box-shadow: 0 -5px 10px -7px #ccc inset, 0 5px 10px -7px #ccc inset;
+    border-radius: 5px;
+    position: relative;
+}
+.w121-pager-button {
+    float: left;
+    box-shadow: 0 0 1px 0 #ccc inset;
+    height: 2em;
+    width: 10%;
+}
+.pager-active, .w121-pager-button:hover {
+    box-shadow: 0 -30px 10px -10px #add8e6 inset;
+}
+.has-page-position .w121-pager-inner {
+    position: relative;
+    padding-left: 6em;
+}
+.w121-pager-page-position {
+    width: 6em;
+    position: absolute;
+    left: 0;
+    top: 0;
+    text-align: right;
+    font-size: 12px;
+}
+.has-adjacent-buttons .pager-buttons {
+    padding-left: 4em;
+    padding-right: 4em;
+}
+.pager-prev, .pager-next, .w121-pager-button {
+    -webkit-transition: box-shadow 0.2s, color 0.2s;
+    -moz-transition: box-shadow 0.2s, color 0.2s;
+    transition: box-shadow 0.2s, color 0.2s;
+    cursor: pointer;
+}
+.pager-buttons .pager-prev, .pager-buttons .pager-next {
+    color: #999;
+    font-size: 12px;
+    position: absolute;
+    width: 4em;
+    text-align: center;
+    top: 0.5em;
+}
+.pager-prev:hover, .pager-next:hover {
+    color: #333;
+}
+.pager-prev {
+    left: 0;
+}
+.pager-next {
+    right: 0;
+}
+.pager-tooltip.show {
+    display: table!important;
+}
+.pager-tooltip {
+    box-shadow: 0 5px 5px 1px #ccc;
+    display: none;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    position: relative;
+    max-width: 300px;
+    position: absolute;
+    z-index: 101;
+    min-width: 120px;
+}
+/*.pager-tooltip:after {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    content: '';
+    display: block;
+    border: solid 1em transparent;
+    border-top-color: #fff;
+    top: 97%;
+    z-index: -1;
+}*/
