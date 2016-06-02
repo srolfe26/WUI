@@ -30,6 +30,55 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         var me = this, el = me.el = me.surePane = $('<div>').append( me.pageButtons = $('<div>', {class: 'pager-buttons'}));
         this.currPage = 0;
 
+        // add tooltip
+        me.tooltip
+        .attr('class', 'pager-tooltip')
+        .appendTo($('body'));
+
+
+        // add adjacent paging buttons
+        me.pageButtons
+        .css({
+            'padding-left': '4em',
+            'padding-right': '4em'
+        });
+
+        // Go to the appropriate page on click.
+        me.pageButtons.on('click', '[name=pager_button]', function page(e) {
+            var $this = $(this);
+            me.goToPage(parseInt($this.attr('data-page-index')));
+            $this.siblings().removeClass('active');
+            $this.addClass('active');
+        })
+        .on('click', '[name=pager_prev]', function() {
+            var pageNum = (me.currPage === 0) ? me.totalPages : me.currPage - 1;
+            me.goToPage(pageNum);
+
+            me.updateTooltipContent(me.pages[me.currPage].el);
+            me.updateTooltipPosition(me.pages[me.currPage].el);
+        })
+        .on('click', '[name=pager_next]', function() {
+            var pageNum = (me.currPage === me.totalPages) ? 0 : me.currPage + 1;
+            me.goToPage(pageNum);
+
+            me.updateTooltipContent(me.pages[me.currPage].el);
+            me.updateTooltipPosition(me.pages[me.currPage].el);
+        })
+        .on('mouseenter', '.w121-pager-button', function(e) {
+            var $this = $(this);
+            me.updateTooltipContent($this);
+            me.updateTooltipPosition($this);
+        })
+        .on('mouseleave', function(e) {
+            me.tooltipTimer = setTimeout(function() {
+                me.tooltip.removeClass('show');
+            }, 300);
+
+            $(this).on('mouseenter', function() {
+                window.clearTimeout(me.tooltipTimer);
+            })
+        });
+
         // Assign the wui data object into the pager so we have access to the 'url' and all member function/variables.
         this.dataObj = wuiDataObj;
 
@@ -122,23 +171,14 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         .width(me.width)
         .addClass(this.cls);
 
-
-
-        me.tooltip = $('<div>', {
-            'id': 'tooltip',
-            'class': 'pager-tooltip'
-        }).appendTo($('body'));
-
         // generate page buttons
         if (me.totalPages >= 1) {
             for(var j=0; j <= me.totalPages; j++) {
-                $('<div>')
+                var ui = $('<div>')
                 .attr({
                     'title': me.pages[j].startContext + '\n ~ ' + me.pages[j].endContext,
                     'name': 'pager_button',
-                    'data-page-index': j,
-                    'data-page-start-context': me.pages[j].startContext,
-                    'data-page-end-context': me.pages[j].endContext
+                    'data-page-index': j
                 })
                 .addClass(me.buttonClass)
                 .css({
@@ -147,66 +187,43 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
                 })
                 .append('' || '')
                 .appendTo(me.pageButtons);
+
+                me.pages[j].el = ui;
             }
         }
 
-        // add adjacent paging buttons
-        me.pageButtons
-        .css({
-            'padding-left': '4em',
-            'padding-right': '4em'
-        })
-        .prepend(
-            $('<div>')
-                .text('Prev')
-                .addClass('pager-prev')
-                .attr('name', 'pager_prev')
-                .width('4em')
-        )
-        .append(
-            $('<div>')
-                .text('Next')
-                .addClass('pager-next')
-                .attr('name', 'pager_next')
-                .width('4em')
-        );
 
-
-        // Go to the appropriate page on click.
-        me.pageButtons.on('click', '[name=pager_button]', function page(e) {
-            var $this = $(this);
-            me.goToPage(parseInt($this.attr('data-page-index')));
-            $this.siblings().removeClass('active');
-            $this.addClass('active');
-        })
-        .on('click', '[name=pager_prev]', function() {
-            var pageNum = (me.currPage === 0) ? me.totalPages : me.currPage - 1;
-            me.goToPage(pageNum);
-        })
-        .on('click', '[name=pager_next]', function() {
-            var pageNum = (me.currPage === me.totalPages) ? 0 : me.currPage + 1;
-            me.goToPage(pageNum);
-        })
-        .on('mouseenter', '.w121-pager-button', function(e) {
-            var $this = $(this);
-            me.updateTooltipContent($this, me.tooltip);
-            me.updateTooltipPosition($this, me.tooltip);
-        });
+        me.adjacentPrev = $('<div>')
+        .text('Prev')
+        .addClass('pager-prev')
+        .attr('name', 'pager_prev')
+        .width('4em')
+        .prependTo(me.pageButtons);
+        
+        me.adjacentNext = $('<div>')
+        .text('Next')
+        .addClass('pager-next')
+        .attr('name', 'pager_next')
+        .width('4em')   
+        .appendTo(me.pageButtons);
     },
 
-    updateTooltipContent: function(target, tooltip) {
-        tooltip
+    updateTooltipContent: function(target) {
+        var me = this, targetIndex = target.attr('data-page-index');
+        me.tooltip
         .html(
-            target.attr('data-page-start-context')
-            + '<div> ~ </div>' + target.attr('data-page-end-context')
+            me.pages[targetIndex].startContext
+            + '<hr />'
+            + me.pages[targetIndex].endContext 
         )
         .addClass('show');
     },
-    updateTooltipPosition: function(target, tooltip) {
-        tooltip
+    updateTooltipPosition: function(target) {
+        var me = this;        
+        me.tooltip
         .offset({
-            left: (target.offset().left + target.width()/2) - ($('.pager-tooltip').outerWidth()/2),
-            top: target.offset().top - (tooltip.height()*1.5)
+            left: (target.offset().left + target.width()/2) - (me.tooltip.outerWidth()/2),
+            top: me.pageButtons.offset().top - (me.pageButtons.height() + me.tooltip.height())
         });
     },
     getStartIdx: function() {
@@ -236,7 +253,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.endIdx = me.startIdx + me.pageSize;
             me.currPage = page;
             me.dataObj.fireDataChanged();  // fire to do the DataList.make()
-            me.make(); // call paging make() to update dynamic sorters context for local paging.
+            // me.make(); // call paging make() to update dynamic sorters context for local paging.
         } else if (me.type == 'remote') {
             var start = page * me.pageSize;
             var sortArray = me.dataObj.marshallSorters(me.dataObj.sorters);
@@ -252,6 +269,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         }
         me.pageButtons.find('[name=pager_button]').removeClass('pager-active')
         me.pageButtons.find('[data-page-index=' + me.currPage + ']').addClass('pager-active')
+        me.tooltip.removeClass('show')
     }
 });
 

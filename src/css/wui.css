@@ -37,38 +37,41 @@
   top: 0.5em;
 }
 .pager-prev:hover, .pager-next:hover {
-  color: #333;
+    color: #333;
 }
 .pager-prev {
-  left: 0;
+    left: 0;
 }
 .pager-next {
-  right: 0;
+    right: 0;
 }
 .pager-tooltip.show {
-  display: table!important;
+    display: table!important;
 }
 .pager-tooltip {
-  box-shadow: 0 5px 5px 1px #ccc;
-  display: none;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: #fff;
-  position: relative;
-  transition: all 0.2s linear 0s;
-  max-width: 300px;
+    box-shadow: 0 5px 5px 1px #ccc;
+    display: none;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    position: relative;
+    transition: all 0.2s linear 0s;
+    max-width: 300px;
+    position: absolute;
+    z-index: 101;
+    text-align: center;
 }
-.pager-tooltip:after {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  content: '';
-  display: block;
-  border: solid 1em transparent;
-  border-top-color: #fff;
-  top: 97%;
-  z-index: 100;
-}
+/*.pager-tooltip:after {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    content: '';
+    display: block;
+    border: solid 1em transparent;
+    border-top-color: #fff;
+    top: 97%;
+    z-index: -1;
+}*/
 
 .w121-pane p {
     margin:1em 0.5em;
