@@ -1,11 +1,62 @@
-/**
-The WUI Paging Object will handle both 'local' and 'remote' paging. 
-
-    Note: Paging can be added to any object that extends Data and implements sort/sorters arrays like (DataList).
-*/
-
 (function($,Wui) {
+/**
+ * The WUI Paging Object handles both 'local' and 'remote' paging. 
+ * 
+ * Example:
+ *
+ var data = [
+  {
+    "_id": "574472f23c3007d892869395",
+    "name": "Lynn Sweeney",
+    "company": "FUTURIS",
+    "favoriteFruit": "strawberry"
+  },
+  ...
+  ...
+  {
+    "_id": "574472f24e55d0e885375dab",
+    "name": "Floyd Holloway",
+    "company": "GUSHKOOL",
+    "favoriteFruit": "banana"
+  }];
 
+  var grid = new Wui.Grid($.extend({
+        data: data,
+        columns: [
+            {heading: 'ID', dataItem: '_id'},
+            {heading: 'Name', dataItem: 'name'},
+            {heading: 'company', dataItem: 'company'},
+            {heading: 'Fruit', dataItem: 'favoriteFruit'}
+        ],
+        title: '<h2>Weird Grid</h2>',
+        bbar: [
+            this.btn = new Wui.Button()
+        ]
+    },args));
+  
+  
+  var pager = new Wui.Paging({
+              type: 'local',
+              pageSize: 100
+          }, 
+          grid                  // <- Pass in the "grid" into the Wui.Paging object.
+  );   
+
+  // splice the pager onto the bbar.
+  grid.bbar.splice(0,0,pager);
+
+ *
+ * @param   {type}                      Is either "local" or "remote"
+ * @param   {pageSize}                  Size of each page
+ * @param   {width}                     width of the paging bar - default 600px
+ * @param   {height}                    height of the paging bar - default 30px
+ * @param   {cls}                       css class to apply to paging bar
+ * @param   {buttonClass}               class to apply to pager buttons
+ * @param   {showPagePosition}          TODO:  -> Not implemented yet.
+ * @param   {showAdjacentButtons}       TODO:  -> Not implemented yet.
+ * @param   {tooltip}                   pass in the container element for the tooltip.                
+ * @return  {Wui.Object}                returns a new Wui.Paging Object.
+ */
 Wui.Paging = function(args, wuiDataObj) {
     $.extend(this, {
         type: 'none',
@@ -256,7 +307,10 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.startIdx = page * me.pageSize;
             me.endIdx = me.startIdx + me.pageSize;
             me.currPage = page;
-            me.dataObj.fireDataChanged();  // fire to do the DataList.make()
+
+            // fire to do the DataList.make()
+            me.dataObj.fireDataChanged();  
+
         } else if (me.type == 'remote') {
             var start = page * me.pageSize;
             var sortArray = me.dataObj.marshallSorters(me.dataObj.sorters);
@@ -267,7 +321,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
                 sort: sortArray
             };
 
-            // Load this page -- Note:  make() will be called after DataSet().
+            // Load this page -- Note:  make() will be called in afterSet() -> updatePagingBar() above.
             me.dataObj.loadData(params);
         }
         me.pageButtons.find('[name=pager_button]').removeClass('pager-active')
