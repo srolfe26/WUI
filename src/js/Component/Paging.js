@@ -10,8 +10,8 @@ Wui.Paging = function(args, wuiDataObj) {
     $.extend(this, {
         type: 'none',
         pageSize:  100,
-        width: '600px',
-        height: '30px',
+        width: 600,
+        height: 30,
         cls: 'w121-pager',
         buttonClass: 'w121-pager-button',
         showPagePosition: true,
@@ -84,7 +84,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
 
         // Update paging bar after data is set.
         me.dataObj.afterSet = function(data) {
-            me.updatePagingBar(data);      
+            me.updatePagingBar(data);
         }
     },
 
@@ -97,7 +97,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
                     tbar: 'header',
                     bbar: 'footer'
                 };
-            var thisBar =   me.dataObj[bars[bar]];
+            var thisBar = me.dataObj[bars[bar]];
             me.dataObj.surePane.addClass(bar);
             thisBar.place();
         }
@@ -176,7 +176,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             for(var j=0; j <= me.totalPages; j++) {
                 var ui = $('<div>')
                 .attr({
-                    'title': me.pages[j].startContext + '\n ~ ' + me.pages[j].endContext,
+                    // TODO: (hfw) determine whether title attribute is necessary for accessibility
+                    // 'title': me.pages[j].startContext + '\n ~ ' + me.pages[j].endContext,
                     'name': 'pager_button',
                     'data-page-index': j
                 })
@@ -215,14 +216,18 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.pages[targetIndex].startContext
             + '<hr />'
             + me.pages[targetIndex].endContext 
-        )
-        .addClass('show');
+        );
+        if (me.dataObj.sorters.length > 0) {
+            me.tooltip
+            .addClass('show');
+        };
     },
     updateTooltipPosition: function(target) {
-        var me = this;        
+        var me = this;
+
         me.tooltip
         .offset({
-            left: (target.offset().left + target.width()/2) - (me.tooltip.outerWidth()/2),
+            left: me.surePane.offset().left,
             top: me.pageButtons.offset().top - (me.pageButtons.height() + me.tooltip.height())
         });
     },
