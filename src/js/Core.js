@@ -182,17 +182,16 @@ Wui.maxZ = function(){
     return $.getMaxZ();
 };
 
-Wui.doSort = function(sortArray,depth,a,b){ 
-    /** 
-    Recursive function for sorting on multiple columns @private
-    @param {Array of Objects}   sortArray   Modified sorters array that holds -- 'dataType' & 'order'
-    @param {number}             depth       Depth of the recursive call
-    @param {number}             a           First item to compare
-    @param {number}             b           Second item to compare
-    
-    @return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
-    */
+/** 
+Recursive function for sorting on multiple columns @private
+@param {object}    sortArray   Modified sorters array that holds -- 'dataType' & 'order'
+@param {number}    depth       Depth of the recursive call
+@param {number}    a           First item to compare
+@param {number}    b           Second item to compare
 
+@return 1 if the first item is greater than the second, -1 if it is not, 0 if they are equal
+*/
+Wui.doSort = function(sortArray,depth,a,b){ 
     if(sortArray.length > 0) {
         var col = sortArray[depth],
             compA = a[col.dataItem],

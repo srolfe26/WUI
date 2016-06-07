@@ -1,9 +1,12 @@
 (function($,Wui) {
 /**
- * The WUI Paging Object handles both 'local' and 'remote' paging. 
+ * The WUI Paging Object handles both 'local' and 'remote' paging of a Wui.DataList
+ *  Object or any other Wui.Data Object that extends like DataList. 
+ * 
+ * Authors: marty.israelsen@usurf.usu.edu, hsin.wang@usurf.usu.edu
  * 
  * Example:
- *
+ 
  var data = [
   {
     "_id": "574472f23c3007d892869395",
@@ -36,7 +39,7 @@
   
   
   var pager = new Wui.Paging({
-              type: 'local',
+              type: 'local',    // specifiy either 'local' or 'remote' 
               pageSize: 100
           }, 
           grid                  // <- Pass in the "grid" into the Wui.Paging object.
@@ -46,16 +49,17 @@
   grid.bbar.splice(0,0,pager);
 
  *
- * @param   {type}                      Is either "local" or "remote"
- * @param   {pageSize}                  Size of each page
- * @param   {width}                     width of the paging bar - default 600px
- * @param   {height}                    height of the paging bar - default 30px
- * @param   {cls}                       css class to apply to paging bar
- * @param   {buttonClass}               class to apply to pager buttons
- * @param   {showPagePosition}          TODO:  -> Not implemented yet.
- * @param   {showAdjacentButtons}       TODO:  -> Not implemented yet.
- * @param   {tooltip}                   pass in the container element for the tooltip.                
- * @return  {Wui.Object}                returns a new Wui.Paging Object.
+ * @param   {string}            type            Is either "local" or "remote"
+ * @param   {integer}           pageSize        Size of each page
+ * @param   {integer}           width           width of the paging bar
+ * @param   {integer}           height          Height of the paging bar
+ * @param   {string}            cls             Css class to apply to paging bar
+ * @param   {string}            buttonClass     Class to apply to pager buttons
+ * @param   {boolean}           pagePosition    Show page position and total
+ * @param   {boolean}           adjacentButtons Adds Prev & Next buttons to pager
+ * @param   {string}            tooltip         Pass in the container element for the tooltip. 
+ *                
+ * @return  {object}            Returns a new Wui.Paging Object.
  */
 Wui.Paging = function(args, wuiDataObj) {
     $.extend(this, {
@@ -76,6 +80,13 @@ Wui.Paging = function(args, wuiDataObj) {
 };
 
 Wui.Paging.prototype = $.extend(new Wui.O(),{
+
+    /**
+     * Set up needed UI and listeners
+     *    
+     * @param   {object}  wuiDataObj        A Wui.DataList Object or any Wui.Data 
+     *                                      Object that is extended like DataList.                               
+     */
     init: function(wuiDataObj) {
         Wui.O.prototype.init.call(this);
         var me = this,
@@ -145,7 +156,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             })
         }
 
-        // Assign the wui data object into the pager so we have access to the 'url' and all member function/variables.
+        // Assign the wui data object into the pager so we have access to the 
+        // 'url' and all member function/variables.
         this.dataObj = wuiDataObj;
 
         // Update paging bar after data is set.
@@ -154,6 +166,12 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         }
     },
 
+    /**
+     * This function assigns the data Object's data array, makes the paging
+     * UI and redrawes the bbar.
+     *    
+     * @param   {object}    data         A data array.                                
+     */
     updatePagingBar: function(data) {
         var me = this;
         me.dataObj.data = data;
@@ -177,6 +195,15 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         }
     },
 
+    /**
+     * This function creates an array of paging objects.   Each object holds 
+     * information for each page of the result set.  Note:  with local paging, 
+     * context information about the starting and ending records is also stored 
+     * in the object based on the current
+     * sort order.
+     *       
+     * @return  {object}          Returns an array of paging objects.
+     */
     getPagingObj: function() {
         var me = this;
         var pagingObj = [];
@@ -225,7 +252,9 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         return pagingObj;
     },
 
-    // Create the default paging UI
+    /**
+     * Makes the default paging UI using the paging Object
+     */
     make: function() {
         var me = this;
         me.items = [];
@@ -242,7 +271,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             for(var j=0; j <= me.totalPages; j++) {
                 var ui = $('<div>')
                 .attr({
-                    // TODO: (hfw) determine whether title attribute is necessary for accessibility
+                    // TODO: (hfw) determine whether title attribute is necessary 
+                    //        for accessibility
                     // 'title': me.pages[j].startContext + '\n ~ ' + me.pages[j].endContext,
                     'name': 'pager_button',
                     'data-page-index': j
@@ -260,7 +290,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         }
 
         if (me.pagePosition) {
-            me.pagePositionEl.html('page ' + (me.currPage + 1) + ' / ' + (me.totalPages + 1 ) + '<br /> total ' + me.dataObj.total);
+            me.pagePositionEl.html('page ' + (me.currPage + 1) + ' / ' 
+                + (me.totalPages + 1 ) + '<br /> total ' + me.dataObj.total);
         }
 
         if (me.adjacentButtons) {
@@ -278,6 +309,9 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         };
     },
 
+    /**
+     * Helper function to updating tool tips
+     */
     updateTooltipContent: function(target) {
         var me = this, targetIndex = target.attr('data-page-index');
         me.tooltip
@@ -291,6 +325,10 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             .addClass('show');
         };
     },
+
+    /**
+     * Helper function to update tool tip positions
+     */
     updateTooltipPosition: function(target) {
         var me = this;
 
@@ -300,6 +338,12 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             top: me.pageButtons.offset().top - (me.surePane.height() + me.tooltip.height())
         });
     },
+
+    /**
+     * Get starting index into the data array for the current page.
+     *
+     * @return  {integer}    The start index
+     */
     getStartIdx: function() {
         var me = this;
         if (me.totalPages < 1) {
@@ -308,6 +352,11 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         return me.startIdx;
     },
 
+    /**
+     * Get ending index into the data array for the current page.
+     *
+     * @return  {integer}    The end index
+     */
     getEndIdx: function() {
         var me = this;
         if (me.totalPages < 1) {
@@ -318,6 +367,12 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
         return me.endIdx;
     },
 
+    /**
+     * This fuction will prepare everything you need to move to the specified page, 
+     * then initiate the dataObj.make().  Works for both 'local' and 'remote' paging.
+     *
+     * @param   {integer}   page       The page you want to go to.
+     */
     goToPage: function(page) {
         var me = this;
 
@@ -326,7 +381,7 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
             me.endIdx = me.startIdx + me.pageSize;
             me.currPage = page;
 
-            // fire to do the DataList.make()
+            // fireDataChanged() to do the DataList.make()
             me.dataObj.fireDataChanged();  
 
         } else if (me.type == 'remote') {
@@ -339,7 +394,8 @@ Wui.Paging.prototype = $.extend(new Wui.O(),{
                 sort: sortArray
             };
 
-            // Load this page -- Note:  make() will be called in afterSet() -> updatePagingBar() above.
+            // Load this page -- Note:  make() will be called in 
+            // afterSet() -> updatePagingBar() above in init.
             me.dataObj.loadData(params);
         }
         me.pageButtons.find('[name=pager_button]').removeClass('pager-active')

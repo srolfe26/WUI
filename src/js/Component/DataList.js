@@ -12,9 +12,11 @@ Wui.DataList = function(args){
         interactive:    true,
         multiSelect:    false,
         selected:       [],
-        sort:           [],  /** An array containing objects in the following format, that 
-                                define the initial sort of the data: {dataItem:'name', order:'asc/desc'} */
-        // sorters:     []   /** @private Used internally to keep track of sorting, items added to sort will be used in the sorters array */
+        sort:           [],  // An array containing objects in the following 
+                             //   format, that define the initial sort of the 
+                             //   data: {dataItem:'name', order:'asc/desc'} 
+        // sorters:     []   // @private Used internally to keep track of sorting, 
+                             //   items added to sort will be used in the sorters array 
     }, args);
 
     me.init();
@@ -232,8 +234,9 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
                     me.el.trigger($.Event('refresh'),[me,me.data]);
                     me.resetSelect();
                     
-                    // Set autoLoad to true because it should only block on the first run, and if this functions is happened then the
-                    // object has been manually run
+                    // Set autoLoad to true because it should only block on the 
+                    //  first run, and if this functions is happened then the
+                    //  object has been manually run
                     me.autoLoad = true;
                 },
     clickListener:function(els){
@@ -354,7 +357,11 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
                         ofstP.animate({ scrollTop:offset }, 100);
                     },
-
+    /** 
+    setData override that sets initial sort array and calls sortList().
+    @param    {object}    col    An object containing the sort direction and DOM element of the heading
+    @param    {string}    dir    The direction of the sort 
+    */
     setData: function(data){
         var me = this, i = null, j = null;
 
@@ -371,14 +378,12 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
     },
 
     /**
-    @param    {object}    Column object associated with a particular column element
-    Sort the grid based on the values of one or more columns. If the grid is paging
-    then sort remotely.
+    @param    {object}  col     Column object associated with a particular column element
     */
     sortList: function(col) {
         var me = this;
-        // If we have paging and it is 'remote' do NOT sort local - the backend should take care of it.
-        //    Also, If no pager is defined we do allow local sorting.
+        // If we have paging and it is 'remote' do NOT sort local - the backend 
+        //  should take care of it.  Also, If no pager is defined we do allow local sorting.
         if (typeof me.pager == 'undefined' || me.pager.type !== 'remote') {
             me.mngSorters(col);
             me.runSort();    
@@ -386,27 +391,31 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
 
     },
 
+    /** 
+    Sorts the full data array and if paging is defined goes to first page.
+    */
     runSort: function(){
-        // Sort the list
         var me = this;
         var sortArray = me.marshallSorters(me.sorters);
-        // Sort the full data arrayWui.maxZ()
+
+        // Sort the full data array
         me.data.sort(function(a, b){ return Wui.doSort(sortArray, 0, a, b); });
 
         if (typeof me.pager != 'undefined' && me.pager.pageSize != -1 &&
             (me.pager.type === 'local'  || me.pager.type === 'remote' ) ) {
             // Here are the options:
                 //      1. Go to page 1 after a sort
-                //      2. Stay on the same page
-                //      3. Whatever row has focus keep it focused but sort everything around it. (will be harder)
+                //      2. Stay on the same page  -- (Not Implemented Yet)
+                //      3. Whatever row has focus keep it focused but sort 
+                //          everything around it. -- (Not Implemented Yet)
             me.pager.goToPage(0);
         } 
     },
 
     /** 
+    Manages the sorters for the grid by keeping them in an array.
     @param    {object}    col    An object containing the sort direction and DOM element of the heading
-    @param    {string}    dir    The direction of the sort
-    Manages the sorters for the grid by keeping them in an array. 
+    @param    {string}    dir    The direction of the sort 
     */
     mngSorters: function(col,dir){
         var me = this,
@@ -451,12 +460,20 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
         });
     },
 
+    /** 
+        Create a new sort array into the form needed by remote paging and doSort().  
+        Note:  remote paging needs an object that it can JSONstringify and 
+               send to the server.
+
+    @param      {object}    sorters     The sorters array that contains dataItem, 
+                                        sortDir, dataType + many other things. 
+    @return     {object}    returns a simplified array of sort objects
+                            that can be JSONstringified.
+    */
     marshallSorters: function(sorters) {
         var me = this;
         var sort = [];
 
-        // creaet a new sort array into the form needed by remote paging and doSort().  
-        //  Note:  remote paging needs an object that it can JSONstringify and send to the server.
         for(var i=0; i<sorters.length; i++) {
             sort.push({
                 dataItem: sorters[i].dataItem,
@@ -467,6 +484,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
         return sort;
     },
 
+    /** 
+        This function prepares the data[] for a cvs file export.  
+        It optionally can filter the data based on filterDataItem & filterValue.
+
+    @param      {string}    filename        The name of the file you want to export. 
+    @param      {string}    filterDataItem  The column name you want to filter on. 
+    @param      {string}    filterValue     The value you want to filter by.
+    */
     exportToCsv: function(filename, filterDataItem, filterValue) {
         var me = this;
         var exportStr = "";
@@ -493,6 +518,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
         me.export(exportStr, filename, 'text/csv;charset=utf-8;');
     },
 
+    /** 
+        This function prepares the data[] for a Excel export.  
+        It optionally can filter the data based on filterDataItem & filterValue.
+
+    @param      {string}    filename        The name of the file you want to export. 
+    @param      {string}    filterDataItem  The column name you want to filter on. 
+    @param      {string}    filterValue     The value you want to filter by.
+    */
     exportToExcel: function(filename, filterDataItem, filterValue) {
         var me = this;
         var exportStr = "<table><tr>";
@@ -520,6 +553,14 @@ Wui.DataList.prototype = $.extend(new Wui.O(), new Wui.Data(), {
         me.export(exportStr, filename, 'data:application/vnd.ms-excel;');
     },
 
+    /** 
+        Initiates a file export given an export string, filename
+        and fileType.
+
+    @param      {string}    exportStr   The string to export. 
+    @param      {string}    filename    The filename to export to. 
+    @param      {string}    fileType    The file type to export as.
+    */
     export:     function(exportStr, filename, fileType) {
         var blob = new Blob([exportStr], { type: fileType });
         if (navigator.msSaveBlob) { // IE 10+

@@ -390,14 +390,6 @@ Wui.Grid.prototype = $.extend(new Wui.Pane(), {
                     return me.getSrcData();
                 },
 
-    // setData:    function(data){
-    //                 var me = this, i = null, j = null;
-
-    //                 me.updatePagingBar(data);
-
-    //                 Wui.DataList.prototype.setData.apply(me,arguments);  // Needs to happen after updatePagingBar() in order to make correctly.
-    //             },
-
     /** Size up the columns of the table to match the headings @private */
     sizeCols:   function (){
                     var me = this, 
