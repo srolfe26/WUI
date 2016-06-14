@@ -75,6 +75,22 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                             combo:          combo
                         });
 
+                        me.combo.afterSet = function(data) {
+
+                            // call prototype to be safe in the future.
+                            Wui.Combo.prototype.afterSet.apply(me.combo,arguments);
+
+                            if(me.combo.data.length && typeof me.sv != 'undefined') {
+                                for(var i = 0; i < me.sv.length; i ++) {
+                                    if($.isNumeric(me.sv[i]) || (me.sv[i].length && me.sv[i].length > 0)) {
+                                        me.push(me.combo.selectBy(me.combo.valueItem,me.sv[i]).rec); 
+                                    }   
+                                }
+                                me.combo.val(null);
+                            }
+                            me.sv = undefined;  
+                        }
+
                         // Define a template for the tags - In a separate function so they
                         // can be overridden
                         me.defineTags();
@@ -212,16 +228,11 @@ Wui.Multiple.prototype = new Wui.FormField( $.extend( new Wui.DataList(), {
                             me.setData(null);
                         }
                     },
-    loadComboVals:  function(sv){
+    loadComboVals:  function(sv) {
                         var me = this;
-
-                        if(me.url === null && me.combo.data.length){
-                            for(var i = 0; i < sv.length; i ++){
-                                if($.isNumeric(sv[i]) || (sv[i].length && sv[i].length > 0))
-                                    me.push(me.combo.selectBy(me.combo.valueItem,sv[i]).rec);
-                            }
-                            me.combo.val(null);
-                        }
+                        // Just set a new temp variable me.sv here so that, on 
+                        // afterSet() above, in init() we can load up the multiple.
+                        me.sv = sv;
                     },
     make:           function (){
                         var me = this,
