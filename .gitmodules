@@ -6,3 +6,6 @@
 	path = wui-1-2-1
 	url = https://github.com/srolfe26/WUI
 	branch = 1.2.1
+[submodule "combo-2"]
+	path = combo-2
+	url = https://github.com/srolfe26/combo2/
