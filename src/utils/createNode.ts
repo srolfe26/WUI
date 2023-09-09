@@ -1,8 +1,8 @@
-export default function createHTMLElement(htmlString: string): HTMLElement {
-    const html = htmlString.trim();
-    const temp = document.createElement(/^\<tr\>/.test(html) ? 'tbody' : 'div');
+export default function createNode(htmlString: string): HTMLElement {
+  const html = htmlString.trim();
+  const temp = document.createElement(/^\<tr\>/.test(html) ? 'tbody' : 'div');
 
-    temp.innerHTML = html;
+  temp.innerHTML = html;
 
-    return temp.firstChild as HTMLElement;
-  }
+  return temp.firstChild as HTMLElement;
+}

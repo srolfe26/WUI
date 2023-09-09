@@ -6,34 +6,34 @@
  * @returns {CSSStyleDeclaration}   CSSStyleDeclaration containing key value pairs of style rules and their values.
  */
 export default function getCSSStyles(elem: HTMLElement): CSSStyleDeclaration {
-    let result: CSSStyleDeclaration = {} as CSSStyleDeclaration;
-    let styles: CSSStyleSheet[] = Array.from(document.styleSheets) as CSSStyleSheet[];
+  const result: CSSStyleDeclaration = {} as CSSStyleDeclaration;
+  const styles: CSSStyleSheet[] = Array.from(document.styleSheets) as CSSStyleSheet[];
 
-    styles.forEach((stylesheet: CSSStyleSheet) => {
-        // some stylesheets don't have rules
-        if (!stylesheet.hasOwnProperty('cssRules')) {
-            return;
+  styles.forEach((stylesheet: CSSStyleSheet) => {
+    // some stylesheets don't have rules
+    if (!stylesheet.hasOwnProperty('cssRules')) {
+      return;
+    }
+
+    Array.from(stylesheet.cssRules).forEach((rule: CSSRule) => {
+      if (!rule) {
+        return;
+      }
+
+      // account for multiple rules split by a comma
+      const selectors = (rule as CSSStyleRule).selectorText.split(',');
+
+      selectors.forEach((selector: string) => {
+        if (elem.matches(selector)) {
+          for (let index = 0; index < (rule as CSSStyleRule).style.length; ++index) {
+            const prop = (rule as CSSStyleRule).style[index];
+            // @ts-ignore
+            result[prop] = (rule as CSSStyleRule).style[prop];
+          }
         }
-
-        Array.from(stylesheet.cssRules).forEach((rule: CSSRule) => {
-            if (!rule) {
-                return;
-            }
-
-            // account for multiple rules split by a comma
-            let selectors = (rule as CSSStyleRule).selectorText.split(',');
-
-            selectors.forEach((selector: string) => {
-                if (elem.matches(selector)) {
-                    for (let index = 0; index < (rule as CSSStyleRule).style.length; ++index) {
-                        let prop = (rule as CSSStyleRule).style[index];
-                        // @ts-ignore
-                        result[prop] = (rule as CSSStyleRule).style[prop];
-                    }
-                }
-            });
-        });
+      });
     });
+  });
 
-    return { ...result, ...elem.style };
+  return { ...result, ...elem.style };
 }

@@ -1,5 +1,22 @@
+// Utils
+import createNode from './utils/createNode';
+import getCssStyles from './utils/getCssStyles';
+import getFurthestDescendant from './utils/getFurthestDescendant';
+import getscrollbarwidth from './utils/getscrollbarwidth';
+import { applyTextHighlight, removeHighlight, HIGHLIGHT_STYLE } from './utils/highlightText';
+import isset from './utils/isset';
+import maxz from './utils/maxz';
+
+// Objects
 import BaseObject from './objects/base-object';
 
-export namespace WUI {
-    base: BaseObject
+export {
+    BaseObject,
+    createNode,
+    getCssStyles,
+    getFurthestDescendant,
+    getscrollbarwidth,
+    applyTextHighlight, removeHighlight, HIGHLIGHT_STYLE,
+    isset,
+    maxz,
 }
