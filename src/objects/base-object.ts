@@ -1,19 +1,25 @@
-import isset from "../utils/isset";
+import isset from '../utils/isset';
+
+declare global {
+  interface HTMLElement {
+    tswuiO: BaseObject;
+  }
+}
 
 export default class BaseObject {
-    elAlias: HTMLElement | undefined;
+  elAlias: HTMLElement | undefined;
 
-    el!: HTMLElement;
+  el!: HTMLElement;
 
-    items!: Array<BaseObject>;
+  items!: Array<BaseObject>;
 
-    parent: BaseObject | undefined;
+  parent: BaseObject | undefined;
 
-    constructor(configs: { [key: string]: any }) {
-        Object.assign(this, configs);
-    }
+  constructor(configs: { [key: string]: any }) {
+    Object.assign(this, configs);
+  }
 
-    private _isNode(node: any): boolean {
-        return isset(node) && node instanceof HTMLElement;
-    }
+  private _isNode(node: any): boolean {
+    return isset(node) && node instanceof HTMLElement;
+  }
 }
