@@ -1,6 +1,6 @@
 import isset from '../utils/isset';
 
-class BreakException {}
+class BreakException extends Error {}
 
 interface ObjectError {
   message: string;
@@ -13,7 +13,7 @@ class ObjectError extends Error {
     super(message);
     this.object = object;
 
-    if (isset(code)) {
+    if (code) {
       this.code = code;
     }
   }
@@ -43,7 +43,7 @@ export default class BaseObject {
   }
 
   get EXCEPTION(): BreakException {
-    return BreakException;
+    return new BreakException('Break outta this loop');
   }
 
   error(message: string, code?: number): void {
@@ -60,13 +60,12 @@ export default class BaseObject {
     }
   }
 
-  appendItems(...elements: Array<HTMLElement | BaseObject>): void {
-    const me = this;
-    const parent: HTMLElement = me.elAlias || me.el;
+  appendItems(): void {
+    const parent: HTMLElement = this.elAlias || this.el;
 
-    me.items.forEach((item: any) => {
+    this.items.forEach((item: any) => {
       if (this._isNode(item.el) && parent) {
-        item.parent = me;
+        item.parent = this;
         parent.appendChild(item.el);
 
         if (item instanceof BaseObject) {
@@ -79,8 +78,7 @@ export default class BaseObject {
   }
 
   splice(startIndex: number, deleteCount: number, ...newChildren: BaseObject[]): BaseObject[] {
-    const me = this;
-    const parent: HTMLElement = me.elAlias || me.el;
+    const parent: HTMLElement = this.elAlias || this.el;
 
     // Remove existing children
     for (let i = 0; i < deleteCount; i++) {
@@ -88,12 +86,12 @@ export default class BaseObject {
     }
 
     // standard splice functionality on items array
-    const removedChildren = Array.prototype.splice.apply(me.items, [startIndex, deleteCount, ...newChildren]);
+    const removedChildren = Array.prototype.splice.apply(this.items, [startIndex, deleteCount, ...newChildren]);
 
     // Insert new children on DOM
     const insertionIndex = startIndex;
     for (let i = newChildren.length - 1; i >= 0; i--) {
-      newChildren[i].parent = me;
+      newChildren[i].parent = this;
       parent.insertBefore(newChildren[i].el, parent.children[insertionIndex]);
     }
 
@@ -101,10 +99,9 @@ export default class BaseObject {
   }
 
   indexOf(findItem: any): number {
-    const me = this;
     let index = -1;
 
-    me.breakEach(me.items, (item: any, idx: number) => {
+    this.breakEach(this.items, (item: any, idx: number) => {
       if (item === findItem) {
         index = idx;
         throw BreakException;
@@ -115,9 +112,8 @@ export default class BaseObject {
   }
 
   removeItem(removeItem: any): any {
-    const me = this;
-    const target = me.elAlias || me.el;
-    const index = me.indexOf(removeItem);
+    const target = this.elAlias || this.el;
+    const index = this.indexOf(removeItem);
 
     if (!target) {
       throw new Error('An el or elAlias must exist to remove items.');
@@ -128,7 +124,7 @@ export default class BaseObject {
         target.removeChild(removeItem.el);
       }
 
-      me.items.splice(index, 1);
+      this.items.splice(index, 1);
 
       return removeItem;
     } else {
@@ -137,13 +133,12 @@ export default class BaseObject {
   }
 
   push(...elements: Array<BaseObject>): void {
-    const me = this;
-    const parent: HTMLElement = me.elAlias || me.el;
+    const parent: HTMLElement = this.elAlias || this.el;
 
-    me.items.push(...elements);
+    this.items.push(...elements);
 
     elements.forEach((element: BaseObject) => {
-      element.parent = me;
+      element.parent = this;
       parent.appendChild(element.el);
       if (typeof element.appendItems === 'function') {
         element.appendItems();

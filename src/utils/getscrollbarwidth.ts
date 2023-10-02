@@ -14,12 +14,12 @@ export default function (): number {
     document.body.appendChild(parent);
 
     const initWidth: number = parseInt(
-      window.getComputedStyle(child).width!,
+      window.getComputedStyle(child).width,
       10,
     );
     child.style.height = '99px';
     const changedWidth: number = parseInt(
-      window.getComputedStyle(child).width!,
+      window.getComputedStyle(child).width,
       10,
     );
     document.body.removeChild(parent);

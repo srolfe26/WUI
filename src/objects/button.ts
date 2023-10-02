@@ -7,14 +7,23 @@ const HIDE_WITH_LOADER_CLASS = 'hide-with-loader';
 
 export default class Button extends BaseObject {
   el: HTMLButtonElement;
+
   loader: HTMLElement | null = null;
-  disabled: boolean = false;
+
+  disabled = false;
+
   onAsync: ((button: Button) => Promise<void>) | null = null;
+
   onClick: (() => void) | null = null;
+
   icon: string | null = null;
+
   tabIndex: string | null = null;
+
   cssClass: string | null = null;
+
   label: string | null = null;
+
   text: string | null = null;
 
   constructor(args: object = {}) {
@@ -32,6 +41,7 @@ export default class Button extends BaseObject {
   static get HAS_LOADER_CLASS() {
     return HAS_LOADER_CLASS;
   }
+
   static get HIDE_WITH_LOADER_CLASS() {
     return HIDE_WITH_LOADER_CLASS;
   }

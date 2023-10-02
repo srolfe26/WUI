@@ -8,7 +8,7 @@
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "prettier": "npx prettier --write .",
-    "lint": "eslint . --ext .js,.ts"
+    "lint": "eslint . --ext .js,.ts --fix"
   },
   "author": "Stephen Nielsen",
   "license": "ISC",
