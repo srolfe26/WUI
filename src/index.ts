@@ -9,9 +9,13 @@ import maxz from './utils/maxz';
 
 // Objects
 import BaseObject from './objects/base-object';
+import Button from './objects/button';
+import SimpleLoader from './objects/simple-loader';
 
 export {
     BaseObject,
+    Button,
+    SimpleLoader,
     createNode,
     getCssStyles,
     getFurthestDescendant,
