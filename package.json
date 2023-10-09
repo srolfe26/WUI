@@ -28,7 +28,9 @@
     "clean-css": "^3.4.10",
     "enhance-css": "^1.1.0",
     "jshint": "^2.9.1",
-    "shelljs": "^0.6.0",
-    "uglifyjs": "^2.4.10"
+    "shelljs": "^0.6.0"
+  },
+  "dependencies": {
+    "uglify-js": "^3.17.4"
   }
 }

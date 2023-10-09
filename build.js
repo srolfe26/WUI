@@ -2,7 +2,7 @@ var shell = require('shelljs');
 var _fs = require('fs');
 var CleanCSS = require('clean-css');
 var buildJSHint = require('build-jshint');
-var UglifyJS = require("uglifyjs");
+var UglifyJS = require("uglify-js");
 
 
 var buildEngine = function(){
@@ -18,13 +18,13 @@ var buildEngine = function(){
  * @return  {string}    src with copyright
  */
 buildEngine.prototype.addCopyright = function(src) {
-    return  "/*! Wui 1.3.01" + 
+    return  "/*! Wui 1.3.01" +
         // Copyright should be the year the work was first published
         "\n * Copyright (c) 2016 Stephen Rolfe Nielsen (rolfe.nielsen@gmail.com)" +
         "\n *" +
         "\n * @license MIT" +
         "\n * http://www.wui-js.com/wui-1-3/license.html" +
-        "\n */ \n\n" + 
+        "\n */ \n\n" +
         src;
 };
 
@@ -39,7 +39,7 @@ buildEngine.prototype.addCopyright = function(src) {
  *    dest:   'destination.js'                      // Path to the output file
  *
  *    fn:     [function(){}, function(){}, ...]     // Array of function names to act on the
- *                                                  // concatenated contents of src, that return 
+ *                                                  // concatenated contents of src, that return
  *                                                  // the modified contents.
  * }
  */
@@ -49,7 +49,7 @@ buildEngine.prototype.buildFile = function(opts) {
         distPath = opts.dest,
         operations = opts.fn,   // Operations that will be performed on the concatenated files
         i = 0;
-        
+
     for (i; i < operations.length; i++) {
         if (typeof me[operations[i]] == 'function') {
             out = me[operations[i]](out);
@@ -71,12 +71,12 @@ buildEngine.prototype.buildFile = function(opts) {
  */
 buildEngine.prototype.concat = function(fileList) {
     return fileList.map(function(filePath){
-        if (filePath.length < 200) {
+        if (filePath && filePath.length < 200) {
             if (shell.test('-f', filePath)) {
                 return _fs.readFileSync(filePath).toString();
             }
             else {
-                console.log("WARNING: '" + filePath + "' is not a file. " + 
+                console.log("WARNING: '" + filePath + "' is not a file. " +
                             "Path included in concatenation, but may cause errors");
                 return filePath;
             }
@@ -97,24 +97,24 @@ buildEngine.prototype.concat = function(fileList) {
  *
  * @param   {string}    path            Space delimited list of source CSS files
  * @param   {string}    destination     Path to the destination css file
- * @param   {string}    root            The 'root' flag is so enhancecss can determine where to 
+ * @param   {string}    root            The 'root' flag is so enhancecss can determine where to
  *                                      get the images
  */
 buildEngine.prototype.cssMinify = function(path, destination, root) {
     var me = this;
-    
+
     shell.exec('cat ' +path+ ' | enhancecss -o ' +destination+ ' --root ' +root, function(code, stdout, stderr) {
         if (code === 0) {
             // Add copyright to the newly created file
             me.buildFile({
-                src : [destination],   
+                src : [destination],
                 dest : destination,
                 fn: ['addCopyright']
             });
-            
+
             // Minify new file
             me.buildFile({
-                src : [(new CleanCSS().minify(me.concat([destination])).styles)],   
+                src : [(new CleanCSS().minify(me.concat([destination])).styles)],
                 dest : destination.replace('.css', '.min.css'),
                 fn: []
             });
@@ -135,7 +135,7 @@ buildEngine.prototype.cssMinify = function(path, destination, root) {
 buildEngine.prototype.namespaceWrap = function(src) {
     var header = "\n\n(function($,Wui) {\n\n\n",
         footer = "\n\n\n})(jQuery, window[_wuiVar]);\n\n";
-        
+
     return header + src + footer;
 };
 
@@ -144,57 +144,57 @@ buildEngine.prototype.namespaceWrap = function(src) {
 var jshintErrors = 0;
 
 var opts = {
-    // Array of globs of files to skip 
+    // Array of globs of files to skip
     ignore: [
         './src/js/goodies/**/*.js',
-        './src/js/Component/State.js',      // TODO: There's some weird stuff in here that is 
-                                            // library code and ought to be separated our from 
+        './src/js/Component/State.js',      // TODO: There's some weird stuff in here that is
+                                            // library code and ought to be separated our from
                                             // Wui code at some pointand placed in libs.
         './src/js/libs/verge.js',
         './src/js/libs/jquery-2-1-1.js',
         './src/js/libs/jquery-1.12.1.js'
     ],
-    
-    // Handles output of errors 
-    // Default reporter logs errors to the console 
+
+    // Handles output of errors
+    // Default reporter logs errors to the console
     reporter: function(error, file, src) {
         var lines = src.split(/\r\n|\n|\r/g);
-        
+
         jshintErrors++;
         console.log(file.replace('./src/js/', '').toUpperCase() + ' '+ error.reason +'\n'+
         error.line + ':  ' + lines[error.line - 1].replace(/^\s+/,'') + '\n');
     },
- 
+
     // Configuration for JSHint
-    config: { 
+    config: {
         undef:  true,
         unused: true,
         predef: [ "_wuiVar" ],
-        
-                // TODO: Currently we have instances where functions are made on the fly 
-                // generating a  "The Function constructor is a form of eval." error (WO54), 
+
+                // TODO: Currently we have instances where functions are made on the fly
+                // generating a  "The Function constructor is a form of eval." error (WO54),
                 // eventually, we want to get rid of this issue, but for now ignore it with (evil).
         evil:   false,
-        
+
                 // Exposes browser globals so they don't get caught (document, window)
         browser:true,
-        
+
                 // Exposes developer globals so they don't get caught (console, alert)
         devel:  true,
-        
+
                 // Exposes jQuery globals so they don't get caught ($, jQuery)
         jquery: true,
     },
- 
-    // Global variables declared (passed to JSHint) 
-    globals: { 
+
+    // Global variables declared (passed to JSHint)
+    globals: {
         Wui:        false,
         _wuiVar:    false
     }
 };
- 
+
 var files = ['./src/js/**/*.js'];
- 
+
 buildJSHint(files, opts, function(err, hasError) {
     /******************************* START BUILDING *******************************************/
     var builder = new buildEngine();
@@ -217,18 +217,18 @@ buildJSHint(files, opts, function(err, hasError) {
     // Create 'wui.js'
     var component = builder.concat([
             './src/js/Component/Object.js',       // Most EVERYTHING inherits from this one
-            
+
             './src/js/Component/Button.js',
-                    
-            './src/js/Component/Data.js',           
-            './src/js/Component/Template.js',           
-            './src/js/Component/DataList.js',       // Requires Template, Data      
-                      
-            './src/js/Pane/Pane.js',           
+
+            './src/js/Component/Data.js',
+            './src/js/Component/Template.js',
+            './src/js/Component/DataList.js',       // Requires Template, Data
+
+            './src/js/Pane/Pane.js',
             './src/js/Pane/Window.js',             // Requires Pane, Button
-            
+
             './src/js/Component/LongPoll.js',
-            
+
             './src/js/Component/msg-errRpt-confirm.js', // Requires Window, Button
         ]);
     var wrapped = builder.namespaceWrap(component);
@@ -287,7 +287,7 @@ buildJSHint(files, opts, function(err, hasError) {
             './src/js/Pane/Grid.js'
         ]);
     builder.buildFile({
-        src : [grid],   
+        src : [grid],
         dest : './dist/js/grid.js',
         fn: ['namespaceWrap', 'addCopyright']
     });
@@ -298,7 +298,7 @@ buildJSHint(files, opts, function(err, hasError) {
             './src/js/Pane/InfiniteGrid.js'        // Requires Grid
         ]);
     builder.buildFile({
-        src : [infinite],   
+        src : [infinite],
         dest : './dist/js/infinite-grid.js',
         fn: ['namespaceWrap', 'addCopyright']
     });
@@ -309,7 +309,7 @@ buildJSHint(files, opts, function(err, hasError) {
             './src/js/Component/State.js'
         ]);
     builder.buildFile({
-        src : [state],   
+        src : [state],
         dest : './dist/js/state.js',
         fn: ['addCopyright']
     });
@@ -322,7 +322,7 @@ buildJSHint(files, opts, function(err, hasError) {
             './dist/js/wui.js',
             builder.namespaceWrap(builder.concat([tabs, grid, infinite, form])),
             './dist/js/state.js'
-        ],   
+        ],
         dest : './dist/wui-1-2-1.js',
         fn: []
     });
@@ -333,7 +333,7 @@ buildJSHint(files, opts, function(err, hasError) {
         src : [
             './src/js/libs/jquery-2-1-1.js',
             './dist/wui-1-2-1.js'
-        ],   
+        ],
         dest : './dist/wui-1-2-1-with-jquery.js',
         fn: []
     });
@@ -343,7 +343,7 @@ buildJSHint(files, opts, function(err, hasError) {
     builder.buildFile({
         src : [
             UglifyJS.minify('./dist/wui-1-2-1.js').code
-        ],   
+        ],
         dest : './dist/wui.1.2.1.min.js',
         fn: ['addCopyright']
     });
