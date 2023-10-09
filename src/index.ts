@@ -10,11 +10,21 @@ import maxz from './utils/maxz';
 // Objects
 import BaseObject from './objects/base-object';
 import Button from './objects/button';
+import Stage from './objects/stage';
+import Toolbar from './objects/toolbar';
+import List from './objects/list';
+import ListItem from './objects/list-item';
+import Page from './objects/page';
 import SimpleLoader from './objects/simple-loader';
 
 export {
     BaseObject,
     Button,
+    Stage,
+    Toolbar,
+    List,
+    ListItem,
+    Page,
     SimpleLoader,
     createNode,
     getCssStyles,

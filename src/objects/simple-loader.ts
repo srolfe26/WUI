@@ -1,4 +1,4 @@
-// import '../styles/simple-loader.scss';
+import '../styles/simple-loader.scss';
 import createNode from '../utils/createNode';
 
 export default class SimpleLoader {

@@ -1,0 +1,79 @@
+@import '../src/styles/variables';
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.list-item {
+    border-bottom: 1px dashed $tswui-lt-gray;
+    margin: 0 -16px;
+    padding: 0 16px;
+    min-height: 44px;
+    color: $tswui-md-gray;
+    svg {
+        width: 24px;
+        height: 24px;
+        fill: $tswui-md-gray;
+        margin: 4px 24px -4px 0;
+    }
+}
+
+.tswui-toolbar {
+    background-color: $tswui-toolbars;
+    z-index: 1;
+    box-shadow: 0 0 3px $tswui-secondary;
+
+    .toolbar-title {
+        color: $tswui-white;
+        font-size: 1.5em;
+    }
+
+    .tswui-button {
+        background-color: transparent;
+        box-shadow: none;
+        padding: 0 8px;
+        font-size: 1em;
+        color: $tswui-secondary;
+
+        svg {
+            fill: $tswui-secondary;
+        }
+
+        &:active,
+        &:hover {
+            background-color: transparent;
+            box-shadow: none;
+            color: $tswui-white;
+
+            svg {
+                fill: $tswui-white;
+            }
+        }
+    }
+
+    .toolbar-center {
+        text-align: center;
+    }
+
+    button.tswui-button.toolbar-right {
+        margin-right: 8px;
+    }
+}
+
+.tswui-page.list-page {
+    padding: 0;
+
+    .tswui-toolbar {
+        position: relative;
+    }
+}
+
+.page-body {
+    flex: 1;
+    padding: 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

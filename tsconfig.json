@@ -9,8 +9,13 @@
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
-    "moduleResolution": "Node",
+    "useDefineForClassFields": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "sourceMap": true,
     "inlineSources": true,
     "skipLibCheck": true,
@@ -19,6 +24,6 @@
       "utils/*": ["./src/utils/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "public/test.ts"],
   "exclude": ["node_modules", "dist"]
 }
