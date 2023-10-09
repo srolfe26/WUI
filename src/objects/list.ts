@@ -14,8 +14,11 @@ interface ListArgs {
 
 export default class List extends BaseObject {
   public emptyText!: string;
-  public data: Array<Object> = [];
+
+  public data: Array<Record<string, any>> = [];
+
   private itemObject: any;
+
   private loader: HTMLElement | null = null;
 
   constructor(args: ListArgs) {
@@ -26,7 +29,7 @@ export default class List extends BaseObject {
 
   render(): void {
     this.clearList();
-    this.data.forEach((record: Object) => {
+    this.data.forEach((record: Record<string, any>) => {
       try {
         const listItem = new this.itemObject(record);
         listItem.parent = this;

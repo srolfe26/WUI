@@ -3,6 +3,7 @@ import MenuList from "./MenuList";
 
 export default class MenuPanel extends Page {
   private menuList: MenuList;
+
   private toolbar: Toolbar;
 
   constructor(args: object = {}) {

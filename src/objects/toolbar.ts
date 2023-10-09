@@ -11,15 +11,14 @@ export default class Toolbar extends BaseObject {
 
     constructor(args: object = {}) {
         super({ cssClass: null, ...args });
-        const me = this;
         let timer: ReturnType<typeof setTimeout> | null = null;
 
         function complete() {
-            me._centerLogo();
+            // this._centerLogo();
             timer = null;
         }
 
-        me.el = createNode(`<div class="tswui-toolbar ${this.cssClass || ""}"></div>`);
+        this.el = createNode(`<div class="tswui-toolbar ${this.cssClass || ""}"></div>`);
         window.addEventListener("resize", function () {
             if (timer) {
                 clearTimeout(timer);
@@ -47,11 +46,9 @@ export default class Toolbar extends BaseObject {
     }
 
     _centerLogo() {
-        const me = this;
-
-        me.el.querySelectorAll(`.${TOOLBAR_CENTER}`).forEach((logoObj: Element) => {
+        this.el.querySelectorAll(`.${TOOLBAR_CENTER}`).forEach((logoObj: Element) => {
             const centeredObj = logoObj as HTMLElement;
-            const toolbarWidth = me.el.offsetWidth;
+            const toolbarWidth = this.el.offsetWidth;
             const logoWidth = centeredObj.offsetWidth;
             const currentLeft = centeredObj.offsetLeft;
             const centerLeft = toolbarWidth / 2 - logoWidth / 2;

@@ -1,9 +1,9 @@
 import isset from '../utils/isset';
 
 export default class ListItem {
-    data: Object;
+    data: Record<string, any>;
 
-    constructor(record: Object) {
+    constructor(record: Record<string, any>) {
         if (!isset(record)) {
             throw new Error('A ListItem must be created by a record');
         }

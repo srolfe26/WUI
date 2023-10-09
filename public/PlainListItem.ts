@@ -3,7 +3,7 @@ import { ListItem, createNode } from '../src/index';
 interface MenuItem {
   icon?: string;
   title?: string;
-  eventHandler?: Function;
+  eventHandler?: (item: PlainListItem, event: Event) => void;
 }
 
 declare interface PlainListItemHTMLElement extends HTMLElement {
@@ -28,15 +28,14 @@ export default class PlainListItem extends ListItem {
   }
 
   get el(): HTMLElement {
-    const me = this;
-    const el: PlainListItemHTMLElement = createNode(me.html) as PlainListItemHTMLElement;
+    const el: PlainListItemHTMLElement = createNode(this.html) as PlainListItemHTMLElement;
 
-    el.obj = me;
+    el.obj = this;
 
     el.addEventListener("click", (event: MouseEvent) => {
       event.stopPropagation();
-      if (me.data.eventHandler) {
-          me.data.eventHandler(me, event);
+      if (this.data.eventHandler) {
+          this.data.eventHandler(this, event);
       }
     });
 

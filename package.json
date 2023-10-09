@@ -9,7 +9,7 @@
     "prettier": "npx prettier --write .",
     "lint": "eslint . --ext .js,.ts --fix",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc",
     "preview": "vite preview"
   },
   "author": "Stephen Nielsen",
