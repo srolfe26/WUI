@@ -15,6 +15,11 @@ import Toolbar from './objects/toolbar';
 import List from './objects/list';
 import ListItem from './objects/list-item';
 import Page from './objects/page';
+import FormItem from './objects/form-item';
+import Form from './objects/form';
+import Text from './objects/text';
+import TextArea from './objects/textarea';
+import BackButtonPage from './objects/back-button-page';
 import SimpleLoader from './objects/simple-loader';
 
 export {
@@ -25,6 +30,11 @@ export {
     List,
     ListItem,
     Page,
+    FormItem,
+    Form,
+    Text,
+    TextArea,
+    BackButtonPage,
     SimpleLoader,
     createNode,
     getCssStyles,

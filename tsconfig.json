@@ -5,25 +5,19 @@
     "baseUrl": "./",
     "lib": ["DOM", "ESNext"],
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "./dist/",
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
     "useDefineForClassFields": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "Node",
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "sourceMap": true,
     "inlineSources": true,
     "skipLibCheck": true,
-    "paths": {
-      "objects/*": ["./src/objects/*"],
-      "utils/*": ["./src/utils/*"]
-    }
   },
-  "include": ["src", "public/test.ts"],
+  "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
