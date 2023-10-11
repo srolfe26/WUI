@@ -45,16 +45,28 @@ export default class FormItem extends BaseObject {
     });
   }
 
-  get idAttr(): string {
-    return this._idDependentAttr('id');
+  public idAttr(opt: string): string {
+    return this._idDependentAttr('id', opt);
   }
 
-  get forAttr(): string {
-    return this._idDependentAttr('for');
+  public forAttr(opt: string): string {
+    return this._idDependentAttr('for', opt);
   }
 
-  private _idDependentAttr(attr: string): string {
-    return isset(this.id) ? ` ${attr}="${this.id}"` : '';
+  public _idDependentAttr(attr: string, opt: any): string {
+    if (opt.id) {
+      return ` ${attr}="${opt.id}"`;
+    } else {
+      return '';
+    }
+  }
+
+  disable() {
+    this.disabled = true;
+  }
+
+  enable() {
+    this.disabled = false;
   }
 
   getValue(): any | null {
