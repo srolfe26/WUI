@@ -22,7 +22,7 @@ export default class PlainListItem extends ListItem {
     const record: MenuItem = this.data as MenuItem;
     return `
         <div class="list-item">
-            <h3 class="no-overflow">${record.icon || ""} ${record.title}</h3>
+            <h3 class="no-overflow">${record.icon || ''} ${record.title}</h3>
         </div>
     `;
   }
@@ -32,10 +32,10 @@ export default class PlainListItem extends ListItem {
 
     el.obj = this;
 
-    el.addEventListener("click", (event: MouseEvent) => {
+    el.addEventListener('click', (event: MouseEvent) => {
       event.stopPropagation();
       if (this.data.eventHandler) {
-          this.data.eventHandler(this, event);
+        this.data.eventHandler(this, event);
       }
     });
 

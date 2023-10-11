@@ -1,7 +1,7 @@
 import createNode from '../utils/createNode';
 import SimpleLoader from './simple-loader';
 import BaseObject from './base-object';
-import "../styles/button.scss";
+import '../styles/button.scss';
 
 const HAS_LOADER_CLASS = 'has-loader';
 const HIDE_WITH_LOADER_CLASS = 'hide-with-loader';
@@ -28,8 +28,7 @@ export default class Button extends BaseObject {
   text: string | null = null;
 
   constructor(args: object = {}) {
-    super(args);
-
+    super();
     Object.assign(this, args);
     this.el = this.element;
     this.bindClickListener();

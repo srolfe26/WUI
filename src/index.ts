@@ -6,6 +6,7 @@ import getscrollbarwidth from './utils/getscrollbarwidth';
 import { applyTextHighlight, removeHighlight, HIGHLIGHT_STYLE } from './utils/highlightText';
 import isset from './utils/isset';
 import maxz from './utils/maxz';
+import isPlainObject from './utils/isplainobject';
 
 // Objects
 import BaseObject from './objects/base-object';
@@ -23,24 +24,27 @@ import BackButtonPage from './objects/back-button-page';
 import SimpleLoader from './objects/simple-loader';
 
 export {
-    BaseObject,
-    Button,
-    Stage,
-    Toolbar,
-    List,
-    ListItem,
-    Page,
-    FormItem,
-    Form,
-    Text,
-    TextArea,
-    BackButtonPage,
-    SimpleLoader,
-    createNode,
-    getCssStyles,
-    getFurthestDescendant,
-    getscrollbarwidth,
-    applyTextHighlight, removeHighlight, HIGHLIGHT_STYLE,
-    isset,
-    maxz,
-}
+  BaseObject,
+  Button,
+  Stage,
+  Toolbar,
+  List,
+  ListItem,
+  Page,
+  FormItem,
+  Form,
+  Text,
+  TextArea,
+  BackButtonPage,
+  SimpleLoader,
+  createNode,
+  getCssStyles,
+  getFurthestDescendant,
+  getscrollbarwidth,
+  applyTextHighlight,
+  removeHighlight,
+  HIGHLIGHT_STYLE,
+  isPlainObject,
+  isset,
+  maxz,
+};

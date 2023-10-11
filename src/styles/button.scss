@@ -7,80 +7,80 @@ input.text,
 input[type='text'],
 input[type='button'],
 input[type='submit'] {
-    -webkit-appearance: none;
+  -webkit-appearance: none;
 }
 
 .tswui-button {
-    border-radius: 4px;
-    font-size: 1.5em;
-    height: 44px;
-    padding: 0 0.7em;
-    background: $tswui-toolbars;
-    border: none;
-    display: flex;
-    align-items: center;
-    box-shadow: 1px 1px 3px rgb(53, 71, 97);
-    color: $tswui-white;
+  border-radius: 4px;
+  font-size: 1.5em;
+  height: 44px;
+  padding: 0 0.7em;
+  background: $tswui-toolbars;
+  border: none;
+  display: flex;
+  align-items: center;
+  box-shadow: 1px 1px 3px rgb(53, 71, 97);
+  color: $tswui-white;
 
-    &.sm {
-        font-size: 1em;
-        height: 30px;
+  &.sm {
+    font-size: 1em;
+    height: 30px;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: $tswui-white;
+
+    &:first-child {
+      margin-right: 0.4em;
     }
+
+    &:last-child {
+      margin-left: 0.4em;
+    }
+
+    &:only-child {
+      margin: 0;
+    }
+  }
+
+  .simple-loader {
+    margin: 1px 0 0 16px;
+  }
+
+  &:focus,
+  &:active,
+  &:hover {
+    cursor: pointer;
+    outline: 0;
+    background-color: $tswui-white;
+    box-shadow: 1px 1px 3px $tswui-toolbars;
+    color: $tswui-toolbars;
 
     svg {
-        width: 24px;
-        height: 24px;
-        fill: $tswui-white;
-
-        &:first-child {
-            margin-right: 0.4em;
-        }
-
-        &:last-child {
-            margin-left: 0.4em;
-        }
-
-        &:only-child {
-            margin: 0;
-        }
+      fill: $tswui-toolbars;
     }
+  }
 
-    .simple-loader {
-        margin: 1px 0 0 16px;
+  &:active {
+    box-shadow: none !important;
+    transform: translate(1px, 1px);
+  }
+
+  &.has-loader {
+    svg.hide-with-loader {
+      display: none;
     }
+  }
 
-    &:focus,
-    &:active,
-    &:hover {
-        cursor: pointer;
-        outline: 0;
-        background-color: $tswui-white;
-        box-shadow: 1px 1px 3px $tswui-toolbars;
-        color: $tswui-toolbars;
-
-        svg {
-            fill: $tswui-toolbars;
-        }
-    }
-
-    &:active {
-        box-shadow: none !important;
-        transform: translate(1px, 1px);
-    }
-
-    &.has-loader {
-        svg.hide-with-loader {
-            display: none;
-        }
-    }
-
-    span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .tswui-button[disabled] {
-    opacity: 0.4;
+  opacity: 0.4;
 }

@@ -1,37 +1,37 @@
 @import 'wui';
 
 .tswui-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px;
-    min-height: 50px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  min-height: 50px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
 
-    .tswui-button {
-        background-color: transparent;
-        box-shadow: none;
-        padding: 0 8px;
-    }
+  .tswui-button {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0 8px;
+  }
 
-    .tswui-button:active,
-    .tswui-button:hover {
-        background-color: transparent;
-        box-shadow: none;
-    }
+  .tswui-button:active,
+  .tswui-button:hover {
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
 
 .no-overflow {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toolbar-left {
-    order: -1;
-    margin-right: 8px;
+  order: -1;
+  margin-right: 8px;
 }

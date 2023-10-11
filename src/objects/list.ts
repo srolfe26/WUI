@@ -1,29 +1,20 @@
-import BaseObject from './base-object';
-import SimpleLoader from './simple-loader';
-import createNode from '../utils/createNode';
+import { BaseObject, SimpleLoader, createNode, ListItem } from '../index';
 import '../styles/list.scss';
-import ListItem from './list-item';
 
 const EMPTY_PANEL_CLASS = 'empty-panel';
 
-interface ListArgs {
-  emptyText?: string;
-  data?: any[];
-  itemObject: ListItem;
-}
-
 export default class List extends BaseObject {
-  public emptyText!: string;
+  public emptyText!: string | null;
 
-  public data: Array<Record<string, any>> = [];
+  public data!: Array<Record<string, any>>[];
 
-  private itemObject: any;
+  public itemObject!: InstanceType<typeof ListItem>;
 
   private loader: HTMLElement | null = null;
 
-  constructor(args: ListArgs) {
-    super(args);
-    this.itemObject = args.itemObject;
+  constructor(args: Record<string, any>) {
+    super();
+    Object.assign(this, args);
     this.el = createNode(`<div class="tswui-list"></div>`);
   }
 
@@ -31,6 +22,7 @@ export default class List extends BaseObject {
     this.clearList();
     this.data.forEach((record: Record<string, any>) => {
       try {
+        // @ts-ignore TODO: How do we express that this.itemObject is a ListItem instance?
         const listItem = new this.itemObject(record);
         listItem.parent = this;
 
@@ -52,7 +44,7 @@ export default class List extends BaseObject {
 
   preRender(): void {
     this.el.innerHTML = '';
-    this.loader = this.loader || new SimpleLoader(48).element as HTMLElement;
+    this.loader = this.loader || (new SimpleLoader(48).element as HTMLElement);
     this.el.classList.add(EMPTY_PANEL_CLASS);
     this.el.appendChild(this.loader);
   }

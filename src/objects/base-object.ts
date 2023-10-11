@@ -21,7 +21,7 @@ class ObjectError extends Error {
 
 declare global {
   interface HTMLElement {
-    tswuiO: BaseObject;
+    tswuiO: BaseObject | Record<string, any>;
   }
 }
 
@@ -34,9 +34,8 @@ export default class BaseObject {
 
   parent: BaseObject | undefined;
 
-  constructor(configs: { [key: string]: any }) {
+  constructor() {
     this.items = [];
-    Object.assign(this, configs);
   }
 
   private _isNode(node: any): boolean {

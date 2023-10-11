@@ -1,5 +1,5 @@
 import { Page, createNode, BaseObject, Toolbar, Button } from '../src/index';
-import MenuList from "./MenuList";
+import MenuList from './MenuList';
 
 export default class MenuPanel extends Page {
   private menuList: MenuList;
@@ -9,7 +9,7 @@ export default class MenuPanel extends Page {
   constructor(args: object = {}) {
     super(args);
 
-    this.el.classList.add("list-page");
+    this.el.classList.add('list-page');
 
     this.toolbar = new Toolbar({
       items: [
@@ -21,9 +21,9 @@ export default class MenuPanel extends Page {
             `),
         }),
         new Button({
-          text: "Test Button",
-          onClick: () => console.log('test')
-        })
+          text: 'Test Button',
+          onClick: () => console.log('test'),
+        }),
       ],
     });
 

@@ -1,21 +1,21 @@
 .tswui-page {
-    -webkit-transition: all 333ms ease-in-out;
-    transition: all 333ms ease-in-out;
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    z-index: 1;
-    padding: 16px;
+  -webkit-transition: all 333ms ease-in-out;
+  transition: all 333ms ease-in-out;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 1;
+  padding: 16px;
 
-    &.page-right {
-        left: 105%;
-    }
+  &.page-right {
+    left: 105%;
+  }
 
-    &.page-left {
-        left: -105%;
-    }
+  &.page-left {
+    left: -105%;
+  }
 }
