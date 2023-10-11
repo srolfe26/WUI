@@ -34,7 +34,10 @@ export default class BaseObject {
 
   parent: BaseObject | undefined;
 
-  constructor() {
+  constructor(configs?: { [key: string]: any }) {
+    if (configs) {
+      Object.assign(this, configs);
+    }
     this.items = [];
   }
 
