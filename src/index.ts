@@ -20,6 +20,8 @@ import FormItem from './objects/form-item';
 import Form from './objects/form';
 import Text from './objects/text';
 import TextArea from './objects/textarea';
+import Checkbox from './objects/checkbox';
+import Radio from './objects/radio';
 import BackButtonPage from './objects/back-button-page';
 import SimpleLoader from './objects/simple-loader';
 
@@ -35,6 +37,8 @@ export {
   Form,
   Text,
   TextArea,
+  Checkbox,
+  Radio,
   BackButtonPage,
   SimpleLoader,
   createNode,
