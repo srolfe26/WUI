@@ -1,36 +1,36 @@
 {
-  "name": "wui",
-  "version": "1.2.0",
-  "description": "Webteam User Interface",
-  "main": "wui.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "name": "tswui",
+  "version": "1.0.0",
+  "description": "The Webteam User Interface",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "wui-test"
+    "prepublishOnly": "npm run build",
+    "prettier": "npx prettier --write .",
+    "lint": "eslint . --ext .js,.ts --fix",
+    "dev": "vite",
+    "build": "npm run lint && rimraf dist && tsc && copyfiles -u 1 src/styles/* dist/",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/srolfe26/WUI.git"
-  },
-  "keywords": [
-    "\"jquery\"",
-    "\"ui\""
-  ],
   "author": "Stephen Nielsen",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/srolfe26/WUI/issues"
-  },
-  "homepage": "https://github.com/srolfe26/WUI#readme",
+  "license": "ISC",
   "devDependencies": {
-    "build-jshint": "^0.1.0",
-    "clean-css": "^3.4.10",
-    "enhance-css": "^1.1.0",
-    "jshint": "^2.9.1",
-    "shelljs": "^0.6.0"
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.49.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
+    "sass": "^1.69.0",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.5"
   },
   "dependencies": {
-    "uglify-js": "^3.17.4"
+    "verge": "^1.10.2"
   }
 }

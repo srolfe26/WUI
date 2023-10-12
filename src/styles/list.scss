@@ -1,0 +1,33 @@
+@import 'variables';
+
+.tswui-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 16px;
+
+  &.empty-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    overflow: hidden;
+
+    .simple-loader {
+      margin-top: -60px;
+    }
+
+    svg {
+      fill: $tswui-lt-gray;
+    }
+  }
+}
+
+.empty-list {
+  margin: 128px auto;
+  text-align: center;
+
+  &:empty {
+    display: none;
+  }
+}

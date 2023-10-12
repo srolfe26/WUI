@@ -1,0 +1,91 @@
+$error_padding: 8px !default;
+$focus_outline: #8bcbff !default;
+
+.form-fieldset.form-error {
+  padding: $error_padding;
+}
+
+.form-checkbox,
+.option-container {
+  margin: 24px 0;
+  padding: 0.1px;
+
+  &.form-error {
+    padding: $error_padding;
+  }
+
+  &.form-disabled {
+    opacity: 0.4;
+  }
+
+  label {
+    display: flex;
+    flex-wrap: nowrap;
+
+    &.form-label {
+      font-size: 1.25em;
+      text-transform: none;
+    }
+
+    .unchecked {
+      display: inline-block;
+    }
+
+    .checked {
+      display: none;
+    }
+  }
+
+  input:checked ~ .input-container .checked,
+  input:checked ~ label .checked {
+    display: inline-block;
+  }
+
+  input:checked ~ .input-container .unchecked,
+  input:checked ~ label .unchecked {
+    display: none;
+  }
+
+  [type='checkbox'],
+  [type='radio'] {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+
+  input[type='checkbox']:focus ~ .input-container svg,
+  input[type='radio']:focus ~ svg input[type='radio']:focus ~ .input-container svg {
+    outline: 0;
+    box-shadow:
+      0 0 5px $focus_outline,
+      0 0 5px $focus_outline inset;
+    border-radius: 4px;
+  }
+
+  .checkbox-icon {
+    width: 24px;
+    height: 24px;
+    margin: 3px 24px -3px 0;
+    flex: none;
+  }
+
+  .selected-text {
+    display: none;
+  }
+
+  input:checked ~ .text-container .selected-text {
+    display: block;
+    padding: 4px 8px 16px 0;
+    font-size: 0.75em;
+    width: 100%;
+  }
+
+  input:checked ~ .text-container .selected-text:empty {
+    display: none;
+  }
+}

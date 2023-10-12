@@ -1,36 +1,39 @@
-# Node
-node_modules/
-npm-debug.log
-
-# macOS
-.DS_Store
-
-# Visual Studio Code
-.vscode/
-
-# Build artifacts
-build/
+# Ignore built files
 dist/
 
-# Temporary files
-tmp/
-*.tmp
+# Ignore node_modules
+node_modules/
 
-# Log files
+# Ignore npm lock file
+package-lock.json
+
+# Ignore log files
+logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Compiled JavaScript files
-*.js
-*.map
 
-# Compiled CSS files
-*.css
-
-# Compiled assets
-*.png
-*.jpg
-*.gif
-*.svg
-
-# Environment variables
+# Ignore environment variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore macOS folder attributes
+.DS_Store
+
+# Ignore build outputs
+build
+
+# Ignore IDE files
+.idea/
+*.iml
+
+# Ignore TypeScript cache
+*.tsbuildinfo
+
+# Ignore output of 'npm pack'
+*.tgz

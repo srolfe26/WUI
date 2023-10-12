@@ -1,0 +1,514 @@
+@import 'wui';
+@import 'variables';
+@import 'button';
+
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0);
+    transform-style: preserve-3d;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0.9);
+  }
+  40%,
+  43% {
+    transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -15px, 0);
+    transform-style: preserve-3d;
+    box-shadow: 0 15px 15px rgba(0, 0, 0, 0.01);
+  }
+  70% {
+    transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -7px, 0);
+    transform-style: preserve-3d;
+    box-shadow: 0 7px 7px rgba(0, 0, 0, 0.5);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+    transform-style: preserve-3d;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.7);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Remove Apple Webkit styling */
+textarea,
+input.text,
+input[type='text'],
+input[type='button'],
+input[type='submit'] {
+  -webkit-appearance: none;
+}
+
+.disable-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.center-text {
+  text-align: center;
+}
+
+/************* FORM ITEMS *************/
+
+.tswui-form {
+  text-align: left;
+  padding: 0;
+  margin: 32px 0;
+  position: relative;
+
+  &:empty {
+    margin: 0;
+  }
+}
+
+.form-validation {
+  padding: 8px 16px;
+  width: 100%;
+  margin-bottom: 32px;
+  list-style-position: outside;
+}
+
+.form-error-item {
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: 16px;
+}
+
+.form-item.form-error {
+  padding: 8px;
+}
+
+.form-error.bump {
+  animation-name: bounce;
+  animation-delay: 166ms;
+  animation-iteration-count: 1;
+  animation-duration: 1s;
+  transform-origin: center bottom;
+}
+
+.form-fieldset,
+.form-item {
+  width: 100%;
+  border: 0;
+  margin: 24px 0;
+}
+
+.form-fieldset:first-child,
+.form-item:first-child {
+  margin-top: 0;
+}
+
+.form-item.form-disabled {
+  opacity: 0.4;
+}
+
+.field-wrapper {
+  position: relative;
+}
+
+.form-label {
+  margin-bottom: 4px;
+  padding-left: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sub-label {
+  display: block;
+  font-size: 0.75em;
+  text-transform: none;
+  height: 15px;
+}
+
+.form-fieldset {
+  padding: 0;
+  margin-inline-end: 0;
+  margin-block-end: 0;
+  margin-inline-start: 0;
+  padding-block-start: 0;
+  padding-inline-end: 0;
+  padding-inline-start: 0;
+  min-inline-size: auto;
+  margin: -24px 0 0 0;
+}
+
+.form-legend {
+  padding: 0;
+}
+
+.form-label,
+.form-legend {
+  text-transform: uppercase;
+}
+
+.form-fieldset.form-error {
+  padding: 0 8px;
+}
+
+/************* TEXT & TEXT AREA *************/
+
+textarea.form-input,
+.form-input[type='text'],
+.form-input[type='number'],
+.form-input[type='password'] {
+  width: 100%;
+  border-radius: 4px;
+  height: 40px;
+  padding: 12px 16px;
+  font-size: 1em;
+  border: 1px solid;
+}
+
+textarea.form-input:focus,
+.form-input[type='text']:focus,
+.form-input[type='number']:focus,
+.form-input[type='password']:focus {
+  outline: 0;
+  border-width: 2px;
+  // 1px less then non-focus styling to compensate for the increase in border width.
+  padding: 11px 15px;
+}
+
+textarea.form-input[readonly],
+.form-input[type='text'][readonly],
+.form-input[type='number'][readonly],
+.form-input[type='password'][readonly],
+textarea.form-input[readonly]:focus,
+.form-input[type='text'][readonly]:focus,
+.form-input[type='number'][readonly]:focus,
+.form-input[type='password'][readonly]:focus {
+  cursor: auto;
+}
+
+textarea.form-input {
+  overflow: hidden;
+}
+
+textarea.form-input:focus {
+  overflow: auto;
+}
+
+textarea.form-input {
+  height: calc(4em + 32px);
+  resize: vertical;
+}
+
+/************* CURRENCY INPUT *************/
+.field-wrapper.currency-form-item {
+  border: 1px solid;
+  border-radius: 4px;
+  width: 256px;
+  display: inline-flex;
+
+  .currency-symbol {
+    padding-top: 9px;
+    padding-left: 9px;
+    padding-bottom: 9px;
+    font-size: 23px;
+  }
+  .currency-input {
+    border: none;
+    padding-left: 9px;
+    padding-bottom: 11px;
+    font-size: 24px;
+    padding-top: 11px;
+    height: 45px;
+  }
+}
+
+/************* PHONE INPUT *************/
+
+.form-phone input[type='text'],
+.form-phone input[type='password'],
+.form-phone input[type='text']:focus,
+.form-phone input[type='password']:focus {
+  padding-left: 48px;
+}
+
+.form-phone .country-code {
+  position: absolute;
+  right: calc(100% - 42px);
+  top: 12px;
+  font-size: 1em;
+  text-align: right;
+}
+
+/************* PASSWORD INPUT *************/
+
+.form-password .form-input {
+  padding-right: 50px;
+}
+
+.field-button {
+  border: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 0;
+  background-color: transparent !important;
+  height: 100%;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.field-button:focus {
+  outline: none;
+}
+
+[type='password'] ~ .field-button .turn-visibility-off {
+  display: none;
+}
+
+[type='text'] ~ .field-button .turn-visibility-on {
+  display: none;
+}
+
+/************* STAR RATING *************/
+
+.form-star-rating {
+  display: flex;
+  justify-content: center;
+  flex-direction: row-reverse;
+}
+
+.form-star-rating .form-checkbox {
+  margin: 16px 8px;
+}
+
+.form-star-rating.form-checkbox .checkbox-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/************* BUTTONS *************/
+
+.tswui-form .tswui-button.submit-button {
+  margin-left: auto;
+}
+
+.tswui-form .tswui-link-button:focus,
+.tswui-form .tswui-link-button:active,
+.tswui-form .tswui-link-button:hover {
+  background: transparent !important;
+  border: 0;
+  box-shadow: none !important;
+  outline: 0;
+}
+
+.tswui-link-button,
+input.tswui-button.tswui-link-button {
+  border: 0;
+  font-size: 1em;
+  text-decoration: underline;
+  background: transparent;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+}
+
+.tswui-link-button svg {
+  width: 24px;
+  height: 24px;
+  margin: 0 8px 0 0;
+}
+
+/*** DISPLAY FIELDS ***/
+
+.form-item.display-field .field-wrapper {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/******************************* FORM THEMEING *******************************/
+.form-validation {
+  background-color: $tswui-lightest-gray;
+}
+
+.form-error-item:hover {
+  color: $tswui-white;
+}
+
+.form-item.form-error,
+.form-checkbox.form-error,
+.form-fieldset.form-error {
+  background-color: $tswui-red;
+}
+
+.form-label,
+.form-legend {
+  color: $tswui-md-gray;
+}
+
+.form-error .form-label,
+.form-error .form-legend {
+  color: $tswui-white;
+}
+
+textarea.form-input:focus::placeholder,
+.form-input[type='text']:focus::placeholder,
+.form-input[type='password']:focus::placeholder,
+textarea.form-input::placeholder,
+.form-input[type='text']::placeholder,
+.form-input[type='password']::placeholder {
+  color: $tswui-lt-gray;
+  -webkit-text-fill-color: $tswui-lt-gray !important;
+}
+
+textarea.form-input,
+.form-input[type='text'],
+.form-input[type='password'] {
+  font-family: 'Montserrat', sans-serif;
+}
+
+textarea.form-input[readonly]::placeholder,
+.form-input[type='text'][readonly]::placeholder,
+.form-input[type='password'][readonly]::placeholder {
+  color: transparent;
+}
+
+input:checked ~ .selected_text {
+  background-color: $tswui-secondary;
+  color: $tswui-white;
+  -webkit-text-fill-color: $tswui-white;
+}
+
+.tswui-form .primary-color,
+.tswui-form .primary-color[readonly]:focus,
+.tswui-form input:-webkit-autofill,
+[type='password'] ~ .field-button svg,
+[type='text'] ~ .field-button svg,
+.form-checkbox svg {
+  outline: 0;
+  color: $tswui-secondary;
+  fill: $tswui-secondary;
+  -webkit-text-fill-color: $tswui-secondary !important;
+  border-color: $tswui-secondary;
+}
+
+.tswui-person-display svg,
+.tswui-person-display a,
+.tswui-person-display a:visited {
+  color: $tswui-secondary;
+  fill: $tswui-secondary;
+}
+
+.tswui-form .primary-color:focus,
+.form-phone input:focus + .country-code,
+[type='password']:focus ~ button svg,
+[type='text']:focus ~ button svg,
+[type='password']:focus ~ .field-button svg,
+[type='text']:focus ~ .field-button svg {
+  color: $tswui-secondary;
+  fill: $tswui-secondary;
+  -webkit-text-fill-color: $tswui-secondary !important;
+  border-color: $tswui-secondary;
+}
+
+.tswui-form .primary-color:focus {
+  background-color: $tswui-white;
+  -webkit-box-shadow: 0 0 0 30px $tswui-white inset !important;
+  box-shadow: 0 0 0 30px $tswui-white inset !important;
+}
+
+/*** COMBO & CALENDAR DROP DOWNS ***/
+.combo-dd {
+  background: $tswui-white;
+  border: 2px solid $tswui-secondary !important;
+  border-top-width: 0 !important;
+  border-radius: 0 0 4px 4px !important;
+  backdrop-filter: blur(6px) !important;
+
+  &.positioned-above {
+    border-radius: 4px 4px 0 0 !important;
+    border-bottom-width: 0 !important;
+    border-top-width: 2px !important;
+  }
+}
+
+.combo-no-results,
+.combo-item,
+.combo-item-disabled {
+  padding: 4px 8px;
+  color: $tswui-secondary;
+}
+
+.combo-item svg {
+  fill: $tswui-toolbars;
+}
+
+.combo-item.combo-list-selected svg {
+  fill: $tswui-toolbars !important;
+}
+
+.combo-list-selected,
+.tswui-selected {
+  background-color: $tswui-secondary !important;
+  color: $tswui-white !important;
+}
+
+.url-input {
+  display: flex;
+  flex-direction: column;
+
+  .field-wrapper {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    border-radius: 4px;
+    padding-left: 16px;
+    border: 1px solid;
+    background-color: $tswui-white;
+
+    .item-prefix {
+      color: $tswui-md-gray;
+    }
+
+    .form-input[type='text'] {
+      border: 0;
+      padding-left: 2px;
+    }
+
+    .tswui-button {
+      background: transparent;
+      box-shadow: none;
+
+      svg {
+        fill: $tswui-dk-gray;
+      }
+    }
+
+    .url-error-display {
+      color: $tswui-md-blue;
+    }
+  }
+
+  .error-display {
+    color: $tswui-white;
+    background-color: $tswui-md-blue;
+    font-size: 12px;
+    border-radius: 0 0 4px 4px;
+    padding: 4px 16px;
+    margin-top: 1px;
+    -ms-flex-order: 10;
+    order: 10;
+  }
+
+  .error-display ~ .field-wrapper {
+    border-radius: 4px 4px 0 0;
+  }
+}
