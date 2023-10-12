@@ -64,7 +64,7 @@ input[type='submit'] {
   }
 
   &:active {
-    box-shadow: none !important;
+    box-shadow: none;
     transform: translate(1px, 1px);
   }
 
