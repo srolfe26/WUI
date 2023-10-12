@@ -12,7 +12,7 @@ export default class Text extends FormItem {
 
   el: HTMLElement;
 
-  container: Element | null;
+  container!: HTMLElement;
 
   field: HTMLInputElement;
 
@@ -23,7 +23,7 @@ export default class Text extends FormItem {
       ...args,
     });
     this.el = this.element;
-    this.container = this.el.querySelector('.field-wrapper');
+    this.container = this.el.querySelector('.field-wrapper') as HTMLElement;
     this.field = this.el.querySelector('.form-input[type="text"]') as HTMLInputElement;
   }
 
@@ -33,7 +33,9 @@ export default class Text extends FormItem {
           ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
           <div class="field-wrapper">
               <input type="text" class="form-input primary-color"
-              name="${this.autocomplete === false ? `no_auto_${20000 + Math.floor(Math.random() * 100000)}` : this.name}"
+              name="${
+                this.autocomplete === false ? `no_auto_${20000 + Math.floor(Math.random() * 100000)}` : this.name
+              }"
               ${this.idAttr}
               ${this.autocomplete === false ? ' autocomplete="off" ' : ''}
               ${this.disabled === true ? ' disabled="true" ' : ''}>
@@ -42,33 +44,33 @@ export default class Text extends FormItem {
     `) as HTMLElement;
   }
 
-  getValue(): string | null {
+  public getValue(): any {
     const fieldVal = this.field.value.trim();
     this.value = fieldVal.length > 0 ? fieldVal : null;
 
-    return this.value as string | null;
+    return this.value;
   }
 
-  setValue(val: string): void {
+  public setValue(val: string): void {
     const setValue = isset(val) && typeof val.trim === 'function' ? val.trim() : val;
 
     this.value = isset(setValue) && String(setValue).length > 0 ? setValue : null;
     this.field.value = this.value as string;
   }
 
-  clear(): void {
+  public clear(): void {
     this.setValue('');
   }
 
-  enable(): void {
-    this.disabled = false;
+  public enable(): void {
+    super.enable();
     this.field.disabled = false;
     this.field.tabIndex = 0;
     this.el.classList.remove('form-disabled');
   }
 
-  disable(): void {
-    this.disabled = true;
+  public disable(): void {
+    super.disable();
     this.field.disabled = true;
     this.field.tabIndex = -1;
     this.el.classList.add('form-disabled');

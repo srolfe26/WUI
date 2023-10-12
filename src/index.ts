@@ -19,6 +19,11 @@ import Page from './objects/page';
 import FormItem from './objects/form-item';
 import Form from './objects/form';
 import Text from './objects/text';
+import InputMask from './objects/input-mask';
+import NumberField from './objects/number';
+import Phone from './objects/phone';
+import SimpleDate from './objects/simple-date';
+import Combo from './objects/combo';
 import TextArea from './objects/textarea';
 import Checkbox from './objects/checkbox';
 import Radio from './objects/radio';
@@ -36,6 +41,11 @@ export {
   FormItem,
   Form,
   Text,
+  Combo,
+  InputMask,
+  NumberField,
+  Phone,
+  SimpleDate,
   TextArea,
   Checkbox,
   Radio,
