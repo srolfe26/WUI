@@ -4,7 +4,7 @@ interface TitleObj extends BaseObject {
   titleContainer: HTMLElement;
 }
 
-export default class BackButtonPanel extends Page {
+export default class BackButtonPage extends Page {
   private title = '';
 
   private backFunction = () => this.hide(Page.HIDE_RIGHT);
