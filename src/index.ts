@@ -4,6 +4,7 @@ import getCssStyles from './utils/getCssStyles';
 import getFurthestDescendant from './utils/getFurthestDescendant';
 import getscrollbarwidth from './utils/getscrollbarwidth';
 import { applyTextHighlight, removeHighlight, HIGHLIGHT_STYLE } from './utils/highlightText';
+import { SortItem, Sorter } from './utils/sort';
 import isset from './utils/isset';
 import maxz from './utils/maxz';
 import isPlainObject from './utils/isplainobject';
@@ -61,4 +62,6 @@ export {
   isPlainObject,
   isset,
   maxz,
+  SortItem,
+  Sorter,
 };

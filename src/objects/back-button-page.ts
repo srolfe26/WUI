@@ -17,7 +17,7 @@ export default class BackButtonPage extends Page {
     super();
     Object.assign(this, args);
 
-    this.el.classList.add('list-panel');
+    this.el.classList.add('list-page');
 
     this.toolbar = new Toolbar({
       items: [

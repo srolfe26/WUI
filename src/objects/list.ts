@@ -6,7 +6,7 @@ const EMPTY_PANEL_CLASS = 'empty-panel';
 export default class List extends BaseObject {
   public emptyText!: string | null;
 
-  public data!: Array<Record<string, any>>[];
+  public data!: Record<string, any>[];
 
   public itemObject!: InstanceType<typeof ListItem>;
 

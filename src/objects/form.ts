@@ -14,11 +14,6 @@ interface FormItem extends BaseObject {
   validationFn?: (value: any) => void;
 }
 
-interface Args {
-  el: HTMLFormElement;
-  [key: string]: any;
-}
-
 /**
  * Base object for all others
  */
@@ -26,7 +21,7 @@ export default class Form extends BaseObject {
   // @ts-ignore
   items: FormItem[];
 
-  constructor(args: Args) {
+  constructor(args: Record<string, unknown>) {
     super();
 
     Object.assign(this, {

@@ -15,49 +15,49 @@ export default class Stage extends BaseObject {
     this.el.tswuiO = this;
   }
 
-  currentPanel(): Page | null {
-    const panels = this.items.filter((item) => item instanceof Page);
+  currentPage(): Page | null {
+    const pages = this.items.filter((item) => item instanceof Page);
 
-    if (panels.length > 0) {
-      return panels.at(-1) as Page;
+    if (pages.length > 0) {
+      return pages.at(-1) as Page;
     } else {
       return null;
     }
   }
 
-  showPanel(page: Page, args?: []): Promise<any> {
-    this.addPanel(page);
+  showPage(page: Page, args?: []): Promise<any> {
+    this.addPage(page);
     return page.show(...(args || []));
   }
 
-  addPanel(page: Page): void {
+  addPage(page: Page): void {
     if (!(page instanceof Page)) {
-      this.error('Items passed to showPanel must be of type Page');
+      this.error('Items passed to showPage must be of type Page');
     }
 
     super.push(page);
   }
 
-  hideAllPagesExcept(exceptionPanel: Page, removePanels: boolean): Promise<Page> {
+  hideAllPagesExcept(exceptionPage: Page, removePages: boolean): Promise<Page> {
     return Promise.all(
       this.items
-        .filter((item) => item instanceof Page && item !== exceptionPanel)
+        .filter((item) => item instanceof Page && item !== exceptionPage)
         .map((item: BaseObject) => {
           const page = item as Page;
 
           if (!page.isHidden()) {
             return page.hide().then((subpage: Page) => {
-              if (removePanels) {
+              if (removePages) {
                 subpage.remove();
               }
               return Promise.resolve(subpage);
             });
-          } else if (removePanels) {
+          } else if (removePages) {
             page.remove();
           }
 
           return Promise.resolve(page);
         })
-    ).then(() => this.showPanel(exceptionPanel));
+    ).then(() => this.showPage(exceptionPage));
   }
 }
