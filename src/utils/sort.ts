@@ -12,13 +12,13 @@ const TYPE_STRING = 'string';
 class SortItem {
   name!: string;
 
-  fn!: (a: any, b: any) => number;
+  fn?: (a: any, b: any) => number;
 
   type: string;
 
   direction: number;
 
-  constructor(args: { name: string; type?: string; direction?: number; fn: (a: any, b: any) => number }) {
+  constructor(args: { name: string; type?: string; direction?: number; fn?: (a: any, b: any) => number }) {
     const configs = {
       type: SortItem.TYPE_STRING,
       direction: SortItem.SORT_ASCENDING,
@@ -104,7 +104,7 @@ class Sorter {
     let compB = b[sorter.name];
     let comparison = 0;
 
-    if (typeof sorter.type === SortItem.TYPE_FUNCTION) {
+    if (typeof sorter.type === SortItem.TYPE_FUNCTION && sorter.fn) {
       comparison = sorter.fn(compA, compB);
     } else {
       switch (sorter.type) {

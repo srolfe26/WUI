@@ -19,6 +19,7 @@ import ListItem from './objects/list-item';
 import Page from './objects/page';
 import FormItem from './objects/form-item';
 import Form from './objects/form';
+import Hidden from './objects/hidden';
 import Text from './objects/text';
 import InputMask from './objects/input-mask';
 import NumberField from './objects/number';
@@ -41,6 +42,7 @@ export {
   Page,
   FormItem,
   Form,
+  Hidden,
   Text,
   Combo,
   InputMask,
