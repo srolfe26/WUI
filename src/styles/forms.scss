@@ -2,6 +2,7 @@
 @import 'variables';
 
 @keyframes bounce {
+
   0%,
   20%,
   53%,
@@ -245,12 +246,6 @@ textarea.form-input {
   text-align: right;
 }
 
-/************* PASSWORD INPUT *************/
-
-.form-password .form-input {
-  padding-right: 50px;
-}
-
 .field-button {
   border: 0;
   position: absolute;
@@ -266,15 +261,31 @@ textarea.form-input {
   cursor: pointer;
 }
 
+
+/************* PASSWORD INPUT *************/
+
+.form-password {
+
+  .form-input[type=text],
+  .form-input[type=password]:focus {
+    padding-left: 50px;
+  }
+
+  .field-button {
+    left: 0;
+    right: auto;
+  }
+}
+
 .field-button:focus {
   outline: none;
 }
 
-[type='password'] ~ .field-button .turn-visibility-off {
+[type='password']~.field-button .turn-visibility-off {
   display: none;
 }
 
-[type='text'] ~ .field-button .turn-visibility-on {
+[type='text']~.field-button .turn-visibility-on {
   display: none;
 }
 
@@ -377,7 +388,7 @@ textarea.form-input[readonly]::placeholder,
   color: transparent;
 }
 
-input:checked ~ .selected_text {
+input:checked~.selected_text {
   background-color: $tswui-secondary;
   color: $tswui-white;
   -webkit-text-fill-color: $tswui-white;
@@ -386,8 +397,8 @@ input:checked ~ .selected_text {
 .tswui-form .primary-color,
 .tswui-form .primary-color[readonly]:focus,
 .tswui-form input:-webkit-autofill,
-[type='password'] ~ .field-button svg,
-[type='text'] ~ .field-button svg,
+[type='password']~.field-button svg,
+[type='text']~.field-button svg,
 .form-checkbox svg {
   outline: 0;
   color: $tswui-secondary;
@@ -404,11 +415,11 @@ input:checked ~ .selected_text {
 }
 
 .tswui-form .primary-color:focus,
-.form-phone input:focus + .country-code,
-[type='password']:focus ~ button svg,
-[type='text']:focus ~ button svg,
-[type='password']:focus ~ .field-button svg,
-[type='text']:focus ~ .field-button svg {
+.form-phone input:focus+.country-code,
+[type='password']:focus~button svg,
+[type='text']:focus~button svg,
+[type='password']:focus~.field-button svg,
+[type='text']:focus~.field-button svg {
   color: $tswui-secondary;
   fill: $tswui-secondary;
   -webkit-text-fill-color: $tswui-secondary !important;
@@ -504,7 +515,7 @@ input:checked ~ .selected_text {
     order: 10;
   }
 
-  .error-display ~ .field-wrapper {
+  .error-display~.field-wrapper {
     border-radius: 4px 4px 0 0;
   }
 }
