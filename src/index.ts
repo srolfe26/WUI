@@ -21,6 +21,7 @@ import FormItem from './objects/form-item';
 import Form from './objects/form';
 import Hidden from './objects/hidden';
 import Text from './objects/text';
+import Password from './objects/password';
 import InputMask from './objects/input-mask';
 import NumberField from './objects/number';
 import Phone from './objects/phone';
@@ -44,6 +45,7 @@ export {
   Form,
   Hidden,
   Text,
+  Password,
   Combo,
   InputMask,
   NumberField,

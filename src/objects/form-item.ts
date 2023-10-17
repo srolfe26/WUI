@@ -81,7 +81,7 @@ export default class FormItem extends BaseObject {
     return Boolean(this.parent && this.parent instanceof BaseObject);
   }
 
-  validationFn(val: any): boolean {
+  validationFn(val: any): void {
     const value = val || this.value;
     const fieldname = this.label ? this.label : this.name;
 
@@ -96,8 +96,6 @@ export default class FormItem extends BaseObject {
     if (value === null && this.required === true) {
       throwError(`A value for "${fieldname}" is required.`);
     }
-
-    return true;
   }
 
   throw(errorMessage: string): never {

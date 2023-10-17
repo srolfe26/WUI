@@ -22,7 +22,7 @@ export default class Phone extends InputMask {
     this.setMaskListeners();
   }
 
-  validationFn(val: string | null): boolean {
+  validationFn(val: string | null) {
     const value = val || this.getValue();
 
     if (value && /^\+?[1-9]\d{10}$/.test(value)) {
@@ -30,8 +30,6 @@ export default class Phone extends InputMask {
     } else if (this.required === true || (value && value.length > 0)) {
       throw new Error((this.label ? this.label : this.name) + ' does not contain a valid US phone number.');
     }
-
-    return false;
   }
 
   getValue(): string | null {
