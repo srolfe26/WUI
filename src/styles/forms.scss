@@ -266,7 +266,8 @@ textarea.form-input {
 
 .form-password {
 
-  .form-input[type=text],
+  .form-input,
+  .form-input[type=text]:focus,
   .form-input[type=password]:focus {
     padding-left: 50px;
   }
