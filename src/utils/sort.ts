@@ -14,24 +14,20 @@ class SortItem {
 
   fn?: (a: any, b: any) => number;
 
-  type: string;
+  type!: string;
 
-  direction: number;
+  direction!: number;
 
   constructor(args: { name: string; type?: string; direction?: number; fn?: (a: any, b: any) => number }) {
-    const configs = {
+    Object.assign(this, {
       type: SortItem.TYPE_STRING,
       direction: SortItem.SORT_ASCENDING,
       ...args,
-    };
+    });
 
-    if (!isset(configs.name)) {
+    if (!isset(this.name)) {
       throw new Error('A name must be specified for a SortItem.');
     }
-
-    this.name = configs.name;
-    this.type = configs.type;
-    this.direction = configs.direction;
   }
 
   static get SORT_ASCENDING() {
@@ -104,7 +100,7 @@ class Sorter {
     let compB = b[sorter.name];
     let comparison = 0;
 
-    if (typeof sorter.type === SortItem.TYPE_FUNCTION && sorter.fn) {
+    if (sorter.type === SortItem.TYPE_FUNCTION && sorter.fn) {
       comparison = sorter.fn(compA, compB);
     } else {
       switch (sorter.type) {
