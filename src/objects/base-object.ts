@@ -114,7 +114,7 @@ export default class BaseObject {
     return index;
   }
 
-  removeItem(removeItem: any): any {
+  removeItem(removeItem: BaseObject): BaseObject | undefined {
     const target = this.elAlias || this.el;
     const index = this.indexOf(removeItem);
 
