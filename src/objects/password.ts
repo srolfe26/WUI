@@ -3,8 +3,11 @@ import { Text, createNode } from '../index';
 export default class Password extends Text {
   private toggleButton: HTMLElement;
 
+  public requiredLength!: number;
+
   constructor(args: any) {
     super(args);
+    Object.assign(this, { requiredLength: 6, ...args });
 
     this.toggleButton = this.container.querySelector('.field-button') as HTMLElement;
 
@@ -46,7 +49,7 @@ export default class Password extends Text {
   validationFn(val: string) {
     super.validationFn(val);
 
-    if (val.length < 6) {
+    if (this.required && typeof val === 'string' && val.length < this.requiredLength) {
       throw new Error('You must enter a password that is at least 6 characters long.');
     }
   }
