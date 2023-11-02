@@ -7,6 +7,7 @@ import { applyTextHighlight, removeHighlight, HIGHLIGHT_STYLE } from './utils/hi
 import { SortItem, Sorter } from './utils/sort';
 import isset from './utils/isset';
 import maxz from './utils/maxz';
+import positionChild from './utils/position-child';
 import isPlainObject from './utils/isplainobject';
 
 // Objects
@@ -64,6 +65,7 @@ export {
   removeHighlight,
   HIGHLIGHT_STYLE,
   isPlainObject,
+  positionChild,
   isset,
   maxz,
   SortItem,

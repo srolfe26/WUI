@@ -1,7 +1,6 @@
 // @ts-ignore Verge is an older library without typescript support
 import verge from 'verge';
 import {
-  maxz,
   isset,
   createNode,
   getscrollbarwidth,
@@ -12,6 +11,7 @@ import {
   FormItem,
   isPlainObject,
   BaseObject,
+  positionChild,
 } from '../index';
 import '../styles/forms.scss';
 import '../styles/combo.scss';
@@ -562,7 +562,7 @@ export default class Combo extends FormItem {
     this.dd.style.visibility = 'hidden';
     this.dd.classList.remove(HIDDEN_CLASS);
     this.adjustDropDownWidth();
-    this.positionDD(this.input, this.dd);
+    positionChild(this.input, this.dd);
     this.dd.style.visibility = '';
 
     // Select the current item in the option list and scroll to it.
@@ -615,35 +615,6 @@ export default class Combo extends FormItem {
     }
 
     return true;
-  }
-
-  private positionDD(parent: HTMLElement, child: HTMLElement): void {
-    const ARBITRARY_PADDING = 16;
-    const ofst = parent.getBoundingClientRect();
-    let top = ofst.top;
-    const cWidth = child.offsetWidth;
-    const spaceAbove = ofst.top;
-    const spaceBelow = verge.viewportH() - spaceAbove - parent.offsetHeight;
-    let showBelow = spaceBelow > spaceAbove;
-    const leftPosition = ofst.left + parent.offsetWidth - cWidth;
-    const anchorRight = leftPosition > 0;
-
-    // Set the child height and determine whether to put the child above or below the parent
-    child.style.maxHeight = (showBelow ? spaceBelow : spaceAbove) - ARBITRARY_PADDING + 'px';
-    const cHeight: number = child.offsetHeight;
-
-    // If there is space, we want to show the item below
-    showBelow = showBelow || cHeight < spaceBelow - ARBITRARY_PADDING;
-
-    // Add a class to allow different displays depending on position
-    top = showBelow ? top + parent.offsetHeight : top - (!isNaN(cHeight) ? cHeight : child.offsetHeight);
-    parent.classList[showBelow ? 'remove' : 'add']('positioned-above');
-    child.classList[showBelow ? 'remove' : 'add']('positioned-above');
-
-    child.style.left = `${anchorRight ? leftPosition : ofst.left}px`;
-    child.style.top = `${top}px`;
-    child.style.position = 'fixed';
-    child.style.zIndex = String(maxz(child));
   }
 
   private adjustDropDownWidth(): void {
@@ -795,7 +766,7 @@ export default class Combo extends FormItem {
       this.resetListHighlighting();
     }
 
-    this.positionDD(this.input, this.dd);
+    positionChild(this.input, this.dd);
   }
 
   initSubtemplate(): void {
