@@ -37,7 +37,7 @@ export default class Page extends BaseObject {
     });
   }
 
-  public hide(direction: string = HIDE_LEFT): Promise<this> {
+  public hide(direction: string = HIDE_RIGHT): Promise<this> {
     return new Promise((resolve, reject) => {
       try {
         if (this.el !== null) {
