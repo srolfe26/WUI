@@ -59,12 +59,17 @@ class SortItem {
   }
 }
 
+interface SortConfigs {
+  debug?: boolean;
+  sortType?: any;
+}
+
 class Sorter {
-  configs: { debug: boolean; sortType?: any };
+  configs: SortConfigs;
 
   sorters!: SortItem[];
 
-  constructor(args: { debug?: boolean }) {
+  constructor(args?: SortConfigs) {
     this.configs = {
       debug: false,
       ...args,
