@@ -137,7 +137,8 @@ export default class Combo extends FormItem {
   private _mouseEnterListener: undefined | ReturnType<typeof setTimeout>;
 
   constructor(args: Record<string, unknown>) {
-    super({
+    super(args);
+    Object.assign(this, {
       dropDownCssClasses: '',
       items: [],
       noResultsMessage: 'No Results.',
@@ -169,7 +170,6 @@ export default class Combo extends FormItem {
 
     // DOM elements
     this.el = this.element;
-    this.container = this.el.querySelector('.field-wrapper') as HTMLElement;
     this.field = this.el.querySelector('.form-input[type="hidden"]') as HTMLElement;
     this.input = this.el.querySelector('.form-input[type="text"]') as HTMLInputElement;
     this.ddToggle = this.el.querySelector('.' + DD_SWITCH_CLASS) as HTMLElement;
@@ -872,18 +872,20 @@ export default class Combo extends FormItem {
     const selection = this.selected[0];
 
     if (selection) {
+      const record = selection.tswuiO.record;
+
       // Avoid an infinite loop by checking if the value is different
-      if (this.value !== selection.record) {
-        this.setValue(selection.record);
+      if (this.value !== record) {
+        this.setValue(record);
       }
 
       // Set the field to the value
-      if (selection.record.disabled !== true) {
-        this.setFieldValue(selection.record[this.titleItem]);
+      if (record.disabled !== true) {
+        this.setFieldValue(record[this.titleItem]);
         this.setPlaceholder('');
         this.toggleFieldSearchability();
       } else {
-        this.setPlaceholder(selection.record[this.titleItem]);
+        this.setPlaceholder(record[this.titleItem]);
       }
     } else {
       this.setFieldValue('');
@@ -989,7 +991,7 @@ export default class Combo extends FormItem {
     let retVal;
 
     if (el) {
-      retVal = this.itemSelect(el.tswuiO);
+      retVal = this.itemSelect(el.tswuiO as BaseObject);
 
       if (doScroll !== false) {
         this.scrollToCurrent();
@@ -999,20 +1001,22 @@ export default class Combo extends FormItem {
     return retVal;
   }
 
-  private itemSelect(item: any, silent?: true) {
+  private itemSelect(item: HTMLElement | BaseObject, silent?: true) {
     if (this.dd.querySelector('.' + SELECTED_CLASS)) {
       (this.dd.querySelector('.' + SELECTED_CLASS) as Element).classList.remove(SELECTED_CLASS);
     }
 
     if (item) {
-      (item.el as Element).classList.add(SELECTED_CLASS);
-      this.selected = [item];
+      const el: HTMLElement = (item as BaseObject).el || item;
+
+      el.classList.add(SELECTED_CLASS);
+      this.selected = [el];
 
       if (!silent) {
         const event = new CustomEvent('combo-change', {
           detail: {
             combo: this,
-            selected: item,
+            selected: el.tswuiO,
             select_list: this.selected,
           },
         });
@@ -1025,7 +1029,7 @@ export default class Combo extends FormItem {
     return item;
   }
 
-  private make(): number {
+  public make(): number {
     const holder = document.createElement('div');
     const optGroups: Record<string, any> = {};
 

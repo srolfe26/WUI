@@ -26,7 +26,10 @@ export default class List extends BaseObject {
         const listItem = new this.itemObject(record);
         listItem.parent = this;
 
-        this.el.appendChild(listItem.el);
+        const node = listItem.el;
+
+        node.tswuiO = listItem;
+        this.el.appendChild(node);
       } catch (error) {
         console.warn(error, record);
       }
