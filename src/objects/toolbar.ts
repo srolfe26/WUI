@@ -14,10 +14,10 @@ export default class Toolbar extends BaseObject {
     Object.assign(this, { cssClass: null, ...args });
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    function complete() {
-      // this._centerLogo();
+    const complete = () => {
+      this._centerLogo();
       timer = null;
-    }
+    };
 
     this.el = createNode(`<div class="tswui-toolbar ${this.cssClass || ''}"></div>`);
     window.addEventListener('resize', function () {
