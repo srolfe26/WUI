@@ -19,6 +19,7 @@ export default class List extends BaseObject {
   }
 
   render(): void {
+    const target = this.elAlias || this.el;
     this.clearList();
     this.data.forEach((record: Record<string, any>) => {
       try {
@@ -29,15 +30,15 @@ export default class List extends BaseObject {
         const node = listItem.el;
 
         node.tswuiO = listItem;
-        this.el.appendChild(node);
+        target.appendChild(node);
       } catch (error) {
         console.warn(error, record);
       }
     });
 
     // Handle Empty Text
-    if (this.el.hasChildNodes() === false) {
-      this.el.appendChild(this.emptyListMessageNode());
+    if (target.hasChildNodes() === false) {
+      target.appendChild(this.emptyListMessageNode());
     }
   }
 
@@ -46,15 +47,18 @@ export default class List extends BaseObject {
   }
 
   preRender(): void {
-    this.el.innerHTML = '';
+    const target = this.elAlias || this.el;
+    target.innerHTML = '';
     this.loader = this.loader || (new SimpleLoader(48).element as HTMLElement);
-    this.el.classList.add(EMPTY_PANEL_CLASS);
-    this.el.appendChild(this.loader);
+    target.classList.add(EMPTY_PANEL_CLASS);
+    target.appendChild(this.loader);
   }
 
   clearList(): void {
+    const target = this.elAlias || this.el;
+
     this.empty();
-    this.el.innerHTML = '';
-    this.el.classList.remove(EMPTY_PANEL_CLASS);
+    target.innerHTML = '';
+    target.classList.remove(EMPTY_PANEL_CLASS);
   }
 }

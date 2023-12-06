@@ -197,7 +197,7 @@ export default class Combo extends FormItem {
   get element() {
     return createNode(`
             <div class="form-item tswui-combo">
-                <label class="form-label" ${this.forAttr}>${this.label}</label>
+                ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
                 <div class="field-wrapper">
                     <input type="hidden" name="${this.name}">
                     <input name="${
