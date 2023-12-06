@@ -13,6 +13,7 @@ import isPlainObject from './utils/isplainobject';
 // Objects
 import BaseObject from './objects/base-object';
 import Button from './objects/button';
+import Detail from './objects/detail';
 import Stage from './objects/stage';
 import Toolbar from './objects/toolbar';
 import List from './objects/list';
@@ -37,6 +38,7 @@ import SimpleLoader from './objects/simple-loader';
 export {
   BaseObject,
   Button,
+  Detail,
   Stage,
   Toolbar,
   List,

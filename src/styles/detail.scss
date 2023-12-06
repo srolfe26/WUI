@@ -1,0 +1,43 @@
+@import 'variables';
+
+.tswui-detail {
+  border-radius: 8px;
+  overflow: hidden;
+
+  .summary {
+    background-color: $tswui-lt-gray;
+    padding: 16px 16px 16px 56px;
+    position: relative;
+
+    .toggle-switch {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      top: 16px;
+      left: 16px;
+      transform: rotate(-90deg);
+      transition: transform 0.3s ease-in-out;
+    }
+  }
+
+  .content {
+    padding: 0;
+    overflow-y: auto;
+    background-color: $tswui-lightest-gray;
+    transition: height 0.3s ease-in-out;
+    height: 0;
+  }
+
+  &.open {
+    .summary {
+      .toggle-switch {
+        transform: rotate(0deg);
+      }
+    }
+
+    .content {
+      padding: 8px;
+      height: 33vh;
+    }
+  }
+}
