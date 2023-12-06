@@ -16,7 +16,7 @@ export default class ResizableText extends FormItem {
 
   private wrapper: HTMLElement;
 
-  private field: HTMLElement;
+  public field: HTMLElement;
 
   public cssClass?: string;
 
