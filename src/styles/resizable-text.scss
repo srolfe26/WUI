@@ -1,0 +1,27 @@
+.form-input.resizable-wrapper {
+  width: 100%;
+  min-height: 40px;
+  max-height: 140px;
+  padding: 12px 16px;
+  font-size: 1em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 4px;
+  border: 1px solid;
+  background-color: #fff;
+
+  .resizable-field {
+    width: 100%;
+    display: block;
+    white-space: pre-wrap;
+
+    &:focus {
+      outline: 0;
+    }
+  }
+
+  &:focus-within {
+    border-width: 2px;
+    padding: 11px 15px;
+  }
+}

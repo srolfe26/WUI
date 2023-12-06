@@ -23,6 +23,7 @@ import FormItem from './objects/form-item';
 import Form from './objects/form';
 import Hidden from './objects/hidden';
 import Text from './objects/text';
+import ResizableText from './objects/resizable-text';
 import Password from './objects/password';
 import InputMask from './objects/input-mask';
 import NumberField from './objects/number';
@@ -48,6 +49,7 @@ export {
   Form,
   Hidden,
   Text,
+  ResizableText,
   Password,
   Combo,
   InputMask,

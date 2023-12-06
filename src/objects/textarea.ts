@@ -12,18 +12,22 @@ export default class TextArea extends Text {
 
   constructor(args: Args) {
     super(args);
+    Object.assign(this, {
+      autocomplete: 'auto',
+      ...args,
+    });
 
     this.field = this.el.querySelector('textarea.form-input') as HTMLTextAreaElement;
   }
 
   get element(): HTMLElement {
     return createNode(`
-            <div class="form-item">
-                <label class="form-label" ${this.forAttr}>${this.label}</label>
-                <div class="field-wrapper">
-                    <textarea class="form-input primary-color" name="${this.name}" ${this.idAttr}></textarea>
-                </div>
-            </div>
-        `) as HTMLElement;
+      <div class="form-item">
+        ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
+        <div class="field-wrapper">
+          <textarea class="form-input primary-color" name="${this.name}" ${this.idAttr}></textarea>
+        </div>
+      </div>
+    `) as HTMLElement;
   }
 }
