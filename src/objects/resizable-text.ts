@@ -46,13 +46,24 @@ export default class ResizableText extends FormItem {
         `) as HTMLElement;
   }
 
-  public getValue(): string | null {
-    const fieldVal = this.field.innerHTML
-      .replace(/<\/?[^>]+?>/gim, '\n') // replace all tags
-      .replace(/\n[\s]*\n/gim, '\n') // replace many empty lines to one
-      .trim();
+  public getRawValue(): string | null {
+    const fieldVal = this.field.innerHTML.trim();
+    const value = fieldVal.length > 0 ? fieldVal : null;
 
-    this.value = fieldVal.length > 0 ? fieldVal : null;
+    this.value = value;
+    return value;
+  }
+
+  public getValue(): string | null {
+    const value = this.getRawValue();
+    const fieldVal = value
+      ? value
+          .replace(/<\/?[^>]+?>/gim, '\n') // replace all tags
+          .replace(/\n[\s]*\n/gim, '\n') // replace many empty lines to one
+          .trim()
+      : null;
+
+    this.value = fieldVal;
 
     return this.value;
   }

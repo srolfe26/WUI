@@ -1,7 +1,7 @@
 import { BaseObject, SimpleLoader, createNode, ListItem } from '../index';
 import '../styles/list.scss';
 
-const EMPTY_PANEL_CLASS = 'empty-panel';
+const EMPTY_PANEL_CLASS = 'empty-list';
 
 export default class List extends BaseObject {
   public emptyText!: string | null;

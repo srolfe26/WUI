@@ -32,6 +32,7 @@ const NO_RESULTS_CLASS = 'combo-no-results';
 const COMBO_LOADING_CLASS = 'combo-loading';
 const SCROLL_LOCK_CLASS = 'combo-no-scroll';
 const COMBO_SEARCHABLE_CLASS = 'combo-searchable';
+const COMBO_CHANGE_EVENT = 'combochange';
 
 // HELPER FUNCTIONS
 function eventFire(el: HTMLElement, etype: string): void {
@@ -98,7 +99,7 @@ export default class Combo extends FormItem {
 
   public items: ComboItem[];
 
-  public data!: Record<string, unknown>[];
+  public data!: unknown[];
 
   private subtemplate!: (data: Record<string, any>) => string;
 
@@ -135,6 +136,8 @@ export default class Combo extends FormItem {
   private _activateFn!: (event: Event) => void;
 
   private _mouseEnterListener: undefined | ReturnType<typeof setTimeout>;
+
+  public dataType!: any;
 
   constructor(args: Record<string, unknown>) {
     super(args);
@@ -194,6 +197,10 @@ export default class Combo extends FormItem {
     this.refreshData();
   }
 
+  static get COMBO_CHANGE_EVENT() {
+    return COMBO_CHANGE_EVENT;
+  }
+
   get element() {
     return createNode(`
             <div class="form-item tswui-combo">
@@ -240,6 +247,34 @@ export default class Combo extends FormItem {
     if (event.target !== this.input) {
       this.setValue(this.value);
       this.close();
+    }
+  }
+
+  public isDataObj = (value: unknown): boolean => {
+    return isPlainObject(value) || value instanceof ComboItem || value instanceof this.dataType;
+  };
+
+  public setValue(sv: any) {
+    const searchItem = this.isDataObj(sv) ? sv[this.valueItem] : sv;
+    const item = this.getItemBy(this.valueItem, searchItem);
+    const dispatchChange = (value: any) => {
+      const event = new CustomEvent(COMBO_CHANGE_EVENT, {
+        bubbles: true,
+        detail: { value },
+      });
+      this.input.dispatchEvent(event);
+    };
+
+    if (this.isDataObj(item) && this.value !== item.record) {
+      this.value = item.record;
+      dispatchChange(this.value);
+      this.set();
+      return item;
+    } else if (item === undefined) {
+      this.value = undefined;
+      dispatchChange(undefined);
+      this.set();
+      return undefined;
     }
   }
 
@@ -566,19 +601,19 @@ export default class Combo extends FormItem {
     this.dd.style.visibility = '';
 
     // Select the current item in the option list and scroll to it.
-    if (isPlainObject(this.value)) {
+    if (this.isDataObj(this.value)) {
       this.getItemBy(this.valueItem, this.value[this.valueItem]);
       this.scrollToCurrent();
     }
   }
 
-  private getItemBy(key: string, val: any): any {
+  private getItemBy(key: string, val: unknown): any {
     let retVal;
 
     this.each((item) => {
       if (
         (item.record[key] !== undefined && item.record[key] === val) ||
-        (!isNaN(parseFloat(val)) && parseFloat(val) === parseFloat(item.record[key]))
+        (!isNaN(parseFloat(val as string)) && parseFloat(val as string) === parseFloat(item.record[key]))
       ) {
         retVal = item;
 
@@ -851,7 +886,7 @@ export default class Combo extends FormItem {
 
       // Make sure there is nothing weird left in the search box on close, it should
       // reflect the value of the field.
-      if (isPlainObject(this.value)) {
+      if (this.isDataObj(this.value)) {
         this.setFieldValue(this.value[this.titleItem]);
       }
 
@@ -945,7 +980,7 @@ export default class Combo extends FormItem {
     item = this.selectByEl(el as HTMLElement);
 
     // If the item is not a plain object, we're likely on an edge. Go to the other end of the list.
-    if (!isPlainObject(item)) {
+    if (!this.isDataObj(item)) {
       item = this.selectByEl(options[theEnd]);
     }
   }

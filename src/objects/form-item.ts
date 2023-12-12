@@ -1,4 +1,4 @@
-import { isset, BaseObject } from '../index';
+import { BaseObject } from '../index';
 
 class FormItemError extends Error {
   formItem: FormItem;

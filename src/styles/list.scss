@@ -6,12 +6,14 @@
   overflow-x: hidden;
   padding: 0 16px;
 
-  &.empty-panel {
+  &.empty-list,
+  .empty-list {
     display: flex;
     justify-content: center;
     align-items: center;
     flex: 1;
     overflow: hidden;
+    margin-top: 60px;
 
     .simple-loader {
       margin-top: -60px;
@@ -20,14 +22,9 @@
     svg {
       fill: $tswui-lt-gray;
     }
-  }
-}
 
-.empty-list {
-  margin: 128px auto;
-  text-align: center;
-
-  &:empty {
-    display: none;
+    &:empty {
+      display: none;
+    }
   }
 }
