@@ -467,27 +467,28 @@ export default class Combo extends FormItem {
   }
 
   private optionListEventsActive(activate: boolean): void {
-    // Add this listener separately because it can be turned on and off by the list scrolling
     this.optionListMouseEnter(activate);
 
     if (activate) {
       this.dd.addEventListener('touchstart', this._notBlurFn);
-      this.dd.childNodes.forEach((child) => child.addEventListener('touchstart', this._notBlurFn));
       this.dd.addEventListener('mousedown', this._notBlurFn);
-
-      this.dd.childNodes.forEach((child) => child.addEventListener('touchend', this._selectFn));
-      this.dd.childNodes.forEach((child) => child.addEventListener('click', this._selectFn));
-
-      // Moving the mouse within the bounds of the list generally should activate this listener.
       this.dd.addEventListener('mousemove', this._activateFn);
+
+      this.dd.childNodes.forEach((child) => {
+        child.addEventListener('touchstart', this._notBlurFn);
+        child.addEventListener('touchend', this._selectFn);
+        child.addEventListener('click', this._selectFn);
+      });
     } else {
       this.dd.removeEventListener('touchstart', this._notBlurFn);
-      this.dd.childNodes.forEach((child) => child.removeEventListener('touchstart', this._notBlurFn));
       this.dd.removeEventListener('mousedown', this._notBlurFn);
-
-      this.dd.childNodes.forEach((child) => child.removeEventListener('touchend', this._selectFn));
-      this.dd.childNodes.forEach((child) => child.removeEventListener('click', this._selectFn));
       this.dd.removeEventListener('mousemove', this._activateFn);
+
+      this.dd.childNodes.forEach((child) => {
+        child.removeEventListener('touchstart', this._notBlurFn);
+        child.removeEventListener('touchend', this._selectFn);
+        child.removeEventListener('click', this._selectFn);
+      });
     }
   }
 
@@ -787,13 +788,11 @@ export default class Combo extends FormItem {
         }
       });
 
-      // If there are no visible items, add the no results message as a disabled item
-      let visibleCount = 0;
-      this.dd.childNodes.forEach((node) => {
-        if (isVisible(node as HTMLElement)) {
-          visibleCount++;
-        }
-      });
+      const visibleCount = Array.from(this.dd.childNodes).reduce(
+        (count, node) => count + (isVisible(node as HTMLElement) ? 1 : 0),
+        0
+      );
+
       if (visibleCount === 0) {
         this.addNoResultsMessage();
       }
@@ -931,7 +930,7 @@ export default class Combo extends FormItem {
     }
   }
 
-  debug(message: string) {
+  debug(message: unknown) {
     if (this.debugMode === true) {
       console.log(message);
     }
@@ -942,36 +941,19 @@ export default class Combo extends FormItem {
     const options: HTMLElement[] = this.items
       .filter((item) => item.record.disabled !== true && isVisible(item.el))
       .map((item) => item.el);
-
-    // Get the index of the selected element in the current options array (if any).
-    const selectedIndex = (() => {
-      let retVal: number | undefined;
-
-      // If there is a selected item, move from it, else go from an end.
-      if (this.selected.length > 0) {
-        options.forEach((option, index) => {
-          if (option === this.selected[0].el) {
-            retVal = index;
-          }
-        });
-      }
-
-      return retVal;
-    })();
-
-    // Determine the value of the edge depending on an arrow key.
+    const selectedIndex: number = options.findIndex((option) => option === this.selected[0]);
     const theEnd = dir > 0 ? 0 : options.length - 1;
     let item: any;
     let el: Element | undefined;
 
-    // If the drop-down was just opened, we only want to show the selected item, not change it.
+    // If the drop-down was just opened, show the selected item, don't change it.
     if (this._justOpened === true) {
       dir = 0;
       this._justOpened = false;
     }
 
     // If there is a selected item, move from it, else go from an end.
-    if (!isNaN(parseInt(selectedIndex as any, 10)) && selectedIndex !== undefined) {
+    if (selectedIndex !== -1) {
       el = options[selectedIndex + dir];
     } else {
       el = options[theEnd];
