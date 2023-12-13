@@ -197,6 +197,13 @@ export default class Combo extends FormItem {
     this.refreshData();
   }
 
+  getValue() {
+    const returnVal =
+      this.isDataObj(this.value) && isset(this.value[this.valueItem]) ? this.value[this.valueItem] : this.value;
+
+    return returnVal;
+  }
+
   static get COMBO_CHANGE_EVENT() {
     return COMBO_CHANGE_EVENT;
   }
