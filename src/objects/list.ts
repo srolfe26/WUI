@@ -6,13 +6,13 @@ const EMPTY_PANEL_CLASS = 'empty-list';
 export default class List extends BaseObject {
   public emptyText!: string | null;
 
-  public data!: Record<string, any>[];
+  public data!: Record<string, unknown>[];
 
   public itemObject!: InstanceType<typeof ListItem>;
 
   private loader: HTMLElement | null = null;
 
-  constructor(args: Record<string, any>) {
+  constructor(args: Record<string, unknown>) {
     super();
     Object.assign(this, args);
     this.el = createNode(`<div class="tswui-list"></div>`);
@@ -21,7 +21,7 @@ export default class List extends BaseObject {
   render(): void {
     const target = this.elAlias || this.el;
     this.clearList();
-    this.data.forEach((record: Record<string, any>) => {
+    this.data.forEach((record: Record<string, unknown>) => {
       try {
         // @ts-ignore TODO: How do we express that this.itemObject is a ListItem instance?
         const listItem = new this.itemObject(record);

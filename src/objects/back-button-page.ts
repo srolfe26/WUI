@@ -13,7 +13,7 @@ export default class BackButtonPage extends Page {
 
   private logoAndTitle: TitleObj;
 
-  constructor(args: any) {
+  constructor(args?: { [key: string]: unknown }) {
     super();
     Object.assign(this, args);
 

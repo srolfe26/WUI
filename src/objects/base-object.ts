@@ -34,7 +34,7 @@ export default class BaseObject {
 
   parent: BaseObject | undefined;
 
-  constructor(configs?: { [key: string]: any }) {
+  constructor(configs?: { [key: string]: unknown }) {
     if (configs) {
       Object.assign(this, configs);
     }

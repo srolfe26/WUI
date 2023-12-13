@@ -1,3 +1,3 @@
-export default (value: any): boolean => {
+export default (value: unknown): boolean => {
   return value !== undefined && value !== null;
 };
