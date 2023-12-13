@@ -3,7 +3,7 @@ import InputMask from './input-mask';
 export default class Phone extends InputMask {
   public countryCode!: number;
 
-  constructor(args: any) {
+  constructor(args?: { [key: string]: unknown }) {
     super({
       countryCode: '1',
       ...args,

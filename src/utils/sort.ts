@@ -12,13 +12,13 @@ const TYPE_STRING = 'string';
 class SortItem {
   name!: string;
 
-  fn?: (a: any, b: any) => number;
+  fn?: (a: unknown, b: unknown) => number;
 
   type!: string;
 
   direction!: number;
 
-  constructor(args: { name: string; type?: string; direction?: number; fn?: (a: any, b: any) => number }) {
+  constructor(args: { name: string; type?: string; direction?: number; fn?: (a: unknown, b: unknown) => number }) {
     Object.assign(this, {
       type: SortItem.TYPE_STRING,
       direction: SortItem.SORT_ASCENDING,
@@ -76,7 +76,7 @@ class Sorter {
     };
   }
 
-  sort(data: any[], sorters: SortItem[]) {
+  sort(data: unknown[], sorters: SortItem[]) {
     if (!this._isArrayOfObjects(data)) {
       throw new Error('Data is not an array of objects.');
     }
@@ -95,7 +95,7 @@ class Sorter {
     return dataCopy;
   }
 
-  private _sort(depth: number, a: any, b: any): number {
+  private _sort(depth: number, a: unknown, b: unknown): number {
     if (this.sorters.length === 0) {
       return 0;
     }
@@ -152,7 +152,7 @@ class Sorter {
     }
   }
 
-  private _isArrayOfSortItems(arr: any): boolean {
+  private _isArrayOfSortItems(arr: unknown): boolean {
     if (!Array.isArray(arr)) {
       return false;
     }
@@ -160,7 +160,7 @@ class Sorter {
     return typeof arr.sort === 'function' && (arr.length === 0 || (arr.length > 0 && arr[0] instanceof SortItem));
   }
 
-  private _isArrayOfObjects(arr: any): boolean {
+  private _isArrayOfObjects(arr: unknown): boolean {
     if (!Array.isArray(arr)) {
       return false;
     }

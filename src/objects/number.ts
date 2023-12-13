@@ -1,6 +1,6 @@
 import Text from './text';
 
-export default class NumberField extends Text {
+export default class NumberField extends Text<number> {
   public integersOnly!: boolean;
 
   constructor(args: any) {
@@ -16,7 +16,7 @@ export default class NumberField extends Text {
     return parseBy(String(num));
   }
 
-  public override getValue(): any {
+  public override getValue(): number | null {
     this.value = super.getValue();
     return isNaN(this.value) ? null : this.value;
   }

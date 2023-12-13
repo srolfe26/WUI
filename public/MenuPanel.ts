@@ -30,7 +30,7 @@ export default class MenuPanel extends Page {
     this.items = [this.toolbar, (this.menuList = new MenuList(args))];
   }
 
-  show(): Promise<any> {
+  show(): Promise<unknown> {
     this.menuList.render();
     return super.show();
   }
