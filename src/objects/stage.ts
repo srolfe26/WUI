@@ -25,7 +25,7 @@ export default class Stage extends BaseObject {
     }
   }
 
-  showPage(page: Page, args?: []): Promise<unknown> {
+  showPage(page: Page, args?: []): Promise<any> {
     this.addPage(page);
     return page.show(...(args || []));
   }

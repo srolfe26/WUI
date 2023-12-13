@@ -1,6 +1,6 @@
 import { Text, createNode } from '../index';
 
-export default class Password extends Text<string> {
+export default class Password extends Text {
   private toggleButton: HTMLElement;
 
   public requiredLength!: number;

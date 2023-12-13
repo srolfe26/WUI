@@ -7,7 +7,7 @@ interface Args extends Record<string, unknown> {
   disabled?: boolean;
 }
 
-export default class Text<T> extends FormItem {
+export default class Text extends FormItem {
   autocomplete!: string | boolean;
 
   el: HTMLElement;
@@ -44,7 +44,7 @@ export default class Text<T> extends FormItem {
     `) as HTMLElement;
   }
 
-  public getValue(): T | null {
+  public getValue(): any {
     const fieldVal = this.field.value.trim();
     this.value = fieldVal.length > 0 ? fieldVal : null;
 
