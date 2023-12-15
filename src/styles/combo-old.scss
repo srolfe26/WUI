@@ -1,0 +1,129 @@
+@-webkit-keyframes loader-spin {
+  /* Don't start turning until 10% because the browser is slow to swap images and we don't
+    want a jittery/spinning search icon */
+  10% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+
+@keyframes loader-spin {
+  10% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+
+/* Breaking many good CSS rules here, but its the only decent way to disable scrolling on the
+body (to mimic the opening of select boxes on other browsers and prevent the dropdown being
+disassociated from the field) but retain the scrollbar (so layout of the page doesn't get
+messed with). Specifying the body because we don't want this applied on any other elemet. */
+body.combo-no-scroll {
+  position: fixed !important;
+  overflow-y: auto !important;
+}
+
+.combo-dd {
+  text-decoration: none;
+  box-sizing: border-box;
+  background: #fff;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  max-height: 300px;
+  overflow: auto;
+  text-align: left;
+  border: 1px solid;
+  border-top-width: 0;
+}
+
+.combo-visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.tswui-combo {
+  .form-input[type='text'] {
+    padding-right: 40px;
+    padding-left: 12px;
+  }
+
+  .field-button.dd-switch {
+    width: 40px;
+  }
+
+  svg.show-when-open {
+    width: 24px;
+    height: 24px;
+    transform: translate(-1px, 3px);
+    display: none;
+  }
+
+  svg.show-when-closed {
+    width: 32px;
+    height: 32px;
+    transform: translate(-1px, 2px);
+  }
+
+  &.combo-open {
+    [type='text'] {
+      border-bottom-width: 0;
+      border-radius: 4px 4px 0 0;
+
+      &.positioned-above {
+        border-top-width: 0;
+        border-bottom-width: 2px;
+        border-radius: 0 0 4px 4px;
+      }
+    }
+
+    svg.show-when-open {
+      display: block;
+    }
+
+    svg.show-when-closed {
+      display: none;
+    }
+  }
+}
+
+.combo-list-selected {
+  background-color: #0000ff;
+  color: #fff;
+}
+
+.combo-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.combo-item * {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Old versions of Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+}
