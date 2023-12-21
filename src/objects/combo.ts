@@ -6,21 +6,21 @@ import '../styles/combo.scss';
 import getscrollbarwidth from '../utils/getscrollbarwidth';
 import positionChild from '../utils/position-child';
 import BaseObject from './base-object';
+import { HIGHLIGHT_STYLE, applyTextHighlight, removeHighlight, SimpleLoader } from '../index';
 
 const DROP_DOWN_ICON =
-  '<svg class="show-when-closed" viewBox="0 0 24 24"><path d="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z"/></svg>';
+  '<svg class="show-when-closed" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z"/></svg>';
 const CLOSE_ICON =
-  '<svg class="show-when-open" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>';
+  '<svg class="show-when-open" focusable="false" aria-hidden="true" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>';
+const SEARCH_ICON =
+  '<svg class="twsui-combo-search" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>';
 const SELECTED_CLASS = 'tswui-combo-selected';
 const DISABLED_CLASS = 'tswui-combo-disabled';
+const HIDDEN_CLASS = 'visually-hidden';
 const COMBO_CHANGE_EVENT = 'combo-change';
 
 type ComboRecord = Record<string, unknown>;
 type ComboObject = BaseObject & { record: ComboRecord };
-
-const isVisible = (el: HTMLElement): boolean => {
-  return el.offsetParent !== null;
-};
 
 export default class Combo extends FormItem {
   public open!: boolean;
@@ -47,13 +47,23 @@ export default class Combo extends FormItem {
 
   private justOpened!: boolean;
 
-  private canSearch!: boolean;
-
   private isBlurring!: boolean | undefined;
 
   private searchLocal!: boolean;
 
+  private searchRemote!: boolean;
+
   private searchThreshold!: number;
+
+  private keyEventShouldSearch!: boolean | undefined;
+
+  private noResultsMessage: BaseObject | undefined;
+
+  private previous: string | undefined;
+
+  private isSearching!: boolean;
+
+  public searchArgName!: string;
 
   constructor(args?: ComboRecord) {
     super(args as ComboRecord);
@@ -63,8 +73,13 @@ export default class Combo extends FormItem {
       dropDownCssClasses: [],
       titleItem: null,
       valueItem: null,
+      // replace this with a remote search parameter
+      searchArgName: 'search',
+      data: [],
       selected: [],
       searchLocal: true,
+      searchRemote: false,
+      isSearching: false,
       searchThreshold: 3,
       subtemplate: (record: ComboRecord): BaseObject =>
         new BaseObject({
@@ -89,8 +104,11 @@ export default class Combo extends FormItem {
     this.addEventListeners();
     this.addKeyboardListeners();
 
-    // Render a static dataset
-    this.refreshData();
+    if (this.searchRemote) {
+      this.searchLocal = false;
+    } else {
+      this.render();
+    }
   }
 
   static get COMBO_CHANGE_EVENT() {
@@ -99,25 +117,29 @@ export default class Combo extends FormItem {
 
   get element() {
     return createNode(`
-      <div class="form-item tswui-combo">
+      <div class="form-item tswui-combo${this.searchRemote ? ' combo-remote-search' : ''}">
         ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
         <div class="field-wrapper">
           <input type="hidden" name="${this.name}">
-          <input name="${
-            this.ensureName
-          }" class="form-input primary-color" type="text" autocomplete="off" autocorrect="off"
+          <input name="${this.ensureName()}" class="form-input primary-color" type="text" autocomplete="off" autocorrect="off"
           autocapitalize="off" spellcheck="false" placeholder="" ${this.disabled ? 'disabled' : ''} >
+          ${
+            this.searchRemote
+              ? `${SEARCH_ICON}${new SimpleLoader(20).html}`
+              : `
           <button unselectable="on" tabindex="-1" class="field-button dd-switch">
             ${DROP_DOWN_ICON}
             ${CLOSE_ICON}
           </button>
+          `
+          }
         </div>
       </div>
     `);
   }
 
   private ensureName() {
-    return (this.name || 'combo') + (20000 + Math.floor(Math.random() * 100000));
+    return this.name || 'combo' + (20000 + Math.floor(Math.random() * 100000));
   }
 
   private createDropDown(): HTMLElement {
@@ -134,10 +156,12 @@ export default class Combo extends FormItem {
     this.dropDown.addEventListener('touchend', () => this.input.focus());
     this.dropDown.addEventListener('click', () => this.input.focus());
 
-    this.dropDownToggle.addEventListener('touchstart', this.blurHandler.bind(this));
-    this.dropDownToggle.addEventListener('mousedown', this.blurHandler.bind(this));
-    this.dropDownToggle.addEventListener('touchend', this.toggleHandler.bind(this));
-    this.dropDownToggle.addEventListener('click', this.toggleHandler.bind(this));
+    if (this.dropDownToggle) {
+      this.dropDownToggle.addEventListener('touchstart', this.blurHandler.bind(this));
+      this.dropDownToggle.addEventListener('mousedown', this.blurHandler.bind(this));
+      this.dropDownToggle.addEventListener('touchend', this.toggleHandler.bind(this));
+      this.dropDownToggle.addEventListener('click', this.toggleHandler.bind(this));
+    }
 
     // Toggle opening and closing the dropdown
     this.input.addEventListener('touchstart', this.openDropDown.bind(this));
@@ -238,7 +262,6 @@ export default class Combo extends FormItem {
       // Set the field to the value
       if (record.disabled !== true) {
         this.setFieldValue(this.getTitleItem(record));
-        // this.toggleFieldSearchability();
       }
     } else {
       this.setFieldValue('');
@@ -338,6 +361,7 @@ export default class Combo extends FormItem {
     this.open = true;
     this.el.classList.add('combo-open');
     this.sizeAndPositionDropDown();
+    this.resetListHighlighting();
     this.toggleDropdownEvents();
     this.input.focus();
     this.input.select();
@@ -376,8 +400,13 @@ export default class Combo extends FormItem {
     positionChild(this.input, this.dropDown);
   }
 
-  public render(): void {
+  private render(): void {
     this.empty();
+
+    if (this.data.length === 0) {
+      this.addEmptyMessage();
+    }
+
     this.data.forEach((record: ComboRecord) => {
       try {
         const wuiObj = this.subtemplate(record);
@@ -389,14 +418,31 @@ export default class Combo extends FormItem {
     });
   }
 
-  public refreshData(searchParams?: ComboRecord): void {
-    this.render();
+  public async refreshData(searchParams?: ComboRecord): Promise<void> {
+    if (searchParams) {
+      // This line is a no-operation; it's just to avoid linting errors
+      // about unused parameters.
+    }
+
+    // Note: This method is intended to be overridden in subclasses to fetch data
+    // from a remote source. The current implementation is a placeholder.
   }
 
   private addKeyboardListeners(): void {
+    let debounceTimer: number;
+
+    const debounceRemoteSearch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
+        if (this.keyEventShouldSearch && !this.isSearching) {
+          this.doRemoteSearch();
+        }
+      }, 333);
+    };
+
     this.input.addEventListener('keydown', (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
-        this.canSearch = false;
+        this.keyEventShouldSearch = false;
 
         if (this.open) {
           event.stopPropagation();
@@ -418,14 +464,14 @@ export default class Combo extends FormItem {
       } else {
         if (!['Enter', 'Shift'].includes(event.key)) {
           if (!this.open) {
+            this.openDropDown();
             this.justOpened = true;
           }
-          this.openDropDown();
         }
 
         if (['ArrowDown', 'ArrowUp', 'Escape'].includes(event.key)) {
           event.preventDefault();
-          this.canSearch = false;
+          this.keyEventShouldSearch = false;
 
           switch (event.key) {
             case 'ArrowDown':
@@ -440,46 +486,25 @@ export default class Combo extends FormItem {
               break;
           }
         } else {
-          this.canSearch = true;
+          this.keyEventShouldSearch = true;
         }
       }
     });
 
     this.input.addEventListener('keyup', (event: KeyboardEvent) => {
+      event.stopPropagation();
+
       if (event.key === 'Enter') {
         if (this.open) {
-          event.stopPropagation();
           event.preventDefault();
           this.set();
         }
       } else {
-        event.stopPropagation();
+        if (this.keyEventShouldSearch && !['Tab', 'Shift'].includes(event.key) && !this.isSearching) {
+          this.doLocalSearch();
+          debounceRemoteSearch();
+        }
       }
-
-      // const key = null;
-      // if (this.canSearch && !['Tab', 'Shift'].includes(event.key)) {
-      //   if (!this.searchLocal) {
-      //     this.searchData();
-      //   } else {
-      //     if (event.key !== undefined && !event.ctrlKey && !event.metaKey && !event.altKey) {
-      //       key = event.key;
-
-      //       if (!this._selectTypeBuffer) {
-      //         this._selectTypeBuffer = key;
-
-      //         setTimeout(() => {
-      //           this._selectTypeBuffer = undefined;
-      //         }, 1000);
-      //       } else {
-      //         this._selectTypeBuffer += key;
-      //       }
-
-      //       this.searchHTMLText(this._selectTypeBuffer, (itm) => {
-      //         this.selectByEl(itm);
-      //       });
-      //     }
-      //   }
-      // }
     });
 
     this.input.addEventListener('focus', (event: FocusEvent) => {
@@ -498,8 +523,16 @@ export default class Combo extends FormItem {
     });
   }
 
+  private toggleFieldSearchability(currentlySearching: boolean): void {
+    this.isSearching = currentlySearching;
+    this.el.classList[currentlySearching ? 'add' : 'remove']('tswui-combo-searching');
+    this.input.readOnly = currentlySearching;
+  }
+
   selectAdjacent(dir: number) {
-    const options = (this.items as ComboObject[]).filter((item) => isVisible(item.el)).map((item) => item.el);
+    const options = (this.items as ComboObject[])
+      .map((item) => item.el)
+      .filter((el) => !el.classList.contains(HIDDEN_CLASS));
     const selectedIndex: number = options.findIndex((option) => option === this.selected[0]?.el);
     const theEnd = dir > 0 ? 0 : options.length - 1;
 
@@ -511,5 +544,83 @@ export default class Combo extends FormItem {
 
     const el = selectedIndex !== -1 ? options[selectedIndex + dir] : options[theEnd];
     this.selectElement(el);
+  }
+
+  private doLocalSearch() {
+    if (this.searchLocal) {
+      const srchVal = this.input.value.trim();
+      const searchRegex = new RegExp(srchVal, 'ig');
+
+      if (srchVal !== undefined && srchVal.trim().length !== 0) {
+        this.searchHTMLText(
+          srchVal,
+          (itm) => applyTextHighlight(itm, searchRegex).classList.remove(HIDDEN_CLASS),
+          (itm) => removeHighlight(itm).classList.add(HIDDEN_CLASS)
+        );
+      } else {
+        this.resetListHighlighting();
+      }
+
+      this.sizeAndPositionDropDown();
+    }
+  }
+
+  private async doRemoteSearch() {
+    if (this.searchRemote) {
+      const srchVal = this.input.value.trim();
+      const oldSearch = this.previous || undefined;
+      this.previous = srchVal;
+
+      if ((srchVal.length >= this.searchThreshold || srchVal.length === 0) && this.previous != oldSearch) {
+        this.toggleFieldSearchability(true);
+        await this.refreshData({ [this.searchArgName]: srchVal });
+        this.toggleFieldSearchability(false);
+        this.render();
+      }
+    }
+  }
+
+  searchHTMLText(srchVal: string, foundFn?: (item: HTMLElement) => void, absentFn?: (item: HTMLElement) => void) {
+    const options = this.items.map((item) => {
+      return item.el;
+    });
+
+    options.forEach((item) => {
+      // Search only visible text here (rather than regex'ing on the html) so we only get visible items
+      // Also allows us to use pseudo-classes to add non-searchable text.
+      if (
+        item.textContent &&
+        item.textContent.toUpperCase().indexOf(srchVal.toUpperCase()) >= 0 &&
+        typeof foundFn === 'function'
+      ) {
+        foundFn(item);
+      } else if (typeof absentFn === 'function') {
+        absentFn(item);
+      }
+    });
+  }
+
+  private resetListHighlighting() {
+    if (this.noResultsMessage) {
+      this.noResultsMessage.remove();
+    }
+
+    this.dropDown.querySelectorAll(`.${HIDDEN_CLASS}`).forEach((node) => {
+      node.classList.remove(HIDDEN_CLASS);
+    });
+
+    this.dropDown.querySelectorAll(`.${HIGHLIGHT_STYLE}`).forEach((node) => {
+      node.replaceWith(node.innerHTML);
+    });
+  }
+
+  private addEmptyMessage(): void {
+    if (!this.noResultsMessage) {
+      this.noResultsMessage = new BaseObject({
+        el: createNode(`<li class="tswui-combo-empty ${DISABLED_CLASS}">(empty)</li>`),
+      });
+
+      this.splice(0, 0, this.noResultsMessage);
+    }
   }
 }

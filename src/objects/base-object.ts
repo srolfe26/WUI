@@ -2,26 +2,9 @@ import isset from '../utils/isset';
 
 class BreakException extends Error {}
 
-interface ObjectError {
-  message: string;
-  object: any;
-  code?: number;
-}
-
-class ObjectError extends Error {
-  constructor(message: string, object: any, code?: number) {
-    super(message);
-    this.object = object;
-
-    if (code) {
-      this.code = code;
-    }
-  }
-}
-
 declare global {
   interface HTMLElement {
-    tswuiO: BaseObject | Record<string, any>;
+    tswuiO: BaseObject | Record<string, unknown>;
   }
 }
 
@@ -41,7 +24,7 @@ export default class BaseObject {
     this.items = [];
   }
 
-  private _isNode(node: any): boolean {
+  private _isNode(node: unknown): boolean {
     return isset(node) && node instanceof HTMLElement;
   }
 
@@ -49,11 +32,7 @@ export default class BaseObject {
     return new BreakException('Break outta this loop');
   }
 
-  error(message: string, code?: number): void {
-    throw new ObjectError(message, this, code);
-  }
-
-  breakEach(items: any[], fn: (item: any, index: number) => void): void {
+  breakEach(items: unknown[], fn: (item: unknown, index: number) => void): void {
     try {
       items.forEach(fn);
     } catch (e) {
@@ -66,7 +45,7 @@ export default class BaseObject {
   appendItems(): void {
     const parent: HTMLElement = this.elAlias || this.el;
 
-    this.items.forEach((item: any) => {
+    this.items.forEach((item: BaseObject) => {
       if (this._isNode(item.el) && parent) {
         item.parent = this;
         parent.appendChild(item.el);
@@ -101,10 +80,10 @@ export default class BaseObject {
     return removedChildren;
   }
 
-  indexOf(findItem: any): number {
+  indexOf(findItem: unknown): number {
     let index = -1;
 
-    this.breakEach(this.items, (item: any, idx: number) => {
+    this.breakEach(this.items, (item: unknown, idx: number) => {
       if (item === findItem) {
         index = idx;
         throw BreakException;
@@ -157,8 +136,8 @@ export default class BaseObject {
     return this.parent instanceof BaseObject;
   }
 
-  remove(): any {
-    let item: any;
+  remove(): unknown {
+    let item: unknown;
 
     if (this.parentCanRemoveMe) {
       item = this.parent?.removeItem(this);

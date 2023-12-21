@@ -32,7 +32,7 @@ export default class Stage extends BaseObject {
 
   addPage(page: Page): void {
     if (!(page instanceof Page)) {
-      this.error('Items passed to showPage must be of type Page');
+      throw new Error('Items passed to showPage must be of type Page');
     }
 
     super.push(page);
