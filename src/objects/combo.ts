@@ -18,18 +18,19 @@ const SELECTED_CLASS = 'tswui-combo-selected';
 const DISABLED_CLASS = 'tswui-combo-disabled';
 const HIDDEN_CLASS = 'visually-hidden';
 const COMBO_CHANGE_EVENT = 'combo-change';
+const LIST_ITEM_CLASS = 'combo-item';
 
-type ComboRecord = Record<string, unknown>;
+export type ComboRecord = Record<string, unknown>;
 type ComboObject = BaseObject & { record: ComboRecord };
 
-export default class Combo extends FormItem {
+export class Combo extends FormItem {
   public open!: boolean;
 
   public valueItem!: string;
 
   public titleItem!: string;
 
-  public subtemplate!: (record: ComboRecord) => BaseObject;
+  private subtemplate!: (record: ComboRecord) => BaseObject;
 
   public dropDownCssClasses!: string[];
 
@@ -65,6 +66,10 @@ export default class Combo extends FormItem {
 
   public searchArgName!: string;
 
+  private mouseEnterListener: number | null = null;
+
+  mouseMoveListenerBound!: boolean;
+
   constructor(args?: ComboRecord) {
     super(args as ComboRecord);
     Object.assign(this, {
@@ -83,7 +88,6 @@ export default class Combo extends FormItem {
       searchThreshold: 3,
       subtemplate: (record: ComboRecord): BaseObject =>
         new BaseObject({
-          record,
           el: createNode(`<li class="combo-item">${record[this.titleItem]}</li>`),
         }),
       ...args,
@@ -152,34 +156,55 @@ export default class Combo extends FormItem {
   }
 
   private addEventListeners(): void {
+    const blurHandler = this.blurHandler.bind(this);
+    const toggleHandler = this.toggleHandler.bind(this);
+    const openDropDown = this.openDropDown.bind(this);
+
     // Prevent the field from losing focus if a user clicks on disabled items in the list
     this.dropDown.addEventListener('touchend', () => this.input.focus());
     this.dropDown.addEventListener('click', () => this.input.focus());
 
     if (this.dropDownToggle) {
-      this.dropDownToggle.addEventListener('touchstart', this.blurHandler.bind(this));
-      this.dropDownToggle.addEventListener('mousedown', this.blurHandler.bind(this));
-      this.dropDownToggle.addEventListener('touchend', this.toggleHandler.bind(this));
-      this.dropDownToggle.addEventListener('click', this.toggleHandler.bind(this));
+      this.dropDownToggle.addEventListener('touchstart', blurHandler);
+      this.dropDownToggle.addEventListener('mousedown', blurHandler);
+      this.dropDownToggle.addEventListener('touchend', toggleHandler);
+      this.dropDownToggle.addEventListener('click', toggleHandler);
     }
 
     // Toggle opening and closing the dropdown
-    this.input.addEventListener('touchstart', this.openDropDown.bind(this));
-    this.input.addEventListener('mousedown', this.openDropDown.bind(this));
+    this.input.addEventListener('touchstart', openDropDown);
+    this.input.addEventListener('mousedown', openDropDown);
+  }
+
+  private killEvent(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   private toggleDropdownEvents(): void {
+    const notBlurringHandler = this.notBlurringHandler.bind(this);
+    const selectHandler = (event: Event): void => {
+      this.killEvent(event);
+      const listItem = this.findListItem(event.target as HTMLElement);
+
+      if (listItem && !listItem.classList.contains(DISABLED_CLASS)) {
+        this.selectElement(listItem);
+        this.set();
+        this.closeDropDown();
+      }
+    };
     const dropDownEventFn = this.open ? this.dropDown.addEventListener : this.dropDown.removeEventListener;
     const childFnString = this.open ? 'addEventListener' : 'removeEventListener';
 
-    dropDownEventFn('touchstart', this.notBlurringHandler.bind(this));
-    dropDownEventFn('mousedown', this.notBlurringHandler.bind(this));
+    this.optionListMouseEnter(this.open);
+    dropDownEventFn('touchstart', notBlurringHandler);
+    dropDownEventFn('mousedown', notBlurringHandler);
 
     this.dropDown.childNodes.forEach((child) => {
-      child[childFnString]('touchstart', this.notBlurringHandler.bind(this));
-      child[childFnString]('mousedown', this.notBlurringHandler.bind(this));
-      child[childFnString]('touchend', this.selectHandler.bind(this));
-      child[childFnString]('click', this.selectHandler.bind(this));
+      child[childFnString]('touchstart', notBlurringHandler);
+      child[childFnString]('mousedown', notBlurringHandler);
+      child[childFnString]('touchend', selectHandler);
+      child[childFnString]('click', selectHandler);
     });
   }
 
@@ -189,25 +214,65 @@ export default class Combo extends FormItem {
   }
 
   private blurHandler(event: Event): void {
-    event.stopPropagation();
-    event.preventDefault();
+    this.killEvent(event);
 
     if (document.activeElement === this.field) {
       this.notBlurringHandler(event);
     }
   }
 
-  private selectHandler(event: Event): void {
-    event.stopPropagation();
-    event.preventDefault();
+  private optionListMouseEnter(activate: boolean): void {
+    const oneTime = () => {
+      this.optionListMouseEnter(true);
+      this.dropDown.removeEventListener('mousemove', oneTime);
+    };
 
-    if (event.target instanceof HTMLElement) {
-      if (!event.target.classList.contains(DISABLED_CLASS)) {
-        this.selectElement(event.target);
-        this.set();
-        this.closeDropDown();
+    if (activate) {
+      this.mouseEnterListener = window.setTimeout(() => {
+        this.addMouseEnterListener();
+      }, 300);
+    } else {
+      if (this.mouseEnterListener) {
+        clearInterval(this.mouseEnterListener);
+        this.mouseEnterListener = null;
+      }
+
+      this.mouseMoveListenerBound = false;
+      this.dropDown.removeEventListener('mousemove', this.mouseEnterHandler.bind(this));
+
+      this.dropDown.addEventListener('mousemove', oneTime);
+    }
+  }
+
+  private mouseEnterHandler = (event: MouseEvent): void => {
+    event.stopPropagation();
+    const listItem = this.findListItem(event.target as HTMLElement);
+
+    if (listItem) {
+      this.selectElement(listItem);
+
+      if (this.mouseEnterListener) {
+        clearInterval(this.mouseEnterListener);
+        this.mouseEnterListener = null;
       }
     }
+  };
+
+  private addMouseEnterListener(): void {
+    if (!this.mouseMoveListenerBound) {
+      this.mouseMoveListenerBound = true;
+      this.dropDown.addEventListener('mousemove', this.mouseEnterHandler);
+    }
+  }
+
+  private findListItem(element: HTMLElement): HTMLElement | null {
+    let currentElement: HTMLElement | null = element;
+
+    while (currentElement && !currentElement.classList.contains(LIST_ITEM_CLASS)) {
+      currentElement = currentElement.parentElement;
+    }
+
+    return currentElement;
   }
 
   private selectElement(element: HTMLElement): void {
@@ -223,6 +288,7 @@ export default class Combo extends FormItem {
     if (element) {
       element.classList.add(SELECTED_CLASS);
       this.selected = [element.tswuiO as ComboObject];
+      this.scrollToCurrent();
     } else {
       this.selected = [];
     }
@@ -336,8 +402,7 @@ export default class Combo extends FormItem {
   }
 
   private toggleHandler(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
+    this.killEvent(event);
 
     if (this.open === true) {
       this.closeDropDown();
@@ -354,8 +419,7 @@ export default class Combo extends FormItem {
 
   public openDropDown(e?: Event): void {
     if (e) {
-      e.stopPropagation();
-      e.preventDefault();
+      this.killEvent(e);
     }
 
     this.open = true;
@@ -397,10 +461,35 @@ export default class Combo extends FormItem {
         : widestChild;
     this.dropDown.style.width = width + 'px';
 
+    this.scrollToCurrent();
     positionChild(this.input, this.dropDown);
   }
 
-  private render(): void {
+  scrollToCurrent(): void {
+    const firstSelect = this.dropDown.querySelector<HTMLElement>(`.${SELECTED_CLASS}`);
+    const ofstP = firstSelect?.offsetParent as HTMLElement | null;
+    const dropDownHeight = parseFloat(getComputedStyle(this.dropDown).height.replace('px', ''));
+    const offset = (() => {
+      let currentNode: ChildNode | null = firstSelect;
+      let r = 0;
+
+      while (currentNode) {
+        r += (currentNode as HTMLElement).offsetHeight;
+        currentNode = currentNode.previousSibling;
+      }
+
+      const firstSelectOffsetHeight = firstSelect?.offsetHeight ?? 0;
+      r -= dropDownHeight / 2 - firstSelectOffsetHeight / 2;
+
+      return r;
+    })();
+
+    if (ofstP) {
+      ofstP.scrollTop = offset;
+    }
+  }
+
+  public render(): void {
     this.empty();
 
     if (this.data.length === 0) {
@@ -410,7 +499,9 @@ export default class Combo extends FormItem {
     this.data.forEach((record: ComboRecord) => {
       try {
         const wuiObj = this.subtemplate(record);
+        (wuiObj as ComboObject).record = record;
         wuiObj.el.tswuiO = wuiObj;
+        wuiObj.el.classList.add(LIST_ITEM_CLASS);
         this.push(wuiObj);
       } catch (error) {
         console.warn(error, record);
@@ -419,13 +510,11 @@ export default class Combo extends FormItem {
   }
 
   public async refreshData(searchParams?: ComboRecord): Promise<void> {
-    if (searchParams) {
-      // This line is a no-operation; it's just to avoid linting errors
-      // about unused parameters.
-    }
+    // Note: To be overridden in subclasses to fetch data from a remote source.
 
-    // Note: This method is intended to be overridden in subclasses to fetch data
-    // from a remote source. The current implementation is a placeholder.
+    if (searchParams) {
+      // This line is a no-op to avoid linting errors about unused parameters.
+    }
   }
 
   private addKeyboardListeners(): void {
@@ -445,8 +534,7 @@ export default class Combo extends FormItem {
         this.keyEventShouldSearch = false;
 
         if (this.open) {
-          event.stopPropagation();
-          event.preventDefault();
+          this.killEvent(event);
           this.set();
         }
       } else {

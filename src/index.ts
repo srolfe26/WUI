@@ -29,13 +29,14 @@ import InputMask from './objects/input-mask';
 import NumberField from './objects/number';
 import Phone from './objects/phone';
 import SimpleDate from './objects/simple-date';
-import Combo from './objects/combo';
+import { Combo, ComboRecord } from './objects/combo';
 import TextArea from './objects/textarea';
 import Checkbox from './objects/checkbox';
 import Radio from './objects/radio';
 import BackButtonPage from './objects/back-button-page';
 import SimpleLoader from './objects/simple-loader';
 
+export type { ComboRecord };
 export {
   BaseObject,
   Button,

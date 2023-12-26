@@ -99,6 +99,12 @@
   border-top-width: 0;
   border-radius: 0 0 4px 4px;
 
+  &.positioned-above {
+    border-top-width: 2px;
+    border-bottom-width: 0;
+    border-radius: 4px 4px 0 0;
+  }
+
   & * {
     -webkit-user-select: none;
     user-select: none;
