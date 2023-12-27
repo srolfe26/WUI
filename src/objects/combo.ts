@@ -371,7 +371,7 @@ export class Combo extends FormItem {
     let retVal;
     let i = 0;
 
-    if (!Array.isArray(this.items)) {
+    if (!Array.isArray(this.items) || this.data.length === 0) {
       return undefined;
     }
 
