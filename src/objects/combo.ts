@@ -338,7 +338,7 @@ export class Combo extends FormItem {
     }
   }
 
-  getValue() {
+  getValue(): string | undefined {
     return this.getValueItem(this.value);
   }
 
