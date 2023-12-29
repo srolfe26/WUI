@@ -13,11 +13,7 @@
     align-items: center;
     flex: 1;
     overflow: hidden;
-    margin-top: 60px;
-
-    .simple-loader {
-      margin-top: -60px;
-    }
+    padding-top: 60px;
 
     svg {
       fill: $tswui-lt-gray;

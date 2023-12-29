@@ -338,7 +338,7 @@ export class Combo extends FormItem {
     }
   }
 
-  getValue(): string | undefined {
+  getValue(): string | unknown {
     return this.getValueItem(this.value);
   }
 
@@ -422,17 +422,19 @@ export class Combo extends FormItem {
       this.killEvent(e);
     }
 
-    this.open = true;
-    this.el.classList.add('combo-open');
-    this.sizeAndPositionDropDown();
-    this.resetListHighlighting();
-    this.toggleDropdownEvents();
-    this.input.focus();
-    this.input.select();
+    if (!this.open && !this.disabled) {
+      this.open = true;
+      this.el.classList.add('combo-open');
+      this.sizeAndPositionDropDown();
+      this.resetListHighlighting();
+      this.toggleDropdownEvents();
+      this.input.focus();
+      this.input.select();
 
-    // Close the drop down when the field loses focus.
-    document.body.addEventListener('mousedown', this.closeDropDown.bind(this), { once: true });
-    document.body.addEventListener('touchstart', this.closeDropDown.bind(this), { once: true });
+      // Close the drop down when the field loses focus.
+      document.body.addEventListener('mousedown', this.closeDropDown.bind(this), { once: true });
+      document.body.addEventListener('touchstart', this.closeDropDown.bind(this), { once: true });
+    }
   }
 
   public closeDropDown(): void {

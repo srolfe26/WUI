@@ -4,7 +4,7 @@ class BreakException extends Error {}
 
 declare global {
   interface HTMLElement {
-    tswuiO: BaseObject | Record<string, unknown>;
+    tswuiO: BaseObject | Record<string, any>;
   }
 }
 
