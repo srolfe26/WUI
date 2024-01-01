@@ -17,8 +17,6 @@ export default class Detail extends BaseObject {
 
   private summaryTarget: HTMLElement;
 
-  public contentElement: HTMLElement;
-
   private isOpen = false;
 
   constructor(args: Args) {
@@ -34,7 +32,7 @@ export default class Detail extends BaseObject {
     ) as HTMLElement;
     this.summaryElement = this.el.querySelector('.summary') as HTMLElement;
     this.summaryTarget = this.el.querySelector('.summary-text') as HTMLElement;
-    this.contentElement = this.el.querySelector('.content') as HTMLElement;
+    this.elAlias = this.el.querySelector('.content') as HTMLElement;
     this.setSummary(this.summary);
     this.setContent(this.content);
     this.summaryElement.onclick = this.toggle.bind(this);
@@ -47,8 +45,10 @@ export default class Detail extends BaseObject {
 
   setContent(content: HTMLElement): void {
     this.content = content;
-    this.contentElement.innerHTML = '';
-    this.contentElement.appendChild(content);
+    if (this.elAlias) {
+      this.elAlias.innerHTML = '';
+      this.elAlias.appendChild(content);
+    }
   }
 
   toggle(): void {
