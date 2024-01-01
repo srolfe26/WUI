@@ -19,6 +19,8 @@ export default class Detail extends BaseObject {
 
   private isOpen = false;
 
+  cssClass: string | null = null;
+
   constructor(args: Args) {
     super();
 
@@ -28,7 +30,9 @@ export default class Detail extends BaseObject {
     });
 
     this.el = createNode(
-      '<div class="tswui-detail"><div class="summary"><svg class="toggle-switch" viewBox="0 0 24 24"><path d="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z"/></svg><span class="summary-text"></span></div><div class="content"></div></div>'
+      `<div class="tswui-detail ${
+        this.cssClass || ''
+      }"><div class="summary"><svg class="toggle-switch" viewBox="0 0 24 24"><path d="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z"/></svg><span class="summary-text"></span></div><div class="content"></div></div>`
     ) as HTMLElement;
     this.summaryElement = this.el.querySelector('.summary') as HTMLElement;
     this.summaryTarget = this.el.querySelector('.summary-text') as HTMLElement;
