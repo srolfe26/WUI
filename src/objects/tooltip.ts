@@ -41,6 +41,16 @@ export default class Tooltip extends BaseObject {
     // Close the tooltip when the field loses focus.
     document.body.addEventListener('mousedown', this.close.bind(this), { once: true });
     document.body.addEventListener('touchstart', this.close.bind(this), { once: true });
+    this.el.addEventListener('mousedown', (e) => this.delayEvent(e));
+    this.el.addEventListener('touchstart', (e) => this.delayEvent(e));
+  }
+
+  // Necessary to prevent the tooltip from closing immediately when clicking on it.
+  delayEvent(event: Event): void {
+    event.stopPropagation();
+    setTimeout(() => {
+      document.body.dispatchEvent(new Event(event.type));
+    }, 333);
   }
 
   close(): void {
