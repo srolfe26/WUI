@@ -7,7 +7,7 @@ export default function positionChild(
   child: HTMLElement,
   options?: { spacing?: number; centered?: boolean }
 ): void {
-  const EDGE_OF_VIEWPORT_PADDING = 32;
+  const EDGE_OF_VIEWPORT_PADDING = 16;
   const ofst = parent.getBoundingClientRect();
   let top = ofst.top;
   const cWidth = child.offsetWidth;
@@ -20,6 +20,13 @@ export default function positionChild(
   // Center the child if needed
   if (options?.centered) {
     leftPosition = ofst.left + parent.offsetWidth / 2 - cWidth / 2;
+  }
+
+  // Ensure the child doesn't overflow off the left or right sides of the screen
+  if (leftPosition < 0) {
+    leftPosition = EDGE_OF_VIEWPORT_PADDING;
+  } else if (leftPosition + cWidth > verge.viewportW()) {
+    leftPosition = verge.viewportW() - cWidth - EDGE_OF_VIEWPORT_PADDING;
   }
 
   // Set the child height and determine whether to put the child above or below the parent
