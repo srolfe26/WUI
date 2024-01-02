@@ -1,0 +1,19 @@
+@import 'variables';
+
+.tswui-tooltip {
+    background-color: $tswui-white;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 5px 5px 10px $tswui-dk-gray;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: $tswui-white transparent transparent transparent;
+    }
+}

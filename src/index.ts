@@ -16,6 +16,7 @@ import Button from './objects/button';
 import Detail from './objects/detail';
 import Stage from './objects/stage';
 import Toolbar from './objects/toolbar';
+import Tooltip from './objects/tooltip';
 import List from './objects/list';
 import ListItem from './objects/list-item';
 import Page from './objects/page';
@@ -43,6 +44,7 @@ export {
   Detail,
   Stage,
   Toolbar,
+  Tooltip,
   List,
   ListItem,
   Page,

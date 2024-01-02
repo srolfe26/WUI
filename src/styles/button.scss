@@ -12,7 +12,7 @@ input[type='submit'] {
   font-size: 1.5em;
   height: 44px;
   padding: 0 0.7em;
-  background: $tswui-toolbars;
+  background: $tswui-lt-gray;
   border: none;
   display: flex;
   align-items: center;
@@ -52,11 +52,11 @@ input[type='submit'] {
     cursor: pointer;
     outline: 0;
     background-color: $tswui-white;
-    box-shadow: 1px 1px 3px $tswui-toolbars;
-    color: $tswui-toolbars;
+    box-shadow: 1px 1px 3px $tswui-lt-gray;
+    color: $tswui-lt-gray;
 
     svg {
-      fill: $tswui-toolbars;
+      fill: $tswui-lt-gray;
     }
   }
 

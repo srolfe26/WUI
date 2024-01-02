@@ -2,6 +2,7 @@
 @import 'variables';
 
 @keyframes bounce {
+
   0%,
   20%,
   53%,
@@ -239,6 +240,7 @@ textarea.form-input {
 /************* PASSWORD INPUT *************/
 
 .form-password {
+
   .form-input,
   .form-input[type='text']:focus,
   .form-input[type='password']:focus {
@@ -255,11 +257,11 @@ textarea.form-input {
   outline: none;
 }
 
-[type='password'] ~ .field-button .turn-visibility-off {
+[type='password']~.field-button .turn-visibility-off {
   display: none;
 }
 
-[type='text'] ~ .field-button .turn-visibility-on {
+[type='text']~.field-button .turn-visibility-on {
   display: none;
 }
 
@@ -345,8 +347,8 @@ textarea.form-input[readonly]::placeholder,
   color: transparent;
 }
 
-input:checked ~ .selected_text {
-  background-color: $tswui-secondary;
+input:checked~.selected_text {
+  background-color: $tswui-dk-gray;
   color: $tswui-white;
   -webkit-text-fill-color: $tswui-white;
 }
@@ -354,26 +356,26 @@ input:checked ~ .selected_text {
 .tswui-form .primary-color,
 .tswui-form .primary-color[readonly]:focus,
 .tswui-form input:-webkit-autofill,
-[type='password'] ~ .field-button svg,
-[type='text'] ~ .field-button svg,
+[type='password']~.field-button svg,
+[type='text']~.field-button svg,
 .form-checkbox svg {
   outline: 0;
-  color: $tswui-secondary;
-  fill: $tswui-secondary;
-  -webkit-text-fill-color: $tswui-secondary !important;
-  border-color: $tswui-secondary;
+  color: $tswui-dk-gray;
+  fill: $tswui-dk-gray;
+  -webkit-text-fill-color: $tswui-dk-gray !important;
+  border-color: $tswui-dk-gray;
 }
 
 .tswui-form .primary-color:focus,
-.form-phone input:focus + .country-code,
-[type='password']:focus ~ button svg,
-[type='text']:focus ~ button svg,
-[type='password']:focus ~ .field-button svg,
-[type='text']:focus ~ .field-button svg {
-  color: $tswui-secondary;
-  fill: $tswui-secondary;
-  -webkit-text-fill-color: $tswui-secondary !important;
-  border-color: $tswui-secondary;
+.form-phone input:focus+.country-code,
+[type='password']:focus~button svg,
+[type='text']:focus~button svg,
+[type='password']:focus~.field-button svg,
+[type='text']:focus~.field-button svg {
+  color: $tswui-dk-gray;
+  fill: $tswui-dk-gray;
+  -webkit-text-fill-color: $tswui-dk-gray !important;
+  border-color: $tswui-dk-gray;
 }
 
 .tswui-form .primary-color:focus {

@@ -13,9 +13,9 @@ export default class Button extends BaseObject {
 
   disabled = false;
 
-  onAsync: ((button: Button) => Promise<void>) | null = null;
+  _onAsync: ((button: Button) => Promise<void>) | null = null;
 
-  onClick: (() => void) | null = null;
+  private _onClick: (() => void) | null = null;
 
   icon: string | null = null;
 
@@ -38,6 +38,24 @@ export default class Button extends BaseObject {
     }
   }
 
+  set onClick(callback: () => void) {
+    this._onClick = callback;
+    this.bindClickListener();
+  }
+
+  get onClick(): (() => void) | null {
+    return this._onClick;
+  }
+
+  set onAsync(callback: (button: Button) => Promise<void>) {
+    this._onAsync = callback;
+    this.bindClickListener();
+  }
+
+  get onAsync(): ((button: Button) => Promise<void>) | null {
+    return this._onAsync;
+  }
+
   static get HAS_LOADER_CLASS() {
     return HAS_LOADER_CLASS;
   }
@@ -47,17 +65,19 @@ export default class Button extends BaseObject {
   }
 
   bindClickListener() {
-    if (typeof this.onAsync === 'function') {
-      this.el.addEventListener('click', (event) => {
-        event.stopPropagation();
-        this.appendLoader();
-        (this.onAsync as (button: Button) => Promise<void>)(this).finally(this.removeLoader.bind(this));
-      });
-    } else if (typeof this.onClick === 'function') {
-      this.el.addEventListener('click', (event) => {
-        event.stopPropagation();
-        (this.onClick as () => void)();
-      });
+    if (this.el) {
+      if (typeof this.onAsync === 'function') {
+        this.el.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.appendLoader();
+          (this.onAsync as (button: Button) => Promise<void>)(this).finally(this.removeLoader.bind(this));
+        });
+      } else if (typeof this.onClick === 'function') {
+        this.el.addEventListener('click', (event) => {
+          event.stopPropagation();
+          (this.onClick as () => void)();
+        });
+      }
     }
   }
 
