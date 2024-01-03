@@ -154,10 +154,12 @@ export default class Checkbox extends FormItem {
   disable() {
     super.disable();
     this.el.querySelectorAll('input').forEach((input) => (input.disabled = true));
+    this.el.classList.add('form-disabled');
   }
 
   enable() {
     super.enable();
     this.el.querySelectorAll('input').forEach((input) => (input.disabled = false));
+    this.el.classList.remove('form-disabled');
   }
 }

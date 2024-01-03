@@ -16,6 +16,11 @@ $focus_outline: #8bcbff !default;
 
   &.form-disabled {
     opacity: 0.4;
+
+    .label-text {
+      font-style: italic;
+      font-size: 0.9em;
+    }
   }
 
   label {
@@ -36,13 +41,13 @@ $focus_outline: #8bcbff !default;
     }
   }
 
-  input:checked ~ .input-container .checked,
-  input:checked ~ label .checked {
+  input:checked~.input-container .checked,
+  input:checked~label .checked {
     display: inline-block;
   }
 
-  input:checked ~ .input-container .unchecked,
-  input:checked ~ label .unchecked {
+  input:checked~.input-container .unchecked,
+  input:checked~label .unchecked {
     display: none;
   }
 
@@ -58,8 +63,8 @@ $focus_outline: #8bcbff !default;
     width: 1px;
   }
 
-  input[type='checkbox']:focus ~ .input-container svg,
-  input[type='radio']:focus ~ svg input[type='radio']:focus ~ .input-container svg {
+  input[type='checkbox']:focus~.input-container svg,
+  input[type='radio']:focus~svg input[type='radio']:focus~.input-container svg {
     outline: 0;
     box-shadow:
       0 0 5px $focus_outline,
@@ -78,14 +83,14 @@ $focus_outline: #8bcbff !default;
     display: none;
   }
 
-  input:checked ~ .text-container .selected-text {
+  input:checked~.text-container .selected-text {
     display: block;
     padding: 4px 8px 16px 0;
     font-size: 0.75em;
     width: 100%;
   }
 
-  input:checked ~ .text-container .selected-text:empty {
+  input:checked~.text-container .selected-text:empty {
     display: none;
   }
 }
