@@ -275,7 +275,7 @@ export class Combo extends FormItem {
     return currentElement;
   }
 
-  private selectElement(element: HTMLElement): void {
+  private selectElement(element: HTMLElement, doScroll = false): void {
     if (this.selected[0] && this.selected[0].el === element) {
       return;
     }
@@ -288,7 +288,10 @@ export class Combo extends FormItem {
     if (element) {
       element.classList.add(SELECTED_CLASS);
       this.selected = [element.tswuiO as ComboObject];
-      this.scrollToCurrent();
+
+      if (doScroll) {
+        this.scrollToCurrent();
+      }
     } else {
       this.selected = [];
     }
