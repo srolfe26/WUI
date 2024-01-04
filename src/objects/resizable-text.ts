@@ -68,6 +68,18 @@ export default class ResizableText extends FormItem {
     return this.value;
   }
 
+  disable(): void {
+    this.field.setAttribute('contenteditable', 'false');
+    this.el.classList.add('form-disabled');
+    super.disable();
+  }
+
+  enable(): void {
+    this.field.setAttribute('contenteditable', 'true');
+    this.el.classList.remove('form-disabled');
+    super.enable();
+  }
+
   public setValue(val: string | null): void {
     const setValue = isset(val) && typeof val === 'string' ? val.trim() : val;
     this.value = isset(setValue) && String(setValue).length > 0 ? setValue : null;
