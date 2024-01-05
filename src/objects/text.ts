@@ -30,13 +30,13 @@ export default class Text extends FormItem {
   get element(): HTMLElement {
     return createNode(`
       <div class="form-item">
-          ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
+          ${this.label ? `<label class="form-label" ${this.forAttr()}>${this.label}</label>` : ''}
           <div class="field-wrapper">
               <input type="text" class="form-input primary-color"
               name="${
                 this.autocomplete === false ? `no_auto_${20000 + Math.floor(Math.random() * 100000)}` : this.name
               }"
-              ${this.idAttr}
+              ${this.idAttr()}
               ${this.autocomplete === false ? ' autocomplete="off" ' : ''}
               ${this.disabled === true ? ' disabled="true" ' : ''}>
           </div>

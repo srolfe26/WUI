@@ -48,8 +48,8 @@ export default class Checkbox extends FormItem {
   singleValueTemplate(opt: any): HTMLElement {
     return createNode(`
             <div class="field-wrapper">
-                <label class="form-label disable-select primary-color" ${this.forAttr(opt)}>
-                    <input type="${this.inputType}" ${this.idAttr(opt)} name="${this.name}" value="${opt.value}">
+                <label class="form-label disable-select primary-color" ${this.forAttr()}>
+                    <input type="${this.inputType}" ${this.idAttr()} name="${this.name}" value="${opt.value}">
                     <div class="input-container">
                         ${this.unselected}
                         ${this.selected}

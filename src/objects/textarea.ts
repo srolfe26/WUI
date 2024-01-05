@@ -23,9 +23,9 @@ export default class TextArea extends Text {
   get element(): HTMLElement {
     return createNode(`
       <div class="form-item">
-        ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
+        ${this.label ? `<label class="form-label" ${this.forAttr()}>${this.label}</label>` : ''}
         <div class="field-wrapper">
-          <textarea class="form-input primary-color" name="${this.name}" ${this.idAttr}></textarea>
+          <textarea class="form-input primary-color" name="${this.name}" ${this.idAttr()}></textarea>
         </div>
       </div>
     `) as HTMLElement;

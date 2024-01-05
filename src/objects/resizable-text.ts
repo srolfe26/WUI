@@ -36,10 +36,10 @@ export default class ResizableText extends FormItem {
   private get element(): HTMLElement {
     return createNode(`
             <div class="form-item">
-            ${this.label ? `<label class="form-label" ${this.forAttr}>${this.label}</label>` : ''}
+            ${this.label ? `<label class="form-label" ${this.forAttr()}>${this.label}</label>` : ''}
                 <div class="field-wrapper">
                     <div class="form-input primary-color resizable-wrapper ${this.cssClass || ''}">
-                        <span class="resizable-field" tabindex="0" ${this.idAttr} contenteditable="true"></span>
+                        <span class="resizable-field" tabindex="0" ${this.idAttr()} contenteditable="true"></span>
                     </div>
                 </div>
             </div>
