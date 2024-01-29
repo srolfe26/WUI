@@ -371,26 +371,12 @@ export class Combo extends FormItem {
   }
 
   private getItemByKey(key: string, searchVal: unknown): ComboObject | undefined {
-    let retVal;
-    let i = 0;
-
-    if (!Array.isArray(this.items) || this.data.length === 0) {
+    if (!Array.isArray(this.items)) {
       return undefined;
     }
 
-    for (i; i < this.items.length; i++) {
-      const item = this.items[i] as ComboObject;
-      if (
-        (item.record[key] !== undefined && item.record[key] === searchVal) ||
-        (!isNaN(parseFloat(searchVal as string)) &&
-          parseFloat(searchVal as string) === parseFloat(item.record[key] as string))
-      ) {
-        retVal = item;
-        break;
-      }
-    }
-
-    return retVal;
+    // @ts-ignore
+    return this.items.find((item) => (item as ComboObject).record[key] === searchVal);
   }
 
   private setFieldValue(text: string): void {
