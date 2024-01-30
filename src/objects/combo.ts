@@ -376,7 +376,9 @@ export class Combo extends FormItem {
     }
 
     // @ts-ignore
-    return this.items.find((item) => (item as ComboObject).record[key] === searchVal);
+    return this.items
+      .filter((item) => (item as ComboObject).record !== undefined)
+      .find((item) => (item as ComboObject).record[key] === searchVal);
   }
 
   private setFieldValue(text: string): void {
